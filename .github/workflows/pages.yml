@@ -1,0 +1,34 @@
+# Publishes site/ to GitHub Pages on every push to main.
+#
+# Enable it once, by hand: repo Settings -> Pages -> Source -> "GitHub Actions".
+# After that the daily refresh job commits a new predictions.json and this
+# redeploys automatically, so the site stays current with no intervention.
+name: pages
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deployment
+        uses: actions/deploy-pages@v4
