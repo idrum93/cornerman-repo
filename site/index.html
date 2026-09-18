@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cornerman — UFC fight analysis</title>
+<style>
+  :root{
+    --ink:#101319; --panel:#171B23; --panel2:#1C212B; --line:#2A3040;
+    --linesoft:#20252F; --bone:#E9E5DC; --mute:#8B93A5; --dim:#5A6274;
+    --red:#C4402F; --redsoft:#E0705E; --blue:#3F82AE; --bluesoft:#6FAAD1;
+    --gold:#C9A227;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ink);color:var(--bone);
+    font:15px/1.55 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+    -webkit-font-smoothing:antialiased}
+  .wrap{max-width:780px;margin:0 auto;padding:0 20px}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+    font-variant-numeric:tabular-nums}
+  .lbl{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim)}
+
+  header{display:flex;justify-content:space-between;align-items:center;
+    padding:16px 0;border-bottom:1px solid var(--line)}
+  .brand{font-weight:800;letter-spacing:.28em;font-size:13px;text-transform:uppercase}
+
+  h1{font-size:clamp(30px,7.5vw,54px);line-height:.98;letter-spacing:-.035em;
+    font-weight:800;text-transform:uppercase;margin:14px 0 12px}
+  .evmeta{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:34px}
+
+  .seg{margin-bottom:26px}
+  .seghead{border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:12px}
+
+  .bout{width:100%;text-align:left;background:var(--panel);color:inherit;
+    border:1px solid var(--line);border-radius:3px;padding:14px 16px;
+    margin-bottom:8px;cursor:pointer;font:inherit;
+    transition:border-color .16s,background .16s}
+  .bout:hover{border-color:#3D4557;background:var(--panel2)}
+  .bout:focus-visible{outline:2px solid var(--bluesoft);outline-offset:2px}
+  .boutTop{display:flex;justify-content:space-between;gap:8px;margin-bottom:11px;
+    align-items:center}
+  .row{display:flex;align-items:center;gap:12px}
+  .nm{font-weight:700;font-size:15px;text-transform:uppercase;letter-spacing:-.01em;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .side{flex:1;min-width:0}
+  .side.r{text-align:right}
+  .pcol{width:96px;flex:none;text-align:center}
+  .pnum{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px}
+  .pnum b{font-size:15px;font-weight:700}
+
+  .track{height:6px;border-radius:3px;background:var(--linesoft);display:flex;
+    overflow:hidden}
+  .track i{display:block;height:100%}
+  .tall{height:10px;border-radius:5px}
+
+  .tag{font-size:9px;letter-spacing:.14em;text-transform:uppercase;
+    border:1px solid currentColor;padding:1px 5px;border-radius:2px}
+
+  .spine{padding:9px 0;border-bottom:1px solid var(--linesoft)}
+  .spineTop{display:flex;align-items:baseline;gap:12px}
+  .sv{width:72px;flex:none;font-size:13px}
+  .sv.l{text-align:right}
+  .sc{flex:1;min-width:0;text-align:center;font-size:9.5px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--dim)}
+  .bar{position:relative;height:4px;margin-top:6px}
+  .bar .bg{position:absolute;inset:0;background:var(--linesoft);border-radius:2px}
+  .bar .mid{position:absolute;left:50%;top:-2px;width:1px;height:8px;background:var(--line)}
+  .bar i{position:absolute;top:0;height:4px;border-radius:2px}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin:22px 0}
+  @media(max-width:560px){.grid2{grid-template-columns:1fr;gap:16px}}
+  .mrow{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+  .mrow span{font-size:11px;color:var(--mute);width:92px;flex:none}
+  .mrow .t{flex:1;height:4px;background:var(--linesoft);border-radius:2px}
+  .mrow .t i{display:block;height:4px;border-radius:2px}
+  .mrow b{font-size:11px;width:38px;text-align:right;font-weight:600}
+
+  .rng{display:flex;align-items:center;gap:10px;padding:8px 0;
+    border-bottom:1px solid var(--linesoft)}
+  .rngbar{flex:1;position:relative;height:18px}
+  .rngbar .zone{position:absolute;top:6px;height:6px;border-radius:3px;opacity:.55}
+  .rngbar .pt{position:absolute;top:3px;width:2px;height:12px;background:var(--bone)}
+
+  button.back{background:none;border:none;color:var(--mute);font:inherit;
+    font-size:11px;letter-spacing:.1em;padding:0;cursor:pointer;margin-bottom:22px}
+  button.back:hover{color:var(--bone)}
+
+  .note{border:1px solid var(--line);border-radius:3px;background:var(--panel);
+    padding:15px;font-size:11.5px;line-height:1.7;color:var(--dim);margin-top:26px}
+  .note b{color:var(--mute)}
+  .noread{border:1px dashed var(--line);border-radius:3px;padding:12px 15px;
+    margin-bottom:8px;font-size:12.5px;color:var(--mute)}
+  footer{border-top:1px solid var(--line);margin-top:34px;padding:18px 0;
+    font-size:10.5px;color:var(--dim)}
+  .hide{display:none}
+  @media(prefers-reduced-motion:no-preference){
+    .fade{animation:f .3s ease both}
+    @keyframes f{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">Cornerman</div>
+    <div class="mono" id="stamp" style="font-size:11px;color:var(--mute)"></div>
+  </header>
+  <div id="app" style="padding:26px 0"><div class="lbl">Loading…</div></div>
+  <footer>
+    Not affiliated with the UFC. Statistics compiled from public records.
+    Analysis tool — not betting advice.
+  </footer>
+</div>
+
+<script>
+const $ = (h) => { const d=document.createElement('div'); d.innerHTML=h.trim(); return d.firstChild; };
+const esc = (s) => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const pct = (x) => (x*100).toFixed(1);
+let DATA = null;
+
+function bar(pa){
+  return `<div class="track"><i style="width:${pa*100}%;background:var(--red)"></i>
+          <i style="width:${(1-pa)*100}%;background:var(--blue)"></i></div>`;
+}
+
+/* one row of the centre spine: a single bar pointing at whoever leads */
+function spine(label, left, right, lead, mag){
+  const w = Math.min(100, Math.max(0, mag*100))/2;
+  const col = lead==='red' ? 'var(--red)' : 'var(--blue)';
+  const side = lead==='red' ? `right:50%` : `left:50%`;
+  return `<div class="spine">
+    <div class="spineTop">
+      <div class="sv l mono" style="color:${lead==='red'?'var(--redsoft)':'var(--mute)'}">${esc(left)}</div>
+      <div class="sc">${esc(label)}</div>
+      <div class="sv mono" style="color:${lead==='blue'?'var(--bluesoft)':'var(--mute)'}">${esc(right)}</div>
+    </div>
+    <div class="spineTop">
+      <div class="sv"></div>
+      <div class="sc bar"><div class="bg"></div><div class="mid"></div>
+        ${lead?`<i style="${side};width:${w}%;background:${col}"></i>`:''}</div>
+      <div class="sv"></div>
+    </div></div>`;
+}
+
+function methodBlock(b, who){
+  const col = who==='a' ? 'var(--red)' : 'var(--blue)';
+  const nm  = who==='a' ? b.a : b.b;
+  const rows = [['KO/TKO', b[`m_${who}_ko`]], ['Submission', b[`m_${who}_sub`]]];
+  return `<div><div class="lbl" style="margin-bottom:9px">${esc(nm)} finishes</div>
+    ${rows.map(([k,v])=>`<div class="mrow"><span>${k}</span>
+      <div class="t"><i style="width:${Math.min(100,v*100*2.2)}%;background:${col}"></i></div>
+      <b>${pct(v)}%</b></div>`).join('')}</div>`;
+}
+
+function rangeRow(label, lo, mid, hi, unit, col){
+  const scale = Math.max(hi, 1e-6) * 1.15;
+  return `<div class="rng">
+    <div class="lbl" style="width:104px;flex:none">${esc(label)}</div>
+    <div class="rngbar">
+      <div class="zone" style="left:${lo/scale*100}%;width:${(hi-lo)/scale*100}%;background:${col}"></div>
+      <div class="pt" style="left:${mid/scale*100}%"></div>
+    </div>
+    <div class="mono" style="width:104px;text-align:right;font-size:12px;color:var(--mute)">
+      ${lo.toFixed(1)}–${hi.toFixed(1)} ${esc(unit)}</div></div>`;
+}
+
+function renderCard(){
+  const d = DATA;
+  const rounds = (b) => b.rounds===5 ? '5 rds' : '3 rds';
+  const boutHtml = (b,i) => `
+    <button class="bout" data-i="${i}">
+      <div class="boutTop">
+        <div class="lbl">${rounds(b)}${b.p_finish!=null?` · ${pct(b.p_finish)}% finish`:''}</div>
+        <div class="lbl">${Math.abs(b.p_a-0.5)*2 < 0.12 ? 'Coin flip'
+          : Math.abs(b.p_a-0.5)*2 < 0.35 ? 'Lean'
+          : Math.abs(b.p_a-0.5)*2 < 0.6 ? 'Clear edge' : 'Lopsided'}</div>
+      </div>
+      <div class="row">
+        <div class="side"><div class="nm" style="color:${b.p_a>=.5?'var(--bone)':'var(--mute)'}">${esc(b.a)}</div></div>
+        <div class="pcol">
+          <div class="pnum mono">
+            <b style="color:${b.p_a>=.5?'var(--redsoft)':'var(--dim)'}">${Math.round(b.p_a*100)}</b>
+            <span style="font-size:9px;color:var(--dim)">%</span>
+            <b style="color:${b.p_a<.5?'var(--bluesoft)':'var(--dim)'}">${Math.round(b.p_b*100)}</b>
+          </div>${bar(b.p_a)}
+        </div>
+        <div class="side r"><div class="nm" style="color:${b.p_a<.5?'var(--bone)':'var(--mute)'}">${esc(b.b)}</div></div>
+      </div>
+    </button>`;
+
+  const noread = (DATA.no_read||[]).map(n =>
+    `<div class="noread"><b>${esc(n.a)}</b> vs. <b>${esc(n.b)}</b>
+     <div class="lbl" style="margin-top:4px">No read — ${esc(n.reason)}</div></div>`).join('');
+
+  const el = $(`<div class="fade">
+    <div class="lbl">${esc(d.venue||'')}</div>
+    <h1>${esc(d.event||'Upcoming card')}</h1>
+    <div class="evmeta">
+      <span class="mono" style="font-size:12px;color:var(--gold);letter-spacing:.1em">${esc(d.date||'')}</span>
+      <span style="color:var(--line)">|</span>
+      <span class="lbl">${d.bouts.length} bouts modelled${d.no_read&&d.no_read.length?` · ${d.no_read.length} no read`:''}</span>
+    </div>
+    <div class="seg"><div class="seghead"><div class="lbl">Card</div></div>
+      ${d.bouts.map(boutHtml).join('')}</div>
+    ${noread?`<div class="seg"><div class="seghead"><div class="lbl">Not modelled</div></div>${noread}</div>`:''}
+    <div class="note">
+      <b>How to read this.</b> Win probability comes from a logistic model on 14
+      opponent-adjusted differentials, tested at 67% accuracy against 70% for the
+      closing betting line — this does not beat the market and is not betting
+      advice. Method and round probabilities come from a competing-risks hazard
+      model and sum to exactly 100% by construction. Output ranges cover the real
+      outcome 79% of the time against a claimed 80%. Fights where either fighter
+      has too little UFC history are shown as “no read” rather than guessed at.
+    </div></div>`);
+  el.querySelectorAll('.bout').forEach(btn =>
+    btn.addEventListener('click', () => renderBout(+btn.dataset.i)));
+  return el;
+}
+
+function renderBout(i){
+  const b = DATA.bouts[i];
+  const rows = [];
+  const push=(lab,l,r,d,s,fl,fr)=>rows.push(spine(lab,fl,fr,d===0?null:(d>0?'red':'blue'),Math.min(1,Math.abs(d)/s)));
+  push('Win probability', 0,0, b.p_a-b.p_b, 1, pct(b.p_a)+'%', pct(b.p_b)+'%');
+  push('Takedown likely', 0,0, b.a_p_takedown-b.b_p_takedown, .8,
+       pct(b.a_p_takedown)+'%', pct(b.b_p_takedown)+'%');
+  push('Knockdown likely', 0,0, b.a_p_knockdown-b.b_p_knockdown, .5,
+       pct(b.a_p_knockdown)+'%', pct(b.b_p_knockdown)+'%');
+  push('Strikes /min (mid)', 0,0, b.a_slpm_mid-b.b_slpm_mid, 4,
+       b.a_slpm_mid.toFixed(1), b.b_slpm_mid.toFixed(1));
+  push('Control sec /min', 0,0, b.a_ctrl_mid-b.b_ctrl_mid, 25,
+       b.a_ctrl_mid.toFixed(0), b.b_ctrl_mid.toFixed(0));
+
+  const rr = [];
+  for(let k=1;k<=(b.rounds||3);k++){
+    const v=b[`p_end_r${k}`]; if(v==null) continue;
+    rr.push(`<div class="mrow"><span>Ends in R${k}</span>
+      <div class="t"><i style="width:${Math.min(100,v*100*3)}%;background:var(--gold)"></i></div>
+      <b>${pct(v)}%</b></div>`);
+  }
+
+  const el = $(`<div class="fade">
+    <button class="back">← BACK TO CARD</button>
+    <div class="row" style="align-items:flex-start;gap:16px">
+      <div class="side">
+        <div class="lbl" style="color:var(--redsoft)">Red corner</div>
+        <div style="font-size:21px;font-weight:800;text-transform:uppercase;letter-spacing:-.02em;margin-top:3px">${esc(b.a)}</div>
+      </div>
+      <div class="lbl" style="padding-top:18px">vs</div>
+      <div class="side r">
+        <div class="lbl" style="color:var(--bluesoft)">Blue corner</div>
+        <div style="font-size:21px;font-weight:800;text-transform:uppercase;letter-spacing:-.02em;margin-top:3px">${esc(b.b)}</div>
+      </div>
+    </div>
+
+    <div style="margin:22px 0 6px">
+      <div class="pnum mono" style="margin-bottom:8px">
+        <b style="font-size:29px;color:var(--redsoft);letter-spacing:-.03em">${pct(b.p_a)}<span style="font-size:14px">%</span></b>
+        <span class="lbl">Win probability</span>
+        <b style="font-size:29px;color:var(--bluesoft);letter-spacing:-.03em">${pct(b.p_b)}<span style="font-size:14px">%</span></b>
+      </div>
+      <div class="track tall"><i style="width:${b.p_a*100}%;background:var(--red)"></i>
+        <i style="width:${b.p_b*100}%;background:var(--blue)"></i></div>
+    </div>
+
+    <div class="seg" style="margin-top:28px">
+      <div class="seghead" style="display:flex;justify-content:space-between">
+        <div class="lbl">How it ends</div>
+        <div class="lbl">sums to 100%</div></div>
+      <div class="grid2">${methodBlock(b,'a')}${methodBlock(b,'b')}</div>
+      <div class="mrow"><span>Decision</span>
+        <div class="t"><i style="width:${Math.min(100,b.m_decision*100)}%;background:var(--mute)"></i></div>
+        <b>${pct(b.m_decision)}%</b></div>
+      ${rr.length?`<div style="margin-top:16px">${rr.join('')}</div>`:''}
+    </div>
+
+    <div class="seg">
+      <div class="seghead" style="display:flex;justify-content:space-between">
+        <div class="lbl">Differentials</div>
+        <div class="lbl">bar points to who leads</div></div>
+      ${rows.join('')}
+    </div>
+
+    <div class="seg">
+      <div class="seghead" style="display:flex;justify-content:space-between">
+        <div class="lbl">Projected output</div><div class="lbl">80% range</div></div>
+      ${rangeRow(esc(b.a)+' strikes', b.a_slpm_lo, b.a_slpm_mid, b.a_slpm_hi, '/min', 'var(--red)')}
+      ${rangeRow(esc(b.b)+' strikes', b.b_slpm_lo, b.b_slpm_mid, b.b_slpm_hi, '/min', 'var(--blue)')}
+      ${rangeRow(esc(b.a)+' control', b.a_ctrl_lo, b.a_ctrl_mid, b.a_ctrl_hi, 'sec/min', 'var(--red)')}
+      ${rangeRow(esc(b.b)+' control', b.b_ctrl_lo, b.b_ctrl_mid, b.b_ctrl_hi, 'sec/min', 'var(--blue)')}
+      <div style="font-size:10.5px;color:var(--dim);margin-top:10px;line-height:1.6">
+        A single fight's stat line is mostly noise, so these are ranges rather than
+        point estimates. The model explains about 11% of the variance in strike
+        volume but ranks fights meaningfully better than a career average.
+      </div>
+    </div></div>`);
+  el.querySelector('.back').addEventListener('click', renderCard2);
+  const app = document.getElementById('app');
+  app.innerHTML=''; app.appendChild(el); window.scrollTo(0,0);
+}
+function renderCard2(){ const a=document.getElementById('app'); a.innerHTML=''; a.appendChild(renderCard()); window.scrollTo(0,0); }
+
+fetch('predictions.json', {cache:'no-store'})
+  .then(r => { if(!r.ok) throw new Error('predictions.json not found ('+r.status+')'); return r.json(); })
+  .then(j => {
+    DATA = j;
+    document.getElementById('stamp').textContent =
+      j.generated_utc ? 'updated ' + j.generated_utc.slice(0,10) : '';
+    renderCard2();
+  })
+  .catch(e => {
+    document.getElementById('app').innerHTML =
+      '<div class="note"><b>Could not load predictions.</b><br>' + esc(e.message) +
+      '<br><br>Run <span class="mono">python -m mmastat.upcoming --json</span> to generate ' +
+      '<span class="mono">site/predictions.json</span>, or wait for the daily refresh job.</div>';
+  });
+</script>
+</body>
+</html>
