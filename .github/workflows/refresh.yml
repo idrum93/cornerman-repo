@@ -1,0 +1,54 @@
+# Keeps the site current without anyone touching a terminal.
+#
+# Runs every morning: re-downloads the UFCStats corpus, refreshes the upcoming
+# card from Wikipedia, regenerates predictions, and commits the results.
+#
+# Two deliberate source choices, both about where this runs. GitHub Actions
+# uses datacenter IPs, and UFCStats served a JavaScript bot-check to exactly
+# that kind of traffic — so mmastat.sources pulls results from
+# raw.githubusercontent.com (plain files, no scraping) and cards from the
+# MediaWiki API (documented, bot-friendly, no challenge). fetch_ufcstats_upcoming()
+# exists but would fail here.
+#
+# The CSVs are downloaded fresh each run and never committed: they are 10 MB of
+# someone else's data. Only upcoming.txt and site/predictions.json are pushed.
+name: refresh
+on:
+  schedule:
+    - cron: "0 11 * * *"      # 11:00 UTC daily
+  workflow_dispatch:           # also runnable from the Actions tab by hand
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+
+      - name: download the UFCStats corpus
+        run: python -m mmastat.sources --corpus --no-upcoming
+
+      - name: validation suite on the refreshed corpus
+        run: python -m mmastat.tests        # a bad download must not reach the site
+
+      - name: refresh the upcoming card
+        id: card
+        continue-on-error: true             # a card that will not parse is not fatal
+        run: python -m mmastat.sources
+
+      - name: regenerate predictions
+        run: python -m mmastat.upcoming --json
+
+      - name: commit
+        run: |
+          git config user.name "cornerman-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add data/upcoming.txt site/predictions.json site/index.html
+          git diff --staged --quiet || git commit -m "refresh: $(date -u +%Y-%m-%d)"
+          git push
