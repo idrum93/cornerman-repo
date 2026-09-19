@@ -315,10 +315,3 @@ if __name__ == "__main__":
         refresh_corpus()
     if "--no-upcoming" not in sys.argv:
         refresh_upcoming()
-if __name__ == "__main__":
-    import sys
-    if "--corpus" in sys.argv:
-        print("refreshing corpus from GitHub:")
-        refresh_corpus()
-    if "--no-upcoming" not in sys.argv:
-        refresh_upcoming()

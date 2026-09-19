@@ -160,17 +160,69 @@ def _states_after(fights, fighters):
     return states
 
 
+def _market_for_card(card_path, odds_path="data/ufc_betting_odds_daily.csv"):
+    """Devigged consensus price per bout, if the odds feed happens to be present.
+
+    Optional by design: that file is a Kaggle download with no public raw URL,
+    so the daily refresh job cannot fetch it and the site simply omits the
+    market comparison when it is absent. Better a missing panel than a stale
+    price presented as current.
+    """
+    import os
+    # Live API first: it is the only source a CI job can reach.
+    try:
+        from .odds_live import fetch_moneylines
+        live = fetch_moneylines()
+        if live:
+            return live, "the-odds-api"
+    except Exception as e:
+        print(f"note: live odds unavailable ({e})")
+    if not os.path.exists(odds_path):
+        return {}, None
+    try:
+        from .odds_daily import load_raw, _nm, BACKFILL_SOURCE
+        d = load_raw(odds_path)
+        B = d[(d.source != BACKFILL_SOURCE) & d.odds_1.notna() & d.odds_2.notna()]
+        if B.empty:
+            return {}, None
+        B = B.sort_values("snap")
+        out = {}
+        for (k1, k2), g in B.groupby([B.fighter_1.map(_nm), B.fighter_2.map(_nm)]):
+            last = g.groupby("source").last()
+            o1, o2 = last.odds_1.median(), last.odds_2.median()
+            p1 = (1 / o1) / (1 / o1 + 1 / o2)
+            out[frozenset((k1, k2))] = (k1, float(p1), int(last.shape[0]))
+        return out, "local csv"
+    except Exception:
+        return {}, None
+
+
 def predict_card(path, fights, fighters, verbose=True):
     from .projections import fit_range, predict_range
     from .props import symmetric_features, prop_targets, BINARY
     from sklearn.ensemble import HistGradientBoostingClassifier
 
+    market, market_src = _market_for_card(path)
+    MARKET_SRC["src"] = market_src
     meta, bouts = parse_card(path)
     as_of = pd.Timestamp(meta.get("date") or fights.date.max())
     states = _states_after(fights, fighters)
 
     names = sorted({n for b in bouts for n in b[:2]})
     ids, unresolved = resolve(names, fighters)
+
+    # --- human-readable names for the win-model features, used to explain
+    # each pick. A price with no reasoning is what the market already sells;
+    # the reasoning is the only thing this site has that they do not.
+    LABELS = {
+        "d_elo": "career quality", "d_opp_elo": "strength of schedule",
+        "d_log_exp": "experience", "d_adj_slpm": "striking output",
+        "d_sapm": "strikes absorbed", "d_str_acc": "striking accuracy",
+        "d_str_def": "striking defence", "d_reach": "reach",
+        "d_age": "age", "d_log_layoff": "layoff",
+        "d_ko_loss_rate": "durability", "grapple_edge": "takedown threat",
+        "ko_edge": "knockout threat", "sub_edge": "submission threat",
+    }
 
     # --- win model, trained on everything available
     X, _ = build(fights, fighters)
@@ -224,6 +276,7 @@ def predict_card(path, fights, fighters, verbose=True):
         surv = 1.0
         out = {k: 0.0 for k in CLASSES[1:]}
         by_r = {}
+        curve = []
         for i in range(len(H)):
             r = int(grid.rnd.iloc[i])
             stop = 0.0
@@ -233,8 +286,9 @@ def predict_card(path, fights, fighters, verbose=True):
                 stop += v
             by_r[r] = by_r.get(r, 0.0) + stop
             surv *= H[i, 0]
+            curve.append(surv)          # P(still going after minute i+1)
         out["decision"] = surv
-        return out, by_r
+        return out, by_r, curve
 
     rows, skipped = [], []
     for na, nb, n_rounds in bouts:
@@ -253,10 +307,27 @@ def predict_card(path, fights, fighters, verbose=True):
         x = pd.DataFrame([fv])[WIN_FEATURES]
         p_a = float(win.predict_proba(sc.transform(x))[0, 1])
 
+        # per-feature push on the log-odds: coefficient x standardised value
+        z = sc.transform(x)[0]
+        contrib = sorted(
+            [(WIN_FEATURES[i], float(win.coef_[0][i] * z[i])) for i in range(len(WIN_FEATURES))],
+            key=lambda kv: -abs(kv[1]))
+
         r = dict(bout=f"{na} vs. {nb}", a=na, b=nb, rounds=n_rounds,
                  p_a=round(p_a, 4), p_b=round(1 - p_a, 4))
+        r["drivers"] = [{"label": LABELS.get(k, k), "value": round(v, 4),
+                         "favours": "a" if v > 0 else "b"}
+                        for k, v in contrib[:5] if abs(v) > 0.01]
+        hit = market.get(frozenset((_key(na), _key(nb))))
+        if hit:
+            src, pm, nbooks = hit
+            p_mkt = pm if src == _key(na) else 1 - pm
+            r["p_market"] = round(p_mkt, 4)
+            r["books"] = nbooks
+            r["edge"] = round(p_a - p_mkt, 4)
+
         try:
-            dist, by_r = method_round(sa, sb, n_rounds)
+            dist, by_r, curve = method_round(sa, sb, n_rounds)
             r["m_a_ko"] = round(dist["a_ko"], 4)
             r["m_b_ko"] = round(dist["b_ko"], 4)
             r["m_a_sub"] = round(dist["a_sub"], 4)
@@ -265,6 +336,28 @@ def predict_card(path, fights, fighters, verbose=True):
             r["p_finish"] = round(1 - dist["decision"], 4)
             for rr in range(1, n_rounds + 1):
                 r[f"p_end_r{rr}"] = round(by_r.get(rr, 0.0), 4)
+            # Round totals, read straight off the survival curve. These are
+            # real prop markets and the hazard model prices them coherently:
+            # "over 1.5 rounds" is simply P(the fight is still going at 7:30).
+            # No free feed quotes MMA props, so there is nothing to compare
+            # them against — they are projections, labelled as such.
+            def surv_at(minutes):
+                i = int(minutes) - 1
+                if i < 0:
+                    return 1.0
+                if i >= len(curve):
+                    return curve[-1]
+                lo = curve[i]
+                if minutes == int(minutes):
+                    return lo
+                hi = curve[i + 1] if i + 1 < len(curve) else curve[-1]
+                return lo + (hi - lo) * (minutes - int(minutes))
+            r["totals"] = {}
+            for line in (1.5, 2.5, 3.5, 4.5):
+                if line > n_rounds:
+                    continue
+                r["totals"][f"over_{str(line).replace('.', '_')}"] = \
+                    round(float(surv_at(line * 5.0)), 4)
         except Exception as e:
             r["method_error"] = str(e)[:80]
         for who, me, op in (("a", sa, sb), ("b", sb, sa)):
@@ -331,6 +424,9 @@ def fetch_ufcstats_upcoming(url="http://ufcstats.com/statistics/events/upcoming"
     return bouts
 
 
+MARKET_SRC = {"src": None}
+
+
 def write_json(out, skipped, unresolved, path="site/predictions.json",
                card_path="data/upcoming.txt"):
     """Emit what the frontend reads. Skipped bouts are included with their
@@ -346,6 +442,7 @@ def write_json(out, skipped, unresolved, path="site/predictions.json",
         "bouts": out.to_dict(orient="records"),
         "no_read": [{"a": a, "b": b, "reason": why} for a, b, why in skipped],
         "unresolved_names": unresolved,
+        "market_source": MARKET_SRC.get("src"),
     }
     Path(path).parent.mkdir(parents=True, exist_ok=True)
     Path(path).write_text(json.dumps(payload, indent=1), encoding="utf-8")

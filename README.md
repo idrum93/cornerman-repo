@@ -8,6 +8,22 @@ output, and a frontend that shows its reasoning.
 
 ## The site
 
+The site shows each pick against the closing line where prices are available:
+the probability bar carries a **gold tick at the market's number**, so agreement
+and disagreement are visible at a glance, and every bout lists the features
+driving its number. Market prices come from **The Odds API** (perpetual free tier, 500
+requests/month; the daily job uses about 30). Get a key, then add it under
+**Settings -> Secrets and variables -> Actions** as `ODDS_API_KEY`. Without it
+the market panel is omitted rather than showing a stale price. A local
+`data/ufc_betting_odds_daily.csv` is used as a fallback when present.
+
+**Props have no market feed at all.** The Odds API covers MMA fight winner odds
+only, and no free source quotes method, round or totals for MMA. So the site
+prices 17 markets per bout from its own models and puts a market marker on the
+moneyline alone. Everything else is labelled a projection, because a model
+number next to a market number is a comparison and a model number by itself
+is not.
+
 `site/index.html` is the whole front end — one file, no framework, no build
 step. It fetches `site/predictions.json` and renders the card, then a breakdown
 per bout: win probability, a method distribution that sums to 100%, round-by-round

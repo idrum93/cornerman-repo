@@ -6,93 +6,112 @@
 <title>Cornerman — UFC fight analysis</title>
 <style>
   :root{
-    --ink:#101319; --panel:#171B23; --panel2:#1C212B; --line:#2A3040;
-    --linesoft:#20252F; --bone:#E9E5DC; --mute:#8B93A5; --dim:#5A6274;
-    --red:#C4402F; --redsoft:#E0705E; --blue:#3F82AE; --bluesoft:#6FAAD1;
-    --gold:#C9A227;
+    --ink:#0D1015; --panel:#151A22; --panel2:#1B212B; --line:#272E3B;
+    --soft:#1E242E; --bone:#ECE8E0; --mute:#8D95A6; --dim:#5B6375;
+    --red:#C8442F; --redsoft:#E87D68; --blue:#3E85B4; --bluesoft:#78B2D8;
+    --gold:#CDA43A; --warn:#D98C3A;
   }
   *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
   body{margin:0;background:var(--ink);color:var(--bone);
     font:15px/1.55 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
     -webkit-font-smoothing:antialiased}
-  .wrap{max-width:780px;margin:0 auto;padding:0 20px}
-  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
-    font-variant-numeric:tabular-nums}
-  .lbl{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim)}
+  .wrap{max-width:840px;margin:0 auto;padding:0 20px}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-variant-numeric:tabular-nums}
+  .lbl{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--dim)}
+  .muted{color:var(--mute)}
 
   header{display:flex;justify-content:space-between;align-items:center;
-    padding:16px 0;border-bottom:1px solid var(--line)}
-  .brand{font-weight:800;letter-spacing:.28em;font-size:13px;text-transform:uppercase}
+    padding:18px 0;border-bottom:1px solid var(--line)}
+  .brand{font-weight:800;letter-spacing:.3em;font-size:13px;text-transform:uppercase}
 
-  h1{font-size:clamp(30px,7.5vw,54px);line-height:.98;letter-spacing:-.035em;
-    font-weight:800;text-transform:uppercase;margin:14px 0 12px}
-  .evmeta{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:34px}
+  h1{font-size:clamp(28px,7vw,50px);line-height:.97;letter-spacing:-.035em;
+    font-weight:800;text-transform:uppercase;margin:16px 0 10px}
+  .evmeta{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
+  .chip{font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+    border:1px solid var(--line);color:var(--mute);padding:3px 8px;border-radius:999px}
 
-  .seg{margin-bottom:26px}
-  .seghead{border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:12px}
+  /* ---- the headline: where we differ from the market ---- */
+  .lede{border:1px solid var(--line);border-left:3px solid var(--gold);
+    background:var(--panel);border-radius:3px;padding:16px 18px;margin:22px 0 30px}
+  .lede h3{margin:0 0 8px;font-size:12px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--gold);font-weight:700}
+  .lede p{margin:0;font-size:13.5px;line-height:1.65;color:var(--mute)}
+  .lede b{color:var(--bone);font-weight:600}
 
+  .seghead{border-bottom:1px solid var(--line);padding-bottom:8px;margin:0 0 12px;
+    display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+
+  /* ---- bout card ---- */
   .bout{width:100%;text-align:left;background:var(--panel);color:inherit;
-    border:1px solid var(--line);border-radius:3px;padding:14px 16px;
-    margin-bottom:8px;cursor:pointer;font:inherit;
-    transition:border-color .16s,background .16s}
-  .bout:hover{border-color:#3D4557;background:var(--panel2)}
+    border:1px solid var(--line);border-radius:4px;padding:15px 17px;margin-bottom:9px;
+    cursor:pointer;font:inherit;display:block;
+    transition:border-color .16s,background .16s,transform .16s}
+  .bout:hover{border-color:#3C465A;background:var(--panel2)}
   .bout:focus-visible{outline:2px solid var(--bluesoft);outline-offset:2px}
-  .boutTop{display:flex;justify-content:space-between;gap:8px;margin-bottom:11px;
-    align-items:center}
-  .row{display:flex;align-items:center;gap:12px}
-  .nm{font-weight:700;font-size:15px;text-transform:uppercase;letter-spacing:-.01em;
+  .btop{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:12px}
+  .verdict{font-size:12.5px;color:var(--mute);line-height:1.4}
+  .verdict b{color:var(--bone);font-weight:600}
+  .names{display:flex;align-items:center;gap:12px;margin-bottom:11px}
+  .nm{font-weight:700;font-size:15.5px;text-transform:uppercase;letter-spacing:-.015em;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .side{flex:1;min-width:0}
   .side.r{text-align:right}
-  .pcol{width:96px;flex:none;text-align:center}
-  .pnum{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px}
-  .pnum b{font-size:15px;font-weight:700}
+  .pc{width:104px;flex:none;text-align:center}
+  .pnum{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px}
+  .pnum b{font-size:16px;font-weight:700}
 
-  .track{height:6px;border-radius:3px;background:var(--linesoft);display:flex;
-    overflow:hidden}
-  .track i{display:block;height:100%}
-  .tall{height:10px;border-radius:5px}
+  /* ---- the signature element: model bar with the market's tick on it ---- */
+  .gauge{position:relative;height:9px;border-radius:5px;background:var(--soft);overflow:visible}
+  .gauge .fill{position:absolute;left:0;top:0;bottom:0;border-radius:5px 0 0 5px;background:var(--red)}
+  .gauge .rest{position:absolute;right:0;top:0;bottom:0;border-radius:0 5px 5px 0;background:var(--blue)}
+  .gauge .mk{position:absolute;top:-5px;width:2px;height:19px;background:var(--gold);
+    box-shadow:0 0 0 2px var(--ink)}
+  .gauge.tall{height:13px;border-radius:7px}
+  .gauge.tall .mk{top:-5px;height:23px}
+  .gkey{display:flex;justify-content:space-between;margin-top:7px;font-size:9.5px;
+    letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
 
-  .tag{font-size:9px;letter-spacing:.14em;text-transform:uppercase;
-    border:1px solid currentColor;padding:1px 5px;border-radius:2px}
+  .edgeTag{font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:3px 7px;
+    border-radius:3px;font-weight:700;white-space:nowrap}
 
-  .spine{padding:9px 0;border-bottom:1px solid var(--linesoft)}
-  .spineTop{display:flex;align-items:baseline;gap:12px}
-  .sv{width:72px;flex:none;font-size:13px}
-  .sv.l{text-align:right}
-  .sc{flex:1;min-width:0;text-align:center;font-size:9.5px;letter-spacing:.14em;
-    text-transform:uppercase;color:var(--dim)}
-  .bar{position:relative;height:4px;margin-top:6px}
-  .bar .bg{position:absolute;inset:0;background:var(--linesoft);border-radius:2px}
-  .bar .mid{position:absolute;left:50%;top:-2px;width:1px;height:8px;background:var(--line)}
-  .bar i{position:absolute;top:0;height:4px;border-radius:2px}
+  /* ---- drivers ---- */
+  .drv{display:flex;align-items:center;gap:10px;padding:7px 0}
+  .drv .dn{width:132px;flex:none;font-size:12px;color:var(--mute)}
+  .drv .dt{flex:1;position:relative;height:8px}
+  .drv .dt .bg{position:absolute;inset:0;background:var(--soft);border-radius:4px}
+  .drv .dt .zero{position:absolute;left:50%;top:-3px;width:1px;height:14px;background:var(--line)}
+  .drv .dt i{position:absolute;top:0;height:8px;border-radius:4px}
+  .drv .dv{width:56px;flex:none;text-align:right;font-size:11px;color:var(--dim)}
 
-  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin:22px 0}
-  @media(max-width:560px){.grid2{grid-template-columns:1fr;gap:16px}}
-  .mrow{display:flex;align-items:center;gap:8px;margin-bottom:5px}
-  .mrow span{font-size:11px;color:var(--mute);width:92px;flex:none}
-  .mrow .t{flex:1;height:4px;background:var(--linesoft);border-radius:2px}
-  .mrow .t i{display:block;height:4px;border-radius:2px}
-  .mrow b{font-size:11px;width:38px;text-align:right;font-weight:600}
+  .mrow{display:flex;align-items:center;gap:9px;margin-bottom:6px}
+  .mrow span{font-size:11.5px;color:var(--mute);width:104px;flex:none}
+  .mrow .t{flex:1;height:7px;background:var(--soft);border-radius:4px}
+  .mrow .t i{display:block;height:7px;border-radius:4px}
+  .mrow b{font-size:11.5px;width:44px;text-align:right;font-weight:600}
 
-  .rng{display:flex;align-items:center;gap:10px;padding:8px 0;
-    border-bottom:1px solid var(--linesoft)}
-  .rngbar{flex:1;position:relative;height:18px}
-  .rngbar .zone{position:absolute;top:6px;height:6px;border-radius:3px;opacity:.55}
-  .rngbar .pt{position:absolute;top:3px;width:2px;height:12px;background:var(--bone)}
+  .rng{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--soft)}
+  .rngbar{flex:1;position:relative;height:20px}
+  .rngbar .zone{position:absolute;top:7px;height:7px;border-radius:4px;opacity:.5}
+  .rngbar .pt{position:absolute;top:4px;width:2px;height:13px;background:var(--bone)}
 
-  button.back{background:none;border:none;color:var(--mute);font:inherit;
-    font-size:11px;letter-spacing:.1em;padding:0;cursor:pointer;margin-bottom:22px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+  @media(max-width:600px){.grid2{grid-template-columns:1fr;gap:18px}
+    .drv .dn{width:96px} .mrow span{width:86px} .pc{width:92px}}
+
+  button.back{background:none;border:none;color:var(--mute);font:inherit;font-size:11px;
+    letter-spacing:.12em;padding:0;cursor:pointer;margin-bottom:24px}
   button.back:hover{color:var(--bone)}
 
-  .note{border:1px solid var(--line);border-radius:3px;background:var(--panel);
-    padding:15px;font-size:11.5px;line-height:1.7;color:var(--dim);margin-top:26px}
+  .card{border:1px solid var(--line);background:var(--panel);border-radius:4px;
+    padding:16px 18px;margin-bottom:18px}
+  .note{border:1px solid var(--line);border-radius:4px;background:var(--panel);
+    padding:16px 18px;font-size:11.5px;line-height:1.75;color:var(--dim);margin-top:28px}
   .note b{color:var(--mute)}
-  .noread{border:1px dashed var(--line);border-radius:3px;padding:12px 15px;
-    margin-bottom:8px;font-size:12.5px;color:var(--mute)}
-  footer{border-top:1px solid var(--line);margin-top:34px;padding:18px 0;
-    font-size:10.5px;color:var(--dim)}
-  .hide{display:none}
+  .noread{border:1px dashed var(--line);border-radius:4px;padding:13px 16px;
+    margin-bottom:9px;font-size:13px;color:var(--mute)}
+  footer{border-top:1px solid var(--line);margin-top:38px;padding:20px 0;
+    font-size:10.5px;color:var(--dim);line-height:1.7}
   @media(prefers-reduced-motion:no-preference){
     .fade{animation:f .3s ease both}
     @keyframes f{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
@@ -103,217 +122,305 @@
 <div class="wrap">
   <header>
     <div class="brand">Cornerman</div>
-    <div class="mono" id="stamp" style="font-size:11px;color:var(--mute)"></div>
+    <div class="mono muted" id="stamp" style="font-size:11px"></div>
   </header>
   <div id="app" style="padding:26px 0"><div class="lbl">Loading…</div></div>
   <footer>
-    Not affiliated with the UFC. Statistics compiled from public records.
-    Analysis tool — not betting advice.
+    Not affiliated with the UFC. Statistics compiled from public records.<br>
+    This is an analysis tool, not betting advice — tested at 67% accuracy against
+    70% for the closing line. It does not beat the market.
   </footer>
 </div>
 
 <script>
-const $ = (h) => { const d=document.createElement('div'); d.innerHTML=h.trim(); return d.firstChild; };
-const esc = (s) => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const pct = (x) => (x*100).toFixed(1);
-let DATA = null;
+const esc = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const P1 = x => (x*100).toFixed(1);
+const P0 = x => Math.round(x*100);
+const el = h => { const d=document.createElement('div'); d.innerHTML=h.trim(); return d.firstChild; };
+let DATA=null;
 
-function bar(pa){
-  return `<div class="track"><i style="width:${pa*100}%;background:var(--red)"></i>
-          <i style="width:${(1-pa)*100}%;background:var(--blue)"></i></div>`;
+/* the model bar with the market's price marked on it */
+function gauge(pa, pm, tall){
+  const mk = pm==null ? '' :
+    `<div class="mk" style="left:calc(${pm*100}% - 1px)" title="market ${P1(pm)}%"></div>`;
+  return `<div class="gauge${tall?' tall':''}">
+    <div class="fill" style="width:${pa*100}%"></div>
+    <div class="rest" style="width:${(1-pa)*100}%"></div>${mk}</div>`;
 }
 
-/* one row of the centre spine: a single bar pointing at whoever leads */
-function spine(label, left, right, lead, mag){
-  const w = Math.min(100, Math.max(0, mag*100))/2;
-  const col = lead==='red' ? 'var(--red)' : 'var(--blue)';
-  const side = lead==='red' ? `right:50%` : `left:50%`;
-  return `<div class="spine">
-    <div class="spineTop">
-      <div class="sv l mono" style="color:${lead==='red'?'var(--redsoft)':'var(--mute)'}">${esc(left)}</div>
-      <div class="sc">${esc(label)}</div>
-      <div class="sv mono" style="color:${lead==='blue'?'var(--bluesoft)':'var(--mute)'}">${esc(right)}</div>
-    </div>
-    <div class="spineTop">
-      <div class="sv"></div>
-      <div class="sc bar"><div class="bg"></div><div class="mid"></div>
-        ${lead?`<i style="${side};width:${w}%;background:${col}"></i>`:''}</div>
-      <div class="sv"></div>
-    </div></div>`;
+function edgeTag(b){
+  if(b.edge==null) return '';
+  const e=Math.abs(b.edge);
+  if(e<0.05) return `<span class="edgeTag" style="color:var(--dim);border:1px solid var(--line)">matches line</span>`;
+  const who = b.edge>0 ? b.a : b.b;
+  const col = e>=0.12 ? 'var(--warn)' : 'var(--mute)';
+  return `<span class="edgeTag" style="color:${col};border:1px solid ${col}">
+    ${(e*100).toFixed(0)} pts on ${esc(who.split(' ').slice(-1)[0])}</span>`;
 }
 
-function methodBlock(b, who){
-  const col = who==='a' ? 'var(--red)' : 'var(--blue)';
-  const nm  = who==='a' ? b.a : b.b;
-  const rows = [['KO/TKO', b[`m_${who}_ko`]], ['Submission', b[`m_${who}_sub`]]];
-  return `<div><div class="lbl" style="margin-bottom:9px">${esc(nm)} finishes</div>
-    ${rows.map(([k,v])=>`<div class="mrow"><span>${k}</span>
-      <div class="t"><i style="width:${Math.min(100,v*100*2.2)}%;background:${col}"></i></div>
-      <b>${pct(v)}%</b></div>`).join('')}</div>`;
+/* a readable sentence, not a number dump */
+function verdict(b){
+  const fav = b.p_a>=.5 ? b.a : b.b;
+  const p   = Math.max(b.p_a,b.p_b);
+  const lean= p<0.56 ? 'barely favours' : p<0.68 ? 'favours' : 'strongly favours';
+  let s = `Model ${lean} <b>${esc(fav)}</b> at ${P0(p)}%`;
+  if(b.edge!=null){
+    const e=Math.abs(b.edge);
+    s += e<0.05 ? `, in line with the market.`
+       : `, where the market has ${P0(b.edge>0?b.p_market:1-b.p_market)}% — a ${(e*100).toFixed(0)}-point gap.`;
+  } else s += '.';
+  if(b.p_finish!=null){
+    const r=[1,2,3,4,5].map(k=>[k,b['p_end_r'+k]]).filter(x=>x[1]!=null)
+                       .sort((x,y)=>y[1]-x[1])[0];
+    s += b.p_finish>=0.55
+      ? ` Likely to end early — ${P0(b.p_finish)}% inside the distance${r?`, most often round ${r[0]}`:''}.`
+      : b.p_finish<=0.35 ? ` Likely to go the distance (${P0(b.m_decision)}%).` : '';
+  }
+  return s;
 }
 
-function rangeRow(label, lo, mid, hi, unit, col){
-  const scale = Math.max(hi, 1e-6) * 1.15;
-  return `<div class="rng">
-    <div class="lbl" style="width:104px;flex:none">${esc(label)}</div>
-    <div class="rngbar">
-      <div class="zone" style="left:${lo/scale*100}%;width:${(hi-lo)/scale*100}%;background:${col}"></div>
-      <div class="pt" style="left:${mid/scale*100}%"></div>
-    </div>
-    <div class="mono" style="width:104px;text-align:right;font-size:12px;color:var(--mute)">
-      ${lo.toFixed(1)}–${hi.toFixed(1)} ${esc(unit)}</div></div>`;
+function driverRows(b){
+  if(!b.drivers||!b.drivers.length) return '';
+  const mx = Math.max(...b.drivers.map(d=>Math.abs(d.value)));
+  return b.drivers.map(d=>{
+    const w = Math.abs(d.value)/mx*50;
+    const red = d.favours==='a';
+    return `<div class="drv">
+      <div class="dn">${esc(d.label)}</div>
+      <div class="dt"><div class="bg"></div><div class="zero"></div>
+        <i style="${red?'right:50%':'left:50%'};width:${w}%;
+           background:${red?'var(--red)':'var(--blue)'}"></i></div>
+      <div class="dv mono">${d.value>0?'+':''}${d.value.toFixed(2)}</div></div>`;
+  }).join('');
+}
+
+function headline(d){
+  const withMkt=d.bouts.filter(b=>b.edge!=null);
+  if(!withMkt.length){
+    return `<div class="lede"><h3>No market prices loaded</h3>
+      <p>Add <b>data/ufc_betting_odds_daily.csv</b> and regenerate to compare every
+      pick against the closing line. Without it the site shows the model alone.</p></div>`;
+  }
+  const big=withMkt.slice().sort((x,y)=>Math.abs(y.edge)-Math.abs(x.edge))[0];
+  const agree=withMkt.filter(b=>Math.abs(b.edge)<0.05).length;
+  const who=big.edge>0?big.a:big.b;
+  const drv=(big.drivers||[]).filter(x=>(x.favours==='a')===(big.edge>0))[0];
+  return `<div class="lede">
+    <h3>Where this differs from the market</h3>
+    <p>Across ${withMkt.length} priced bouts, the model agrees with the line on
+    <b>${agree}</b> within 5 points. The widest gap is
+    <b>${esc(big.a)} vs. ${esc(big.b)}</b>: the model has ${esc(who)} at
+    <b>${P0(big.edge>0?big.p_a:big.p_b)}%</b> against the market's
+    <b>${P0(big.edge>0?big.p_market:1-big.p_market)}%</b>${drv?`, driven mostly by <b>${esc(drv.label)}</b>`:''}.
+    Disagreement is not an edge — tested, the model loses to the closing line.
+    It is a starting point for an argument.</p></div>`;
 }
 
 function renderCard(){
-  const d = DATA;
-  const rounds = (b) => b.rounds===5 ? '5 rds' : '3 rds';
-  const boutHtml = (b,i) => `
+  const d=DATA;
+  const boutHtml=(b,i)=>`
     <button class="bout" data-i="${i}">
-      <div class="boutTop">
-        <div class="lbl">${rounds(b)}${b.p_finish!=null?` · ${pct(b.p_finish)}% finish`:''}</div>
-        <div class="lbl">${Math.abs(b.p_a-0.5)*2 < 0.12 ? 'Coin flip'
-          : Math.abs(b.p_a-0.5)*2 < 0.35 ? 'Lean'
-          : Math.abs(b.p_a-0.5)*2 < 0.6 ? 'Clear edge' : 'Lopsided'}</div>
+      <div class="btop">
+        <div class="lbl">${b.rounds===5?'5 rounds':'3 rounds'}</div>
+        ${edgeTag(b)}
       </div>
-      <div class="row">
+      <div class="names">
         <div class="side"><div class="nm" style="color:${b.p_a>=.5?'var(--bone)':'var(--mute)'}">${esc(b.a)}</div></div>
-        <div class="pcol">
+        <div class="pc">
           <div class="pnum mono">
-            <b style="color:${b.p_a>=.5?'var(--redsoft)':'var(--dim)'}">${Math.round(b.p_a*100)}</b>
-            <span style="font-size:9px;color:var(--dim)">%</span>
-            <b style="color:${b.p_a<.5?'var(--bluesoft)':'var(--dim)'}">${Math.round(b.p_b*100)}</b>
-          </div>${bar(b.p_a)}
+            <b style="color:${b.p_a>=.5?'var(--redsoft)':'var(--dim)'}">${P0(b.p_a)}</b>
+            <span class="lbl">vs</span>
+            <b style="color:${b.p_a<.5?'var(--bluesoft)':'var(--dim)'}">${P0(b.p_b)}</b>
+          </div>${gauge(b.p_a,b.p_market)}
         </div>
         <div class="side r"><div class="nm" style="color:${b.p_a<.5?'var(--bone)':'var(--mute)'}">${esc(b.b)}</div></div>
       </div>
+      <div class="verdict">${verdict(b)}</div>
     </button>`;
-
-  const noread = (DATA.no_read||[]).map(n =>
-    `<div class="noread"><b>${esc(n.a)}</b> vs. <b>${esc(n.b)}</b>
-     <div class="lbl" style="margin-top:4px">No read — ${esc(n.reason)}</div></div>`).join('');
-
-  const el = $(`<div class="fade">
+  const nr=(d.no_read||[]).map(n=>`<div class="noread"><b>${esc(n.a)}</b> vs. <b>${esc(n.b)}</b>
+      <div class="lbl" style="margin-top:5px">No read — ${esc(n.reason)}</div></div>`).join('');
+  const node=el(`<div class="fade">
     <div class="lbl">${esc(d.venue||'')}</div>
     <h1>${esc(d.event||'Upcoming card')}</h1>
     <div class="evmeta">
-      <span class="mono" style="font-size:12px;color:var(--gold);letter-spacing:.1em">${esc(d.date||'')}</span>
-      <span style="color:var(--line)">|</span>
-      <span class="lbl">${d.bouts.length} bouts modelled${d.no_read&&d.no_read.length?` · ${d.no_read.length} no read`:''}</span>
+      <span class="chip mono" style="color:var(--gold);border-color:var(--gold)">${esc(d.date||'')}</span>
+      <span class="chip">${d.bouts.length} modelled</span>
+      ${d.no_read&&d.no_read.length?`<span class="chip">${d.no_read.length} no read</span>`:''}
+      ${d.bouts.some(b=>b.books)?`<span class="chip">${Math.max(...d.bouts.map(b=>b.books||0))} books${d.market_source?` · ${esc(d.market_source)}`:''}</span>`:''}
     </div>
-    <div class="seg"><div class="seghead"><div class="lbl">Card</div></div>
-      ${d.bouts.map(boutHtml).join('')}</div>
-    ${noread?`<div class="seg"><div class="seghead"><div class="lbl">Not modelled</div></div>${noread}</div>`:''}
-    <div class="note">
-      <b>How to read this.</b> Win probability comes from a logistic model on 14
-      opponent-adjusted differentials, tested at 67% accuracy against 70% for the
-      closing betting line — this does not beat the market and is not betting
-      advice. Method and round probabilities come from a competing-risks hazard
-      model and sum to exactly 100% by construction. Output ranges cover the real
-      outcome 79% of the time against a claimed 80%. Fights where either fighter
+    ${headline(d)}
+    <div class="seghead"><div class="lbl">Card</div>
+      <div class="lbl" style="color:var(--gold)">▏gold tick = market price</div></div>
+    ${d.bouts.map(boutHtml).join('')}
+    ${nr?`<div class="seghead" style="margin-top:26px"><div class="lbl">Not modelled</div></div>${nr}`:''}
+    <div class="note"><b>How to read this.</b> Win probability comes from a logistic
+      model on 14 opponent-adjusted differentials, trained only on fights that happened
+      before the ones it is scoring. Method and round probabilities come from a
+      competing-risks hazard model and sum to exactly 100%. Output ranges cover the
+      real result 79% of the time against a claimed 80%. Fights where either fighter
       has too little UFC history are shown as “no read” rather than guessed at.
-    </div></div>`);
-  el.querySelectorAll('.bout').forEach(btn =>
-    btn.addEventListener('click', () => renderBout(+btn.dataset.i)));
-  return el;
+      The model tests at 67% accuracy against 70% for the closing line: it does not
+      beat the market, and where the two disagree the market has historically been
+      right more often.</div></div>`);
+  node.querySelectorAll('.bout').forEach(btn=>
+    btn.addEventListener('click',()=>show(+btn.dataset.i)));
+  return node;
 }
 
-function renderBout(i){
-  const b = DATA.bouts[i];
-  const rows = [];
-  const push=(lab,l,r,d,s,fl,fr)=>rows.push(spine(lab,fl,fr,d===0?null:(d>0?'red':'blue'),Math.min(1,Math.abs(d)/s)));
-  push('Win probability', 0,0, b.p_a-b.p_b, 1, pct(b.p_a)+'%', pct(b.p_b)+'%');
-  push('Takedown likely', 0,0, b.a_p_takedown-b.b_p_takedown, .8,
-       pct(b.a_p_takedown)+'%', pct(b.b_p_takedown)+'%');
-  push('Knockdown likely', 0,0, b.a_p_knockdown-b.b_p_knockdown, .5,
-       pct(b.a_p_knockdown)+'%', pct(b.b_p_knockdown)+'%');
-  push('Strikes /min (mid)', 0,0, b.a_slpm_mid-b.b_slpm_mid, 4,
-       b.a_slpm_mid.toFixed(1), b.b_slpm_mid.toFixed(1));
-  push('Control sec /min', 0,0, b.a_ctrl_mid-b.b_ctrl_mid, 25,
-       b.a_ctrl_mid.toFixed(0), b.b_ctrl_mid.toFixed(0));
+/* every market the model can price, with a market marker where one exists */
+function propRow(name, p, col, marker, note){
+  const mk = marker==null ? '' :
+    `<div style="position:absolute;left:calc(${marker*100}% - 4px);top:-3px;
+       color:var(--gold);font-size:11px;line-height:1">◆</div>`;
+  return `<div style="display:flex;align-items:center;gap:10px;padding:7px 0;
+      border-bottom:1px solid var(--soft)">
+    <div style="width:152px;flex:none;font-size:12px;color:var(--mute)">${esc(name)}
+      ${note?`<span class="lbl" style="display:block;margin-top:2px">${esc(note)}</span>`:''}</div>
+    <div style="flex:1;position:relative;height:9px">
+      <div style="position:absolute;inset:0;background:var(--soft);border-radius:5px"></div>
+      <div style="position:absolute;left:0;top:0;height:9px;border-radius:5px;
+        width:${Math.max(0,Math.min(100,p*100))}%;background:${col}"></div>${mk}</div>
+    <div class="mono" style="width:52px;text-align:right;font-size:12.5px;font-weight:600">${P1(p)}%</div>
+  </div>`;
+}
 
-  const rr = [];
-  for(let k=1;k<=(b.rounds||3);k++){
-    const v=b[`p_end_r${k}`]; if(v==null) continue;
-    rr.push(`<div class="mrow"><span>Ends in R${k}</span>
-      <div class="t"><i style="width:${Math.min(100,v*100*3)}%;background:var(--gold)"></i></div>
-      <b>${pct(v)}%</b></div>`);
+function propRows(b){
+  const R=[];
+  R.push(propRow(`${b.a} wins`, b.p_a, 'var(--red)', b.p_market,
+                 b.p_market!=null?`market ${P1(b.p_market)}%`:'moneyline'));
+  R.push(propRow(`${b.b} wins`, b.p_b, 'var(--blue)',
+                 b.p_market!=null?1-b.p_market:null,
+                 b.p_market!=null?`market ${P1(1-b.p_market)}%`:'moneyline'));
+  R.push(propRow('Goes the distance', b.m_decision, 'var(--mute)', null, 'decision'));
+  R.push(propRow('Ends inside distance', b.p_finish, 'var(--warn)', null, 'ITD'));
+  if(b.totals){
+    Object.keys(b.totals).forEach(k=>{
+      const line=k.replace('over_','').replace('_','.');
+      R.push(propRow(`Over ${line} rounds`, b.totals[k], 'var(--gold)', null, 'total rounds'));
+    });
   }
+  R.push(propRow(`${b.a} by KO/TKO`, b.m_a_ko, 'var(--red)', null, 'method'));
+  R.push(propRow(`${b.a} by submission`, b.m_a_sub, 'var(--red)', null, 'method'));
+  R.push(propRow(`${b.b} by KO/TKO`, b.m_b_ko, 'var(--blue)', null, 'method'));
+  R.push(propRow(`${b.b} by submission`, b.m_b_sub, 'var(--blue)', null, 'method'));
+  [1,2,3,4,5].forEach(k=>{ const v=b['p_end_r'+k];
+    if(v!=null) R.push(propRow(`Ends in round ${k}`, v, 'var(--gold)', null, 'round')); });
+  R.push(propRow(`${b.a} lands a takedown`, b.a_p_takedown, 'var(--red)', null, 'AUC .742'));
+  R.push(propRow(`${b.b} lands a takedown`, b.b_p_takedown, 'var(--blue)', null, 'AUC .742'));
+  R.push(propRow(`${b.a} scores a knockdown`, b.a_p_knockdown, 'var(--red)', null, 'AUC .668'));
+  R.push(propRow(`${b.b} scores a knockdown`, b.b_p_knockdown, 'var(--blue)', null, 'AUC .668'));
+  return R.join('');
+}
 
-  const el = $(`<div class="fade">
+function rangeRow(name,lo,mid,hi,unit,col){
+  const sc=Math.max(hi,1e-6)*1.15;
+  return `<div class="rng">
+    <div style="width:128px;flex:none;font-size:11.5px;color:var(--mute)">${esc(name)}</div>
+    <div class="rngbar">
+      <div class="zone" style="left:${lo/sc*100}%;width:${(hi-lo)/sc*100}%;background:${col}"></div>
+      <div class="pt" style="left:${mid/sc*100}%"></div></div>
+    <div class="mono" style="width:96px;text-align:right;font-size:12px;color:var(--mute)">
+      ${lo.toFixed(1)}–${hi.toFixed(1)}<span class="lbl"> ${esc(unit)}</span></div></div>`;
+}
+
+function show(i){
+  const b=DATA.bouts[i];
+  const rr=[1,2,3,4,5].map(k=>[k,b['p_end_r'+k]]).filter(x=>x[1]!=null);
+  const node=el(`<div class="fade">
     <button class="back">← BACK TO CARD</button>
-    <div class="row" style="align-items:flex-start;gap:16px">
+    <div class="names" style="align-items:flex-start">
       <div class="side">
         <div class="lbl" style="color:var(--redsoft)">Red corner</div>
-        <div style="font-size:21px;font-weight:800;text-transform:uppercase;letter-spacing:-.02em;margin-top:3px">${esc(b.a)}</div>
-      </div>
-      <div class="lbl" style="padding-top:18px">vs</div>
+        <div style="font-size:22px;font-weight:800;text-transform:uppercase;letter-spacing:-.025em;margin-top:4px">${esc(b.a)}</div></div>
+      <div class="lbl" style="padding-top:20px">vs</div>
       <div class="side r">
         <div class="lbl" style="color:var(--bluesoft)">Blue corner</div>
-        <div style="font-size:21px;font-weight:800;text-transform:uppercase;letter-spacing:-.02em;margin-top:3px">${esc(b.b)}</div>
-      </div>
+        <div style="font-size:22px;font-weight:800;text-transform:uppercase;letter-spacing:-.025em;margin-top:4px">${esc(b.b)}</div></div>
     </div>
 
-    <div style="margin:22px 0 6px">
-      <div class="pnum mono" style="margin-bottom:8px">
-        <b style="font-size:29px;color:var(--redsoft);letter-spacing:-.03em">${pct(b.p_a)}<span style="font-size:14px">%</span></b>
-        <span class="lbl">Win probability</span>
-        <b style="font-size:29px;color:var(--bluesoft);letter-spacing:-.03em">${pct(b.p_b)}<span style="font-size:14px">%</span></b>
+    <div class="card" style="margin-top:22px">
+      <div class="pnum mono" style="margin-bottom:10px">
+        <b style="font-size:32px;color:var(--redsoft);letter-spacing:-.03em">${P1(b.p_a)}<span style="font-size:14px">%</span></b>
+        <span class="lbl">Model</span>
+        <b style="font-size:32px;color:var(--bluesoft);letter-spacing:-.03em">${P1(b.p_b)}<span style="font-size:14px">%</span></b>
       </div>
-      <div class="track tall"><i style="width:${b.p_a*100}%;background:var(--red)"></i>
-        <i style="width:${b.p_b*100}%;background:var(--blue)"></i></div>
+      ${gauge(b.p_a,b.p_market,true)}
+      <div class="gkey"><span>${esc(b.a)}</span>
+        ${b.p_market!=null?`<span style="color:var(--gold)">market ${P1(b.p_market)} / ${P1(1-b.p_market)}${b.books?` · ${b.books} books`:''}</span>`:'<span>no market price</span>'}
+        <span>${esc(b.b)}</span></div>
     </div>
 
-    <div class="seg" style="margin-top:28px">
-      <div class="seghead" style="display:flex;justify-content:space-between">
-        <div class="lbl">How it ends</div>
-        <div class="lbl">sums to 100%</div></div>
-      <div class="grid2">${methodBlock(b,'a')}${methodBlock(b,'b')}</div>
-      <div class="mrow"><span>Decision</span>
+    ${b.drivers&&b.drivers.length?`<div class="card">
+      <div class="seghead"><div class="lbl">Why</div>
+        <div class="lbl">push on the log-odds</div></div>
+      ${driverRows(b)}
+      <div style="font-size:11px;color:var(--dim);margin-top:10px;line-height:1.6">
+        Each bar is one feature's contribution, scaled and signed. This is the part
+        a price cannot give you — the market publishes a number and no reasoning.</div>
+    </div>`:''}
+
+    <div class="card">
+      <div class="seghead"><div class="lbl">How it ends</div><div class="lbl">sums to 100%</div></div>
+      <div class="grid2">
+        <div>
+          <div class="lbl" style="margin-bottom:9px;color:var(--redsoft)">${esc(b.a)}</div>
+          <div class="mrow"><span>by KO/TKO</span><div class="t"><i style="width:${Math.min(100,b.m_a_ko*220)}%;background:var(--red)"></i></div><b>${P1(b.m_a_ko)}%</b></div>
+          <div class="mrow"><span>by submission</span><div class="t"><i style="width:${Math.min(100,b.m_a_sub*220)}%;background:var(--red)"></i></div><b>${P1(b.m_a_sub)}%</b></div>
+        </div>
+        <div>
+          <div class="lbl" style="margin-bottom:9px;color:var(--bluesoft)">${esc(b.b)}</div>
+          <div class="mrow"><span>by KO/TKO</span><div class="t"><i style="width:${Math.min(100,b.m_b_ko*220)}%;background:var(--blue)"></i></div><b>${P1(b.m_b_ko)}%</b></div>
+          <div class="mrow"><span>by submission</span><div class="t"><i style="width:${Math.min(100,b.m_b_sub*220)}%;background:var(--blue)"></i></div><b>${P1(b.m_b_sub)}%</b></div>
+        </div>
+      </div>
+      <div class="mrow" style="margin-top:14px"><span>Decision</span>
         <div class="t"><i style="width:${Math.min(100,b.m_decision*100)}%;background:var(--mute)"></i></div>
-        <b>${pct(b.m_decision)}%</b></div>
-      ${rr.length?`<div style="margin-top:16px">${rr.join('')}</div>`:''}
+        <b>${P1(b.m_decision)}%</b></div>
+      ${rr.length?`<div style="margin-top:16px">
+        <div class="lbl" style="margin-bottom:9px">Finish by round</div>
+        ${rr.map(([k,v])=>`<div class="mrow"><span>Round ${k}</span>
+          <div class="t"><i style="width:${Math.min(100,v*300)}%;background:var(--gold)"></i></div>
+          <b>${P1(v)}%</b></div>`).join('')}</div>`:''}
     </div>
 
-    <div class="seg">
-      <div class="seghead" style="display:flex;justify-content:space-between">
-        <div class="lbl">Differentials</div>
-        <div class="lbl">bar points to who leads</div></div>
-      ${rows.join('')}
-    </div>
-
-    <div class="seg">
-      <div class="seghead" style="display:flex;justify-content:space-between">
-        <div class="lbl">Projected output</div><div class="lbl">80% range</div></div>
-      ${rangeRow(esc(b.a)+' strikes', b.a_slpm_lo, b.a_slpm_mid, b.a_slpm_hi, '/min', 'var(--red)')}
-      ${rangeRow(esc(b.b)+' strikes', b.b_slpm_lo, b.b_slpm_mid, b.b_slpm_hi, '/min', 'var(--blue)')}
-      ${rangeRow(esc(b.a)+' control', b.a_ctrl_lo, b.a_ctrl_mid, b.a_ctrl_hi, 'sec/min', 'var(--red)')}
-      ${rangeRow(esc(b.b)+' control', b.b_ctrl_lo, b.b_ctrl_mid, b.b_ctrl_hi, 'sec/min', 'var(--blue)')}
-      <div style="font-size:10.5px;color:var(--dim);margin-top:10px;line-height:1.6">
-        A single fight's stat line is mostly noise, so these are ranges rather than
-        point estimates. The model explains about 11% of the variance in strike
-        volume but ranks fights meaningfully better than a career average.
+    <div class="card">
+      <div class="seghead"><div class="lbl">All markets the model prices</div>
+        <div class="lbl">${b.p_market!=null?'◆ = market price':'no market feed'}</div></div>
+      ${propRows(b)}
+      <div style="font-size:11px;color:var(--dim);margin-top:12px;line-height:1.6">
+        Only the moneyline carries a market marker. No free odds feed quotes MMA
+        props — The Odds API covers fight winner only — so everything below the
+        first row is a projection with nothing to check it against. Method and
+        round figures come from the hazard model and sum to 100% across outcomes.
       </div>
-    </div></div>`);
-  el.querySelector('.back').addEventListener('click', renderCard2);
-  const app = document.getElementById('app');
-  app.innerHTML=''; app.appendChild(el); window.scrollTo(0,0);
-}
-function renderCard2(){ const a=document.getElementById('app'); a.innerHTML=''; a.appendChild(renderCard()); window.scrollTo(0,0); }
+    </div>
 
-fetch('predictions.json', {cache:'no-store'})
-  .then(r => { if(!r.ok) throw new Error('predictions.json not found ('+r.status+')'); return r.json(); })
-  .then(j => {
-    DATA = j;
-    document.getElementById('stamp').textContent =
-      j.generated_utc ? 'updated ' + j.generated_utc.slice(0,10) : '';
-    renderCard2();
-  })
-  .catch(e => {
-    document.getElementById('app').innerHTML =
-      '<div class="note"><b>Could not load predictions.</b><br>' + esc(e.message) +
-      '<br><br>Run <span class="mono">python -m mmastat.upcoming --json</span> to generate ' +
-      '<span class="mono">site/predictions.json</span>, or wait for the daily refresh job.</div>';
-  });
+    <div class="card">
+      <div class="seghead"><div class="lbl">Projected output</div><div class="lbl">80% range</div></div>
+      ${rangeRow(b.a+' strikes',b.a_slpm_lo,b.a_slpm_mid,b.a_slpm_hi,'/min','var(--red)')}
+      ${rangeRow(b.b+' strikes',b.b_slpm_lo,b.b_slpm_mid,b.b_slpm_hi,'/min','var(--blue)')}
+      ${rangeRow(b.a+' control',b.a_ctrl_lo,b.a_ctrl_mid,b.a_ctrl_hi,'sec/min','var(--red)')}
+      ${rangeRow(b.b+' control',b.b_ctrl_lo,b.b_ctrl_mid,b.b_ctrl_hi,'sec/min','var(--blue)')}
+      <div style="font-size:11px;color:var(--dim);margin-top:12px;line-height:1.6">
+        Takedown probability is the strongest of these (AUC .742). Strike and control
+        figures are ranges because a single fight's stat line is mostly noise — the
+        model explains about 11% of the variance, but ranks fights meaningfully
+        better than a career average does.</div>
+    </div></div>`);
+  node.querySelector('.back').addEventListener('click',home);
+  const a=document.getElementById('app'); a.innerHTML=''; a.appendChild(node); window.scrollTo(0,0);
+}
+function home(){ const a=document.getElementById('app'); a.innerHTML=''; a.appendChild(renderCard()); window.scrollTo(0,0); }
+
+fetch('predictions.json',{cache:'no-store'})
+  .then(r=>{ if(!r.ok) throw new Error('predictions.json not found ('+r.status+')'); return r.json(); })
+  .then(j=>{ DATA=j;
+    document.getElementById('stamp').textContent=j.generated_utc?'updated '+j.generated_utc.slice(0,10):'';
+    home(); })
+  .catch(e=>{ document.getElementById('app').innerHTML=
+    '<div class="note"><b>Could not load predictions.</b><br>'+esc(e.message)+
+    '<br><br>Run <span class="mono">python -m mmastat.upcoming --json</span> to generate '+
+    '<span class="mono">site/predictions.json</span>, or wait for the daily refresh job.</div>'; });
 </script>
 </body>
 </html>
