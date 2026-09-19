@@ -1,0 +1,9 @@
+# The odds ledger is an append-only log written by a scheduled job. When two
+# runs (or a run and a manual edit) touch it, the correct resolution is to keep
+# BOTH sides rather than pick one — git's union driver does exactly that.
+#
+# Concatenation is safe here only because mmastat/ledger.py deduplicates on
+# (captured_utc, event_date, fighter, opponent) on every read and write. The
+# two together make the ledger robust to merges without ever losing a captured
+# prediction, which is the one thing that must not happen.
+data/ledger/*.jsonl merge=union
