@@ -76,10 +76,43 @@ def append(rows, path=LEDGER):
     return len(rows)
 
 
+KEY = ["captured_utc", "event_date", "fighter", "opponent"]
+
+
+def dedupe(rows):
+    """One row per (capture time, bout, fighter), last write wins.
+
+    An append-only log committed by a scheduled job will eventually get
+    duplicated: a rebase replays a local rewrite on top of a remote that
+    already has it, and both copies survive. That happened on the second live
+    capture — the 13:56 Van/Pantoja rows appeared twice, once with the old bad
+    settlement and once corrected. Duplicates would double-count in both CLV
+    and ROI, so the file is deduplicated on every write. The capture fields
+    are identical across copies by construction, so keeping the last is safe.
+    """
+    seen = {}
+    for r in rows:
+        seen[tuple(str(r.get(k)) for k in KEY)] = r
+    return list(seen.values())
+
+
 def read(path=LEDGER):
     if not os.path.exists(path):
         return pd.DataFrame()
-    return pd.DataFrame([json.loads(l) for l in open(path, encoding="utf-8") if l.strip()])
+    rows = [json.loads(l) for l in open(path, encoding="utf-8") if l.strip()]
+    return pd.DataFrame(dedupe(rows))
+
+
+def _rewrite(path=LEDGER):
+    """Rewrite the file deduplicated, preserving order of first appearance."""
+    if not os.path.exists(path):
+        return 0
+    rows = [json.loads(l) for l in open(path, encoding="utf-8") if l.strip()]
+    clean = dedupe(rows)
+    Path(path).write_text(
+        "\n".join(json.dumps(r, sort_keys=True) for r in clean) + "\n",
+        encoding="utf-8")
+    return len(rows) - len(clean)
 
 
 def capture(fights, fighters, card_path="data/upcoming.txt", path=LEDGER,
@@ -129,7 +162,12 @@ def capture(fights, fighters, card_path="data/upcoming.txt", path=LEDGER,
                 p_model=round(p_model, 5), edge=round(p_model - implied, 5),
                 books=nbooks, bet=bool(fires(p_model, implied, rule)),
                 rule_frozen_on=rule.get("frozen_on"), settled=False))
+    existing = read(path)
+    if not existing.empty:
+        have = {tuple(str(r[k]) for k in KEY) for _, r in existing[KEY].iterrows()}
+        rows = [r for r in rows if tuple(str(r.get(k)) for k in KEY) not in have]
     n = append(rows, path)
+    _rewrite(path)                      # collapse any duplicates a merge left
     if verbose:
         b = sum(1 for r in rows if r["bet"])
         print(f"captured {n} fighter-prices for {meta.get('event')}; "
@@ -190,6 +228,7 @@ def settle(fights, path=LEDGER, date_tol_days=4, verbose=True):
             fixed += 1
         out.append(d)
 
+    out = dedupe(out)
     Path(path).write_text(
         "\n".join(json.dumps(r, sort_keys=True) for r in out) + "\n", encoding="utf-8")
     if verbose:

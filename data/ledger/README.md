@@ -12,10 +12,25 @@ One row per fighter-price per capture:
 
 Rules, enforced in code:
 
+- **Deduplicated on every read and write**, keyed on
+  (captured_utc, event_date, fighter, opponent). A scheduled job committing an
+  append-only file will eventually duplicate it — a rebase replays a local
+  rewrite onto a remote that already has it and both copies survive. That
+  happened on the second live capture. Duplicates would double-count in CLV
+  and ROI. `.gitattributes` also sets `merge=union` on this file, so a merge
+  keeps both sides and dedupe cleans up: no captured prediction is ever lost.
 - **Append only.** `settle` marks outcomes; nothing else is ever rewritten.
 - **Frozen coefficients.** The rule lives in `mmastat/residual_model.json` and
   is applied, never refitted. Refitting would turn the forward test back into
   a retrospective one.
+- **Settlement is re-derived from the corpus every run**, not skipped once
+  set, so a bad match heals itself on the next pass. Captured prediction
+  fields are never touched; only outcome fields are.
+- **Matching requires the event date**, within 4 days, not just the fighter
+  pair. 424 corpus fights are rematches — on the very first live capture, pair-
+  only matching settled a Van vs Pantoja rematch with their 2025-12-06 first
+  meeting, marking tonight's fight decided hours before it happened.
+  `tests.py::test_settle_respects_dates` now guards this.
 - **The last row before an event is the closing price**, which is what CLV is
   measured against.
 

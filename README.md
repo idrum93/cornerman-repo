@@ -398,7 +398,7 @@ selectively after the fact.
 
 ## How it's kept honest
 
-`python -m mmastat.tests` runs four checks:
+`python -m mmastat.tests` runs five checks:
 
 1. **No temporal leakage.** Random fights are rebuilt from a corpus truncated at
    that fight and the features must be bit-identical. Currently 0.00e+00 drift.
@@ -410,7 +410,10 @@ selectively after the fact.
    the time in the raw file. A model trained naively learns that.
 3. **Null model.** Shuffled labels must score ~0.500 AUC, averaged over seeds
    because one 300-row test block has a standard deviation of ±0.035.
-4. **Leak detector has power.** Injecting a post-fight statistic must move the
+4. **Settle respects dates.** A rematch must not be settled with the earlier
+   fight's result. This fired for real on the first live capture and is the
+   reason the check exists.
+5. **Leak detector has power.** Injecting a post-fight statistic must move the
    metric (+0.12 AUC). A leakage test never shown to fire proves nothing.
 
 `build()` and `build_panel()` share one update path, so there is exactly one
