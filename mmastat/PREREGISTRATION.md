@@ -354,3 +354,163 @@ takes an explicit `full` flag with the distinction documented at the call site.
 `props.py` as the source of method and round numbers on the site because those
 numbers will be coherent. The win probability stays with the direct logistic,
 or the average of the two if the small ensemble gain holds up on more data.
+
+---
+
+# Addendum 7: weight audit and two ablations (2026-09-19)
+
+Prompted by a reasonable question — why does strength of schedule carry so
+much weight?
+
+## What the weights actually are
+
+Drop-one ablation on the held-out block. `drop_ll > 0` means removing the
+feature makes the model worse.
+
+| feature | beta | 95% CI | drop_ll | drop_acc |
+|---|---|---|---|---|
+| d_age | -0.389 | [-0.45,-0.33] | +0.0178 | **-3.98** |
+| d_adj_slpm | +0.242 | [+0.11,+0.37] | +0.0009 | -0.72 |
+| d_sapm | -0.196 | [-0.26,-0.13] | +0.0062 | -0.24 |
+| d_ko_loss_rate | -0.192 | [-0.36,-0.03] | +0.0001 | +0.36 |
+| d_elo | +0.191 | [+0.11,+0.25] | +0.0055 | -1.69 |
+| **d_opp_elo** | **+0.167** | [+0.11,+0.22] | **+0.0058** | **-1.09** |
+| d_str_def | +0.156 | [+0.10,+0.22] | -0.0009 | -0.24 |
+| grapple_edge | +0.149 | [+0.10,+0.21] | +0.0033 | -1.45 |
+| ko_edge | -0.126 | [-0.31,+0.07] | 0.0000 | 0.00 |
+| d_reach | +0.109 | [+0.06,+0.16] | -0.0003 | 0.00 |
+| d_str_acc | +0.086 | [+0.04,+0.14] | +0.0010 | -0.48 |
+| d_log_exp | -0.075 | [-0.14,-0.02] | +0.0027 | -0.84 |
+| d_log_layoff | +0.031 | [-0.02,+0.09] | -0.0013 | 0.00 |
+| sub_edge | -0.011 | [-0.06,+0.04] | -0.0002 | -0.12 |
+
+**Strength of schedule is legitimate.** It correlates only **0.133** with Elo —
+Elo measures how well you have done, `d_opp_elo` measures who you did it
+against, and a fighter can post a strong record against weak opposition.
+Dropping it costs 1.09 accuracy points, third worst of the fourteen.
+
+Age remains dominant: removing it costs **4 accuracy points**, more than four
+times any other feature.
+
+## Ablation 1: pruning. FAILED, and the failure is the lesson.
+
+Four features have CIs crossing zero and ablations suggesting they are dead
+weight. Dropping ko_edge, d_log_layoff and sub_edge scored better on the test
+block on all three metrics — 67.55% vs 67.31%, log loss 0.6194 vs 0.6208.
+
+**That was test-set overfitting.** The features were chosen by looking at the
+test block. Re-run honestly — backward elimination judged only on a validation
+slice, then confirmed once on test — validation selected a *different* trio
+(dropping `d_sapm` instead of `ko_edge`) and the result reversed: log loss
+**-0.0044, 95% CI [-0.0090, +0.0002], P(better) = 0.032**, i.e. almost
+certainly worse.
+
+Two conclusions. The 14 features stay exactly as they are. And at ~3,300
+training fights, feature selection does not generalise — the sample cannot
+distinguish a dead feature from a quiet one.
+
+## Ablation 2: recency weighting. NULL.
+
+The state accumulators weight a 2014 fight identically to a 2026 one, which
+was listed as a known gap. Tested by decaying every accumulator by
+exp(-lambda x years) at each update and exposing the decayed rates as extra
+differentials.
+
+Half-life chosen on validation (which picked 3.0 years), confirmed on test:
+gain **+0.0000, 95% CI [-0.0052, +0.0046], P(better) = 0.518**. Accuracy fell
+slightly, AUC rose slightly. Nothing.
+
+Note the shorter half-lives were *negative* on validation (-0.0019 at 9 months,
+-0.0010 at 1 year). Recent form carries no information the career average
+lacks, and weighting it harder actively hurts. The shrinkage already in
+`state.py` appears to be doing this job.
+
+## Addendum 1: RESULT (2026-09-19)
+
+**Zero of nine supported.** Smallest p-value was 0.060 against a BH threshold
+of 0.011, and six of the nine carried the wrong sign.
+
+| hypothesis | predicted | beta | p | sign ok |
+|---|---|---|---|---|
+| H1 leg-kicks x stance mismatch | + | -0.0513 | .060 | no |
+| H5 power x chin | + | +0.0395 | .147 | yes |
+| H4 body work x opponent decay | + | -0.0393 | .213 | no |
+| H3 clinch/ground x takedown defence | - | -0.0345 | .293 | yes |
+| H8 takedowns x opponent ground game | - | +0.0282 | .353 | no |
+| H7 reach x opponent clinch share | - | +0.0789 | .400 | no |
+| H6 reach x own distance share | + | -0.1495 | .513 | no |
+| H2 leg-kicks x takedown defence | + | +0.0037 | .853 | yes |
+| H9 age x pace | - | +0.0150 | .987 | no |
+
+H6 and H7 were named in advance as the most interesting — reach entering the
+model as a flat effect "almost certainly isn't one". Both came back with the
+wrong sign and p > 0.4. **Reach is a flat effect.** That is a real answer to a
+reasonable question, arrived at the only way it could be.
+
+---
+
+# Addendum 8: five angles from fields already in the corpus (2026-09-19)
+
+Registered before fitting. These are not new formulas over existing features —
+that avenue is exhausted — but **measurements never extracted**, all from
+columns already downloaded and currently unused.
+
+| # | measurement | source | predicted sign | rationale |
+|---|---|---|---|---|
+| V1 | small-cage venue (UFC Apex, Las Vegas) x own pressure style | `LOCATION` | positive for pressure fighters | the Apex cage is 25ft against the standard 30ft; less room to circle should favour forward pressure and raise finish rates |
+| V2 | altitude of venue x own cardio proxy | `LOCATION` + lookup (Denver, Mexico City, Salt Lake, Calgary) | negative for high-output fighters | thin air punishes pace; only 21 events, so power is low and a null is uninformative |
+| V3 | referee identity x fight duration and method | `REFEREE`, 249 distinct, 99.7% populated | referees with early-stoppage tendencies raise P(KO/TKO) | a genuinely unacknowledged input: the third person in the cage decides when a fight ends |
+| V4 | moving up or down a weight class | `WEIGHTCLASS` history per fighter | negative for moving up | a real and widely discussed effect that appears in no stat line |
+| V5 | career mileage: cumulative minutes fought and strikes absorbed | existing accumulators | negative | wear distinct from age — two 34-year-olds with 20 and 60 career rounds are not the same fighter |
+
+V3 and V5 are the ones worth watching. V3 because referee assignment is
+knowable before a fight and is plausibly priced by nobody, and it targets the
+**method and round props** rather than the winner — which is where a coherent
+hazard model could actually use it. V5 because age is the single strongest
+feature in the model and mileage is the mechanism people assume is behind it;
+if mileage carries signal beyond age, that is a genuine decomposition.
+
+Family of five, Benjamini-Hochberg at FDR 0.10. Winner hypotheses tested on
+the 2012 to 2026-03 window; V3 tested against method rather than outcome. The
+252-fight holdout stays reserved.
+
+**Prior: low, as always.** Every previous family has come back null. V2 is
+underpowered by construction and is included for completeness, not hope.
+
+## Addendum 8: RESULT (2026-09-19)
+
+**Zero of five supported.** BH thresholds run 0.025 to 0.100; the smallest
+p-value was 0.140.
+
+| # | measurement | predicted | beta | p | sign ok |
+|---|---|---|---|---|---|
+| V5 | career mileage | - | -0.3241 | .140 | **yes** |
+| V4 | weight-class move | - | +0.0246 | .393 | no |
+| V1 | Apex cage x pressure | + | +0.0144 | .567 | yes |
+| V2 | altitude x pace | - | +0.0116 | .593 | no |
+
+**V3, referee stoppage tendency → P(KO/TKO): AUC 0.523** on 1,084 fights.
+Referees' career KO rates genuinely range from 0.160 to 0.437, a wide spread —
+but it does not transfer to the next fight. Either the spread is the fighters
+they happen to be assigned rather than the referee, or stoppage style matters
+less than the difference between a durable and a fragile chin. This was the
+most promising of the five and it is a clean null.
+
+V5 is the near-miss: correct sign, largest coefficient in the family, p = 0.14.
+Mileage may carry a little signal beyond age, but not at this sample size, and
+per the standing prohibitions it is not reported as encouraging. If anything is
+revisited later it should be this one, with a cleaner mileage measure (true
+career rounds rather than the `log_exp` proxy used here).
+
+## Standing conclusion after eight families
+
+Tested and null: style shares, margin-aware ratings, cardio, fight-type
+clustering, the fortitude cluster, nine style interactions, Bradley-Terry,
+Pythagorean/log5, recency weighting, feature pruning, and now venue, altitude,
+referee, weight-class moves and mileage.
+
+**Nothing has beaten the 14 features.** The one result that has ever pointed
+the right way consistently is the market-residual model (6 of 6 folds,
+P(better) = 0.934), which remains unconfirmed and untestable without forward
+odds capture. The binding constraint is not ideas — it is ~6.5 recorded fights
+per athlete and one bit of outcome per fight.

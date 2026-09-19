@@ -362,6 +362,10 @@ Recorded because a negative result you can't find gets re-tried forever.
 | the fortitude cluster: late-round accuracy change, volume/control retention, induced opponent decay, deep-round experience, knockdown recovery | pre-registered, **0 of 6 survive BH correction**, 5 of 6 carry the wrong sign; whole cluster makes the model *worse* (-0.0016, CI [-0.0052, +0.0019]) |
 | Bradley-Terry maximum-likelihood ratings (Elo's exact form) | catastrophic: 47-50% alone, and **-0.17 to -0.42** log loss when added. ~2,700 fighters and ~3,200 training fights means more free parameters than observations |
 | Pythagorean expectation on strikes landed/absorbed, combined via Bill James log5 | null at every exponent tested (k = 1.0 to 4.0), gain -0.0017 to -0.0023 |
+| pruning the 3 features whose CIs cross zero | looked like a win on test (67.55% vs 67.31%) — **that was test-set overfitting**. Selected honestly on validation it reversed: -0.0044, CI [-0.0090, +0.0002] |
+| recency weighting (exponential decay on career accumulators) | null at the validation-chosen 3-year half-life: +0.0000, CI [-0.0052, +0.0046]. Shorter half-lives were negative |
+| nine pre-registered style interactions (leg-kicks x stance, reach x range, power x chin, ...) | **0 of 9**; smallest p .060 against a .011 threshold. Reach x range and reach x clinch both came back with the WRONG sign — reach is a flat effect |
+| venue (Apex small cage), altitude, referee stoppage tendency, weight-class moves, career mileage | **0 of 5**. Referee career KO rates spread 0.160-0.437 but predict the next fight at AUC .523 |
 | historical-analog dispersion as a chaos signal | correlates with market error at +.172, but the trivial "is the line close to even" baseline correlates at +.468; AUC 0.548 alone vs 0.642 for the price, and adds nothing on top |
 
 The style features are kept in the codebase because they demonstrably help
