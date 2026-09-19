@@ -57,7 +57,8 @@
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .side{flex:1;min-width:0}
   .side.r{text-align:right}
-  .pc{width:104px;flex:none;text-align:center}
+  .pc{width:150px;flex:none;text-align:center}
+  @media(max-width:600px){.pc{width:118px}.dlab{width:0;overflow:hidden}.dgap{margin-left:0}}
   .pnum{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px}
   .pnum b{font-size:16px;font-weight:700}
 
@@ -72,8 +73,36 @@
   .gkey{display:flex;justify-content:space-between;margin-top:7px;font-size:9.5px;
     letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
 
-  .edgeTag{font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:3px 7px;
-    border-radius:3px;font-weight:700;white-space:nowrap}
+  .edgeTag{font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;
+    border-radius:3px;font-weight:700;white-space:nowrap;border:1px solid currentColor}
+  .edgeTag.agree{color:var(--dim)}
+  .edgeTag.lean{color:var(--mute)}
+  .edgeTag.wide{color:var(--warn);background:rgba(217,140,58,.10)}
+
+  /* model over market, sharing one axis: the offset is the message */
+  .dual{display:flex;flex-direction:column;gap:3px}
+  .drow{display:flex;align-items:center;gap:7px}
+  .dlab{font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);
+    width:34px;flex:none;text-align:right}
+  .drow .gauge{flex:1}
+  .gauge.mkt{background:var(--soft)}
+  .gauge .mfill{position:absolute;left:0;top:0;bottom:0;border-radius:5px;
+    background:var(--gold);opacity:.65}
+  .dgap{position:relative;height:5px;margin-left:41px}
+  .dgap i{position:absolute;top:1px;height:3px;background:var(--warn);opacity:.9;
+    border-radius:2px}
+
+  /* grouped markets, so 17 rows do not read as one list */
+  .pgroup{border:1px solid var(--line);border-radius:4px;margin-bottom:10px;
+    overflow:hidden;background:var(--ink)}
+  .pgroup.priced{border-color:rgba(205,164,58,.45)}
+  .ghead{display:flex;justify-content:space-between;align-items:baseline;gap:10px;
+    padding:8px 12px;background:var(--panel2);border-bottom:1px solid var(--line)}
+  .gname{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--bone)}
+  .pgroup.priced .gname{color:var(--gold)}
+  .prow{display:flex;align-items:center;gap:10px;padding:8px 12px}
+  .prow+.prow{border-top:1px solid var(--soft)}
 
   /* ---- drivers ---- */
   .drv{display:flex;align-items:center;gap:10px;padding:7px 0}
@@ -139,24 +168,35 @@ const P0 = x => Math.round(x*100);
 const el = h => { const d=document.createElement('div'); d.innerHTML=h.trim(); return d.firstChild; };
 let DATA=null;
 
-/* the model bar with the market's price marked on it */
+/* Two stacked bars, model over market, sharing one axis.
+   A tick on a single bar was too quiet to carry the comparison — the offset
+   between two aligned bars reads instantly and needs no legend. */
 function gauge(pa, pm, tall){
-  const mk = pm==null ? '' :
-    `<div class="mk" style="left:calc(${pm*100}% - 1px)" title="market ${P1(pm)}%"></div>`;
-  return `<div class="gauge${tall?' tall':''}">
-    <div class="fill" style="width:${pa*100}%"></div>
-    <div class="rest" style="width:${(1-pa)*100}%"></div>${mk}</div>`;
+  const h = tall ? 13 : 9;
+  const model = `<div class="gauge${tall?' tall':''}">
+      <div class="fill" style="width:${pa*100}%"></div>
+      <div class="rest" style="width:${(1-pa)*100}%"></div></div>`;
+  if(pm==null) return model;
+  const d = pa - pm;
+  const lo = Math.min(pa,pm), w = Math.abs(d);
+  return `<div class="dual">
+    <div class="drow"><span class="dlab">model</span>${model}</div>
+    <div class="dgap">${w>0.02?`<i style="left:${lo*100}%;width:${w*100}%"></i>`:''}</div>
+    <div class="drow"><span class="dlab" style="color:var(--gold)">market</span>
+      <div class="gauge${tall?' tall':''} mkt">
+        <div class="mfill" style="width:${pm*100}%"></div></div></div>
+  </div>`;
 }
 
-function edgeTag(b){
+function deltaChip(b, big){
   if(b.edge==null) return '';
-  const e=Math.abs(b.edge);
-  if(e<0.05) return `<span class="edgeTag" style="color:var(--dim);border:1px solid var(--line)">matches line</span>`;
-  const who = b.edge>0 ? b.a : b.b;
-  const col = e>=0.12 ? 'var(--warn)' : 'var(--mute)';
-  return `<span class="edgeTag" style="color:${col};border:1px solid ${col}">
-    ${(e*100).toFixed(0)} pts on ${esc(who.split(' ').slice(-1)[0])}</span>`;
+  const e=Math.abs(b.edge), who=(b.edge>0?b.a:b.b).split(' ').slice(-1)[0];
+  if(e<0.05) return `<span class="edgeTag agree">in line</span>`;
+  const cls = e>=0.12 ? 'wide' : 'lean';
+  return `<span class="edgeTag ${cls}"${big?' style="font-size:11px;padding:4px 9px"':''}>
+    ${b.edge>0?'▲':'▼'} ${(e*100).toFixed(0)} pts ${esc(who)}</span>`;
 }
+
 
 /* a readable sentence, not a number dump */
 function verdict(b){
@@ -254,7 +294,7 @@ function renderCard(){
     <button class="bout" data-i="${i}">
       <div class="btop">
         <div class="lbl">${b.rounds===5?'5 rounds':'3 rounds'}</div>
-        ${edgeTag(b)}
+        ${deltaChip(b)}
       </div>
       <div class="names">
         <div class="side"><div class="nm" style="color:${b.p_a>=.5?'var(--bone)':'var(--mute)'}">${esc(b.a)}</div></div>
@@ -312,9 +352,8 @@ function propRow(name, p, col, marker, note){
   const mk = marker==null ? '' :
     `<div style="position:absolute;left:calc(${marker*100}% - 4px);top:-3px;
        color:var(--gold);font-size:11px;line-height:1">◆</div>`;
-  return `<div style="display:flex;align-items:center;gap:10px;padding:7px 0;
-      border-bottom:1px solid var(--soft)">
-    <div style="width:152px;flex:none;font-size:12px;color:var(--mute)">${esc(name)}
+  return `<div class="prow">
+    <div style="width:150px;flex:none;font-size:12px;color:var(--mute)">${esc(name)}
       ${note?`<span class="lbl" style="display:block;margin-top:2px">${esc(note)}</span>`:''}</div>
     <div style="flex:1;position:relative;height:9px">
       <div style="position:absolute;inset:0;background:var(--soft);border-radius:5px"></div>
@@ -324,33 +363,46 @@ function propRow(name, p, col, marker, note){
   </div>`;
 }
 
+function propGroup(title, sub, rows, priced){
+  if(!rows.length) return '';
+  return `<div class="pgroup${priced?' priced':''}">
+    <div class="ghead"><span class="gname">${esc(title)}</span>
+      <span class="lbl">${esc(sub)}</span></div>
+    ${rows.join('')}</div>`;
+}
+
 function propRows(b){
-  const R=[];
-  R.push(propRow(`${b.a} wins`, b.p_a, 'var(--red)', b.p_market,
-                 b.p_market!=null?`market ${P1(b.p_market)}%`:'moneyline'));
-  R.push(propRow(`${b.b} wins`, b.p_b, 'var(--blue)',
-                 b.p_market!=null?1-b.p_market:null,
-                 b.p_market!=null?`market ${P1(1-b.p_market)}%`:'moneyline'));
-  R.push(propRow('Goes the distance', b.m_decision, 'var(--mute)', null, 'decision'));
-  R.push(propRow('Ends inside distance', b.p_finish, 'var(--warn)', null, 'ITD'));
-  if(b.totals){
-    Object.keys(b.totals).forEach(k=>{
-      const line=k.replace('over_','').replace('_','.');
-      R.push(propRow(`Over ${line} rounds`, b.totals[k], 'var(--gold)', null, 'total rounds'));
-    });
-  }
-  R.push(propRow(`${b.a} by KO/TKO`, b.m_a_ko, 'var(--red)', null, 'method'));
-  R.push(propRow(`${b.a} by submission`, b.m_a_sub, 'var(--red)', null, 'method'));
-  R.push(propRow(`${b.b} by KO/TKO`, b.m_b_ko, 'var(--blue)', null, 'method'));
-  R.push(propRow(`${b.b} by submission`, b.m_b_sub, 'var(--blue)', null, 'method'));
-  [1,2,3,4,5].forEach(k=>{ const v=b['p_end_r'+k];
-    if(v!=null) R.push(propRow(`Ends in round ${k}`, v, 'var(--gold)', null, 'round')); });
   const tdn=track('takedown'), kdn=track('knockdown');
-  R.push(propRow(`${b.a} lands a takedown`, b.a_p_takedown, 'var(--red)', null, tdn));
-  R.push(propRow(`${b.b} lands a takedown`, b.b_p_takedown, 'var(--blue)', null, tdn));
-  R.push(propRow(`${b.a} scores a knockdown`, b.a_p_knockdown, 'var(--red)', null, kdn));
-  R.push(propRow(`${b.b} scores a knockdown`, b.b_p_knockdown, 'var(--blue)', null, kdn));
-  return R.join('');
+  const mk = b.p_market!=null;
+  const winner=[
+    propRow(`${b.a} wins`, b.p_a, 'var(--red)', mk?b.p_market:null,
+            mk?`market ${P1(b.p_market)}%`:null),
+    propRow(`${b.b} wins`, b.p_b, 'var(--blue)', mk?1-b.p_market:null,
+            mk?`market ${P1(1-b.p_market)}%`:null)];
+  const dist=[
+    propRow('Goes the distance', b.m_decision, 'var(--mute)'),
+    propRow('Ends inside distance', b.p_finish, 'var(--warn)')];
+  if(b.totals) Object.keys(b.totals).forEach(k=>
+    dist.push(propRow(`Over ${k.replace('over_','').replace('_','.')} rounds`,
+                      b.totals[k], 'var(--gold)')));
+  const meth=[
+    propRow(`${b.a} by KO/TKO`, b.m_a_ko, 'var(--red)'),
+    propRow(`${b.a} by submission`, b.m_a_sub, 'var(--red)'),
+    propRow(`${b.b} by KO/TKO`, b.m_b_ko, 'var(--blue)'),
+    propRow(`${b.b} by submission`, b.m_b_sub, 'var(--blue)')];
+  const rnd=[];
+  [1,2,3,4,5].forEach(k=>{ const v=b['p_end_r'+k];
+    if(v!=null) rnd.push(propRow(`Ends in round ${k}`, v, 'var(--gold)')); });
+  const act=[
+    propRow(`${b.a} lands a takedown`, b.a_p_takedown, 'var(--red)', null, tdn),
+    propRow(`${b.b} lands a takedown`, b.b_p_takedown, 'var(--blue)', null, tdn),
+    propRow(`${b.a} scores a knockdown`, b.a_p_knockdown, 'var(--red)', null, kdn),
+    propRow(`${b.b} scores a knockdown`, b.b_p_knockdown, 'var(--blue)', null, kdn)];
+  return propGroup('Winner', mk?'market price shown':'no market feed', winner, mk)
+       + propGroup('How long', 'from the survival curve', dist)
+       + propGroup('Method', 'sums to 100% with decision', meth)
+       + propGroup('Finish round', 'projection only', rnd)
+       + propGroup('Fight action', 'hit rates measured below', act);
 }
 
 function rangeRow(name,lo,mid,hi,unit,col){
@@ -362,6 +414,36 @@ function rangeRow(name,lo,mid,hi,unit,col){
       <div class="pt" style="left:${mid/sc*100}%"></div></div>
     <div class="mono" style="width:96px;text-align:right;font-size:12px;color:var(--mute)">
       ${lo.toFixed(1)}–${hi.toFixed(1)}<span class="lbl"> ${esc(unit)}</span></div></div>`;
+}
+
+/* the headline comparison, stated outright rather than implied by a tick */
+function divergence(b){
+  if(b.edge==null) return '';
+  const e=b.edge, a=Math.abs(e);
+  const who = e>0 ? b.a : b.b;
+  const mine = e>0 ? b.p_a : b.p_b;
+  const theirs = e>0 ? b.p_market : 1-b.p_market;
+  const drv=(b.drivers||[]).filter(x=>(x.favours==='a')===(e>0))[0];
+  const verdictTxt = a<0.05
+    ? `The model and the market agree here, within ${(a*100).toFixed(0)} points.`
+    : `The model is <b>${(a*100).toFixed(0)} points higher on ${esc(who)}</b> than the
+       market${drv?`, driven mostly by <b>${esc(drv.label)}</b>`:''}. Tested, the market
+       wins these disagreements more often than we do — treat it as an argument, not a tip.`;
+  return `<div class="card" style="border-left:3px solid ${a>=0.12?'var(--warn)':'var(--line)'}">
+    <div class="seghead"><div class="lbl">Model vs market</div>${deltaChip(b,true)}</div>
+    <div style="display:flex;align-items:flex-end;gap:18px;margin:4px 0 12px">
+      <div><div class="lbl">Model on ${esc(who)}</div>
+        <div class="mono" style="font-size:30px;font-weight:800;letter-spacing:-.03em">${P1(mine)}<span style="font-size:14px">%</span></div></div>
+      <div style="font-size:22px;color:var(--dim);padding-bottom:6px">→</div>
+      <div><div class="lbl" style="color:var(--gold)">Market</div>
+        <div class="mono" style="font-size:30px;font-weight:800;letter-spacing:-.03em;color:var(--gold)">${P1(theirs)}<span style="font-size:14px">%</span></div></div>
+      <div style="margin-left:auto;text-align:right">
+        <div class="lbl">Gap</div>
+        <div class="mono" style="font-size:30px;font-weight:800;letter-spacing:-.03em;
+          color:${a>=0.12?'var(--warn)':'var(--mute)'}">${e>0?'+':'−'}${(a*100).toFixed(1)}</div></div>
+    </div>
+    <p style="font-size:12.5px;color:var(--mute);margin:0;line-height:1.6">${verdictTxt}</p>
+  </div>`;
 }
 
 function show(i){
@@ -390,6 +472,8 @@ function show(i){
         ${b.p_market!=null?`<span style="color:var(--gold)">market ${P1(b.p_market)} / ${P1(1-b.p_market)}${b.books?` · ${b.books} books`:''}</span>`:'<span>no market price</span>'}
         <span>${esc(b.b)}</span></div>
     </div>
+
+    ${divergence(b)}
 
     ${b.drivers&&b.drivers.length?`<div class="card">
       <div class="seghead"><div class="lbl">Why</div>
