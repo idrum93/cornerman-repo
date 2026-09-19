@@ -6,6 +6,36 @@ output, and a frontend that shows its reasoning.
 **It does not beat the betting market, and it is not a betting tool.** See
 [Model vs market](#model-vs-market) — that was tested, not assumed.
 
+## Track record instead of AUC
+
+The site does not print AUC anywhere. It reports what actually happened on
+fights held out of training, recomputed on every refresh:
+
+| it said | how often it was right | n |
+|---|---|---|
+| 50-60% | 60% | 366 |
+| 60-70% | 68% | 299 |
+| 70-80% | 83% | 138 |
+| 80-100% | 81% | 26 |
+
+| projection | model said (avg) | actually happened | n |
+|---|---|---|---|
+| takedown likely | 72% | **72%** | 394 |
+| takedown unlikely | 24% | **25%** | 820 |
+| knockdown unlikely | 16% | **17%** | 1,598 |
+
+The takedown model is almost exactly calibrated — when it says 72%, it happens
+72% of the time. That is a more useful and more checkable statement than
+"AUC .742", and it is the same fact.
+
+Deliberately NOT done: inventing a composite "confidence score". A made-up
+index that makes a model look comprehensible is how sites overstate what they
+know. These are counts, and a reader can verify them.
+
+`mmastat/reliability.py` computes it; the numbers ride along in
+`predictions.json` so the site always quotes its current record rather than a
+figure hard-coded months ago.
+
 ## The site
 
 The site shows each pick against the closing line where prices are available:

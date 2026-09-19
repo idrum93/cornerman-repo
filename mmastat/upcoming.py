@@ -375,11 +375,22 @@ def predict_card(path, fights, fighters, verbose=True):
                     float(evt_models[t].predict_proba(xx)[0, 1]), 3)
         rows.append(r)
 
+    # Measured reliability, recomputed each run so the site quotes its own
+    # current track record rather than a figure hard-coded months ago.
+    try:
+        from .reliability import build_record
+        TRACK["rec"] = build_record(fights, fighters)
+    except Exception as e:
+        print(f"note: track record unavailable ({e})")
+
     out = pd.DataFrame(rows)
     if verbose:
         print(f"{meta.get('event','(card)')} | {meta.get('date','')} | "
               f"{meta.get('venue','')}")
-        print(f"{len(bouts)} bouts parsed, {len(out)} predicted, {len(skipped)} skipped\n")
+        n_mkt = int(out.p_market.notna().sum()) if "p_market" in out.columns else 0
+        print(f"{len(bouts)} bouts parsed, {len(out)} predicted, {len(skipped)} skipped")
+        print(f"market prices: {n_mkt} bouts from "
+              f"{MARKET_SRC.get('src') or 'no source (set ODDS_API_KEY)'}\n")
         if len(out):
             cc = [c for c in ["bout", "p_a", "p_b", "p_finish", "m_decision",
                               "a_p_takedown", "b_p_takedown"]
@@ -425,6 +436,7 @@ def fetch_ufcstats_upcoming(url="http://ufcstats.com/statistics/events/upcoming"
 
 
 MARKET_SRC = {"src": None}
+TRACK = {"rec": None}
 
 
 def write_json(out, skipped, unresolved, path="site/predictions.json",
@@ -433,7 +445,26 @@ def write_json(out, skipped, unresolved, path="site/predictions.json",
     reason so the site can render "no read" rather than omitting them
     silently — a card with three fights quietly missing looks broken."""
     import json
+    import math
     from pathlib import Path
+
+    def clean(o):
+        """NaN and Infinity are valid Python floats and INVALID JSON. pandas
+        fills missing columns with NaN, so a card where only some bouts have a
+        market price produced `"p_market": NaN` and the browser refused the
+        whole file. Null them out, then dump with allow_nan=False so this can
+        never be written silently again — a hard failure here is far better
+        than a site that cannot load."""
+        if isinstance(o, dict):
+            return {k: clean(v) for k, v in o.items()}
+        if isinstance(o, (list, tuple)):
+            return [clean(v) for v in o]
+        if isinstance(o, float):
+            return None if (math.isnan(o) or math.isinf(o)) else o
+        if hasattr(o, "item"):          # numpy scalars
+            return clean(o.item())
+        return o
+
     meta, _ = parse_card(card_path)
     payload = {
         "event": meta.get("event"), "date": meta.get("date"),
@@ -443,9 +474,11 @@ def write_json(out, skipped, unresolved, path="site/predictions.json",
         "no_read": [{"a": a, "b": b, "reason": why} for a, b, why in skipped],
         "unresolved_names": unresolved,
         "market_source": MARKET_SRC.get("src"),
+        "track_record": TRACK.get("rec"),
     }
     Path(path).parent.mkdir(parents=True, exist_ok=True)
-    Path(path).write_text(json.dumps(payload, indent=1), encoding="utf-8")
+    Path(path).write_text(json.dumps(clean(payload), indent=1, allow_nan=False),
+                          encoding="utf-8")
     return path
 
 

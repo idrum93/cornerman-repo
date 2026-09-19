@@ -216,6 +216,38 @@ function headline(d){
     It is a starting point for an argument.</p></div>`;
 }
 
+function trackPanel(){
+  const t=DATA.track_record; if(!t||!t.winner) return '';
+  const w=t.winner;
+  const bands=(w.bands||[]).map(b=>`
+    <div class="mrow"><span>Said ${esc(b.said)}</span>
+      <div class="t"><i style="width:${b.right*100}%;background:${b.right>=0.5?'var(--gold)':'var(--dim)'}"></i></div>
+      <b>${Math.round(b.right*100)}%</b></div>`).join('');
+  const rows=[];
+  ['takedown','knockdown'].forEach(k=>{
+    const r=t[k]; if(!r) return;
+    if(r.said_likely) rows.push(`<li>Called a <b>${k}</b> likely (avg ${Math.round(r.said_likely.avg_said*100)}%) →
+      one happened <b>${Math.round(r.said_likely.happened*100)}%</b> of the time, ${r.said_likely.n} fights.</li>`);
+    if(r.said_unlikely) rows.push(`<li>Called a <b>${k}</b> unlikely (avg ${Math.round(r.said_unlikely.avg_said*100)}%) →
+      one happened <b>${Math.round(r.said_unlikely.happened*100)}%</b> of the time, ${r.said_unlikely.n} fights.</li>`);
+  });
+  Object.keys(t.ranges||{}).forEach(k=>{
+    const r=t.ranges[k];
+    rows.push(`<li>The <b>${esc(k)}</b> range claims to cover 80% →
+      it covered <b>${(r.actual*100).toFixed(0)}%</b>, ${r.n} fighter-fights.</li>`);
+  });
+  return `<div class="card" style="margin-top:26px">
+    <div class="seghead"><div class="lbl">Track record</div>
+      <div class="lbl">${w.n_tested} fights it never saw · ${esc(w.tested_from)} to ${esc(w.tested_to)}</div></div>
+    <p style="font-size:12.5px;color:var(--mute);margin:0 0 14px;line-height:1.6">
+      Not a rating we invented — just what happened on fights held out of training.
+      When it says a number, how often does that turn out?</p>
+    <div class="lbl" style="margin-bottom:8px">Winner picks, by how confident it was</div>
+    ${bands}
+    <ul style="font-size:12.5px;color:var(--mute);line-height:1.8;margin:14px 0 0;padding-left:18px">${rows.join('')}</ul>
+  </div>`;
+}
+
 function renderCard(){
   const d=DATA;
   const boutHtml=(b,i)=>`
@@ -253,6 +285,7 @@ function renderCard(){
       <div class="lbl" style="color:var(--gold)">▏gold tick = market price</div></div>
     ${d.bouts.map(boutHtml).join('')}
     ${nr?`<div class="seghead" style="margin-top:26px"><div class="lbl">Not modelled</div></div>${nr}`:''}
+    ${trackPanel()}
     <div class="note"><b>How to read this.</b> Win probability comes from a logistic
       model on 14 opponent-adjusted differentials, trained only on fights that happened
       before the ones it is scoring. Method and round probabilities come from a
@@ -268,6 +301,13 @@ function renderCard(){
 }
 
 /* every market the model can price, with a market marker where one exists */
+/* plain-language reliability, measured, no invented index */
+function track(key){
+  const r=(DATA.track_record||{})[key];
+  if(!r||!r.said_likely) return '';
+  return `said likely → ${Math.round(r.said_likely.happened*100)}% happened`;
+}
+
 function propRow(name, p, col, marker, note){
   const mk = marker==null ? '' :
     `<div style="position:absolute;left:calc(${marker*100}% - 4px);top:-3px;
@@ -305,10 +345,11 @@ function propRows(b){
   R.push(propRow(`${b.b} by submission`, b.m_b_sub, 'var(--blue)', null, 'method'));
   [1,2,3,4,5].forEach(k=>{ const v=b['p_end_r'+k];
     if(v!=null) R.push(propRow(`Ends in round ${k}`, v, 'var(--gold)', null, 'round')); });
-  R.push(propRow(`${b.a} lands a takedown`, b.a_p_takedown, 'var(--red)', null, 'AUC .742'));
-  R.push(propRow(`${b.b} lands a takedown`, b.b_p_takedown, 'var(--blue)', null, 'AUC .742'));
-  R.push(propRow(`${b.a} scores a knockdown`, b.a_p_knockdown, 'var(--red)', null, 'AUC .668'));
-  R.push(propRow(`${b.b} scores a knockdown`, b.b_p_knockdown, 'var(--blue)', null, 'AUC .668'));
+  const tdn=track('takedown'), kdn=track('knockdown');
+  R.push(propRow(`${b.a} lands a takedown`, b.a_p_takedown, 'var(--red)', null, tdn));
+  R.push(propRow(`${b.b} lands a takedown`, b.b_p_takedown, 'var(--blue)', null, tdn));
+  R.push(propRow(`${b.a} scores a knockdown`, b.a_p_knockdown, 'var(--red)', null, kdn));
+  R.push(propRow(`${b.b} scores a knockdown`, b.b_p_knockdown, 'var(--blue)', null, kdn));
   return R.join('');
 }
 
