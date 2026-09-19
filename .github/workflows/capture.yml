@@ -1,9 +1,9 @@
 # Forward odds capture — the only remaining way to test the residual rule.
 #
-# Runs four times a day so that the last row before an event is a genuine
-# closing price. Every row is written before the fight happens; settlement
-# comes later, from results. The ledger is append-only and committed, which is
-# the point: a prediction you can revise is not a prediction.
+# Runs four times a day so the last row before an event is a genuine closing
+# price. Rows are written before the fight; settlement comes later from
+# results. The ledger is append-only and committed: a prediction you can
+# revise is not a prediction.
 #
 # Needs the ODDS_API_KEY secret. Four runs a day is ~120 requests a month,
 # inside The Odds API's 500/month free tier.
@@ -17,7 +17,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: ledger          # never let two runs append at once
+  group: ledger
   cancel-in-progress: false
 
 jobs:
@@ -41,11 +41,21 @@ jobs:
       - name: settle finished bouts
         run: python -m mmastat.ledger settle
 
+      # Retry loop rather than a single push. The refresh job commits to the
+      # same repo, so a race is normal; union-merge plus ledger dedupe makes
+      # replaying safe, and a lost capture is unrecoverable.
       - name: commit the ledger
         run: |
           git config user.name "cornerman-bot"
           git config user.email "bot@users.noreply.github.com"
-          git pull --rebase --autostash || true
-          git add data/ledger/
-          git diff --staged --quiet || git commit -m "ledger: $(date -u +%Y-%m-%dT%H:%MZ)"
-          git push
+          for attempt in 1 2 3; do
+            git add data/ledger/
+            if git diff --staged --quiet; then echo "nothing to commit"; exit 0; fi
+            git commit -m "ledger: $(date -u +%Y-%m-%dT%H:%MZ)"
+            if git push; then echo "pushed on attempt $attempt"; exit 0; fi
+            echo "push rejected, rebasing and retrying"
+            git pull --rebase --no-edit || git rebase --continue || true
+            python -m mmastat.ledger settle   # re-dedupe after the merge
+          done
+          echo "could not push after 3 attempts"; exit 1
+
