@@ -146,23 +146,57 @@ def parse_card_prose(text):
 
 
 def next_event():
-    """Find the soonest scheduled UFC event. Returns (page_title, iso_date)."""
-    from datetime import date
-    data = _wiki({"action": "query", "list": "search", "srlimit": "20",
-                  "srsearch": "insource:/upcoming mixed martial arts event/ "
-                              "incategory:Upcoming_events UFC"})
-    titles = [h["title"] for h in data.get("query", {}).get("search", [])]
+    """Soonest scheduled UFC event, from the Scheduled events table on
+    Wikipedia's "List of UFC events". Returns (page_title, iso_date).
+
+    The first version searched with `insource:` plus a category filter, which
+    matched nothing and took the whole refresh down. Wikipedia maintains one
+    canonical list of upcoming cards; parse that instead of trying to discover
+    pages by search.
+    """
+    from bs4 import BeautifulSoup
+    from datetime import date, datetime
+    data = _wiki({"action": "parse", "page": "List of UFC events", "prop": "text"})
+    soup = BeautifulSoup(data["parse"]["text"], "html.parser")
+
+    table = None
+    for el in soup.find_all(id=True):
+        if "scheduled" in str(el.get("id", "")).lower():
+            table = el.find_next("table")
+            break
+    tables = [table] if table is not None else soup.find_all("table", class_="wikitable")
+
+    today = date.today()
     best = None
-    for t in titles:
-        try:
-            meta = event_meta(t)
-        except Exception:
+    for tbl in tables:
+        if tbl is None:
             continue
-        if meta.get("date") and meta["date"] >= date.today().isoformat():
-            if best is None or meta["date"] < best[1]:
-                best = (t, meta["date"])
+        for row in tbl.find_all("tr"):
+            cells = row.find_all(["td", "th"])
+            if len(cells) < 2:
+                continue
+            text = row.get_text(" ", strip=True)
+            m = re.search(r"([A-Z][a-z]+ \d{1,2}, \d{4})", text)
+            if not m:
+                continue
+            try:
+                dt = datetime.strptime(m.group(1), "%B %d, %Y").date()
+            except ValueError:
+                continue
+            if dt < today:
+                continue
+            link = cells[0].find("a")
+            title = (link.get("title") or link.get_text(" ", strip=True)) if link \
+                else cells[0].get_text(" ", strip=True)
+            title = _clean_name(title)
+            if not title or len(title) < 3:
+                continue
+            if best is None or dt.isoformat() < best[1]:
+                best = (title, dt.isoformat())
     if best is None:
-        raise RuntimeError("no upcoming UFC event found via the Wikipedia API")
+        raise RuntimeError(
+            "no upcoming UFC event found in the Scheduled events table on "
+            "'List of UFC events' - the page layout may have changed")
     return best
 
 
@@ -218,7 +252,23 @@ def render_upcoming(meta, bouts):
     return "\n".join([head] + [f"{a} vs. {b}" for a, b in bouts]) + "\n"
 
 
-def refresh_upcoming(path="data/upcoming.txt", title=None, verbose=True):
+def refresh_upcoming(path="data/upcoming.txt", title=None, verbose=True,
+                     strict=False):
+    """Write data/upcoming.txt. On any failure the existing file is kept and a
+    warning is printed rather than raising, unless strict=True: a card that
+    cannot be parsed should not stop predictions from regenerating off
+    yesterday's card. The caller decides how loud to be."""
+    try:
+        return _refresh_upcoming(path, title, verbose)
+    except Exception as e:
+        if strict:
+            raise
+        print(f"WARNING: could not refresh the card ({e}). "
+              f"Keeping the existing {path}.")
+        return None, None
+
+
+def _refresh_upcoming(path="data/upcoming.txt", title=None, verbose=True):
     """Write data/upcoming.txt, but never replace a longer card with a shorter
     one — that pattern is what a half-broken parser looks like."""
     meta, bouts = fetch_upcoming(title)
@@ -258,6 +308,13 @@ def fetch_ufcstats_upcoming(url="http://ufcstats.com/statistics/events/upcoming"
     return parse_card_html(page)
 
 
+if __name__ == "__main__":
+    import sys
+    if "--corpus" in sys.argv:
+        print("refreshing corpus from GitHub:")
+        refresh_corpus()
+    if "--no-upcoming" not in sys.argv:
+        refresh_upcoming()
 if __name__ == "__main__":
     import sys
     if "--corpus" in sys.argv:
