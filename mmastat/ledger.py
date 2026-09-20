@@ -76,7 +76,7 @@ def append(rows, path=LEDGER):
     return len(rows)
 
 
-KEY = ["captured_utc", "event_date", "fighter", "opponent"]
+KEY = ["captured_utc", "venue", "event_date", "fighter", "opponent"]
 
 
 def dedupe(rows):
@@ -123,11 +123,40 @@ def capture(fights, fighters, card_path="data/upcoming.txt", path=LEDGER,
     from .features import elo_eff, make_features
 
     rule = load_rule()
-    book = fetch_moneylines()
-    if not book:
+
+    # Two venues, logged separately and never pooled.
+    #
+    #   sportsbook   The Odds API consensus. Cost is the bookmaker margin, so
+    #                the payable price is the devigged probability inflated by
+    #                half the two-way overround.
+    #   polymarket   peer-to-peer, near-zero fee. There is no vig to add back:
+    #                the ASK is literally what you pay. Its cost is the spread,
+    #                which is recorded per row.
+    #
+    # They stay separate because the pre-registered rule was frozen on
+    # sportsbook prices. Pooling a second venue into it would widen the
+    # population mid-experiment, which is the same error as re-specifying a
+    # hypothesis after seeing data. Polymarket rows accumulate as their own
+    # test, with their own count toward 300.
+    venues = {}
+    try:
+        sb = fetch_moneylines()
+        if sb:
+            venues["sportsbook"] = sb
+    except Exception as e:
+        print(f"note: sportsbook odds unavailable ({e})")
+    try:
+        from .polymarket import fetch_all
+        pm, _props, _rows = fetch_all(with_book=True)
+        if pm:
+            venues["polymarket"] = pm
+    except Exception as e:
+        print(f"note: polymarket unavailable ({e})")
+    if not venues:
         if verbose:
-            print("no live odds (set ODDS_API_KEY) - nothing captured")
+            print("no live prices from any venue - nothing captured")
         return 0
+    book = venues.get("sportsbook") or {}
 
     meta, bouts = parse_card(card_path)
     states = _states_after(fights, fighters)
@@ -136,32 +165,40 @@ def capture(fights, fighters, card_path="data/upcoming.txt", path=LEDGER,
     as_of = pd.Timestamp(meta.get("date") or fights.date.max())
 
     rows, ts = [], _now()
-    for na, nb, n_rounds, _segment in bouts:
-        hit = book.get(frozenset((_key(na), _key(nb))))
-        if hit is None or na not in ids or nb not in ids:
-            continue
-        A, B = states[ids[na]], states[ids[nb]]
-        if min(A.n_fights, B.n_fights) < 2:
-            continue
-        sa, sb = A.snapshot(as_of), B.snapshot(as_of)
-        sa["elo"], sb["elo"] = elo_eff(A, as_of), elo_eff(B, as_of)
-        fv = make_features(sa, sb)
+    for venue, vbook in venues.items():
+        for na, nb, n_rounds, _segment in bouts:
+            hit = vbook.get(frozenset((_key(na), _key(nb))))
+            if hit is None or na not in ids or nb not in ids:
+                continue
+            A, B = states[ids[na]], states[ids[nb]]
+            if min(A.n_fights, B.n_fights) < 2:
+                continue
+            sa, sb = A.snapshot(as_of), B.snapshot(as_of)
+            sa["elo"], sb["elo"] = elo_eff(A, as_of), elo_eff(B, as_of)
+            fv = make_features(sa, sb)
 
-        src, p_mkt_devig, nbooks = hit
-        p_mkt = p_mkt_devig if src == _key(na) else 1 - p_mkt_devig
-        # price actually payable: add back half the typical two-way margin
-        vig = 0.037
-        for side, name, opp, pm in (("a", na, nb, p_mkt), ("b", nb, na, 1 - p_mkt)):
-            f = fv if side == "a" else {k: -v for k, v in fv.items()}
-            p_model = rule_probability(f, pm, rule)
-            implied = pm * (1 + vig / 2)
-            rows.append(dict(
-                captured_utc=ts, event=meta.get("event"), event_date=meta.get("date"),
-                fighter=name, opponent=opp, side=side,
-                p_market_devig=round(pm, 5), implied_with_vig=round(implied, 5),
-                p_model=round(p_model, 5), edge=round(p_model - implied, 5),
-                books=nbooks, bet=bool(fires(p_model, implied, rule)),
-                rule_frozen_on=rule.get("frozen_on"), settled=False))
+            src, p_raw, extra = hit
+            p_mkt = p_raw if src == _key(na) else 1 - p_raw
+            meta_x = extra if isinstance(extra, dict) else {"books": extra}
+            for side, name, opp, pm in (("a", na, nb, p_mkt), ("b", nb, na, 1 - p_mkt)):
+                f = fv if side == "a" else {k: -v for k, v in fv.items()}
+                p_model = rule_probability(f, pm, rule)
+                if venue == "polymarket":
+                    # the ask is the price; no margin to add back
+                    sp = meta_x.get("spread")
+                    implied = pm + (sp / 2 if sp else 0.0)
+                else:
+                    implied = pm * (1 + 0.037 / 2)
+                rows.append(dict(
+                    captured_utc=ts, venue=venue,
+                    event=meta.get("event"), event_date=meta.get("date"),
+                    fighter=name, opponent=opp, side=side,
+                    p_market_devig=round(pm, 5), implied_with_vig=round(implied, 5),
+                    p_model=round(p_model, 5), edge=round(p_model - implied, 5),
+                    books=meta_x.get("books"), spread=meta_x.get("spread"),
+                    depth_usd=meta_x.get("depth_usd"),
+                    bet=bool(fires(p_model, implied, rule)),
+                    rule_frozen_on=rule.get("frozen_on"), settled=False))
     existing = read(path)
     if not existing.empty:
         have = {tuple(str(r[k]) for k in KEY) for _, r in existing[KEY].iterrows()}
@@ -169,9 +206,12 @@ def capture(fights, fighters, card_path="data/upcoming.txt", path=LEDGER,
     n = append(rows, path)
     _rewrite(path)                      # collapse any duplicates a merge left
     if verbose:
-        b = sum(1 for r in rows if r["bet"])
-        print(f"captured {n} fighter-prices for {meta.get('event')}; "
-              f"{b} trigger the pre-registered bet")
+        from collections import Counter
+        per = Counter(r["venue"] for r in rows)
+        b = Counter(r["venue"] for r in rows if r["bet"])
+        print(f"captured {n} fighter-prices for {meta.get('event')}")
+        for v in per:
+            print(f"  {v:<12} {per[v]:>3} prices, {b.get(v,0)} trigger the rule")
     return n
 
 
@@ -236,19 +276,27 @@ def settle(fights, path=LEDGER, date_tol_days=4, verbose=True):
     return n
 
 
-def report(path=LEDGER, vig=0.037):
+def report(path=LEDGER, vig=0.037, venue=None):
     """Where the forward test stands. CLV first — it converges long before ROI."""
     L = read(path)
     if L.empty:
         return {"status": "ledger empty"}
     # one row per fighter-price: the LAST capture before the fight is the close
+    if "venue" not in L.columns:
+        L["venue"] = "sportsbook"
+    if venue:
+        L = L[L.venue == venue]
+        if L.empty:
+            return {"status": f"no rows for venue {venue}"}
     L = L.sort_values("captured_utc")
-    close = L.groupby(["event_date", "fighter", "opponent"], as_index=False).last()
-    first = L.groupby(["event_date", "fighter", "opponent"], as_index=False).first()
+    gk = ["venue", "event_date", "fighter", "opponent"]
+    close = L.groupby(gk, as_index=False).last()
+    first = L.groupby(gk, as_index=False).first()
     clv = (close.p_market_devig.values - first.p_market_devig.values)
 
     bets = close[(close.bet == True) & (close.get("settled") == True)]  # noqa: E712
     out = {
+        "venue": venue or "all",
         "captured_prices": int(len(close)),
         "bets_triggered": int((close.bet == True).sum()),  # noqa: E712
         "bets_settled": int(len(bets)),
@@ -277,4 +325,8 @@ if __name__ == "__main__":
         capture(f, p)
     elif cmd == "settle":
         settle(f)
-    print(json.dumps(report(), indent=1))
+    for v in (None, "sportsbook", "polymarket"):
+        r = report(venue=v)
+        if r.get("status"):
+            continue
+        print(json.dumps(r, indent=1))

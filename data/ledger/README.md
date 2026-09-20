@@ -4,11 +4,33 @@
 times a day via `.github/workflows/capture.yml`. It **is** committed — unlike
 the rest of `data/` — because it is the experiment, not an input to it.
 
+## Two venues, never pooled
+
+| venue | source | auth | cost of trading |
+|---|---|---|---|
+| `sportsbook` | The Odds API consensus | `ODDS_API_KEY` | ~3.7% two-way overround |
+| `polymarket` | Gamma + CLOB, public | **none** | the bid-ask spread, logged per row |
+
+The pre-registered rule was frozen on sportsbook prices, so Polymarket rows
+accumulate as a **separate test with their own count toward 300**. Pooling a
+second venue into a running experiment widens the population mid-flight, which
+is the same error as re-specifying a hypothesis after seeing data.
+
+Polymarket matters for one reason: **a prediction market has almost no vig.**
+The residual model's measured advantage is +0.0035 log loss — hopeless against
+a bookmaker's margin, but the right order of magnitude against a venue whose
+cost is a one- or two-cent spread. Whether that survives contact with reality
+is exactly what the ledger is for.
+
+Prices from thin books are dropped rather than recorded: wider than 6 cents or
+under $250 of depth and the row never appears. A price you cannot trade is not
+a price, and letting one in would quietly flatter the comparison.
+
 One row per fighter-price per capture:
 
-    captured_utc, event, event_date, fighter, opponent,
-    p_market_devig, implied_with_vig, p_model, edge, books, bet,
-    settled, won
+    captured_utc, venue, event, event_date, fighter, opponent,
+    p_market_devig, implied_with_vig, p_model, edge, bet,
+    books, spread, depth_usd, settled, won
 
 Rules, enforced in code:
 
