@@ -132,6 +132,42 @@ def test_settle_respects_dates(fights):
                 f"{'correctly left open' if ok else 'WRONGLY SETTLED'}")
 
 
+def test_ledger_reads_old_schema(_unused=None):
+    """Every field in the dedupe key must tolerate rows written before it
+    existed.
+
+    Adding `venue` to the key broke capture outright in CI — the first 48
+    rows predate the field, and indexing a DataFrame by the key column list
+    raised KeyError: ['venue'] not in index. An append-only log keeps every
+    historical schema forever, so this is not a one-off: it will recur on the
+    next field added unless it is tested.
+    """
+    import json
+    import os
+    import tempfile
+    from . import ledger
+
+    minimal = {"captured_utc": "2020-01-01T00:00:00+00:00",
+               "event_date": "2020-01-01", "fighter": "A", "opponent": "B",
+               "p_market_devig": 0.5, "implied_with_vig": 0.52,
+               "p_model": 0.55, "edge": 0.03, "bet": True}
+    with tempfile.NamedTemporaryFile("w", suffix=".jsonl", delete=False) as fh:
+        fh.write(json.dumps(minimal) + "\n")
+        tmp = fh.name
+    try:
+        df = ledger.read(tmp)
+        missing = [k for k in ledger.KEY if k not in df.columns]
+        keys = {tuple(str(r.get(k)) for k in ledger.KEY)
+                for r in ledger.migrate([minimal])}
+        rep = ledger.report(tmp)
+        ok = (not missing) and len(keys) == 1 and "status" not in rep
+    finally:
+        os.unlink(tmp)
+    return ok, ("a row with none of the newer fields "
+                + ("read, keyed and reported cleanly" if ok
+                   else f"FAILED (missing columns: {missing})"))
+
+
 def run_all(fights=None, fighters=None):
     if fights is None:
         fights, fighters, _ = make_corpus(n_fighters=520, n_events=320)
@@ -142,6 +178,7 @@ def run_all(fights=None, fighters=None):
         ("null model is chance", test_null_model(X)),
         ("leak detector has power", test_leak_detector_has_power(fights, fighters, X)),
         ("settle respects dates", test_settle_respects_dates(fights)),
+        ("ledger reads old schema", test_ledger_reads_old_schema()),
     ]
     print(f"{'CHECK':<28} {'RESULT':<6}  DETAIL")
     print("-" * 78)

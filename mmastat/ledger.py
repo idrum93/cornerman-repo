@@ -96,18 +96,44 @@ def dedupe(rows):
     return list(seen.values())
 
 
+# Fields added after the ledger was already running, with the value that rows
+# written before them are known to have had. An append-only log keeps every
+# historical schema forever, so every consumer must tolerate the oldest one:
+# adding `venue` to the dedupe key broke capture outright with
+# KeyError: ['venue'] not in index, because the first 48 rows predate it.
+BACKFILL = {"venue": "sportsbook", "spread": None, "depth_usd": None,
+            "books": None, "settled": False}
+
+
+def migrate(rows):
+    """Give every row today's schema, so old and new rows compare equal."""
+    out = []
+    for r in rows:
+        d = dict(r)
+        for k, v in BACKFILL.items():
+            d.setdefault(k, v)
+            if d.get(k) is None and k == "venue":
+                d[k] = "sportsbook"
+        out.append(d)
+    return out
+
+
 def read(path=LEDGER):
     if not os.path.exists(path):
         return pd.DataFrame()
     rows = [json.loads(l) for l in open(path, encoding="utf-8") if l.strip()]
-    return pd.DataFrame(dedupe(rows))
+    df = pd.DataFrame(dedupe(migrate(rows)))
+    for k, v in BACKFILL.items():          # guarantee the column exists
+        if k not in df.columns:
+            df[k] = v
+    return df
 
 
 def _rewrite(path=LEDGER):
     """Rewrite the file deduplicated, preserving order of first appearance."""
     if not os.path.exists(path):
         return 0
-    rows = [json.loads(l) for l in open(path, encoding="utf-8") if l.strip()]
+    rows = migrate([json.loads(l) for l in open(path, encoding="utf-8") if l.strip()])
     clean = dedupe(rows)
     Path(path).write_text(
         "\n".join(json.dumps(r, sort_keys=True) for r in clean) + "\n",
@@ -199,10 +225,13 @@ def capture(fights, fighters, card_path="data/upcoming.txt", path=LEDGER,
                     depth_usd=meta_x.get("depth_usd"),
                     bet=bool(fires(p_model, implied, rule)),
                     rule_frozen_on=rule.get("frozen_on"), settled=False))
-    existing = read(path)
-    if not existing.empty:
-        have = {tuple(str(r[k]) for k in KEY) for _, r in existing[KEY].iterrows()}
-        rows = [r for r in rows if tuple(str(r.get(k)) for k in KEY) not in have]
+    # Read the raw rows, not a DataFrame view: indexing by column list breaks
+    # the moment a key field postdates some of the file.
+    prior = []
+    if os.path.exists(path):
+        prior = migrate([json.loads(l) for l in open(path, encoding="utf-8") if l.strip()])
+    have = {tuple(str(r.get(k)) for k in KEY) for r in prior}
+    rows = [r for r in rows if tuple(str(r.get(k)) for k in KEY) not in have]
     n = append(rows, path)
     _rewrite(path)                      # collapse any duplicates a merge left
     if verbose:
@@ -282,8 +311,6 @@ def report(path=LEDGER, vig=0.037, venue=None):
     if L.empty:
         return {"status": "ledger empty"}
     # one row per fighter-price: the LAST capture before the fight is the close
-    if "venue" not in L.columns:
-        L["venue"] = "sportsbook"
     if venue:
         L = L[L.venue == venue]
         if L.empty:

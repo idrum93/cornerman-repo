@@ -514,3 +514,66 @@ the right way consistently is the market-residual model (6 of 6 folds,
 P(better) = 0.934), which remains unconfirmed and untestable without forward
 odds capture. The binding constraint is not ideas — it is ~6.5 recorded fights
 per athlete and one bit of outcome per fight.
+
+---
+
+# Addendum 9: the distance market (2026-09-20)
+
+**Registered before any Polymarket price has been seen.** The fetcher is built
+and classifies distance markets, but has not yet been run against live data.
+Writing the rule after seeing the first quotes would make this retrospective,
+and the whole point of the venue is that it is a fresh test.
+
+## Why this market and not the others
+
+Method props are closed — the market beat us on all three at P(model better)
+= 0.000, by a wider margin than on the moneyline. Distance is different in
+three ways: it is two-way rather than six-way, so the margin is far smaller;
+the competing-risks model prices it directly and coherently; and on Polymarket
+the cost is a one- or two-cent spread rather than a bookmaker's overround.
+
+## A correction that had to come first
+
+The raw hazard roll-up predicted P(decision) = 0.487 against an actual 0.525.
+That is not miscalibration — it is drift. **The UFC decision rate moved 12.3
+points across recent years** (55% in 2019, 44% so far in 2026), and a Platt
+correction fitted on a validation slice whose actual rate was 47.9% still
+predicted 47.7% on a block where it was 52.5%.
+
+So the rule uses a **rolling 300-fight base-rate anchor**, frozen in
+`distance_model.json`: the logit is shifted so the trailing window matches its
+own observed rate. On the test block that moved predictions to 0.529 against
+0.525 actual. Discrimination is unchanged (AUC .608 to .613) — this fixes the
+level only.
+
+## The frozen rule
+
+    probability : hazard model P(decision), anchored to the trailing 300 fights
+    venue       : Polymarket distance markets only (spread <= 6c, depth >= $250)
+    bet when    : |anchored P(decision) - ask| > 0.05
+    stake       : flat 1 unit
+    success     : ROI > +2% over >= 200 settled bets
+
+Both sides are permitted. There is no favourites-only restriction because the
+favourite-longshot analysis was measured on sportsbook moneylines and does not
+transfer to a prediction market.
+
+## Pre-stated expectation: lower than when I proposed this
+
+I suggested distance as "the one candidate genuinely worth testing" before
+measuring it. Having measured it, two things are worse than implied.
+Discrimination is weak — **AUC 0.608**, barely above the 0.6 that separates a
+useful signal from a decorative one. And the base rate is unstable by 12
+points, which is several times any edge we could plausibly claim, so an
+apparent edge over a few months is at least as likely to be era drift as skill.
+
+That is an argument for the anchor and for a long horizon, not for abandoning
+the test. But the honest prior here is low, and lower than I first said.
+
+## Prohibited
+
+- Reading the rule's result before 200 settled bets
+- Adjusting the 300-fight window or the 0.05 threshold after seeing prices
+- Pooling Polymarket distance results with the sportsbook moneyline ledger
+- Treating a positive result as established without checking whether the
+  decision rate drifted in the same direction over the test window
