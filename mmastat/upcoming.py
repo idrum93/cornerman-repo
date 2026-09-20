@@ -475,6 +475,100 @@ MARKET_SRC = {"src": None}
 TRACK = {"rec": None}
 
 
+def archive_previous(new_event, path="site/predictions.json",
+                     archive_dir="site/archive", verbose=True):
+    """Keep the outgoing card before it is overwritten.
+
+    `refresh_upcoming` advances data/upcoming.txt to the next event the moment
+    Wikipedia lists one, so predictions.json is rebuilt for the new card and
+    the finished one vanishes — usually before its results have even reached
+    the corpus. Grading only ever worked in the overlap between "card is over"
+    and "card is still the current file", which is frequently empty. Archiving
+    on event change removes the race entirely.
+    """
+    import json
+    import re
+    from pathlib import Path
+    src = Path(path)
+    if not src.exists():
+        return None
+    try:
+        old = json.loads(src.read_text(encoding="utf-8"))
+    except Exception:
+        return None
+    ev = old.get("event")
+    if not ev or ev == new_event:
+        return None
+    slug = re.sub(r"[^a-z0-9]+", "-", str(ev).lower()).strip("-")
+    dest = Path(archive_dir) / f"{slug}.json"
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    dest.write_text(json.dumps(old, indent=1), encoding="utf-8")
+    if verbose:
+        print(f"archived previous card '{ev}' -> {dest}")
+    return str(dest)
+
+
+def grade_archive(fights, archive_dir="site/archive", out_path="site/history.json",
+                  keep=8, verbose=True):
+    """Grade archived cards against the corpus and write the history file.
+
+    Re-graded from scratch every run: a card archived before its results
+    existed simply grades on a later pass, with no state to get stuck.
+    """
+    import json
+    from pathlib import Path
+    d = Path(archive_dir)
+    if not d.exists():
+        return None
+    done = {}
+    parts = fights.bout.str.split(" vs. ", n=1, expand=True)
+    for r_, b_, w, mth, dt, ts in zip(parts[0], parts[1], fights.winner,
+                                      fights.method, fights.date, fights.total_sec):
+        done[frozenset((_key(r_), _key(b_)))] = (_key(r_), w, mth, dt, int(ts))
+
+    cards = []
+    for fp in sorted(d.glob("*.json")):
+        try:
+            card = json.loads(fp.read_text(encoding="utf-8"))
+        except Exception:
+            continue
+        ev_date = pd.to_datetime(card.get("date"), errors="coerce")
+        graded, right = [], 0
+        for b in card.get("bouts", []):
+            hit = done.get(frozenset((_key(b["a"]), _key(b["b"]))))
+            if not hit:
+                continue
+            red, w, mth, dt, ts = hit
+            if w not in ("r", "b"):
+                continue
+            if pd.notna(ev_date) and abs((pd.Timestamp(dt) - ev_date).days) > 4:
+                continue
+            a_won = (w == "r") == (_key(b["a"]) == red)
+            ok = (b["p_a"] > 0.5) == a_won
+            right += ok
+            graded.append({"bout": b["bout"], "a": b["a"], "b": b["b"],
+                           "p_a": b["p_a"], "segment": b.get("segment"),
+                           "winner": b["a"] if a_won else b["b"],
+                           "method": mth, "seconds": ts, "model_right": bool(ok)})
+        if graded:
+            cards.append({"event": card.get("event"), "date": card.get("date"),
+                          "venue": card.get("venue"), "n": len(graded),
+                          "right": int(right), "bouts": graded})
+    cards.sort(key=lambda c: str(c.get("date")), reverse=True)
+    cards = cards[:keep]
+    Path(out_path).parent.mkdir(parents=True, exist_ok=True)
+    Path(out_path).write_text(json.dumps(
+        {"cards": cards,
+         "total_graded": sum(c["n"] for c in cards),
+         "total_right": sum(c["right"] for c in cards)}, indent=1), encoding="utf-8")
+    if verbose and cards:
+        tot = sum(c["n"] for c in cards)
+        rt = sum(c["right"] for c in cards)
+        print(f"graded {len(cards)} past card(s), {rt}/{tot} winners correct "
+              f"-> {out_path}")
+    return out_path
+
+
 def write_json(out, skipped, unresolved, path="site/predictions.json",
                card_path="data/upcoming.txt"):
     """Emit what the frontend reads. Skipped bouts are included with their
@@ -502,6 +596,7 @@ def write_json(out, skipped, unresolved, path="site/predictions.json",
         return o
 
     meta, _ = parse_card(card_path)
+    archive_previous(meta.get("event"), path=path)
     payload = {
         "event": meta.get("event"), "date": meta.get("date"),
         "venue": meta.get("venue"),

@@ -360,7 +360,14 @@ def report(path=LEDGER, vig=0.037, venue=None):
     gk = ["venue", "event_date", "fighter", "opponent"]
     close = L.groupby(gk, as_index=False).last()
     first = L.groupby(gk, as_index=False).first()
-    clv = (close.p_market_devig.values - first.p_market_devig.values)
+    move = close.p_market_devig.values - first.p_market_devig.values
+
+    # CLV is only defined for the side you BACKED. Averaged over both corners
+    # it is identically zero: every point the favourite gains, the underdog
+    # loses. The first version did exactly that and reported -0.0 on a card
+    # where the lines had genuinely moved almost two points.
+    betmask = close.bet.fillna(False).values.astype(bool)
+    clv = move[betmask]
 
     bets = close[(close.bet == True) & (close.get("settled") == True)]  # noqa: E712
     out = {
@@ -369,7 +376,13 @@ def report(path=LEDGER, vig=0.037, venue=None):
         "bets_triggered": int((close.bet == True).sum()),  # noqa: E712
         "bets_settled": int(len(bets)),
         "bets_needed": max(0, 300 - int(len(bets))),
+        # movement on the backed side only; positive means the market came to us
+        "clv_bets_n": int(betmask.sum()),
         "clv_mean_pp": round(float(np.nanmean(clv) * 100), 3) if len(clv) else None,
+        "clv_positive_share": (round(float(np.mean(clv > 0)), 3) if len(clv) else None),
+        # sanity: across both corners this must be ~0, and if it is not the
+        # two sides of a fight are not being paired correctly
+        "all_sides_move_pp": round(float(np.nanmean(move) * 100), 4),
     }
     if len(bets):
         won = bets.get("won")

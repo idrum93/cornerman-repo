@@ -167,45 +167,64 @@ def parse_card_prose(text):
     return out
 
 
-def next_event():
-    """Soonest scheduled UFC event, from the Scheduled events table on
-    Wikipedia's "List of UFC events". Returns (page_title, iso_date).
+DATE_FORMATS = ("%B %d, %Y", "%b %d, %Y", "%d %B %Y", "%d %b %Y", "%Y-%m-%d")
 
-    The first version searched with `insource:` plus a category filter, which
-    matched nothing and took the whole refresh down. Wikipedia maintains one
-    canonical list of upcoming cards; parse that instead of trying to discover
-    pages by search.
+
+def _parse_date(text):
+    """Wikipedia is not consistent about date format across tables.
+
+    The first version accepted only "October 10, 2026" and silently skipped
+    everything else, which took down card discovery entirely: every row in the
+    Scheduled events table failed to parse and next_event() concluded there
+    were no upcoming fights. Abbreviated months and ISO dates are just as
+    common.
+    """
+    from datetime import datetime
+    pats = [r"(\d{4}-\d{2}-\d{2})",
+            r"([A-Z][a-z]{2,8}\.? \d{1,2}, \d{4})",
+            r"(\d{1,2} [A-Z][a-z]{2,8}\.? \d{4})"]
+    for pat in pats:
+        for m in re.finditer(pat, text):
+            raw = m.group(1).replace(".", "")
+            for fmt in DATE_FORMATS:
+                try:
+                    return datetime.strptime(raw, fmt).date()
+                except ValueError:
+                    continue
+    return None
+
+
+def next_event(verbose=False):
+    """Soonest scheduled UFC event, from Wikipedia's "List of UFC events".
+
+    Returns (page_title, iso_date). Scans the Scheduled events table first and
+    falls back to every wikitable on the page, because a layout change should
+    degrade rather than blank the whole pipeline.
     """
     from bs4 import BeautifulSoup
-    from datetime import date, datetime
+    from datetime import date
     data = _wiki({"action": "parse", "page": "List of UFC events", "prop": "text"})
     soup = BeautifulSoup(data["parse"]["text"], "html.parser")
 
-    table = None
+    tables, seen_rows = [], 0
     for el in soup.find_all(id=True):
         if "scheduled" in str(el.get("id", "")).lower():
-            table = el.find_next("table")
-            break
-    tables = [table] if table is not None else soup.find_all("table", class_="wikitable")
+            t = el.find_next("table")
+            if t is not None:
+                tables.append(t)
+    if not tables:
+        tables = soup.find_all("table", class_="wikitable")
 
     today = date.today()
     best = None
     for tbl in tables:
-        if tbl is None:
-            continue
         for row in tbl.find_all("tr"):
             cells = row.find_all(["td", "th"])
             if len(cells) < 2:
                 continue
-            text = row.get_text(" ", strip=True)
-            m = re.search(r"([A-Z][a-z]+ \d{1,2}, \d{4})", text)
-            if not m:
-                continue
-            try:
-                dt = datetime.strptime(m.group(1), "%B %d, %Y").date()
-            except ValueError:
-                continue
-            if dt < today:
+            seen_rows += 1
+            dt = _parse_date(row.get_text(" ", strip=True))
+            if dt is None or dt < today:
                 continue
             link = cells[0].find("a")
             title = (link.get("title") or link.get_text(" ", strip=True)) if link \
@@ -215,10 +234,13 @@ def next_event():
                 continue
             if best is None or dt.isoformat() < best[1]:
                 best = (title, dt.isoformat())
+    if verbose:
+        print(f"scanned {len(tables)} table(s), {seen_rows} rows")
     if best is None:
         raise RuntimeError(
-            "no upcoming UFC event found in the Scheduled events table on "
-            "'List of UFC events' - the page layout may have changed")
+            f"no upcoming UFC event found on 'List of UFC events' "
+            f"(scanned {len(tables)} tables, {seen_rows} rows, none with a "
+            f"parseable future date)")
     return best
 
 
@@ -236,10 +258,9 @@ def event_meta(title):
         k = th.get_text(" ", strip=True).lower()
         v = _clean_name(td.get_text(" ", strip=True))
         if k.startswith("date"):
-            m = re.search(r"(\w+ \d{1,2}, \d{4})", v)
-            if m:
-                from datetime import datetime
-                meta["date"] = datetime.strptime(m.group(1), "%B %d, %Y").date().isoformat()
+            d2 = _parse_date(v)
+            if d2:
+                meta["date"] = d2.isoformat()
         elif k.startswith("venue"):
             meta["venue"] = v
         elif k.startswith("city"):

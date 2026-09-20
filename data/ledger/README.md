@@ -66,6 +66,13 @@ Rules, enforced in code:
 
 `python -m mmastat.ledger report` shows where it stands.
 
+**CLV is measured on the backed side only.** Averaged across both corners it is
+identically zero — every point the favourite gains, the underdog loses — and
+the first version did exactly that, reporting -0.0 on a card where lines had
+moved almost two points. `all_sides_move_pp` is kept in the output purely as a
+check: it should stay at 0.0, and if it drifts the two sides of a fight are no
+longer being paired correctly.
+
 ## How long this takes
 
 The rule triggers on roughly 14% of prices, or about **180 qualifying bets a
