@@ -129,6 +129,33 @@ def read(path=LEDGER):
     return df
 
 
+def prune_resolved(path=LEDGER, eps=0.02, verbose=True):
+    """Remove rows whose market price is at certainty.
+
+    Append-only is a discipline for PREDICTIONS. A row quoting 1.0 after the
+    fight is not a prediction that turned out well, it is corrupt input, and
+    leaving it in would hand the model a fabricated perfect record. Removals
+    are counted and reported rather than done silently.
+    """
+    if not os.path.exists(path):
+        return 0
+    rows = [json.loads(l) for l in open(path, encoding="utf-8") if l.strip()]
+    keep, drop = [], 0
+    for r in rows:
+        p = r.get("p_market_devig")
+        if p is None or (eps < float(p) < 1 - eps):
+            keep.append(r)
+        else:
+            drop += 1
+    if drop:
+        Path(path).write_text(
+            "\n".join(json.dumps(r, sort_keys=True) for r in keep) + "\n",
+            encoding="utf-8")
+        if verbose:
+            print(f"pruned {drop} rows priced at certainty (resolved markets)")
+    return drop
+
+
 def _rewrite(path=LEDGER):
     """Rewrite the file deduplicated, preserving order of first appearance."""
     if not os.path.exists(path):
@@ -185,6 +212,20 @@ def capture(fights, fighters, card_path="data/upcoming.txt", path=LEDGER,
     book = venues.get("sportsbook") or {}
 
     meta, bouts = parse_card(card_path)
+
+    # Hard stop: a capture is a PREDICTION, so it is only meaningful before
+    # the event. Polymarket keeps resolved fights listed and quotes them at
+    # 1.0/0.0; a run after the bell logged eight of those as if they were
+    # forecasts the model nailed. No venue-specific fix is sufficient here —
+    # the date is the invariant.
+    ev_date = pd.to_datetime(meta.get("date"), errors="coerce")
+    if pd.notna(ev_date) and pd.Timestamp.now(tz="UTC").normalize() > \
+            ev_date.tz_localize("UTC") + pd.Timedelta(days=1):
+        if verbose:
+            print(f"card dated {meta.get('date')} is in the past - "
+                  f"refusing to capture prices for a finished event")
+        return 0
+
     states = _states_after(fights, fighters)
     names = sorted({n for b in bouts for n in b[:2]})
     ids, _ = resolve(names, fighters)
@@ -351,7 +392,10 @@ if __name__ == "__main__":
     if cmd == "capture":
         capture(f, p)
     elif cmd == "settle":
+        prune_resolved()
         settle(f)
+    elif cmd == "prune":
+        prune_resolved()
     for v in (None, "sportsbook", "polymarket"):
         r = report(venue=v)
         if r.get("status"):

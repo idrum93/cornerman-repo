@@ -168,6 +168,54 @@ def test_ledger_reads_old_schema(_unused=None):
                    else f"FAILED (missing columns: {missing})"))
 
 
+def test_no_resolved_prices(_unused=None):
+    """A market at certainty must never enter the ledger as a prediction.
+
+    On the first live Polymarket capture, eight rows were logged at 1.0 and
+    0.0 — resolved markets, read hours after the fights ended. Had they
+    settled, the model would have shown a perfect record on eight bets. Three
+    independent guards now exist (date check in capture, price check in
+    moneylines, prune on settle) because this is the one failure that
+    manufactures evidence rather than destroying it.
+    """
+    import json
+    import os
+    import tempfile
+    from . import ledger
+    from .polymarket import moneylines, parse_events
+    import mmastat.polymarket as PM
+
+    ev = [{"title": "T", "markets": [
+        {"question": "Will A beat B?", "slug": "s",
+         "outcomes": '["A", "B"]', "outcomePrices": '["1.0", "0.0"]',
+         "clobTokenIds": '["1","2"]'}]}]
+    saved = PM.book_quality
+    PM.book_quality = lambda t: {"bid": .99, "ask": 1.0, "spread": .01,
+                                 "mid": .995, "depth_usd": 9e4}
+    try:
+        kept = len(moneylines(parse_events(ev), with_book=True))
+        PM.book_quality = lambda t: {}
+        fail_open = len(moneylines(parse_events(ev), with_book=True))
+    finally:
+        PM.book_quality = saved
+
+    bad = {"captured_utc": "x", "venue": "polymarket", "event_date": "2020-01-01",
+           "fighter": "A", "opponent": "B", "p_market_devig": 1.0,
+           "implied_with_vig": 1.0, "p_model": 1.0, "edge": 0.0, "bet": False}
+    with tempfile.NamedTemporaryFile("w", suffix=".jsonl", delete=False) as fh:
+        fh.write(json.dumps(bad) + "\n")
+        tmp = fh.name
+    try:
+        ledger.prune_resolved(tmp, verbose=False)
+        left = len(ledger.read(tmp))
+    finally:
+        os.unlink(tmp)
+
+    ok = (kept == 0 and fail_open == 0 and left == 0)
+    return ok, (f"resolved market kept={kept}, no-book kept={fail_open}, "
+                f"rows surviving prune={left} (all must be 0)")
+
+
 def run_all(fights=None, fighters=None):
     if fights is None:
         fights, fighters, _ = make_corpus(n_fighters=520, n_events=320)
@@ -179,6 +227,7 @@ def run_all(fights=None, fighters=None):
         ("leak detector has power", test_leak_detector_has_power(fights, fighters, X)),
         ("settle respects dates", test_settle_respects_dates(fights)),
         ("ledger reads old schema", test_ledger_reads_old_schema()),
+        ("no resolved prices", test_no_resolved_prices()),
     ]
     print(f"{'CHECK':<28} {'RESULT':<6}  DETAIL")
     print("-" * 78)

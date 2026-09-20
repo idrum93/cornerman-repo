@@ -106,6 +106,9 @@ def parse_events(events):
                     toks = []
             out.append(dict(
                 event=e.get("title"), slug=m.get("slug"), question=q,
+                closed=bool(m.get("closed") or e.get("closed")),
+                resolved=bool(m.get("umaResolutionStatus") == "resolved"
+                              or m.get("resolvedBy")),
                 kind=classify(q),
                 outcomes=list(outcomes or []),
                 prices=[float(p) for p in (prices or []) if p not in (None, "")],
@@ -136,16 +139,29 @@ def book_quality(token_id):
             "depth_usd": round(depth, 2)}
 
 
-def moneylines(rows, with_book=True, max_spread=0.06, min_depth=250.0):
+# A market at 0.99 or 0.01 is not a confident market, it is a decided one.
+# Polymarket leaves fights listed until they resolve, so a capture run after
+# the bell reads 1.0 / 0.0 — which would enter the ledger as a "prediction"
+# the model got exactly right. That happened on the first live Polymarket
+# capture: eight rows at certainty, hours after the fights ended.
+RESOLVED_EPS = 0.02
+
+
+def moneylines(rows, with_book=True, max_spread=0.06, min_depth=250.0,
+               require_book=True):
     """{frozenset(name_a, name_b): (name_a, P(a), meta)} for winner markets.
 
-    Thin or wide markets are dropped rather than recorded: a price you cannot
-    trade is not a price, and letting one into the ledger would quietly
-    flatter any comparison made against it.
+    Every gate here FAILS CLOSED. The first version skipped its liquidity
+    checks whenever the orderbook call returned nothing, so a market with no
+    book data sailed through — which is exactly the case where you know least
+    about whether the price is real. Missing evidence is now a rejection, not
+    a pass.
     """
     out = {}
     for r in rows:
         if r["kind"] != "winner" or len(r["outcomes"]) != 2 or len(r["prices"]) != 2:
+            continue
+        if r.get("closed") or r.get("resolved"):
             continue
         a, b = _nm(r["outcomes"][0]), _nm(r["outcomes"][1])
         if not a or not b or a == b:
@@ -154,19 +170,22 @@ def moneylines(rows, with_book=True, max_spread=0.06, min_depth=250.0):
         tot = pa + pb
         if tot <= 0:
             continue
+        if min(pa, pb) <= RESOLVED_EPS or max(pa, pb) >= 1 - RESOLVED_EPS:
+            continue                      # decided, not predicted
         meta = {"liquidity": r["liquidity"], "volume": r["volume"],
                 "slug": r["slug"], "venue": "polymarket"}
-        if with_book and r["token_ids"]:
-            q = book_quality(r["token_ids"][0])
+        if with_book:
+            q = book_quality(r["token_ids"][0]) if r["token_ids"] else {}
             meta.update(q)
-            if q.get("spread") is not None and q["spread"] > max_spread:
-                continue
-            if q.get("depth_usd") is not None and q["depth_usd"] < min_depth:
-                continue
-            if q.get("mid"):
-                pa = q["mid"]
-                pb = 1 - q["mid"]
-                tot = 1.0
+            if q.get("spread") is None or q.get("depth_usd") is None:
+                if require_book:
+                    continue              # no book, no row
+            else:
+                if q["spread"] > max_spread or q["depth_usd"] < min_depth:
+                    continue
+                if q.get("mid") is None or not (RESOLVED_EPS < q["mid"] < 1 - RESOLVED_EPS):
+                    continue
+                pa, pb, tot = q["mid"], 1 - q["mid"], 1.0
         out[frozenset((a, b))] = (a, pa / tot, meta)
     return out
 

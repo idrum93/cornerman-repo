@@ -22,6 +22,14 @@ a bookmaker's margin, but the right order of magnitude against a venue whose
 cost is a one- or two-cent spread. Whether that survives contact with reality
 is exactly what the ledger is for.
 
+**Three guards against capturing a decided fight.** Polymarket leaves markets
+listed until they resolve and then quotes them at 1.0 / 0.0. A run after the
+bell logged eight such rows as if they were forecasts the model got exactly
+right — the one failure mode that manufactures evidence instead of destroying
+it. Now: `capture` refuses any card dated in the past, `moneylines` rejects
+prices within 2 cents of certainty, and `settle` prunes any that slipped
+through. `python -m mmastat.ledger prune` runs the cleanup by hand.
+
 Prices from thin books are dropped rather than recorded: wider than 6 cents or
 under $250 of depth and the row never appears. A price you cannot trade is not
 a price, and letting one in would quietly flatter the comparison.
