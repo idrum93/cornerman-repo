@@ -122,8 +122,9 @@
   .qbar{position:relative;height:34px;background:var(--soft);border-radius:3px;overflow:hidden}
   .qbar i{position:absolute;left:12%;width:76%;border-radius:2px}
   .qmid{position:absolute;left:0;right:0;top:50%;height:1px;background:var(--line)}
-  .qc.mine .qbar{outline:1.5px solid var(--gold);outline-offset:1px}
-  .qc.mine .qv{color:var(--gold);font-weight:800}
+  .qc.mine .qbar{outline:1px solid #3B4557;outline-offset:1px}
+  .qc.mine .qv{font-weight:800;color:var(--bone)}
+  .qmk{height:11px;line-height:11px;font-size:9px;letter-spacing:1px}
   .qv{font-size:11px;margin-top:3px}
   .qn{font-size:8.5px;letter-spacing:.08em}
   .cwhy{margin-top:5px;font-size:9px;letter-spacing:.06em;color:#4C5462}
@@ -220,28 +221,47 @@ function tile(b){
    ones. A conditional-rate display that only shows strong relationships is
    indistinguishable from one that selects them; the null rows are the
    evidence the list was fixed in advance (PREREGISTRATION addendum 10). */
-function baseRatePanel(here){
+function baseRatePanel(here,bout){
   if(!BR||!BR.conditions) return '';
+  // Colour means ONE thing on this site: red is the first fighter, blue the
+  // second. So the quartile bars are neutral — gold above the base rate, grey
+  // below, with position above/below the midline carrying the direction — and
+  // red/blue appear only as the markers showing where each fighter falls.
   const rows=BR.conditions.map(c=>{
     const flat=c.spread<0.05;
+    const mk = here? here[c.id] : null;
     const cells=c.cells.map(q=>{
-      const mine = here && here[c.id]===q.q;
-      const up = q.lift>0;
-      const h = Math.min(100,Math.abs(q.lift)/0.22*100);
-      return `<div class="qc ${mine?'mine':''} ${q.thin?'thin':''}" title="${c.label} Q${q.q}: ${(q.rate*100).toFixed(1)}% of ${q.n} fights (±${(q.ci*100).toFixed(1)})">
-        <div class="qbar"><i style="height:${Math.max(3,h)}%;background:${up?'var(--good)':'var(--red)'};
-          ${up?'bottom:50%':'top:50%'}"></i><div class="qmid"></div></div>
+      const up=q.lift>0, h=Math.min(100,Math.abs(q.lift)/0.22*100);
+      const hits=[];
+      if(mk){
+        if(mk.a===q.q) hits.push(['a','var(--red)',bout?bout.a:'A']);
+        if(mk.b===q.q) hits.push(['b','var(--blue)',bout?bout.b:'B']);
+        if(mk.fight===q.q) hits.push(['f','var(--gold)','this fight']);
+      }
+      return `<div class="qc ${hits.length?'mine':''} ${q.thin?'thin':''}"
+        title="${esc(c.label)} Q${q.q}: ${(q.rate*100).toFixed(1)}% of ${q.n} fights (±${(q.ci*100).toFixed(1)})">
+        <div class="qbar"><div class="qmid"></div>
+          <i style="height:${Math.max(3,h)}%;background:${up?'var(--gold)':'#4A5260'};
+            ${up?'bottom:50%':'top:50%'}"></i></div>
+        <div class="qmk">${hits.map(([k,col,nm])=>
+          `<span style="color:${col}" title="${esc(nm)}">▲</span>`).join('')}</div>
         <div class="mono qv">${(q.rate*100).toFixed(0)}</div>
         <div class="lbl qn">${q.n<1000?q.n:(q.n/1000).toFixed(1)+'k'}</div></div>`;}).join('');
+    const scope = c.level==='fighter' ? 'per fighter' : 'whole fight';
     return `<div class="cond ${flat?'flat':''}">
       <div class="condhd">
         <span class="cname">${esc(c.label)}</span>
-        <span class="lbl">→ ${esc(c.outcome_label)} · base ${(c.base*100).toFixed(0)}%${flat?' · flat':''}</span>
+        <span class="lbl">→ ${esc(c.outcome_label)} · base ${(c.base*100).toFixed(0)}% · ${scope}${flat?' · flat':''}</span>
       </div>
       <div class="qrow">${cells}</div>
       <div class="lbl cwhy">${esc(c.why)}</div></div>`;}).join('');
+  const key = here&&bout
+    ? `<span style="color:var(--red)">▲ ${esc(bout.a)}</span> ·
+       <span style="color:var(--blue)">▲ ${esc(bout.b)}</span> ·
+       <span style="color:var(--gold)">▲ whole fight</span>`
+    : 'historical frequencies by quartile · not predictions';
   return `<div class="seg"><div class="seghd"><h2>What usually happens</h2>
-      <span class="lbl">historical frequencies by quartile · not predictions${here?' · ◆ marks this bout':''}</span></div>
+      <span class="lbl">${key}</span></div>
     <div class="conds">${rows}</div>
     <div class="note" style="margin-top:8px">Counts from ${BR.conditions[0].n.toLocaleString()}+ past
       fights, split into quartiles. Every registered condition is shown every time, including the
@@ -283,7 +303,7 @@ function render(){
         ${nr.map(n=>`<div class="noread"><b>${esc(n.a)}</b> vs. <b>${esc(n.b)}</b>
           <div class="lbl" style="margin-top:4px">No read — ${esc(n.reason)}</div></div>`).join('')}</div></div>`;
   }).join('');
-  document.getElementById('app').innerHTML=strip()+segs+lastCard()+baseRatePanel(null)+`
+  document.getElementById('app').innerHTML=strip()+segs+lastCard()+baseRatePanel(null,null)+`
     <div class="note" style="margin-top:16px;max-width:900px">
       Win probability is a logistic model on 14 opponent-adjusted differentials, trained only on
       earlier fights. Method and round come from a competing-risks hazard model and sum to 100%.
@@ -406,8 +426,8 @@ function open_(id){
         propRow(`${b.b} scores a knockdown`,b.b_p_knockdown,'var(--blue)')])}
     </div>
     ${b.bands?`<div class="card"><div class="ghead" style="background:none;border:none;padding:0 0 8px">
-      <span class="gname">Where this bout sits</span><span class="lbl">◆ = this matchup</span></div>
-      ${baseRatePanel(b.bands)}</div>`:''}
+      <span class="gname">Where this bout sits</span><span class="lbl">markers show each corner</span></div>
+      ${baseRatePanel(b.bands,b)}</div>`:''}
     <div class="card"><div class="ghead" style="background:none;border:none;padding:0 0 8px">
       <span class="gname">Projected output</span><span class="lbl">80% range</span></div>
       ${rangeBlock('Significant strikes','per min',

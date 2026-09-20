@@ -424,18 +424,32 @@ def predict_card(path, fights, fighters, verbose=True):
             sb2 = _snap.get(r["b"])
             if not sa2 or not sb2:
                 continue
-            vals = {
-                "C1": sa2["adj_td15"], "C2": sb2["td_def"], "C3": sa2["kd15"],
+            # Fighter-level conditions get a band for EACH corner. Showing
+            # only one silently answered "whose takedown rate?" with "the red
+            # corner's", which is not something a reader can infer.
+            per_fighter = {
+                "C1": (sa2["adj_td15"], sb2["adj_td15"]),
+                "C2": (sb2["td_def"], sa2["td_def"]),      # the one in front of you
+                "C3": (sa2["kd15"], sb2["kd15"]),
+                "C6": (sa2["reach"] - sb2["reach"], sb2["reach"] - sa2["reach"]),
+                "C10": (sa2["clinch_share"] + sa2["ground_share"],
+                        sb2["clinch_share"] + sb2["ground_share"]),
+            }
+            per_fight = {
                 "C4": sa2["kd15"] + sb2["kd15"],
                 "C5": sa2["ctrl_share"] + sb2["ctrl_share"],
-                "C6": sa2["reach"] - sb2["reach"],
                 "C7": sa2["adj_slpm"] + sb2["adj_slpm"],
                 "C8": abs(sa2["age"] - sb2["age"]),
                 "C9": sa2["sub15"] + sb2["sub15"],
-                "C10": sa2["clinch_share"] + sa2["ground_share"],
             }
-            r["bands"] = {k: band_for(v, _by[k]) for k, v in vals.items()
-                          if k in _by}
+            bands = {}
+            for k, (va, vb) in per_fighter.items():
+                if k in _by:
+                    bands[k] = {"a": band_for(va, _by[k]), "b": band_for(vb, _by[k])}
+            for k, v in per_fight.items():
+                if k in _by:
+                    bands[k] = {"fight": band_for(v, _by[k])}
+            r["bands"] = bands
     except Exception as e:
         print(f"note: base rates unavailable ({e})")
 
