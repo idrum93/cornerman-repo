@@ -577,3 +577,71 @@ the test. But the honest prior here is low, and lower than I first said.
 - Pooling Polymarket distance results with the sportsbook moneyline ledger
 - Treating a positive result as established without checking whether the
   decision rate drifted in the same direction over the test window
+
+---
+
+# Addendum 10: the conditional base-rate panel (2026-09-20)
+
+A display feature, not a hypothesis test — but it needs registering for a
+different reason than the others. The danger is not false discovery, it is
+**selective display**: with a dozen candidate conditions, showing whichever
+looks strongest turns a lookup table into a machine for rendering noise
+attractively.
+
+So this fixes the DISPLAY LIST. The panel shows every condition below, always,
+including the ones that turn out flat. A condition is never dropped for being
+boring and never added for being interesting.
+
+## What the panel is
+
+For each condition: the base rate, the rate within each quartile, the lift,
+n, and a 95% interval. Descriptive counts from the corpus, not model output.
+Nothing here is a prediction; it is what happened in past fights that looked
+like this one.
+
+## Conditions, fixed now
+
+Each is included because there is a stated mechanism, not because it measured
+well. Five were run before this was written and are marked SEEN; they are
+reported as exploratory and re-validated on the reserved holdout.
+
+| # | condition | outcome | mechanism | status |
+|---|---|---|---|---|
+| C1 | own opponent-adjusted takedown rate, quartiles | lands a takedown | direct: the rate IS the propensity | SEEN (.238 to .630) |
+| C2 | opponent's takedown defence, quartiles | lands a takedown | the thing standing in the way | SEEN (.495 to .386) |
+| C3 | own knockdown rate, quartiles | scores a knockdown | direct | SEEN (.114 to .294) |
+| C4 | combined knockdown rate, quartiles | ends inside distance | two heavy hitters end fights | SEEN (.410 to .588) |
+| C5 | combined control share, quartiles | ends inside distance | grappling-heavy fights grind out | SEEN (.480 to .486, FLAT) |
+| C6 | reach differential, quartiles | lands a takedown | shooting under a longer fighter | new |
+| C7 | combined strike volume, quartiles | ends inside distance | pace as a proxy for damage | new |
+| C8 | age differential, quartiles | ends inside distance | the older fighter as the one who breaks | new |
+| C9 | combined submission-attempt rate, quartiles | goes the distance | grapplers hunting finishes | new |
+| C10 | own clinch+ground strike share, quartiles | lands a takedown | position-dependent offense needs the takedown | new |
+
+C5 stays in the panel precisely because it is flat. A conditional-rate display
+that only ever shows strong relationships is indistinguishable from one that
+selects them, and the reader has no way to tell. The null row is the evidence
+that the list was fixed in advance.
+
+## Display rules
+
+- Every condition rendered, every quartile, always.
+- n and a 95% interval on every cell. A quartile under 200 fights is greyed.
+- Never ranked by lift, never truncated to "top" conditions.
+- Labelled as historical frequencies, not predictions, and never combined into
+  a single "regime" score. Compressing a dozen conditions into one bar means
+  choosing which dominates, which is selection by another name.
+
+## Explicitly NOT built
+
+A "dominant fighting style" indicator tied to winning. Style features were
+tested against the win model and came back at **-0.0009 log loss, 95% CI
+[-0.0041, +0.0022]** (addendum, style cluster). Showing a style-to-wins bar
+would have the site contradicting its own recorded result.
+
+## Success criterion
+
+There is none, because nothing is being claimed. The panel is correct if its
+numbers match the corpus and the holdout reproduces the SEEN rows within their
+intervals. If a SEEN row fails to reproduce, it is removed and the failure
+recorded here.

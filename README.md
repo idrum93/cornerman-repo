@@ -6,6 +6,36 @@ output, and a frontend that shows its reasoning.
 **It does not beat the betting market, and it is not a betting tool.** See
 [Model vs market](#model-vs-market) — that was tested, not assumed.
 
+## What usually happens: the conditional base-rate panel
+
+`baserates.py` splits the corpus into quartiles on ten registered conditions
+and reports the outcome rate in each, with n and a 95% interval. Counts, not
+model output.
+
+| condition | outcome | Q1 | Q4 | spread |
+|---|---|---|---|---|
+| own takedown rate | lands a takedown | .238 | .630 | **.392** |
+| own clinch+ground share | lands a takedown | .331 | .541 | .210 |
+| own knockdown rate | scores a knockdown | .114 | .294 | .180 |
+| combined knockdown rate | ends inside distance | .410 | .588 | .178 |
+| combined submission rate | goes the distance | .553 | .433 | .120 |
+| opponent's takedown defence | lands a takedown | .495 | .386 | .109 |
+| reach advantage | lands a takedown | .472 | .387 | .085 |
+| combined strike volume | ends inside distance | .505 | .471 | .041 |
+| age gap | ends inside distance | .495 | .510 | .041 |
+| combined control share | ends inside distance | .480 | .486 | **.018** |
+
+**The flat rows are rendered too, and that is the point.** A conditional-rate
+display that only ever showed strong relationships would be indistinguishable
+from one that picked them after looking, and a reader could not tell the
+difference. Three of the ten are flat. The condition list is frozen in
+[PREREGISTRATION addendum 10](mmastat/PREREGISTRATION.md) with a stated
+mechanism for each, written before the five new ones were measured.
+
+In a bout's drawer the same panel marks which quartile that matchup falls into
+on every condition, so the general pattern and the specific fight are read off
+one grid.
+
 ## Track record instead of AUC
 
 The site does not print AUC anywhere. It reports what actually happened on

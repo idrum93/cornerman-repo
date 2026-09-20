@@ -302,7 +302,7 @@ def predict_card(path, fights, fighters, verbose=True):
         out["decision"] = surv
         return out, by_r, curve
 
-    rows, skipped = [], []
+    rows, skipped, _snap = [], [], {}
     for na, nb, n_rounds, segment in bouts:
         if na not in ids or nb not in ids:
             skipped.append((na, nb, "name not in UFCStats corpus", segment))
@@ -315,6 +315,7 @@ def predict_card(path, fights, fighters, verbose=True):
             continue
         sa, sb = A.snapshot(as_of), B.snapshot(as_of)
         sa["elo"], sb["elo"] = elo_eff(A, as_of), elo_eff(B, as_of)
+        _snap[na], _snap[nb] = sa, sb
 
         fv = make_features(sa, sb)
         x = pd.DataFrame([fv])[WIN_FEATURES]
@@ -410,6 +411,33 @@ def predict_card(path, fights, fighters, verbose=True):
         r["result"] = {"winner": r["a"] if a_won else r["b"], "method": mth,
                        "seconds": int(ts),
                        "model_right": bool((r["p_a"] > 0.5) == a_won)}
+
+    # Conditional base rates, plus where THIS bout sits on each condition.
+    # Locating a fight on a fixed list is not selection — the list is frozen
+    # in PREREGISTRATION addendum 10 and every entry renders every time.
+    try:
+        from .baserates import write_json as _br_write, band_for, CONDITIONS
+        _tbl = _br_write(fights, fighters, verbose=False)
+        _by = {t["id"]: t for t in _tbl}
+        for r in rows:
+            sa2 = _snap.get(r["a"])
+            sb2 = _snap.get(r["b"])
+            if not sa2 or not sb2:
+                continue
+            vals = {
+                "C1": sa2["adj_td15"], "C2": sb2["td_def"], "C3": sa2["kd15"],
+                "C4": sa2["kd15"] + sb2["kd15"],
+                "C5": sa2["ctrl_share"] + sb2["ctrl_share"],
+                "C6": sa2["reach"] - sb2["reach"],
+                "C7": sa2["adj_slpm"] + sb2["adj_slpm"],
+                "C8": abs(sa2["age"] - sb2["age"]),
+                "C9": sa2["sub15"] + sb2["sub15"],
+                "C10": sa2["clinch_share"] + sa2["ground_share"],
+            }
+            r["bands"] = {k: band_for(v, _by[k]) for k, v in vals.items()
+                          if k in _by}
+    except Exception as e:
+        print(f"note: base rates unavailable ({e})")
 
     # Measured reliability, recomputed each run so the site quotes its own
     # current track record rather than a figure hard-coded months ago.
