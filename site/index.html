@@ -230,7 +230,10 @@ function baseRatePanel(here,bout){
   // left the numbers unexplained — you could not tell 51 from 47 by looking,
   // and nothing said 51 was a percentage.
   const rows=BR.conditions.map(c=>{
-    const flat=c.spread<0.05;
+    // "Flat" now means no quartile is distinguishable from the overall rate,
+    // which is the actual claim, rather than a spread below an arbitrary cut.
+    const nsig=c.cells.filter(q=>Math.abs(q.rate-c.base)>q.ci).length;
+    const flat=nsig===0;
     const mk=here?here[c.id]:null;
     const top=Math.max(c.base,...c.cells.map(q=>q.rate))*1.25||1;
     const cells=c.cells.map(q=>{
@@ -240,11 +243,16 @@ function baseRatePanel(here,bout){
         if(mk.b===q.q) hits.push(['var(--blue)',bout?bout.b:'B']);
         if(mk.fight===q.q) hits.push(['var(--gold)','this fight']);
       }
-      const above=q.rate>=c.base;
+      // Colour only where the cell is actually distinguishable from the
+      // overall rate. 51% against a 49% base is a two-point gap inside its
+      // own error bar: painting it gold asserts a difference the eye cannot
+      // check and the data does not support. Those cells stay neutral.
+      const diff=q.rate-c.base, sig=Math.abs(diff)>q.ci;
+      const fill = !sig ? '#39414E' : (diff>0 ? 'var(--gold)' : '#7C8695');
       return `<div class="qc ${hits.length?'mine':''} ${q.thin?'thin':''}"
-        title="${esc(c.label)} quartile ${q.q} (${q.lo} to ${q.hi}): the outcome happened in ${(q.rate*100).toFixed(1)}% of ${q.n} fights, ±${(q.ci*100).toFixed(1)}">
+        title="${esc(c.label)} quartile ${q.q} (${q.lo} to ${q.hi}): happened in ${(q.rate*100).toFixed(1)}% of ${q.n} fights, ±${(q.ci*100).toFixed(1)} — ${sig?((diff>0?'above':'below')+' the '+(c.base*100).toFixed(0)+'% overall rate'):'not distinguishable from the '+(c.base*100).toFixed(0)+'% overall rate'}">
         <div class="qbar">
-          <i style="height:${(q.rate/top*100).toFixed(1)}%;background:${above?'var(--gold)':'#4A5260'}"></i>
+          <i style="height:${(q.rate/top*100).toFixed(1)}%;background:${fill}"></i>
           <div class="qbase" style="bottom:${(c.base/top*100).toFixed(1)}%"></div></div>
         <div class="qmk">${hits.map(([col,nm])=>`<span style="color:${col}" title="${esc(nm)}">▲</span>`).join('')}</div>
         <div class="mono qv">${(q.rate*100).toFixed(0)}<span class="qpct">%</span></div>
@@ -252,25 +260,30 @@ function baseRatePanel(here,bout){
     const scope=c.level==='fighter'?'per fighter':'whole fight';
     return `<div class="cond ${flat?'flat':''}">
       <div class="condhd">
-        <span class="cname">${esc(c.label)} <span class="lbl" style="letter-spacing:.06em">low → high</span></span>
-        <span class="lbl">how often it <b style="color:var(--mute)">${esc(c.outcome_label)}</b> · ${scope}</span>
+        <span class="cname">${esc(c.outcome_label.charAt(0).toUpperCase()+c.outcome_label.slice(1))}</span>
+        <span class="lbl">grouped by <b style="color:var(--mute)">${esc(c.label.toLowerCase())}</b>,
+          lowest quarter first · ${scope}</span>
       </div>
       <div class="qrow">${cells}</div>
-      <div class="lbl cwhy">dashed line = ${(c.base*100).toFixed(0)}% overall · ${esc(c.why)}${flat?' · FLAT, no relationship':''}</div>
+      <div class="lbl cwhy"><span style="color:#7C8695">- - -</span> ${(c.base*100).toFixed(0)}% across all fights
+        · ${esc(c.why)}${flat?' · <b style="color:#7C8695">FLAT — no quarter differs from the overall rate</b>'
+          :` · ${nsig} of ${c.cells.length} quarters differ`}</div>
     </div>`;}).join('');
   const key=here&&bout
     ? `<span style="color:var(--red)">▲ ${esc(bout.a)}</span> ·
        <span style="color:var(--blue)">▲ ${esc(bout.b)}</span> ·
        <span style="color:var(--gold)">▲ whole fight</span>`
-    : 'each bar = % of past fights where it happened · dashed line = overall rate';
+    : 'bar = share of past fights with that outcome · dashed line = the rate across all fights';
   return `<div class="seg"><div class="seghd"><h2>What usually happens</h2>
       <span class="lbl">${key}</span></div>
     <div class="conds">${rows}</div>
     <div class="note" style="margin-top:8px"><b style="color:var(--mute)">How to use this.</b>
-      Each condition splits past fights into four groups, lowest quartile on the left. The bar is
-      the share of those fights where the outcome happened; the dashed line is the rate across all
-      fights. A bar well above the line means fights like that one really do produce the outcome
-      more often. <b style="color:var(--mute)">This is not an edge.</b> Bookmakers price base rates
+      Each row takes one measurement, sorts every past fight by it, and splits them into four
+      equal groups — lowest quarter on the left. The bar is the share of that group where the
+      outcome happened, and the dashed line is the rate across all fights combined. A bar clearly
+      above the line means fights in that group really do produce the outcome more often.
+      <b style="color:var(--mute)">Gold or grey-blue means the gap is bigger than the sampling
+      error; dark bars are not distinguishable from the overall rate</b>, however they look. <b style="color:var(--mute)">This is not an edge.</b> Bookmakers price base rates
       too — it is context for reading a projection, so you can see whether a model number is mostly
       just the base rate or whether the model is leaning on something beyond it. Flat conditions
       are shown on purpose: a panel that only displayed strong relationships would be
