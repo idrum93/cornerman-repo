@@ -119,13 +119,14 @@
   .qrow{display:flex;gap:4px}
   .qc{flex:1;text-align:center}
   .qc.thin{opacity:.42}
-  .qbar{position:relative;height:34px;background:var(--soft);border-radius:3px;overflow:hidden}
-  .qbar i{position:absolute;left:12%;width:76%;border-radius:2px}
-  .qmid{position:absolute;left:0;right:0;top:50%;height:1px;background:var(--line)}
+  .qbar{position:relative;height:42px;background:var(--soft);border-radius:3px;overflow:hidden}
+  .qbar i{position:absolute;bottom:0;left:14%;width:72%;border-radius:2px 2px 0 0}
+  .qbase{position:absolute;left:0;right:0;height:0;border-top:1px dashed #6A7382}
   .qc.mine .qbar{outline:1px solid #3B4557;outline-offset:1px}
   .qc.mine .qv{font-weight:800;color:var(--bone)}
   .qmk{height:11px;line-height:11px;font-size:9px;letter-spacing:1px}
-  .qv{font-size:11px;margin-top:3px}
+  .qv{font-size:12.5px;margin-top:3px;font-weight:700}
+  .qpct{font-size:8.5px;color:var(--dim);margin-left:1px}
   .qn{font-size:8.5px;letter-spacing:.08em}
   .cwhy{margin-top:5px;font-size:9px;letter-spacing:.06em;color:#4C5462}
   footer{border-top:1px solid var(--line);margin-top:22px;padding:14px 0 26px;
@@ -223,51 +224,57 @@ function tile(b){
    evidence the list was fixed in advance (PREREGISTRATION addendum 10). */
 function baseRatePanel(here,bout){
   if(!BR||!BR.conditions) return '';
-  // Colour means ONE thing on this site: red is the first fighter, blue the
-  // second. So the quartile bars are neutral — gold above the base rate, grey
-  // below, with position above/below the midline carrying the direction — and
-  // red/blue appear only as the markers showing where each fighter falls.
+  // Bar height is the RATE, with a dashed line across all four quartiles at
+  // the overall base rate. The first version drew lift-from-base at a fixed
+  // scale, which rendered every flat condition as an identical hairline and
+  // left the numbers unexplained — you could not tell 51 from 47 by looking,
+  // and nothing said 51 was a percentage.
   const rows=BR.conditions.map(c=>{
     const flat=c.spread<0.05;
-    const mk = here? here[c.id] : null;
+    const mk=here?here[c.id]:null;
+    const top=Math.max(c.base,...c.cells.map(q=>q.rate))*1.25||1;
     const cells=c.cells.map(q=>{
-      const up=q.lift>0, h=Math.min(100,Math.abs(q.lift)/0.22*100);
       const hits=[];
       if(mk){
-        if(mk.a===q.q) hits.push(['a','var(--red)',bout?bout.a:'A']);
-        if(mk.b===q.q) hits.push(['b','var(--blue)',bout?bout.b:'B']);
-        if(mk.fight===q.q) hits.push(['f','var(--gold)','this fight']);
+        if(mk.a===q.q) hits.push(['var(--red)',bout?bout.a:'A']);
+        if(mk.b===q.q) hits.push(['var(--blue)',bout?bout.b:'B']);
+        if(mk.fight===q.q) hits.push(['var(--gold)','this fight']);
       }
+      const above=q.rate>=c.base;
       return `<div class="qc ${hits.length?'mine':''} ${q.thin?'thin':''}"
-        title="${esc(c.label)} Q${q.q}: ${(q.rate*100).toFixed(1)}% of ${q.n} fights (±${(q.ci*100).toFixed(1)})">
-        <div class="qbar"><div class="qmid"></div>
-          <i style="height:${Math.max(3,h)}%;background:${up?'var(--gold)':'#4A5260'};
-            ${up?'bottom:50%':'top:50%'}"></i></div>
-        <div class="qmk">${hits.map(([k,col,nm])=>
-          `<span style="color:${col}" title="${esc(nm)}">▲</span>`).join('')}</div>
-        <div class="mono qv">${(q.rate*100).toFixed(0)}</div>
-        <div class="lbl qn">${q.n<1000?q.n:(q.n/1000).toFixed(1)+'k'}</div></div>`;}).join('');
-    const scope = c.level==='fighter' ? 'per fighter' : 'whole fight';
+        title="${esc(c.label)} quartile ${q.q} (${q.lo} to ${q.hi}): the outcome happened in ${(q.rate*100).toFixed(1)}% of ${q.n} fights, ±${(q.ci*100).toFixed(1)}">
+        <div class="qbar">
+          <i style="height:${(q.rate/top*100).toFixed(1)}%;background:${above?'var(--gold)':'#4A5260'}"></i>
+          <div class="qbase" style="bottom:${(c.base/top*100).toFixed(1)}%"></div></div>
+        <div class="qmk">${hits.map(([col,nm])=>`<span style="color:${col}" title="${esc(nm)}">▲</span>`).join('')}</div>
+        <div class="mono qv">${(q.rate*100).toFixed(0)}<span class="qpct">%</span></div>
+        <div class="lbl qn">n ${q.n<1000?q.n:(q.n/1000).toFixed(1)+'k'}</div></div>`;}).join('');
+    const scope=c.level==='fighter'?'per fighter':'whole fight';
     return `<div class="cond ${flat?'flat':''}">
       <div class="condhd">
-        <span class="cname">${esc(c.label)}</span>
-        <span class="lbl">→ ${esc(c.outcome_label)} · base ${(c.base*100).toFixed(0)}% · ${scope}${flat?' · flat':''}</span>
+        <span class="cname">${esc(c.label)} <span class="lbl" style="letter-spacing:.06em">low → high</span></span>
+        <span class="lbl">how often it <b style="color:var(--mute)">${esc(c.outcome_label)}</b> · ${scope}</span>
       </div>
       <div class="qrow">${cells}</div>
-      <div class="lbl cwhy">${esc(c.why)}</div></div>`;}).join('');
-  const key = here&&bout
+      <div class="lbl cwhy">dashed line = ${(c.base*100).toFixed(0)}% overall · ${esc(c.why)}${flat?' · FLAT, no relationship':''}</div>
+    </div>`;}).join('');
+  const key=here&&bout
     ? `<span style="color:var(--red)">▲ ${esc(bout.a)}</span> ·
        <span style="color:var(--blue)">▲ ${esc(bout.b)}</span> ·
        <span style="color:var(--gold)">▲ whole fight</span>`
-    : 'historical frequencies by quartile · not predictions';
+    : 'each bar = % of past fights where it happened · dashed line = overall rate';
   return `<div class="seg"><div class="seghd"><h2>What usually happens</h2>
       <span class="lbl">${key}</span></div>
     <div class="conds">${rows}</div>
-    <div class="note" style="margin-top:8px">Counts from ${BR.conditions[0].n.toLocaleString()}+ past
-      fights, split into quartiles. Every registered condition is shown every time, including the
-      flat ones — a panel that only displayed strong relationships would be indistinguishable from
-      one that picked them. Cells under ${BR.min_cell} fights are greyed. Nothing here is a
-      prediction.</div></div>`;
+    <div class="note" style="margin-top:8px"><b style="color:var(--mute)">How to use this.</b>
+      Each condition splits past fights into four groups, lowest quartile on the left. The bar is
+      the share of those fights where the outcome happened; the dashed line is the rate across all
+      fights. A bar well above the line means fights like that one really do produce the outcome
+      more often. <b style="color:var(--mute)">This is not an edge.</b> Bookmakers price base rates
+      too — it is context for reading a projection, so you can see whether a model number is mostly
+      just the base rate or whether the model is leaning on something beyond it. Flat conditions
+      are shown on purpose: a panel that only displayed strong relationships would be
+      indistinguishable from one that picked them.</div></div>`;
 }
 
 function lastCard(){
@@ -315,6 +322,24 @@ function render(){
 }
 
 /* ---- drawer ---- */
+/* The number a reader actually wants next to a projection: what happened in
+   past fights that looked like this one. Without it, "60.5%" has nothing to
+   be judged against — and the whole point of the base-rate panel is to be
+   that comparison, which it cannot do from the other end of the drawer. */
+function baseFor(cid, side, bands){
+  if(!BR||!bands||!bands[cid]) return null;
+  const c=BR.conditions.find(x=>x.id===cid); if(!c) return null;
+  const q=bands[cid][side]; if(!q) return null;
+  const cell=c.cells.find(x=>x.q===q); if(!cell) return null;
+  return {rate:cell.rate, base:c.base, q:q, n:cell.n};
+}
+function vsBase(cid, side, bands, model){
+  const b=baseFor(cid,side,bands); if(!b) return null;
+  const d=model-b.rate;
+  const verdict=Math.abs(d)<0.05?'in line with':(d>0?'above':'below');
+  return `fights like this: ${(b.rate*100).toFixed(0)}% (Q${b.q}, n=${b.n}) — model is ${verdict} it`;
+}
+
 function propRow(name,p,col,marker,note){
   const mk=marker==null?'':`<div style="position:absolute;left:calc(${marker*100}% - 4px);top:-3px;
     color:var(--gold);font-size:10px;line-height:1">◆</div>`;
@@ -411,8 +436,8 @@ function open_(id){
         propRow(`${b.a} wins`,b.p_a,'var(--red)',mk?b.p_market:null,mk?`market ${P1(b.p_market)}%`:null),
         propRow(`${b.b} wins`,b.p_b,'var(--blue)',mk?1-b.p_market:null,mk?`market ${P1(1-b.p_market)}%`:null)],mk)}
       ${group('How long','from the survival curve',[
-        propRow('Goes the distance',b.m_decision,'var(--mute)'),
-        propRow('Ends inside distance',b.p_finish,'var(--warn)')].concat(totals))}
+        propRow('Goes the distance',b.m_decision,'var(--mute)',null,vsBase('C9','fight',b.bands,b.m_decision)),
+        propRow('Ends inside distance',b.p_finish,'var(--warn)',null,vsBase('C4','fight',b.bands,b.p_finish))].concat(totals))}
       ${group('Method','sums to 100% with decision',[
         propRow(`${b.a} by KO/TKO`,b.m_a_ko,'var(--red)'),
         propRow(`${b.a} by submission`,b.m_a_sub,'var(--red)'),
@@ -420,10 +445,10 @@ function open_(id){
         propRow(`${b.b} by submission`,b.m_b_sub,'var(--blue)')])}
       ${group('Finish round','projection only',rr.map(([k,v])=>propRow(`Ends in round ${k}`,v,'var(--gold)')))}
       ${group('Fight action',trackLine(),[
-        propRow(`${b.a} lands a takedown`,b.a_p_takedown,'var(--red)'),
-        propRow(`${b.b} lands a takedown`,b.b_p_takedown,'var(--blue)'),
-        propRow(`${b.a} scores a knockdown`,b.a_p_knockdown,'var(--red)'),
-        propRow(`${b.b} scores a knockdown`,b.b_p_knockdown,'var(--blue)')])}
+        propRow(`${b.a} lands a takedown`,b.a_p_takedown,'var(--red)',null,vsBase('C1','a',b.bands,b.a_p_takedown)),
+        propRow(`${b.b} lands a takedown`,b.b_p_takedown,'var(--blue)',null,vsBase('C1','b',b.bands,b.b_p_takedown)),
+        propRow(`${b.a} scores a knockdown`,b.a_p_knockdown,'var(--red)',null,vsBase('C3','a',b.bands,b.a_p_knockdown)),
+        propRow(`${b.b} scores a knockdown`,b.b_p_knockdown,'var(--blue)',null,vsBase('C3','b',b.bands,b.b_p_knockdown))])}
     </div>
     ${b.bands?`<div class="card"><div class="ghead" style="background:none;border:none;padding:0 0 8px">
       <span class="gname">Where this bout sits</span><span class="lbl">markers show each corner</span></div>
