@@ -66,8 +66,15 @@ connector spanning the gap — so agreement and divergence read without a legend
 Prop chips on each tile surface the loudest projections (inside-the-distance,
 takedown, round total, knockdown), with the strongest ones highlighted.
 
-The timestamp is to the minute, so you can tell which scheduled run produced
-what is on screen. It fetches `site/predictions.json` and renders the card, then a breakdown
+The timestamp is Eastern, to the minute, so you can tell which scheduled run
+produced what is on screen. `Intl` handles the EDT/EST switch.
+
+**Refresh runtime.** `reliability.build_record` refits six gradient-boosting
+models and takes ~67 seconds — measured, it was the overwhelming majority of a
+3m22s run, with every other step in single-digit seconds. What it measures
+moves by one card a week, so it is now cached in `site/track_record.json` and
+rebuilt only when it is 7+ days old or the corpus has grown by 40+ fights.
+Combined with pip caching that takes a typical run to roughly a minute. It fetches `site/predictions.json` and renders the card, then a breakdown
 per bout: win probability, a method distribution that sums to 100%, round-by-round
 finish probabilities, and 80% ranges for strikes and control.
 

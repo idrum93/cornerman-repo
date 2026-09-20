@@ -414,8 +414,8 @@ def predict_card(path, fights, fighters, verbose=True):
     # Measured reliability, recomputed each run so the site quotes its own
     # current track record rather than a figure hard-coded months ago.
     try:
-        from .reliability import build_record
-        TRACK["rec"] = build_record(fights, fighters)
+        from .reliability import load_or_build
+        TRACK["rec"] = load_or_build(fights, fighters)
     except Exception as e:
         print(f"note: track record unavailable ({e})")
 

@@ -241,4 +241,14 @@ def run_all(fights=None, fighters=None):
 
 
 if __name__ == "__main__":
-    run_all()
+    import sys
+    if "--real" in sys.argv:
+        # The refresh job's step is called "validation suite on the refreshed
+        # corpus" — before this flag existed it ran on the SYNTHETIC corpus
+        # and the name was simply wrong. A bad download would have sailed
+        # through the one check meant to catch it.
+        from .loaders import load
+        _f, _p, _ = load(verbose=False)
+        run_all(_f, _p)
+    else:
+        run_all()

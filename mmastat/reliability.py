@@ -110,6 +110,44 @@ def build_record(fights, fighters, min_date="2012-01-01", test_frac=0.20):
     return rec
 
 
+def load_or_build(fights, fighters, path="site/track_record.json",
+                  max_age_days=7, verbose=True, **kw):
+    """Reuse a recent track record instead of refitting it every run.
+
+    build_record refits six gradient-boosting models and takes ~67 seconds —
+    the overwhelming majority of the refresh pipeline, everything else being
+    single-digit seconds. What it measures barely moves: it is computed on
+    fights held out of training, from a corpus that gains a card a week. Daily
+    recomputation buys nothing and costs the entire runtime.
+
+    Cached with the corpus size it was built from, so it also refreshes when
+    the corpus grows materially rather than only on a timer.
+    """
+    import json
+    from pathlib import Path
+    n_now = int(len(fights))
+    try:
+        old = json.loads(Path(path).read_text(encoding="utf-8"))
+        age = (pd.Timestamp.now(tz="UTC")
+               - pd.Timestamp(old["computed_utc"])).days
+        grew = n_now - int(old.get("n_fights", 0))
+        if age <= max_age_days and grew < 40:
+            if verbose:
+                print(f"track record: reusing cache ({age}d old, "
+                      f"+{grew} fights since)")
+            return old["record"]
+    except Exception:
+        pass
+    if verbose:
+        print("track record: recomputing (this is the slow step)")
+    rec = build_record(fights, fighters, **kw)
+    Path(path).parent.mkdir(parents=True, exist_ok=True)
+    Path(path).write_text(json.dumps(
+        {"computed_utc": pd.Timestamp.now(tz="UTC").isoformat(timespec="seconds"),
+         "n_fights": n_now, "record": rec}, indent=1), encoding="utf-8")
+    return rec
+
+
 def phrase(rec, key):
     """One sentence a reader can check, for the site."""
     r = rec.get(key) or {}

@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!-- cornerman build: dashboard-v2 -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -23,8 +22,7 @@
   header{display:flex;align-items:center;gap:16px;padding:12px 0;
     border-bottom:1px solid var(--line);flex-wrap:wrap}
   .brand{font-weight:800;letter-spacing:.3em;font-size:12px;text-transform:uppercase;
-    cursor:pointer;background:none;border:none;color:var(--bone);padding:0;font-family:inherit}
-  .brand:hover{color:var(--gold)}
+    color:var(--bone)}
   .evline{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;flex:1;min-width:0}
   .evname{font-size:17px;font-weight:800;text-transform:uppercase;letter-spacing:-.02em;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -122,7 +120,7 @@
 <body>
 <div class="wrap">
   <header>
-    <button class="brand" id="home">Cornerman</button>
+    <span class="brand">Cornerman</span>
     <div class="evline" id="evline"></div>
     <div class="mono" id="stamp" style="font-size:10.5px;color:var(--mute);white-space:nowrap"></div>
   </header>
@@ -130,7 +128,6 @@
   <footer>
     Not affiliated with the UFC. Statistics from public records. Analysis tool, not betting
     advice — tested at 67% accuracy against 70% for the closing line. It does not beat the market.
-    <span class="mono" style="color:#333A46"> · build dashboard-v2</span>
   </footer>
 </div>
 <div class="scrim" id="scrim"></div>
@@ -260,13 +257,49 @@ function propRow(name,p,col,marker,note){
         width:${Math.max(0,Math.min(100,p*100))}%;background:${col}"></div>${mk}</div>
     <div class="mono" style="width:48px;text-align:right;font-size:12px;font-weight:600">${P1(p)}%</div></div>`;
 }
+/* Ranges need a shared axis per stat and an explicit label, or the reader is
+   left with two bare numbers and no idea what they measure. Both fighters are
+   drawn on the same scale so the comparison is visual, and the median is
+   marked inside the band. */
+function rangeBlock(stat,unit,rows){
+  const top=Math.max(...rows.map(r=>r[3]))*1.08||1;
+  return `<div style="margin-bottom:12px">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px">
+      <span class="lbl" style="color:var(--mute)">${esc(stat)}</span>
+      <span class="lbl">${esc(unit)}</span></div>
+    ${rows.map(([n,lo,mid,hi,c])=>`
+      <div style="display:flex;align-items:center;gap:9px;padding:3px 0">
+        <span style="width:104px;flex:none;font-size:11.5px;color:var(--mute);
+          white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(n)}</span>
+        <div style="flex:1;position:relative;height:14px">
+          <div style="position:absolute;top:5px;left:0;right:0;height:5px;
+            background:var(--soft);border-radius:3px"></div>
+          <div style="position:absolute;top:5px;height:5px;border-radius:3px;background:${c};
+            left:${lo/top*100}%;width:${Math.max(1,(hi-lo)/top*100)}%"></div>
+          <div style="position:absolute;top:2px;width:2px;height:11px;background:var(--bone);
+            left:${mid/top*100}%"></div>
+        </div>
+        <span class="mono" style="width:84px;text-align:right;font-size:11.5px">
+          ${lo.toFixed(1)}–${hi.toFixed(1)}</span>
+      </div>`).join('')}</div>`;
+}
+
 function group(title,sub,rows,priced){
   if(!rows.length) return '';
   return `<div class="pgroup${priced?' priced':''}"><div class="ghead">
     <span class="gname">${esc(title)}</span><span class="lbl">${esc(sub)}</span></div>${rows.join('')}</div>`;
 }
-function track(k){ const r=(DATA.track_record||{})[k];
-  return (r&&r.said_likely)?`said likely → ${Math.round(r.said_likely.happened*100)}% happened`:''; }
+/* One calibration line for the whole group, not a note on every row.
+   Repeating "said likely -> 72% happened" under each fighter read as a claim
+   about that fighter; it is a property of the takedown model across 394
+   held-out fights, and identical for both corners by construction. */
+function trackLine(){
+  const t=DATA.track_record||{}, bits=[];
+  const td=t.takedown&&t.takedown.said_likely, kd=t.knockdown;
+  if(td) bits.push(`takedowns: said ~${Math.round(td.avg_said*100)}% → ${Math.round(td.happened*100)}% happened (${td.n} fights)`);
+  if(kd&&kd.said_unlikely) bits.push(`knockdowns: said ~${Math.round(kd.said_unlikely.avg_said*100)}% → ${Math.round(kd.said_unlikely.happened*100)}%`);
+  return bits.join(' · ') || 'projection only';
+}
 
 function open_(id){
   const b=DATA.bouts.find(x=>x.bout===id); if(!b) return;
@@ -274,7 +307,6 @@ function open_(id){
   const drv=(b.drivers||[]);
   const mx=drv.length?Math.max(...drv.map(d=>Math.abs(d.value))):1;
   const rr=[1,2,3,4,5].map(k=>[k,b['p_end_r'+k]]).filter(x=>x[1]!=null);
-  const tdn=track('takedown'), kdn=track('knockdown');
   const totals=b.totals?Object.keys(b.totals).map(k=>
     propRow(`Over ${k.replace('over_','').replace('_','.')} rounds`,b.totals[k],'var(--gold)')):[];
   document.getElementById('drawin').innerHTML=`
@@ -317,21 +349,20 @@ function open_(id){
         propRow(`${b.b} by KO/TKO`,b.m_b_ko,'var(--blue)'),
         propRow(`${b.b} by submission`,b.m_b_sub,'var(--blue)')])}
       ${group('Finish round','projection only',rr.map(([k,v])=>propRow(`Ends in round ${k}`,v,'var(--gold)')))}
-      ${group('Fight action','measured hit rates',[
-        propRow(`${b.a} lands a takedown`,b.a_p_takedown,'var(--red)',null,tdn),
-        propRow(`${b.b} lands a takedown`,b.b_p_takedown,'var(--blue)',null,tdn),
-        propRow(`${b.a} scores a knockdown`,b.a_p_knockdown,'var(--red)',null,kdn),
-        propRow(`${b.b} scores a knockdown`,b.b_p_knockdown,'var(--blue)',null,kdn)])}
+      ${group('Fight action',trackLine(),[
+        propRow(`${b.a} lands a takedown`,b.a_p_takedown,'var(--red)'),
+        propRow(`${b.b} lands a takedown`,b.b_p_takedown,'var(--blue)'),
+        propRow(`${b.a} scores a knockdown`,b.a_p_knockdown,'var(--red)'),
+        propRow(`${b.b} scores a knockdown`,b.b_p_knockdown,'var(--blue)')])}
     </div>
     <div class="card"><div class="ghead" style="background:none;border:none;padding:0 0 8px">
       <span class="gname">Projected output</span><span class="lbl">80% range</span></div>
-      ${[[b.a,b.a_slpm_lo,b.a_slpm_hi,'strikes /min','var(--red)'],
-         [b.b,b.b_slpm_lo,b.b_slpm_hi,'strikes /min','var(--blue)'],
-         [b.a,b.a_ctrl_lo,b.a_ctrl_hi,'control sec/min','var(--red)'],
-         [b.b,b.b_ctrl_lo,b.b_ctrl_hi,'control sec/min','var(--blue)']].map(([n,lo,hi,u,c])=>
-        `<div class="mrow"><span>${esc(n.split(' ').slice(-1)[0])}</span>
-          <div class="t"><i style="width:${Math.min(100,hi/ (u[0]==='c'?40:9) *100)}%;background:${c}"></i></div>
-          <b class="mono">${lo.toFixed(1)}–${hi.toFixed(1)}</b></div>`).join('')}
+      ${rangeBlock('Significant strikes','per min',
+          [[b.a,b.a_slpm_lo,b.a_slpm_mid,b.a_slpm_hi,'var(--red)'],
+           [b.b,b.b_slpm_lo,b.b_slpm_mid,b.b_slpm_hi,'var(--blue)']])}
+      ${rangeBlock('Control time','sec per min',
+          [[b.a,b.a_ctrl_lo,b.a_ctrl_mid,b.a_ctrl_hi,'var(--red)'],
+           [b.b,b.b_ctrl_lo,b.b_ctrl_mid,b.b_ctrl_hi,'var(--blue)']])}
       <div class="note" style="margin-top:6px">A single fight's stat line is mostly noise, so these
         are ranges. The model explains ~11% of the variance but ranks fights better than a career average.</div>
     </div>`;
@@ -347,7 +378,6 @@ function close_(){
 }
 document.getElementById('scrim').addEventListener('click',close_);
 document.addEventListener('keydown',e=>{ if(e.key==='Escape') close_(); });
-document.getElementById('home').addEventListener('click',()=>{ close_(); window.scrollTo(0,0); });
 
 Promise.all([
   fetch('predictions.json',{cache:'no-store'}).then(r=>{ if(!r.ok) throw new Error('predictions.json not found ('+r.status+')'); return r.json(); }),
