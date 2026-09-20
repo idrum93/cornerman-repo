@@ -60,8 +60,13 @@ per bout: win probability, a method distribution that sums to 100%, round-by-rou
 finish probabilities, and 80% ranges for strikes and control.
 
 Publish it free on GitHub Pages: **Settings -> Pages -> Source -> "GitHub
-Actions"**, once. `.github/workflows/pages.yml` deploys on every push, and the
-daily refresh job commits a fresh `predictions.json`, so the site updates itself.
+Actions"**, once.
+
+`pages.yml` deploys on push AND on `workflow_run` after refresh or capture.
+That second trigger is required, not belt-and-braces: GitHub deliberately does
+not fire workflows for pushes made with the default `GITHUB_TOKEN`, so the
+refresh job's commit never triggered a deploy and the site silently served a
+stale card while every job reported success.
 
 To preview locally, serve the folder (opening the file directly will not work —
 `fetch` is blocked on `file://`):

@@ -1,6 +1,20 @@
 # Forward odds ledger
 
-`odds_log.jsonl` is written here by `python -m mmastat.ledger capture`, four
+Rows are written to a **per-month shard**, `data/ledger/2026-09.jsonl`.
+
+Not for size — a year of capture is under 2 MB. For churn. `settle` rewrites
+the ledger each run, so with one growing file every one of the ~1,460 commits
+a year stores a fresh blob of the whole thing. With monthly shards a file
+stops changing the day its month ends and costs nothing after that, and
+`settle` only writes a shard whose contents actually changed. The legacy
+`odds_log.jsonl` is still read, so nothing already captured is orphaned.
+
+At this rate the repo takes on roughly 2 MB a year of ledger plus 0.7 MB of
+archived cards. Object storage (R2, S3, release assets) is not needed at any
+point on that curve; if it ever is, the shards are already the natural unit to
+move.
+
+`odds_log.jsonl` was written here by `python -m mmastat.ledger capture`, four
 times a day via `.github/workflows/capture.yml`. It **is** committed — unlike
 the rest of `data/` — because it is the experiment, not an input to it.
 

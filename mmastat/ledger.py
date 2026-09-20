@@ -36,7 +36,33 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-LEDGER = "data/ledger/odds_log.jsonl"
+LEDGER_DIR = "data/ledger"
+LEGACY = "data/ledger/odds_log.jsonl"
+LEDGER = LEGACY          # kept for call sites that pass an explicit path
+
+
+def month_file(when=None, directory=LEDGER_DIR):
+    """Ledger rows go in a per-month file, e.g. data/ledger/2026-09.jsonl.
+
+    Not for size — a year of capture is under 2 MB. For CHURN. settle()
+    rewrites the whole ledger each run, so with one big file every one of the
+    ~1,460 commits a year stores a fresh blob of an ever-growing file. With
+    monthly files, a month's file stops changing the day the month ends and
+    costs nothing thereafter. Cheap now, and it removes the only part of this
+    that would eventually need object storage.
+    """
+    ts = pd.Timestamp(when) if when is not None else pd.Timestamp.now(tz="UTC")
+    return os.path.join(directory, f"{ts.year:04d}-{ts.month:02d}.jsonl")
+
+
+def ledger_files(directory=LEDGER_DIR):
+    """Every ledger shard, oldest first. The legacy single file is included so
+    existing rows are never orphaned by the switch."""
+    import glob
+    files = sorted(glob.glob(os.path.join(directory, "[0-9][0-9][0-9][0-9]-[0-9][0-9].jsonl")))
+    if os.path.exists(LEGACY):
+        files = [LEGACY] + files
+    return files
 MODEL = os.path.join(os.path.dirname(__file__), "residual_model.json")
 
 
@@ -68,12 +94,22 @@ def fires(p_model, implied_with_vig, rule):
     return (p_model - implied_with_vig) > r["min_edge"]
 
 
-def append(rows, path=LEDGER):
-    Path(path).parent.mkdir(parents=True, exist_ok=True)
-    with open(path, "a", encoding="utf-8") as fh:
-        for r in rows:
-            fh.write(json.dumps(r, sort_keys=True) + "\n")
-    return len(rows)
+def append(rows, path=None):
+    """Append each row to the shard for its own capture month."""
+    if not rows:
+        return 0
+    by_file = {}
+    for r in rows:
+        f = path or month_file(r.get("captured_utc"))
+        by_file.setdefault(f, []).append(r)
+    n = 0
+    for f, rs in by_file.items():
+        Path(f).parent.mkdir(parents=True, exist_ok=True)
+        with open(f, "a", encoding="utf-8") as fh:
+            for r in rs:
+                fh.write(json.dumps(r, sort_keys=True) + "\n")
+        n += len(rs)
+    return n
 
 
 KEY = ["captured_utc", "venue", "event_date", "fighter", "opponent"]
@@ -118,10 +154,20 @@ def migrate(rows):
     return out
 
 
-def read(path=LEDGER):
-    if not os.path.exists(path):
+def _raw(path=None):
+    files = [path] if path else ledger_files()
+    rows = []
+    for f in files:
+        if not f or not os.path.exists(f):
+            continue
+        rows += [json.loads(l) for l in open(f, encoding="utf-8") if l.strip()]
+    return rows
+
+
+def read(path=None):
+    rows = _raw(path)
+    if not rows:
         return pd.DataFrame()
-    rows = [json.loads(l) for l in open(path, encoding="utf-8") if l.strip()]
     df = pd.DataFrame(dedupe(migrate(rows)))
     for k, v in BACKFILL.items():          # guarantee the column exists
         if k not in df.columns:
@@ -129,7 +175,7 @@ def read(path=LEDGER):
     return df
 
 
-def prune_resolved(path=LEDGER, eps=0.02, verbose=True):
+def prune_resolved(path=None, eps=0.02, verbose=True):
     """Remove rows whose market price is at certainty.
 
     Append-only is a discipline for PREDICTIONS. A row quoting 1.0 after the
@@ -137,35 +183,39 @@ def prune_resolved(path=LEDGER, eps=0.02, verbose=True):
     leaving it in would hand the model a fabricated perfect record. Removals
     are counted and reported rather than done silently.
     """
-    if not os.path.exists(path):
-        return 0
-    rows = [json.loads(l) for l in open(path, encoding="utf-8") if l.strip()]
-    keep, drop = [], 0
-    for r in rows:
-        p = r.get("p_market_devig")
-        if p is None or (eps < float(p) < 1 - eps):
-            keep.append(r)
-        else:
-            drop += 1
-    if drop:
-        Path(path).write_text(
-            "\n".join(json.dumps(r, sort_keys=True) for r in keep) + "\n",
-            encoding="utf-8")
-        if verbose:
-            print(f"pruned {drop} rows priced at certainty (resolved markets)")
+    drop = 0
+    for f in ([path] if path else ledger_files()):
+        if not f or not os.path.exists(f):
+            continue
+        rows = [json.loads(l) for l in open(f, encoding="utf-8") if l.strip()]
+        keep = [r for r in rows
+                if r.get("p_market_devig") is None
+                or eps < float(r["p_market_devig"]) < 1 - eps]
+        if len(keep) != len(rows):
+            drop += len(rows) - len(keep)
+            Path(f).write_text(
+                "\n".join(json.dumps(r, sort_keys=True) for r in keep) + "\n",
+                encoding="utf-8")
+    if drop and verbose:
+        print(f"pruned {drop} rows priced at certainty (resolved markets)")
     return drop
 
 
-def _rewrite(path=LEDGER):
-    """Rewrite the file deduplicated, preserving order of first appearance."""
-    if not os.path.exists(path):
-        return 0
-    rows = migrate([json.loads(l) for l in open(path, encoding="utf-8") if l.strip()])
-    clean = dedupe(rows)
-    Path(path).write_text(
-        "\n".join(json.dumps(r, sort_keys=True) for r in clean) + "\n",
-        encoding="utf-8")
-    return len(rows) - len(clean)
+def _rewrite(path=None):
+    """Deduplicate each shard in place. Only shards that actually change are
+    written, so a closed month never produces a new git blob."""
+    removed = 0
+    for f in ([path] if path else ledger_files()):
+        if not f or not os.path.exists(f):
+            continue
+        raw = [json.loads(l) for l in open(f, encoding="utf-8") if l.strip()]
+        clean = dedupe(migrate(raw))
+        if len(clean) != len(raw):
+            Path(f).write_text(
+                "\n".join(json.dumps(r, sort_keys=True) for r in clean) + "\n",
+                encoding="utf-8")
+            removed += len(raw) - len(clean)
+    return removed
 
 
 def capture(fights, fighters, card_path="data/upcoming.txt", path=LEDGER,
@@ -285,7 +335,7 @@ def capture(fights, fighters, card_path="data/upcoming.txt", path=LEDGER,
     return n
 
 
-def settle(fights, path=LEDGER, date_tol_days=4, verbose=True):
+def settle(fights, path=None, date_tol_days=4, verbose=True):
     """Attach outcomes to finished bouts.
 
     Matching is on the name pair AND the event date, within a few days. Name
@@ -300,8 +350,8 @@ def settle(fights, path=LEDGER, date_tol_days=4, verbose=True):
     prediction fields are never touched; only the outcome fields are.
     """
     from .upcoming import _key
-    L = read(path)
-    if L.empty:
+    files = [path] if path else ledger_files()
+    if not any(f and os.path.exists(f) for f in files):
         if verbose:
             print("ledger is empty")
         return 0
@@ -311,36 +361,41 @@ def settle(fights, path=LEDGER, date_tol_days=4, verbose=True):
     for r_, b_, w, dt in zip(parts[0], parts[1], fights.winner, fights.date):
         by_pair.setdefault(frozenset((_key(r_), _key(b_))), []).append((dt, _key(r_), w))
 
-    out, n, fixed = [], 0, 0
-    for _, row in L.iterrows():
-        d = row.to_dict()
-        was = bool(d.get("settled"))
-        d["settled"], d.pop("won", None), d.pop("void", None)
-        d["settled"] = False
-        cands = by_pair.get(frozenset((_key(d["fighter"]), _key(d["opponent"]))), [])
-        ev = pd.to_datetime(d.get("event_date"), errors="coerce")
-        best = None
-        for dt, red, w in cands:
-            if pd.isna(ev):
-                continue
-            gap = abs((pd.Timestamp(dt) - ev).days)
-            if gap <= date_tol_days and (best is None or gap < best[0]):
-                best = (gap, red, w)
-        if best is not None:
-            _, red, winner = best
-            if winner not in ("r", "b"):
-                d["settled"], d["void"] = True, True
-            else:
-                d["settled"] = True
-                d["won"] = bool((winner == "r") == (_key(d["fighter"]) == red))
-            n += 1
-        if was and not d["settled"]:
-            fixed += 1
-        out.append(d)
+    n, fixed = 0, 0
+    for f in files:
+        if not f or not os.path.exists(f):
+            continue
+        out = []
+        for d in migrate([json.loads(l) for l in open(f, encoding="utf-8") if l.strip()]):
+            was = bool(d.get("settled"))
+            d.pop("won", None)
+            d.pop("void", None)
+            d["settled"] = False
+            cands = by_pair.get(frozenset((_key(d["fighter"]), _key(d["opponent"]))), [])
+            ev = pd.to_datetime(d.get("event_date"), errors="coerce")
+            best = None
+            for dt, red, w in cands:
+                if pd.isna(ev):
+                    continue
+                gap = abs((pd.Timestamp(dt) - ev).days)
+                if gap <= date_tol_days and (best is None or gap < best[0]):
+                    best = (gap, red, w)
+            if best is not None:
+                _, red, winner = best
+                if winner not in ("r", "b"):
+                    d["settled"], d["void"] = True, True
+                else:
+                    d["settled"] = True
+                    d["won"] = bool((winner == "r") == (_key(d["fighter"]) == red))
+                n += 1
+            if was and not d["settled"]:
+                fixed += 1
+            out.append(d)
 
-    out = dedupe(out)
-    Path(path).write_text(
-        "\n".join(json.dumps(r, sort_keys=True) for r in out) + "\n", encoding="utf-8")
+        out = dedupe(out)
+        new = "\n".join(json.dumps(r, sort_keys=True) for r in out) + "\n"
+        if new != Path(f).read_text(encoding="utf-8"):
+            Path(f).write_text(new, encoding="utf-8")   # untouched shards stay untouched
     if verbose:
         print(f"settled {n} rows" + (f"; un-settled {fixed} wrongly matched" if fixed else ""))
     return n
