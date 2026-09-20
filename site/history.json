@@ -1,0 +1,103 @@
+{
+ "cards": [
+  {
+   "event": "UFC 331",
+   "date": "2026-09-19",
+   "venue": "Crypto.com Arena, Los Angeles",
+   "n": 8,
+   "right": 6,
+   "bouts": [
+    {
+     "bout": "Joshua Van vs. Alexandre Pantoja",
+     "a": "Joshua Van",
+     "b": "Alexandre Pantoja",
+     "p_a": 0.7127,
+     "segment": "Main card",
+     "winner": "Joshua Van",
+     "method": "DEC",
+     "seconds": 1500,
+     "model_right": true
+    },
+    {
+     "bout": "Arman Tsarukyan vs. Mauricio Ruffy",
+     "a": "Arman Tsarukyan",
+     "b": "Mauricio Ruffy",
+     "p_a": 0.751,
+     "segment": "Main card",
+     "winner": "Arman Tsarukyan",
+     "method": "KO/TKO",
+     "seconds": 296,
+     "model_right": true
+    },
+    {
+     "bout": "Iwo Baraniewski vs. Alonzo Menifield",
+     "a": "Iwo Baraniewski",
+     "b": "Alonzo Menifield",
+     "p_a": 0.6385,
+     "segment": "Main card",
+     "winner": "Alonzo Menifield",
+     "method": "DEC",
+     "seconds": 900,
+     "model_right": false
+    },
+    {
+     "bout": "Charles Jourdain vs. Marlon Vera",
+     "a": "Charles Jourdain",
+     "b": "Marlon Vera",
+     "p_a": 0.6059,
+     "segment": "Prelims",
+     "winner": "Marlon Vera",
+     "method": "KO/TKO",
+     "seconds": 722,
+     "model_right": false
+    },
+    {
+     "bout": "Tai Tuivasa vs. Robelis Despaigne",
+     "a": "Tai Tuivasa",
+     "b": "Robelis Despaigne",
+     "p_a": 0.456,
+     "segment": "Prelims",
+     "winner": "Robelis Despaigne",
+     "method": "DEC",
+     "seconds": 900,
+     "model_right": true
+    },
+    {
+     "bout": "Edmen Shahbazyan vs. Brunno Ferreira",
+     "a": "Edmen Shahbazyan",
+     "b": "Brunno Ferreira",
+     "p_a": 0.6688,
+     "segment": "Early prelims",
+     "winner": "Edmen Shahbazyan",
+     "method": "DEC",
+     "seconds": 900,
+     "model_right": true
+    },
+    {
+     "bout": "Casey O'Neill vs. Eduarda Moura",
+     "a": "Casey O'Neill",
+     "b": "Eduarda Moura",
+     "p_a": 0.6439,
+     "segment": "Early prelims",
+     "winner": "Casey O'Neill",
+     "method": "SUB",
+     "seconds": 202,
+     "model_right": true
+    },
+    {
+     "bout": "Giga Chikadze vs. Joanderson Brito",
+     "a": "Giga Chikadze",
+     "b": "Joanderson Brito",
+     "p_a": 0.3608,
+     "segment": "Early prelims",
+     "winner": "Joanderson Brito",
+     "method": "KO/TKO",
+     "seconds": 117,
+     "model_right": true
+    }
+   ]
+  }
+ ],
+ "total_graded": 8,
+ "total_right": 6
+}
