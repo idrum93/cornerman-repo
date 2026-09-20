@@ -1,736 +1,535 @@
 {
- "event": "UFC 331",
- "date": "2026-09-19",
- "venue": "Crypto.com Arena, Los Angeles",
- "generated_utc": "2026-09-20T02:26:33.460784+00:00",
+ "event": "UFC Fight Night: Rosas Jr. vs. Barcelos",
+ "date": "2026-09-26",
+ "venue": "Meta Apex, Enterprise, Nevada , United States",
+ "generated_utc": "2026-09-20T16:33:02.485172+00:00",
  "bouts": [
   {
-   "bout": "Joshua Van vs. Alexandre Pantoja",
-   "a": "Joshua Van",
-   "b": "Alexandre Pantoja",
+   "bout": "Raul Rosas Jr vs. Raoni Barcelos",
+   "a": "Raul Rosas Jr",
+   "b": "Raoni Barcelos",
    "rounds": 5,
    "segment": "Main card",
-   "p_a": 0.7127,
-   "p_b": 0.2873,
+   "p_a": 0.7219,
+   "p_b": 0.2781,
    "drivers": [
     {
      "label": "age",
-     "value": 0.8982,
+     "value": 1.3639,
      "favours": "a"
     },
     {
      "label": "striking output",
-     "value": 0.4676,
+     "value": -0.5347,
+     "favours": "b"
+    },
+    {
+     "label": "strikes absorbed",
+     "value": 0.4542,
+     "favours": "a"
+    },
+    {
+     "label": "strength of schedule",
+     "value": -0.2154,
+     "favours": "b"
+    },
+    {
+     "label": "career quality",
+     "value": -0.1225,
+     "favours": "b"
+    }
+   ],
+   "p_market": 0.6203,
+   "books": 18.0,
+   "edge": 0.1015,
+   "m_a_ko": 0.162,
+   "m_b_ko": 0.102,
+   "m_a_sub": 0.0981,
+   "m_b_sub": 0.1401,
+   "m_decision": 0.4979,
+   "p_finish": 0.5021,
+   "p_end_r1": 0.1121,
+   "p_end_r2": 0.1216,
+   "p_end_r3": 0.096,
+   "p_end_r4": 0.0926,
+   "p_end_r5": 0.0798,
+   "totals": {
+    "over_1_5": 0.8336,
+    "over_2_5": 0.7195,
+    "over_3_5": 0.6224,
+    "over_4_5": 0.5364
+   },
+   "a_ctrl_lo": 0.0,
+   "a_ctrl_mid": 12.84,
+   "a_ctrl_hi": 30.06,
+   "a_slpm_lo": 1.37,
+   "a_slpm_mid": 2.85,
+   "a_slpm_hi": 4.77,
+   "a_p_takedown": 0.605,
+   "a_p_knockdown": 0.039,
+   "b_ctrl_lo": 0.0,
+   "b_ctrl_mid": 7.72,
+   "b_ctrl_hi": 24.47,
+   "b_slpm_lo": 0.84,
+   "b_slpm_mid": 2.03,
+   "b_slpm_hi": 5.95,
+   "b_p_takedown": 0.701,
+   "b_p_knockdown": 0.022
+  },
+  {
+   "bout": "Rodolfo Vieira vs. Robert Bryczek",
+   "a": "Rodolfo Vieira",
+   "b": "Robert Bryczek",
+   "rounds": 3,
+   "segment": "Main card",
+   "p_a": 0.5163,
+   "p_b": 0.4837,
+   "drivers": [
+    {
+     "label": "takedown threat",
+     "value": 0.1845,
+     "favours": "a"
+    },
+    {
+     "label": "experience",
+     "value": -0.1705,
+     "favours": "b"
+    },
+    {
+     "label": "striking accuracy",
+     "value": 0.1488,
+     "favours": "a"
+    },
+    {
+     "label": "career quality",
+     "value": 0.1245,
+     "favours": "a"
+    },
+    {
+     "label": "strength of schedule",
+     "value": -0.1138,
+     "favours": "b"
+    }
+   ],
+   "p_market": 0.5352,
+   "books": 16.0,
+   "edge": -0.0189,
+   "m_a_ko": 0.1211,
+   "m_b_ko": 0.1393,
+   "m_a_sub": 0.1935,
+   "m_b_sub": 0.0753,
+   "m_decision": 0.4707,
+   "p_finish": 0.5293,
+   "p_end_r1": 0.2496,
+   "p_end_r2": 0.1813,
+   "p_end_r3": 0.0984,
+   "p_end_r4": null,
+   "p_end_r5": null,
+   "totals": {
+    "over_1_5": 0.6684,
+    "over_2_5": 0.5186
+   },
+   "a_ctrl_lo": 0.0,
+   "a_ctrl_mid": 12.1,
+   "a_ctrl_hi": 36.23,
+   "a_slpm_lo": 1.14,
+   "a_slpm_mid": 3.15,
+   "a_slpm_hi": 5.97,
+   "a_p_takedown": 0.62,
+   "a_p_knockdown": 0.132,
+   "b_ctrl_lo": 0.0,
+   "b_ctrl_mid": 2.74,
+   "b_ctrl_hi": 8.88,
+   "b_slpm_lo": 0.95,
+   "b_slpm_mid": 3.46,
+   "b_slpm_hi": 6.97,
+   "b_p_takedown": 0.234,
+   "b_p_knockdown": 0.253
+  },
+  {
+   "bout": "Brady Hiestand vs. Rinya Nakamura",
+   "a": "Brady Hiestand",
+   "b": "Rinya Nakamura",
+   "rounds": 3,
+   "segment": "Main card",
+   "p_a": 0.5165,
+   "p_b": 0.4835,
+   "drivers": [
+    {
+     "label": "age",
+     "value": 0.321,
      "favours": "a"
     },
     {
      "label": "strikes absorbed",
-     "value": -0.3349,
+     "value": -0.3144,
+     "favours": "b"
+    },
+    {
+     "label": "striking defence",
+     "value": -0.1679,
      "favours": "b"
     },
     {
      "label": "takedown threat",
-     "value": -0.1387,
-     "favours": "b"
-    },
-    {
-     "label": "striking defence",
-     "value": 0.1288,
-     "favours": "a"
-    }
-   ],
-   "p_market": 0.5483,
-   "books": 30.0,
-   "edge": 0.1644,
-   "m_a_ko": 0.159,
-   "m_b_ko": 0.0895,
-   "m_a_sub": 0.0954,
-   "m_b_sub": 0.1212,
-   "m_decision": 0.5349,
-   "p_finish": 0.4651,
-   "p_end_r1": 0.1022,
-   "p_end_r2": 0.117,
-   "p_end_r3": 0.0896,
-   "p_end_r4": 0.0811,
-   "p_end_r5": 0.0751,
-   "totals": {
-    "over_1_5": 0.8479,
-    "over_2_5": 0.7362,
-    "over_3_5": 0.6498,
-    "over_4_5": 0.5715
-   },
-   "a_ctrl_lo": 0.0,
-   "a_ctrl_mid": 2.48,
-   "a_ctrl_hi": 2.48,
-   "a_slpm_lo": 1.94,
-   "a_slpm_mid": 6.0,
-   "a_slpm_hi": 8.97,
-   "a_p_takedown": 0.173,
-   "a_p_knockdown": 0.258,
-   "b_ctrl_lo": 0.0,
-   "b_ctrl_mid": 8.71,
-   "b_ctrl_hi": 23.16,
-   "b_slpm_lo": 2.42,
-   "b_slpm_mid": 5.11,
-   "b_slpm_hi": 8.44,
-   "b_p_takedown": 0.695,
-   "b_p_knockdown": 0.06
-  },
-  {
-   "bout": "Arman Tsarukyan vs. Mauricio Ruffy",
-   "a": "Arman Tsarukyan",
-   "b": "Mauricio Ruffy",
-   "rounds": 3,
-   "segment": "Main card",
-   "p_a": 0.751,
-   "p_b": 0.249,
-   "drivers": [
-    {
-     "label": "strength of schedule",
-     "value": 0.3973,
-     "favours": "a"
-    },
-    {
-     "label": "career quality",
-     "value": 0.3642,
-     "favours": "a"
-    },
-    {
-     "label": "strikes absorbed",
-     "value": 0.339,
-     "favours": "a"
-    },
-    {
-     "label": "takedown threat",
-     "value": 0.2137,
-     "favours": "a"
-    },
-    {
-     "label": "experience",
-     "value": -0.0961,
-     "favours": "b"
-    }
-   ],
-   "p_market": 0.7277,
-   "books": 25.0,
-   "edge": 0.0233,
-   "m_a_ko": 0.1848,
-   "m_b_ko": 0.1903,
-   "m_a_sub": 0.0203,
-   "m_b_sub": 0.0116,
-   "m_decision": 0.593,
-   "p_finish": 0.407,
-   "p_end_r1": 0.1768,
-   "p_end_r2": 0.1376,
-   "p_end_r3": 0.0927,
-   "p_end_r4": null,
-   "p_end_r5": null,
-   "totals": {
-    "over_1_5": 0.7564,
-    "over_2_5": 0.6377
-   },
-   "a_ctrl_lo": 0.0,
-   "a_ctrl_mid": 17.43,
-   "a_ctrl_hi": 34.29,
-   "a_slpm_lo": 1.87,
-   "a_slpm_mid": 3.72,
-   "a_slpm_hi": 7.12,
-   "a_p_takedown": 0.784,
-   "a_p_knockdown": 0.222,
-   "b_ctrl_lo": 0.0,
-   "b_ctrl_mid": 0.21,
-   "b_ctrl_hi": 0.21,
-   "b_slpm_lo": 1.08,
-   "b_slpm_mid": 2.54,
-   "b_slpm_hi": 5.22,
-   "b_p_takedown": 0.13,
-   "b_p_knockdown": 0.405
-  },
-  {
-   "bout": "Patricio Pitbull vs. Doo Ho Choi",
-   "a": "Patricio Pitbull",
-   "b": "Doo Ho Choi",
-   "rounds": 3,
-   "segment": "Main card",
-   "p_a": 0.452,
-   "p_b": 0.548,
-   "drivers": [
-    {
-     "label": "strength of schedule",
-     "value": 0.4407,
-     "favours": "a"
-    },
-    {
-     "label": "striking output",
-     "value": -0.3421,
-     "favours": "b"
-    },
-    {
-     "label": "age",
-     "value": -0.294,
-     "favours": "b"
-    },
-    {
-     "label": "career quality",
-     "value": -0.2745,
-     "favours": "b"
-    },
-    {
-     "label": "experience",
-     "value": 0.2016,
-     "favours": "a"
-    }
-   ],
-   "p_market": null,
-   "books": null,
-   "edge": null,
-   "m_a_ko": 0.1073,
-   "m_b_ko": 0.3121,
-   "m_a_sub": 0.062,
-   "m_b_sub": 0.0427,
-   "m_decision": 0.476,
-   "p_finish": 0.524,
-   "p_end_r1": 0.2293,
-   "p_end_r2": 0.1798,
-   "p_end_r3": 0.1149,
-   "p_end_r4": null,
-   "p_end_r5": null,
-   "totals": {
-    "over_1_5": 0.6859,
-    "over_2_5": 0.5316
-   },
-   "a_ctrl_lo": 0.0,
-   "a_ctrl_mid": 9.13,
-   "a_ctrl_hi": 27.61,
-   "a_slpm_lo": 1.05,
-   "a_slpm_mid": 3.14,
-   "a_slpm_hi": 5.63,
-   "a_p_takedown": 0.674,
-   "a_p_knockdown": 0.154,
-   "b_ctrl_lo": 0.0,
-   "b_ctrl_mid": 4.55,
-   "b_ctrl_hi": 17.33,
-   "b_slpm_lo": 1.92,
-   "b_slpm_mid": 4.32,
-   "b_slpm_hi": 8.03,
-   "b_p_takedown": 0.314,
-   "b_p_knockdown": 0.4
-  },
-  {
-   "bout": "Renato Moicano vs. Brian Ortega",
-   "a": "Renato Moicano",
-   "b": "Brian Ortega",
-   "rounds": 3,
-   "segment": "Main card",
-   "p_a": 0.6717,
-   "p_b": 0.3283,
-   "drivers": [
-    {
-     "label": "strikes absorbed",
-     "value": 0.4911,
-     "favours": "a"
-    },
-    {
-     "label": "strength of schedule",
-     "value": -0.2315,
-     "favours": "b"
-    },
-    {
-     "label": "career quality",
-     "value": 0.1689,
-     "favours": "a"
-    },
-    {
-     "label": "striking defence",
-     "value": 0.1469,
-     "favours": "a"
-    },
-    {
-     "label": "age",
-     "value": -0.1372,
-     "favours": "b"
-    }
-   ],
-   "p_market": 0.6483,
-   "books": 24.0,
-   "edge": 0.0235,
-   "m_a_ko": 0.1581,
-   "m_b_ko": 0.0872,
-   "m_a_sub": 0.0421,
-   "m_b_sub": 0.056,
-   "m_decision": 0.6567,
-   "p_finish": 0.3433,
-   "p_end_r1": 0.1197,
-   "p_end_r2": 0.1423,
-   "p_end_r3": 0.0813,
-   "p_end_r4": null,
-   "p_end_r5": null,
-   "totals": {
-    "over_1_5": 0.8185,
-    "over_2_5": 0.6961
-   },
-   "a_ctrl_lo": 0.0,
-   "a_ctrl_mid": 8.62,
-   "a_ctrl_hi": 26.33,
-   "a_slpm_lo": 2.61,
-   "a_slpm_mid": 4.96,
-   "a_slpm_hi": 5.99,
-   "a_p_takedown": 0.643,
-   "a_p_knockdown": 0.105,
-   "b_ctrl_lo": 0.0,
-   "b_ctrl_mid": 3.06,
-   "b_ctrl_hi": 15.5,
-   "b_slpm_lo": 1.65,
-   "b_slpm_mid": 4.1,
-   "b_slpm_hi": 6.98,
-   "b_p_takedown": 0.428,
-   "b_p_knockdown": 0.183
-  },
-  {
-   "bout": "Iwo Baraniewski vs. Alonzo Menifield",
-   "a": "Iwo Baraniewski",
-   "b": "Alonzo Menifield",
-   "rounds": 3,
-   "segment": "Main card",
-   "p_a": 0.6385,
-   "p_b": 0.3615,
-   "drivers": [
-    {
-     "label": "age",
-     "value": 0.8674,
-     "favours": "a"
-    },
-    {
-     "label": "strength of schedule",
-     "value": -0.4446,
-     "favours": "b"
-    },
-    {
-     "label": "experience",
-     "value": 0.2418,
-     "favours": "a"
-    },
-    {
-     "label": "striking output",
-     "value": 0.214,
-     "favours": "a"
-    },
-    {
-     "label": "strikes absorbed",
-     "value": -0.1859,
-     "favours": "b"
-    }
-   ],
-   "p_market": 0.6811,
-   "books": 26.0,
-   "edge": -0.0426,
-   "m_a_ko": 0.4236,
-   "m_b_ko": 0.2122,
-   "m_a_sub": 0.0254,
-   "m_b_sub": 0.0408,
-   "m_decision": 0.298,
-   "p_finish": 0.702,
-   "p_end_r1": 0.3719,
-   "p_end_r2": 0.2456,
-   "p_end_r3": 0.0845,
-   "p_end_r4": null,
-   "p_end_r5": null,
-   "totals": {
-    "over_1_5": 0.4961,
-    "over_2_5": 0.3374
-   },
-   "a_ctrl_lo": 0.0,
-   "a_ctrl_mid": 7.43,
-   "a_ctrl_hi": 18.81,
-   "a_slpm_lo": 2.15,
-   "a_slpm_mid": 4.8,
-   "a_slpm_hi": 10.56,
-   "a_p_takedown": 0.126,
-   "a_p_knockdown": 0.439,
-   "b_ctrl_lo": 0.0,
-   "b_ctrl_mid": 3.68,
-   "b_ctrl_hi": 18.67,
-   "b_slpm_lo": 1.36,
-   "b_slpm_mid": 3.84,
-   "b_slpm_hi": 6.45,
-   "b_p_takedown": 0.21,
-   "b_p_knockdown": 0.339
-  },
-  {
-   "bout": "Charles Jourdain vs. Marlon Vera",
-   "a": "Charles Jourdain",
-   "b": "Marlon Vera",
-   "rounds": 3,
-   "segment": "Prelims",
-   "p_a": 0.6059,
-   "p_b": 0.3941,
-   "drivers": [
-    {
-     "label": "age",
-     "value": 0.2334,
-     "favours": "a"
-    },
-    {
-     "label": "strikes absorbed",
-     "value": 0.2297,
-     "favours": "a"
-    },
-    {
-     "label": "strength of schedule",
-     "value": -0.1675,
-     "favours": "b"
-    },
-    {
-     "label": "striking defence",
-     "value": 0.103,
-     "favours": "a"
-    },
-    {
-     "label": "striking output",
-     "value": 0.0956,
-     "favours": "a"
-    }
-   ],
-   "p_market": 0.6548,
-   "books": 22.0,
-   "edge": -0.0489,
-   "m_a_ko": 0.1316,
-   "m_b_ko": 0.0795,
-   "m_a_sub": 0.0347,
-   "m_b_sub": 0.0937,
-   "m_decision": 0.6605,
-   "p_finish": 0.3395,
-   "p_end_r1": 0.1147,
-   "p_end_r2": 0.1336,
-   "p_end_r3": 0.0912,
-   "p_end_r4": null,
-   "p_end_r5": null,
-   "totals": {
-    "over_1_5": 0.8308,
-    "over_2_5": 0.7065
-   },
-   "a_ctrl_lo": 0.0,
-   "a_ctrl_mid": 2.71,
-   "a_ctrl_hi": 11.75,
-   "a_slpm_lo": 2.79,
-   "a_slpm_mid": 5.68,
-   "a_slpm_hi": 10.83,
-   "a_p_takedown": 0.314,
-   "a_p_knockdown": 0.073,
-   "b_ctrl_lo": 0.0,
-   "b_ctrl_mid": 4.06,
-   "b_ctrl_hi": 10.65,
-   "b_slpm_lo": 2.19,
-   "b_slpm_mid": 5.55,
-   "b_slpm_hi": 7.48,
-   "b_p_takedown": 0.296,
-   "b_p_knockdown": 0.243
-  },
-  {
-   "bout": "Tai Tuivasa vs. Robelis Despaigne",
-   "a": "Tai Tuivasa",
-   "b": "Robelis Despaigne",
-   "rounds": 3,
-   "segment": "Prelims",
-   "p_a": 0.456,
-   "p_b": 0.544,
-   "drivers": [
-    {
-     "label": "strength of schedule",
-     "value": 0.6132,
-     "favours": "a"
-    },
-    {
-     "label": "age",
-     "value": 0.3531,
-     "favours": "a"
-    },
-    {
-     "label": "strikes absorbed",
-     "value": -0.3269,
-     "favours": "b"
-    },
-    {
-     "label": "experience",
-     "value": -0.2864,
-     "favours": "b"
-    },
-    {
-     "label": "reach",
-     "value": -0.2707,
-     "favours": "b"
-    }
-   ],
-   "p_market": 0.1796,
-   "books": 21.0,
-   "edge": 0.2764,
-   "m_a_ko": 0.1698,
-   "m_b_ko": 0.3752,
-   "m_a_sub": 0.0376,
-   "m_b_sub": 0.0995,
-   "m_decision": 0.3179,
-   "p_finish": 0.6821,
-   "p_end_r1": 0.2873,
-   "p_end_r2": 0.2717,
-   "p_end_r3": 0.1232,
-   "p_end_r4": null,
-   "p_end_r5": null,
-   "totals": {
-    "over_1_5": 0.605,
-    "over_2_5": 0.3827
-   },
-   "a_ctrl_lo": 0.0,
-   "a_ctrl_mid": 5.0,
-   "a_ctrl_hi": 28.2,
-   "a_slpm_lo": 0.63,
-   "a_slpm_mid": 3.09,
-   "a_slpm_hi": 7.37,
-   "a_p_takedown": 0.105,
-   "a_p_knockdown": 0.049,
-   "b_ctrl_lo": 0.0,
-   "b_ctrl_mid": 6.09,
-   "b_ctrl_hi": 13.55,
-   "b_slpm_lo": 1.18,
-   "b_slpm_mid": 3.88,
-   "b_slpm_hi": 9.08,
-   "b_p_takedown": 0.182,
-   "b_p_knockdown": 0.354
-  },
-  {
-   "bout": "Edmen Shahbazyan vs. Brunno Ferreira",
-   "a": "Edmen Shahbazyan",
-   "b": "Brunno Ferreira",
-   "rounds": 3,
-   "segment": "Early prelims",
-   "p_a": 0.6688,
-   "p_b": 0.3312,
-   "drivers": [
-    {
-     "label": "age",
-     "value": 0.3944,
-     "favours": "a"
-    },
-    {
-     "label": "striking output",
-     "value": 0.1103,
-     "favours": "a"
-    },
-    {
-     "label": "career quality",
-     "value": 0.0961,
+     "value": 0.1606,
      "favours": "a"
     },
     {
      "label": "reach",
      "value": 0.0902,
      "favours": "a"
-    },
-    {
-     "label": "takedown threat",
-     "value": 0.0796,
-     "favours": "a"
     }
    ],
-   "p_market": 0.611,
-   "books": 22.0,
-   "edge": 0.0579,
-   "m_a_ko": 0.2632,
-   "m_b_ko": 0.1172,
-   "m_a_sub": 0.1446,
-   "m_b_sub": 0.1035,
-   "m_decision": 0.3716,
-   "p_finish": 0.6284,
-   "p_end_r1": 0.27,
-   "p_end_r2": 0.2439,
-   "p_end_r3": 0.1145,
+   "p_market": 0.2653,
+   "books": 16.0,
+   "edge": 0.2512,
+   "m_a_ko": 0.0889,
+   "m_b_ko": 0.0986,
+   "m_a_sub": 0.1954,
+   "m_b_sub": 0.1401,
+   "m_decision": 0.4769,
+   "p_finish": 0.5231,
+   "p_end_r1": 0.1982,
+   "p_end_r2": 0.1877,
+   "p_end_r3": 0.1372,
    "p_end_r4": null,
    "p_end_r5": null,
    "totals": {
-    "over_1_5": 0.6092,
-    "over_2_5": 0.4257
+    "over_1_5": 0.7186,
+    "over_2_5": 0.5402
    },
    "a_ctrl_lo": 0.0,
-   "a_ctrl_mid": 7.5,
-   "a_ctrl_hi": 23.71,
-   "a_slpm_lo": 1.46,
-   "a_slpm_mid": 3.61,
-   "a_slpm_hi": 7.29,
-   "a_p_takedown": 0.37,
-   "a_p_knockdown": 0.498,
+   "a_ctrl_mid": 14.13,
+   "a_ctrl_hi": 27.28,
+   "a_slpm_lo": 0.5,
+   "a_slpm_mid": 2.04,
+   "a_slpm_hi": 4.62,
+   "a_p_takedown": 0.562,
+   "a_p_knockdown": 0.123,
    "b_ctrl_lo": 0.0,
-   "b_ctrl_mid": 2.02,
-   "b_ctrl_hi": 13.25,
-   "b_slpm_lo": 1.02,
-   "b_slpm_mid": 3.28,
-   "b_slpm_hi": 7.87,
-   "b_p_takedown": 0.377,
-   "b_p_knockdown": 0.093
+   "b_ctrl_mid": 12.39,
+   "b_ctrl_hi": 35.35,
+   "b_slpm_lo": 0.8,
+   "b_slpm_mid": 2.62,
+   "b_slpm_hi": 6.32,
+   "b_p_takedown": 0.627,
+   "b_p_knockdown": 0.245
   },
   {
-   "bout": "Casey O'Neill vs. Eduarda Moura",
-   "a": "Casey O'Neill",
-   "b": "Eduarda Moura",
+   "bout": "Montel Jackson vs. Ricky Sim\u00f3n",
+   "a": "Montel Jackson",
+   "b": "Ricky Sim\u00f3n",
    "rounds": 3,
-   "segment": "Early prelims",
-   "p_a": 0.6439,
-   "p_b": 0.3561,
+   "segment": "Prelims",
+   "p_a": 0.6571,
+   "p_b": 0.3429,
    "drivers": [
-    {
-     "label": "striking output",
-     "value": 0.7857,
-     "favours": "a"
-    },
     {
      "label": "strikes absorbed",
-     "value": -0.4517,
-     "favours": "b"
-    },
-    {
-     "label": "age",
-     "value": 0.282,
-     "favours": "a"
-    },
-    {
-     "label": "career quality",
-     "value": 0.216,
+     "value": 0.4465,
      "favours": "a"
     },
     {
      "label": "takedown threat",
-     "value": -0.203,
-     "favours": "b"
-    }
-   ],
-   "p_market": 0.6678,
-   "books": 20.0,
-   "edge": -0.0239,
-   "m_a_ko": 0.1014,
-   "m_b_ko": 0.0302,
-   "m_a_sub": 0.0362,
-   "m_b_sub": 0.0441,
-   "m_decision": 0.7882,
-   "p_finish": 0.2118,
-   "p_end_r1": 0.078,
-   "p_end_r2": 0.0707,
-   "p_end_r3": 0.0631,
-   "p_end_r4": null,
-   "p_end_r5": null,
-   "totals": {
-    "over_1_5": 0.8892,
-    "over_2_5": 0.8198
-   },
-   "a_ctrl_lo": 0.0,
-   "a_ctrl_mid": 5.49,
-   "a_ctrl_hi": 17.15,
-   "a_slpm_lo": 0.99,
-   "a_slpm_mid": 4.86,
-   "a_slpm_hi": 8.39,
-   "a_p_takedown": 0.158,
-   "a_p_knockdown": 0.332,
-   "b_ctrl_lo": 0.0,
-   "b_ctrl_mid": 13.12,
-   "b_ctrl_hi": 35.49,
-   "b_slpm_lo": 1.35,
-   "b_slpm_mid": 3.33,
-   "b_slpm_hi": 5.48,
-   "b_p_takedown": 0.911,
-   "b_p_knockdown": 0.036
-  },
-  {
-   "bout": "Giga Chikadze vs. Joanderson Brito",
-   "a": "Giga Chikadze",
-   "b": "Joanderson Brito",
-   "rounds": 3,
-   "segment": "Early prelims",
-   "p_a": 0.3608,
-   "p_b": 0.6392,
-   "drivers": [
-    {
-     "label": "age",
-     "value": -0.5055,
+     "value": -0.191,
      "favours": "b"
     },
     {
+     "label": "reach",
+     "value": 0.1805,
+     "favours": "a"
+    },
+    {
+     "label": "durability",
+     "value": 0.1487,
+     "favours": "a"
+    },
+    {
+     "label": "striking accuracy",
+     "value": 0.1116,
+     "favours": "a"
+    }
+   ],
+   "p_market": 0.6203,
+   "books": 16.0,
+   "edge": 0.0368,
+   "m_a_ko": 0.2352,
+   "m_b_ko": 0.1718,
+   "m_a_sub": 0.0262,
+   "m_b_sub": 0.0428,
+   "m_decision": 0.5239,
+   "p_finish": 0.4761,
+   "p_end_r1": 0.2133,
+   "p_end_r2": 0.1651,
+   "p_end_r3": 0.0976,
+   "p_end_r4": null,
+   "p_end_r5": null,
+   "totals": {
+    "over_1_5": 0.7043,
+    "over_2_5": 0.5715
+   },
+   "a_ctrl_lo": 0.0,
+   "a_ctrl_mid": 4.95,
+   "a_ctrl_hi": 16.27,
+   "a_slpm_lo": 1.1,
+   "a_slpm_mid": 3.78,
+   "a_slpm_hi": 7.2,
+   "a_p_takedown": 0.182,
+   "a_p_knockdown": 0.681,
+   "b_ctrl_lo": 0.0,
+   "b_ctrl_mid": 8.16,
+   "b_ctrl_hi": 30.03,
+   "b_slpm_lo": 0.89,
+   "b_slpm_mid": 2.48,
+   "b_slpm_hi": 4.32,
+   "b_p_takedown": 0.693,
+   "b_p_knockdown": 0.116
+  },
+  {
+   "bout": "John Casta\u00f1eda vs. Alateng Heili",
+   "a": "John Casta\u00f1eda",
+   "b": "Alateng Heili",
+   "rounds": 3,
+   "segment": "Prelims",
+   "p_a": 0.6522,
+   "p_b": 0.3478,
+   "drivers": [
+    {
      "label": "striking output",
-     "value": 0.2963,
+     "value": 0.4949,
+     "favours": "a"
+    },
+    {
+     "label": "striking accuracy",
+     "value": 0.178,
+     "favours": "a"
+    },
+    {
+     "label": "reach",
+     "value": 0.1504,
+     "favours": "a"
+    },
+    {
+     "label": "durability",
+     "value": -0.1398,
+     "favours": "b"
+    },
+    {
+     "label": "strength of schedule",
+     "value": 0.1198,
+     "favours": "a"
+    }
+   ],
+   "p_market": null,
+   "books": null,
+   "edge": null,
+   "m_a_ko": 0.1726,
+   "m_b_ko": 0.0882,
+   "m_a_sub": 0.0264,
+   "m_b_sub": 0.0283,
+   "m_decision": 0.6844,
+   "p_finish": 0.3156,
+   "p_end_r1": 0.1417,
+   "p_end_r2": 0.1058,
+   "p_end_r3": 0.068,
+   "p_end_r4": null,
+   "p_end_r5": null,
+   "totals": {
+    "over_1_5": 0.804,
+    "over_2_5": 0.7176
+   },
+   "a_ctrl_lo": 0.0,
+   "a_ctrl_mid": 3.17,
+   "a_ctrl_hi": 14.17,
+   "a_slpm_lo": 2.09,
+   "a_slpm_mid": 4.84,
+   "a_slpm_hi": 8.82,
+   "a_p_takedown": 0.265,
+   "a_p_knockdown": 0.158,
+   "b_ctrl_lo": 0.0,
+   "b_ctrl_mid": 4.53,
+   "b_ctrl_hi": 20.25,
+   "b_slpm_lo": 1.83,
+   "b_slpm_mid": 3.63,
+   "b_slpm_hi": 6.06,
+   "b_p_takedown": 0.558,
+   "b_p_knockdown": 0.166
+  },
+  {
+   "bout": "Norma Dumont vs. Ail\u00edn P\u00e9rez",
+   "a": "Norma Dumont",
+   "b": "Ail\u00edn P\u00e9rez",
+   "rounds": 3,
+   "segment": "Prelims",
+   "p_a": 0.4189,
+   "p_b": 0.5811,
+   "drivers": [
+    {
+     "label": "age",
+     "value": -0.3137,
+     "favours": "b"
+    },
+    {
+     "label": "takedown threat",
+     "value": -0.2628,
+     "favours": "b"
+    },
+    {
+     "label": "strength of schedule",
+     "value": 0.2163,
      "favours": "a"
     },
     {
      "label": "striking defence",
-     "value": 0.2436,
+     "value": 0.1102,
      "favours": "a"
     },
     {
-     "label": "takedown threat",
-     "value": -0.2406,
-     "favours": "b"
-    },
-    {
      "label": "strikes absorbed",
-     "value": -0.1775,
+     "value": -0.0997,
      "favours": "b"
     }
    ],
-   "p_market": 0.2322,
-   "books": 21.0,
-   "edge": 0.1286,
-   "m_a_ko": 0.111,
-   "m_b_ko": 0.147,
-   "m_a_sub": 0.0468,
-   "m_b_sub": 0.1026,
-   "m_decision": 0.5926,
-   "p_finish": 0.4074,
-   "p_end_r1": 0.1552,
-   "p_end_r2": 0.1635,
-   "p_end_r3": 0.0888,
+   "p_market": 0.4698,
+   "books": 14.0,
+   "edge": -0.051,
+   "m_a_ko": 0.0735,
+   "m_b_ko": 0.086,
+   "m_a_sub": 0.0329,
+   "m_b_sub": 0.0475,
+   "m_decision": 0.7601,
+   "p_finish": 0.2399,
+   "p_end_r1": 0.0784,
+   "p_end_r2": 0.0795,
+   "p_end_r3": 0.082,
    "p_end_r4": null,
    "p_end_r5": null,
    "totals": {
-    "over_1_5": 0.7745,
-    "over_2_5": 0.6365
+    "over_1_5": 0.887,
+    "over_2_5": 0.8009
    },
    "a_ctrl_lo": 0.0,
-   "a_ctrl_mid": 1.87,
-   "a_ctrl_hi": 6.4,
-   "a_slpm_lo": 0.81,
-   "a_slpm_mid": 2.76,
-   "a_slpm_hi": 7.13,
-   "a_p_takedown": 0.105,
-   "a_p_knockdown": 0.146,
+   "a_ctrl_mid": 5.92,
+   "a_ctrl_hi": 21.29,
+   "a_slpm_lo": 0.83,
+   "a_slpm_mid": 2.55,
+   "a_slpm_hi": 4.91,
+   "a_p_takedown": 0.294,
+   "a_p_knockdown": 0.075,
    "b_ctrl_lo": 0.0,
-   "b_ctrl_mid": 10.66,
-   "b_ctrl_hi": 30.33,
-   "b_slpm_lo": 1.2,
-   "b_slpm_mid": 3.13,
-   "b_slpm_hi": 5.16,
-   "b_p_takedown": 0.574,
-   "b_p_knockdown": 0.135
+   "b_ctrl_mid": 12.39,
+   "b_ctrl_hi": 26.49,
+   "b_slpm_lo": 1.02,
+   "b_slpm_mid": 2.41,
+   "b_slpm_hi": 5.46,
+   "b_p_takedown": 0.695,
+   "b_p_knockdown": 0.081
+  },
+  {
+   "bout": "Vanessa Demopoulos vs. Yazmin Jauregui",
+   "a": "Vanessa Demopoulos",
+   "b": "Yazmin Jauregui",
+   "rounds": 3,
+   "segment": "Prelims",
+   "p_a": 0.1766,
+   "p_b": 0.8234,
+   "drivers": [
+    {
+     "label": "age",
+     "value": -0.816,
+     "favours": "b"
+    },
+    {
+     "label": "striking output",
+     "value": -0.3462,
+     "favours": "b"
+    },
+    {
+     "label": "durability",
+     "value": 0.2885,
+     "favours": "a"
+    },
+    {
+     "label": "striking defence",
+     "value": -0.1981,
+     "favours": "b"
+    },
+    {
+     "label": "reach",
+     "value": -0.1504,
+     "favours": "b"
+    }
+   ],
+   "p_market": 0.1421,
+   "books": 15.0,
+   "edge": 0.0345,
+   "m_a_ko": 0.0595,
+   "m_b_ko": 0.1085,
+   "m_a_sub": 0.0406,
+   "m_b_sub": 0.1767,
+   "m_decision": 0.6147,
+   "p_finish": 0.3853,
+   "p_end_r1": 0.1402,
+   "p_end_r2": 0.1477,
+   "p_end_r3": 0.0974,
+   "p_end_r4": null,
+   "p_end_r5": null,
+   "totals": {
+    "over_1_5": 0.8016,
+    "over_2_5": 0.6643
+   },
+   "a_ctrl_lo": 0.0,
+   "a_ctrl_mid": 5.43,
+   "a_ctrl_hi": 23.38,
+   "a_slpm_lo": 1.77,
+   "a_slpm_mid": 3.75,
+   "a_slpm_hi": 8.02,
+   "a_p_takedown": 0.297,
+   "a_p_knockdown": 0.084,
+   "b_ctrl_lo": 0.0,
+   "b_ctrl_mid": 1.83,
+   "b_ctrl_hi": 15.02,
+   "b_slpm_lo": 2.31,
+   "b_slpm_mid": 5.74,
+   "b_slpm_hi": 9.39,
+   "b_p_takedown": 0.367,
+   "b_p_knockdown": 0.214
   }
  ],
  "no_read": [
   {
-   "a": "Gable Steveson",
-   "b": "Sean Sharaf",
-   "reason": "insufficient history (1 / 2 prior bouts)",
-   "segment": "Prelims"
-  },
-  {
-   "a": "Michael Aswell Jr.",
-   "b": "Joo Sang Yoo",
+   "a": "Mehemmedeli Osmanli",
+   "b": "Ilimbek Akylbek uulu",
    "reason": "name not in UFCStats corpus",
-   "segment": "Prelims"
+   "segment": "Main card"
   },
   {
-   "a": "Ryan Gandra",
-   "b": "Ozzy Diaz",
-   "reason": "insufficient history (1 / 3 prior bouts)",
+   "a": "Melissa Amaya",
+   "b": "Valesca Machado",
+   "reason": "name not in UFCStats corpus",
+   "segment": "Main card"
+  },
+  {
+   "a": "Josiah Harrell",
+   "b": "Elves Brener",
+   "reason": "insufficient history (1 / 6 prior bouts)",
+   "segment": "Main card"
+  },
+  {
+   "a": "Rodolfo Bellato",
+   "b": "Christian Edwards",
+   "reason": "insufficient history (5 / 1 prior bouts)",
    "segment": "Prelims"
   }
  ],
  "unresolved_names": [
-  "Michael Aswell Jr."
+  "Ilimbek Akylbek uulu",
+  "Mehemmedeli Osmanli",
+  "Melissa Amaya",
+  "Valesca Machado"
  ],
- "market_source": "local csv",
+ "market_source": "the-odds-api",
  "track_record": {
   "winner": {
    "n_tested": 829,
@@ -762,34 +561,34 @@
   },
   "takedown": {
    "said_likely": {
-    "n": 394,
-    "happened": 0.716,
-    "avg_said": 0.717
+    "n": 397,
+    "happened": 0.718,
+    "avg_said": 0.716
    },
    "said_unlikely": {
-    "n": 820,
-    "happened": 0.254,
-    "avg_said": 0.245
+    "n": 812,
+    "happened": 0.246,
+    "avg_said": 0.246
    },
-   "auc": 0.742
+   "auc": 0.743
   },
   "knockdown": {
    "said_unlikely": {
-    "n": 1598,
-    "happened": 0.173,
-    "avg_said": 0.165
+    "n": 1584,
+    "happened": 0.17,
+    "avg_said": 0.164
    },
-   "auc": 0.668
+   "auc": 0.662
   },
   "ranges": {
    "control time": {
     "claimed": 0.8,
-    "actual": 0.794,
+    "actual": 0.797,
     "n": 1692
    },
    "significant strikes": {
     "claimed": 0.8,
-    "actual": 0.793,
+    "actual": 0.795,
     "n": 1692
    }
   }
