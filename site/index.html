@@ -6,617 +6,360 @@
 <title>Cornerman — UFC fight analysis</title>
 <style>
   :root{
-    --ink:#0D1015; --panel:#151A22; --panel2:#1B212B; --line:#272E3B;
-    --soft:#1E242E; --bone:#ECE8E0; --mute:#8D95A6; --dim:#5B6375;
+    --ink:#0C0F14; --panel:#141921; --panel2:#1A2029; --line:#252C38;
+    --soft:#1C222C; --bone:#ECE8E0; --mute:#8D95A6; --dim:#59616F;
     --red:#C8442F; --redsoft:#E87D68; --blue:#3E85B4; --bluesoft:#78B2D8;
-    --gold:#CDA43A; --warn:#D98C3A;
+    --gold:#CDA43A; --warn:#DE8C34; --good:#6FBF73;
   }
   *{box-sizing:border-box}
-  html{-webkit-text-size-adjust:100%}
   body{margin:0;background:var(--ink);color:var(--bone);
-    font:15px/1.55 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+    font:14px/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
     -webkit-font-smoothing:antialiased}
-  .wrap{max-width:840px;margin:0 auto;padding:0 20px}
   .mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-variant-numeric:tabular-nums}
-  .lbl{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--dim)}
-  .muted{color:var(--mute)}
+  .lbl{font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim)}
+  .wrap{max-width:1680px;margin:0 auto;padding:0 18px}
 
-  header{display:flex;justify-content:space-between;align-items:center;
-    padding:18px 0;border-bottom:1px solid var(--line)}
-  .brand{font-weight:800;letter-spacing:.3em;font-size:13px;text-transform:uppercase}
-
-  h1{font-size:clamp(28px,7vw,50px);line-height:.97;letter-spacing:-.035em;
-    font-weight:800;text-transform:uppercase;margin:16px 0 10px}
-  .evmeta{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
-  .chip{font-size:10px;letter-spacing:.14em;text-transform:uppercase;
-    border:1px solid var(--line);color:var(--mute);padding:3px 8px;border-radius:999px}
-
-  /* ---- the headline: where we differ from the market ---- */
-  .lede{border:1px solid var(--line);border-left:3px solid var(--gold);
-    background:var(--panel);border-radius:3px;padding:16px 18px;margin:22px 0 30px}
-  .lede h3{margin:0 0 8px;font-size:12px;letter-spacing:.16em;text-transform:uppercase;
-    color:var(--gold);font-weight:700}
-  .lede p{margin:0;font-size:13.5px;line-height:1.65;color:var(--mute)}
-  .lede b{color:var(--bone);font-weight:600}
-
-  .seghead{border-bottom:1px solid var(--line);padding-bottom:8px;margin:0 0 12px;
-    display:flex;justify-content:space-between;align-items:baseline;gap:10px}
-
-  /* ---- bout card ---- */
-  .bout{width:100%;text-align:left;background:var(--panel);color:inherit;
-    border:1px solid var(--line);border-radius:4px;padding:15px 17px;margin-bottom:9px;
-    cursor:pointer;font:inherit;display:block;
-    transition:border-color .16s,background .16s,transform .16s}
-  .bout:hover{border-color:#3C465A;background:var(--panel2)}
-  .bout:focus-visible{outline:2px solid var(--bluesoft);outline-offset:2px}
-  .btop{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:12px}
-  .verdict{font-size:12.5px;color:var(--mute);line-height:1.4}
-  .verdict b{color:var(--bone);font-weight:600}
-  .names{display:flex;align-items:center;gap:12px;margin-bottom:11px}
-  .nm{font-weight:700;font-size:15.5px;text-transform:uppercase;letter-spacing:-.015em;
+  header{display:flex;align-items:center;gap:16px;padding:12px 0;
+    border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .brand{font-weight:800;letter-spacing:.3em;font-size:12px;text-transform:uppercase;
+    cursor:pointer;background:none;border:none;color:var(--bone);padding:0;font-family:inherit}
+  .brand:hover{color:var(--gold)}
+  .evline{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;flex:1;min-width:0}
+  .evname{font-size:17px;font-weight:800;text-transform:uppercase;letter-spacing:-.02em;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .side{flex:1;min-width:0}
-  .side.r{text-align:right}
-  .pc{width:150px;flex:none;text-align:center}
-  @media(max-width:600px){.pc{width:118px}.dlab{width:0;overflow:hidden}.dgap{margin-left:0}}
-  .pnum{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px}
-  .pnum b{font-size:16px;font-weight:700}
+  .chip{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;
+    border:1px solid var(--line);color:var(--mute);padding:2px 7px;border-radius:999px;
+    white-space:nowrap}
 
-  /* ---- the signature element: model bar with the market's tick on it ---- */
-  .gauge{position:relative;height:9px;border-radius:5px;background:var(--soft);overflow:visible}
-  .gauge .fill{position:absolute;left:0;top:0;bottom:0;border-radius:5px 0 0 5px;background:var(--red)}
-  .gauge .rest{position:absolute;right:0;top:0;bottom:0;border-radius:0 5px 5px 0;background:var(--blue)}
-  .gauge .mk{position:absolute;top:-5px;width:2px;height:19px;background:var(--gold);
-    box-shadow:0 0 0 2px var(--ink)}
-  .gauge.tall{height:13px;border-radius:7px}
-  .gauge.tall .mk{top:-5px;height:23px}
-  .gkey{display:flex;justify-content:space-between;margin-top:7px;font-size:9.5px;
-    letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+  /* divergence strip: the loudest thing on the page */
+  .strip{display:flex;gap:10px;overflow-x:auto;padding:12px 0 4px;margin-bottom:6px}
+  .dcard{flex:0 0 auto;min-width:214px;border:1px solid var(--warn);border-radius:4px;
+    background:linear-gradient(180deg,rgba(222,140,52,.10),rgba(222,140,52,.02));
+    padding:9px 12px;cursor:pointer;text-align:left;font:inherit;color:inherit}
+  .dcard:hover{background:rgba(222,140,52,.16)}
+  .dcard.calm{border-color:var(--line);background:var(--panel)}
+  .dgap{font-size:22px;font-weight:800;letter-spacing:-.03em;color:var(--warn)}
+  .dcard.calm .dgap{color:var(--mute)}
 
-  .edgeTag{font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;
-    border-radius:3px;font-weight:700;white-space:nowrap;border:1px solid currentColor}
-  .edgeTag.agree{color:var(--dim)}
-  .edgeTag.lean{color:var(--mute)}
-  .edgeTag.wide{color:var(--warn);background:rgba(217,140,58,.10)}
-  .edgeTag.hit{color:#6FBF73;background:rgba(111,191,115,.10)}
-  .edgeTag.miss{color:var(--red);background:rgba(200,68,47,.10)}
-  .cardseg{margin-bottom:22px}
-  .segbar{background:var(--panel2);border:1px solid var(--line);border-bottom:none;
-    border-radius:4px 4px 0 0;padding:9px 13px;margin-bottom:0}
-  .cardseg .bout{border-radius:0;margin-bottom:0;border-top:none}
-  .cardseg .bout:last-child{border-radius:0 0 4px 4px}
-  .cardseg .noread{border-radius:0;margin-bottom:0;border-top:none}
+  .seg{margin-top:14px}
+  .seghd{display:flex;align-items:baseline;gap:10px;margin-bottom:8px}
+  .seghd h2{margin:0;font-size:11px;font-weight:800;letter-spacing:.2em;
+    text-transform:uppercase;color:var(--bone)}
+  .grid{display:grid;gap:9px;grid-template-columns:repeat(auto-fill,minmax(268px,1fr))}
 
-  /* model over market, sharing one axis: the offset is the message */
-  .dual{display:flex;flex-direction:column;gap:3px}
-  .drow{display:flex;align-items:center;gap:7px}
-  .dlab{font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);
-    width:34px;flex:none;text-align:right}
-  .drow .gauge{flex:1}
-  .gauge.mkt{background:var(--soft)}
-  .gauge .mfill{position:absolute;left:0;top:0;bottom:0;border-radius:5px;
-    background:var(--gold);opacity:.65}
-  .dgap{position:relative;height:5px;margin-left:41px}
-  .dgap i{position:absolute;top:1px;height:3px;background:var(--warn);opacity:.9;
-    border-radius:2px}
+  .tile{border:1px solid var(--line);background:var(--panel);border-radius:4px;
+    padding:10px 11px;cursor:pointer;text-align:left;font:inherit;color:inherit;
+    transition:border-color .15s,background .15s}
+  .tile:hover{border-color:#3B4557;background:var(--panel2)}
+  .tile:focus-visible{outline:2px solid var(--bluesoft);outline-offset:2px}
+  .tile.wide{border-color:rgba(222,140,52,.55)}
+  .trow{display:flex;justify-content:space-between;align-items:center;gap:6px}
+  .nm{font-size:12.5px;font-weight:700;text-transform:uppercase;letter-spacing:-.01em;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:108px}
+  .pnum{font-size:14px;font-weight:800}
 
-  /* grouped markets, so 17 rows do not read as one list */
-  .pgroup{border:1px solid var(--line);border-radius:4px;margin-bottom:10px;
-    overflow:hidden;background:var(--ink)}
-  .pgroup.priced{border-color:rgba(205,164,58,.45)}
-  .ghead{display:flex;justify-content:space-between;align-items:baseline;gap:10px;
-    padding:8px 12px;background:var(--panel2);border-bottom:1px solid var(--line)}
-  .gname{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
-    color:var(--bone)}
-  .pgroup.priced .gname{color:var(--gold)}
-  .prow{display:flex;align-items:center;gap:10px;padding:8px 12px}
-  .prow+.prow{border-top:1px solid var(--soft)}
+  .gauge{position:relative;height:7px;border-radius:4px;background:var(--soft);
+    display:flex;overflow:hidden;margin:5px 0 2px}
+  .gauge i{display:block;height:100%}
+  .mkt{position:relative;height:5px;border-radius:3px;background:var(--soft);overflow:hidden}
+  .mkt i{display:block;height:100%;background:var(--gold);opacity:.7}
+  .gaplink{position:relative;height:4px;margin:1px 0}
+  .gaplink i{position:absolute;top:1px;height:2px;background:var(--warn);border-radius:1px}
 
-  /* ---- drivers ---- */
-  .drv{display:flex;align-items:center;gap:10px;padding:7px 0}
-  .drv .dn{width:132px;flex:none;font-size:12px;color:var(--mute)}
-  .drv .dt{flex:1;position:relative;height:8px}
-  .drv .dt .bg{position:absolute;inset:0;background:var(--soft);border-radius:4px}
-  .drv .dt .zero{position:absolute;left:50%;top:-3px;width:1px;height:14px;background:var(--line)}
-  .drv .dt i{position:absolute;top:0;height:8px;border-radius:4px}
-  .drv .dv{width:56px;flex:none;text-align:right;font-size:11px;color:var(--dim)}
+  .props{display:flex;gap:5px;margin-top:7px;flex-wrap:wrap}
+  .pp{font-size:9.5px;letter-spacing:.04em;padding:2px 6px;border-radius:3px;
+    border:1px solid var(--line);color:var(--mute);white-space:nowrap}
+  .pp b{color:var(--bone);font-weight:700}
+  .pp.hot{border-color:rgba(205,164,58,.6);color:var(--gold)}
+  .pp.hot b{color:var(--gold)}
 
-  .mrow{display:flex;align-items:center;gap:9px;margin-bottom:6px}
-  .mrow span{font-size:11.5px;color:var(--mute);width:104px;flex:none}
-  .mrow .t{flex:1;height:7px;background:var(--soft);border-radius:4px}
-  .mrow .t i{display:block;height:7px;border-radius:4px}
-  .mrow b{font-size:11.5px;width:44px;text-align:right;font-weight:600}
+  .noread{border:1px dashed var(--line);border-radius:4px;padding:9px 11px;
+    font-size:11.5px;color:var(--dim)}
 
-  .rng{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--soft)}
-  .rngbar{flex:1;position:relative;height:20px}
-  .rngbar .zone{position:absolute;top:7px;height:7px;border-radius:4px;opacity:.5}
-  .rngbar .pt{position:absolute;top:4px;width:2px;height:13px;background:var(--bone)}
-
-  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:24px}
-  @media(max-width:600px){.grid2{grid-template-columns:1fr;gap:18px}
-    .drv .dn{width:96px} .mrow span{width:86px} .pc{width:92px}}
-
-  button.back{background:none;border:none;color:var(--mute);font:inherit;font-size:11px;
-    letter-spacing:.12em;padding:0;cursor:pointer;margin-bottom:24px}
-  button.back:hover{color:var(--bone)}
-
+  /* detail drawer */
+  .scrim{position:fixed;inset:0;background:rgba(5,7,10,.62);opacity:0;pointer-events:none;
+    transition:opacity .18s;z-index:40}
+  .scrim.on{opacity:1;pointer-events:auto}
+  .draw{position:fixed;top:0;right:0;bottom:0;width:min(560px,96vw);background:var(--ink);
+    border-left:1px solid var(--line);z-index:50;overflow-y:auto;
+    transform:translateX(100%);transition:transform .2s ease}
+  .draw.on{transform:none}
+  .draw .inner{padding:18px 20px 40px}
+  .xbtn{position:sticky;top:0;float:right;background:var(--ink);border:1px solid var(--line);
+    color:var(--mute);font:inherit;font-size:12px;border-radius:4px;padding:3px 9px;cursor:pointer}
+  .xbtn:hover{color:var(--bone)}
   .card{border:1px solid var(--line);background:var(--panel);border-radius:4px;
-    padding:16px 18px;margin-bottom:18px}
-  .note{border:1px solid var(--line);border-radius:4px;background:var(--panel);
-    padding:16px 18px;font-size:11.5px;line-height:1.75;color:var(--dim);margin-top:28px}
-  .note b{color:var(--mute)}
-  .noread{border:1px dashed var(--line);border-radius:4px;padding:13px 16px;
-    margin-bottom:9px;font-size:13px;color:var(--mute)}
-  footer{border-top:1px solid var(--line);margin-top:38px;padding:20px 0;
-    font-size:10.5px;color:var(--dim);line-height:1.7}
-  @media(prefers-reduced-motion:no-preference){
-    .fade{animation:f .3s ease both}
-    @keyframes f{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-  }
+    padding:13px 15px;margin-bottom:12px}
+  .pgroup{border:1px solid var(--line);border-radius:4px;margin-bottom:9px;overflow:hidden}
+  .pgroup.priced{border-color:rgba(205,164,58,.5)}
+  .ghead{display:flex;justify-content:space-between;align-items:baseline;gap:8px;
+    padding:7px 11px;background:var(--panel2);border-bottom:1px solid var(--line)}
+  .gname{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+  .pgroup.priced .gname{color:var(--gold)}
+  .prow{display:flex;align-items:center;gap:9px;padding:6px 11px}
+  .prow+.prow{border-top:1px solid var(--soft)}
+  .drv{display:flex;align-items:center;gap:9px;padding:5px 0}
+  .drv .dt{flex:1;position:relative;height:7px}
+  .drv .dt .bg{position:absolute;inset:0;background:var(--soft);border-radius:4px}
+  .drv .dt .zero{position:absolute;left:50%;top:-3px;width:1px;height:13px;background:var(--line)}
+  .drv .dt i{position:absolute;top:0;height:7px;border-radius:4px}
+  .mrow{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+  .mrow span{font-size:11px;color:var(--mute);width:96px;flex:none}
+  .mrow .t{flex:1;height:6px;background:var(--soft);border-radius:3px}
+  .mrow .t i{display:block;height:6px;border-radius:3px}
+  .mrow b{font-size:11px;width:42px;text-align:right}
+  .edgeTag{font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;padding:2px 6px;
+    border-radius:3px;font-weight:700;white-space:nowrap;border:1px solid currentColor}
+  .edgeTag.agree{color:var(--dim)} .edgeTag.lean{color:var(--mute)}
+  .edgeTag.wide{color:var(--warn)} .edgeTag.hit{color:var(--good)} .edgeTag.miss{color:var(--red)}
+  footer{border-top:1px solid var(--line);margin-top:22px;padding:14px 0 26px;
+    font-size:10px;color:var(--dim);line-height:1.6}
+  .note{font-size:10.5px;color:var(--dim);line-height:1.6}
+  @media(max-width:700px){ .nm{max-width:84px} .wrap{padding:0 12px} }
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <div class="brand">Cornerman</div>
-    <div class="mono muted" id="stamp" style="font-size:11px"></div>
+    <button class="brand" id="home">Cornerman</button>
+    <div class="evline" id="evline"></div>
+    <div class="mono" id="stamp" style="font-size:10.5px;color:var(--mute);white-space:nowrap"></div>
   </header>
-  <div id="app" style="padding:26px 0"><div class="lbl">Loading…</div></div>
+  <div id="app" style="padding:4px 0 0"><div class="lbl">Loading…</div></div>
   <footer>
-    Not affiliated with the UFC. Statistics compiled from public records.<br>
-    This is an analysis tool, not betting advice — tested at 67% accuracy against
-    70% for the closing line. It does not beat the market.
+    Not affiliated with the UFC. Statistics from public records. Analysis tool, not betting
+    advice — tested at 67% accuracy against 70% for the closing line. It does not beat the market.
   </footer>
 </div>
+<div class="scrim" id="scrim"></div>
+<aside class="draw" id="draw" aria-hidden="true"><div class="inner" id="drawin"></div></aside>
 
 <script>
-const esc = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const P1 = x => (x*100).toFixed(1);
-const P0 = x => Math.round(x*100);
-const el = h => { const d=document.createElement('div'); d.innerHTML=h.trim(); return d.firstChild; };
-let DATA=null;
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const P1=x=>(x*100).toFixed(1), P0=x=>Math.round(x*100);
+const SEGS=['Main card','Prelims','Early prelims'];
+let DATA=null, HIST=null;
 
-/* Two stacked bars, model over market, sharing one axis.
-   A tick on a single bar was too quiet to carry the comparison — the offset
-   between two aligned bars reads instantly and needs no legend. */
-function gauge(pa, pm, tall){
-  const h = tall ? 13 : 9;
-  const model = `<div class="gauge${tall?' tall':''}">
-      <div class="fill" style="width:${pa*100}%"></div>
-      <div class="rest" style="width:${(1-pa)*100}%"></div></div>`;
-  if(pm==null) return model;
-  const d = pa - pm;
-  const lo = Math.min(pa,pm), w = Math.abs(d);
-  return `<div class="dual">
-    <div class="drow"><span class="dlab">model</span>${model}</div>
-    <div class="dgap">${w>0.02?`<i style="left:${lo*100}%;width:${w*100}%"></i>`:''}</div>
-    <div class="drow"><span class="dlab" style="color:var(--gold)">market</span>
-      <div class="gauge${tall?' tall':''} mkt">
-        <div class="mfill" style="width:${pm*100}%"></div></div></div>
-  </div>`;
-}
-
-function deltaChip(b, big){
-  if(b.edge==null) return '';
+function gap(b){ return b.edge==null?null:Math.abs(b.edge); }
+function tag(b){
+  if(b.edge==null) return '<span class="edgeTag agree">no line</span>';
   const e=Math.abs(b.edge), who=(b.edge>0?b.a:b.b).split(' ').slice(-1)[0];
-  if(e<0.05) return `<span class="edgeTag agree">in line</span>`;
-  const cls = e>=0.12 ? 'wide' : 'lean';
-  return `<span class="edgeTag ${cls}"${big?' style="font-size:11px;padding:4px 9px"':''}>
-    ${b.edge>0?'▲':'▼'} ${(e*100).toFixed(0)} pts ${esc(who)}</span>`;
+  if(e<0.05) return '<span class="edgeTag agree">in line</span>';
+  return `<span class="edgeTag ${e>=0.12?'wide':'lean'}">${b.edge>0?'▲':'▼'} ${(e*100).toFixed(0)} ${esc(who)}</span>`;
 }
 
-
-/* a readable sentence, not a number dump */
-function resultBadge(b){
-  const r=b.result;
-  const t=Math.floor(r.seconds/60)+':'+String(r.seconds%60).padStart(2,'0');
-  return `<span class="edgeTag ${r.model_right?'hit':'miss'}">
-    ${r.model_right?'✓':'✗'} ${esc(r.winner.split(' ').slice(-1)[0])} · ${esc(r.method)} · ${t}</span>`;
+/* the model-vs-market strip, first thing on the page */
+function strip(){
+  const w=DATA.bouts.filter(b=>b.edge!=null).sort((x,y)=>Math.abs(y.edge)-Math.abs(x.edge));
+  if(!w.length) return `<div class="note" style="padding:10px 0">No market prices in this
+    build — add <span class="mono">ODDS_API_KEY</span> and the model-vs-market comparison appears here.</div>`;
+  const top=w.slice(0,5);
+  return `<div class="strip">${top.map(b=>{
+    const e=Math.abs(b.edge), who=e>0?(b.edge>0?b.a:b.b):b.a;
+    const mine=b.edge>0?b.p_a:b.p_b, theirs=b.edge>0?b.p_market:1-b.p_market;
+    return `<button class="dcard ${e>=0.05?'':'calm'}" data-id="${esc(b.bout)}">
+      <div class="lbl">model vs market</div>
+      <div style="display:flex;align-items:baseline;gap:8px;margin:3px 0 2px">
+        <span class="dgap mono">${b.edge>0?'+':'−'}${(e*100).toFixed(1)}</span>
+        <span class="nm" style="max-width:120px">${esc(who)}</span></div>
+      <div class="mono" style="font-size:10.5px;color:var(--mute)">
+        ${P1(mine)}% vs <span style="color:var(--gold)">${P1(theirs)}%</span> market</div>
+    </button>`;}).join('')}</div>`;
 }
 
-function verdict(b){
-  if(b.result){
-    const r=b.result;
-    return `<b>${esc(r.winner)}</b> won by ${esc(r.method)} at ${Math.floor(r.seconds/60)}:${String(r.seconds%60).padStart(2,'0')}. `+
-           `The model had ${esc(b.p_a>=.5?b.a:b.b)} at ${P0(Math.max(b.p_a,b.p_b))}% — `+
-           `<b>${r.model_right?'correct':'wrong'}</b>.`;
-  }
-  const fav = b.p_a>=.5 ? b.a : b.b;
-  const p   = Math.max(b.p_a,b.p_b);
-  const lean= p<0.56 ? 'barely favours' : p<0.68 ? 'favours' : 'strongly favours';
-  let s = `Model ${lean} <b>${esc(fav)}</b> at ${P0(p)}%`;
-  if(b.edge!=null){
-    const e=Math.abs(b.edge);
-    s += e<0.05 ? `, in line with the market.`
-       : `, where the market has ${P0(b.edge>0?b.p_market:1-b.p_market)}% — a ${(e*100).toFixed(0)}-point gap.`;
-  } else s += '.';
-  if(b.p_finish!=null){
-    const r=[1,2,3,4,5].map(k=>[k,b['p_end_r'+k]]).filter(x=>x[1]!=null)
-                       .sort((x,y)=>y[1]-x[1])[0];
-    s += b.p_finish>=0.55
-      ? ` Likely to end early — ${P0(b.p_finish)}% inside the distance${r?`, most often round ${r[0]}`:''}.`
-      : b.p_finish<=0.35 ? ` Likely to go the distance (${P0(b.m_decision)}%).` : '';
-  }
-  return s;
+function propChips(b){
+  const c=[];
+  if(b.p_finish!=null) c.push(`<span class="pp ${b.p_finish>=.6?'hot':''}">ITD <b>${P0(b.p_finish)}%</b></span>`);
+  const td=Math.max(b.a_p_takedown||0,b.b_p_takedown||0);
+  const who=(b.a_p_takedown||0)>=(b.b_p_takedown||0)?b.a:b.b;
+  if(td) c.push(`<span class="pp ${td>=.7?'hot':''}">TD ${esc(who.split(' ').slice(-1)[0])} <b>${P0(td)}%</b></span>`);
+  if(b.totals&&b.totals.over_2_5!=null) c.push(`<span class="pp">O2.5 <b>${P0(b.totals.over_2_5)}%</b></span>`);
+  const kd=Math.max(b.a_p_knockdown||0,b.b_p_knockdown||0);
+  if(kd>=.3) c.push(`<span class="pp ${kd>=.45?'hot':''}">KD <b>${P0(kd)}%</b></span>`);
+  return `<div class="props">${c.join('')}</div>`;
 }
 
-function driverRows(b){
-  if(!b.drivers||!b.drivers.length) return '';
-  const mx = Math.max(...b.drivers.map(d=>Math.abs(d.value)));
-  return b.drivers.map(d=>{
-    const w = Math.abs(d.value)/mx*50;
-    const red = d.favours==='a';
-    return `<div class="drv">
-      <div class="dn">${esc(d.label)}</div>
-      <div class="dt"><div class="bg"></div><div class="zero"></div>
-        <i style="${red?'right:50%':'left:50%'};width:${w}%;
-           background:${red?'var(--red)':'var(--blue)'}"></i></div>
-      <div class="dv mono">${d.value>0?'+':''}${d.value.toFixed(2)}</div></div>`;
-  }).join('');
-}
-
-function resultsStrip(d){
-  const done=d.bouts.filter(b=>b.result);
-  if(!done.length) return '';
-  const right=done.filter(b=>b.result.model_right).length;
-  const fin=done.filter(b=>b.result.method!=='DEC').length;
-  return `<div class="lede" style="border-left-color:#6FBF73">
-    <h3 style="color:#6FBF73">Card graded</h3>
-    <p><b>${right} of ${done.length}</b> winners called correctly
-    (${Math.round(100*right/done.length)}%). ${fin} of ${done.length} ended inside
-    the distance. Results arrive with the next corpus refresh, not live — the
-    UFCStats feed updates roughly a day after an event.</p></div>`;
-}
-
-function headline(d){
-  const withMkt=d.bouts.filter(b=>b.edge!=null);
-  if(!withMkt.length){
-    return `<div class="lede"><h3>No market prices loaded</h3>
-      <p>Add <b>data/ufc_betting_odds_daily.csv</b> and regenerate to compare every
-      pick against the closing line. Without it the site shows the model alone.</p></div>`;
-  }
-  const big=withMkt.slice().sort((x,y)=>Math.abs(y.edge)-Math.abs(x.edge))[0];
-  const agree=withMkt.filter(b=>Math.abs(b.edge)<0.05).length;
-  const who=big.edge>0?big.a:big.b;
-  const drv=(big.drivers||[]).filter(x=>(x.favours==='a')===(big.edge>0))[0];
-  return `<div class="lede">
-    <h3>Where this differs from the market</h3>
-    <p>Across ${withMkt.length} priced bouts, the model agrees with the line on
-    <b>${agree}</b> within 5 points. The widest gap is
-    <b>${esc(big.a)} vs. ${esc(big.b)}</b>: the model has ${esc(who)} at
-    <b>${P0(big.edge>0?big.p_a:big.p_b)}%</b> against the market's
-    <b>${P0(big.edge>0?big.p_market:1-big.p_market)}%</b>${drv?`, driven mostly by <b>${esc(drv.label)}</b>`:''}.
-    Disagreement is not an edge — tested, the model loses to the closing line.
-    It is a starting point for an argument.</p></div>`;
+function tile(b){
+  const mk=b.p_market!=null;
+  const lo=mk?Math.min(b.p_a,b.p_market):0, w=mk?Math.abs(b.p_a-b.p_market):0;
+  return `<button class="tile ${gap(b)>=.12?'wide':''}" data-id="${esc(b.bout)}">
+    <div class="trow" style="margin-bottom:5px">
+      <span class="lbl">${b.rounds===5?'5 rds':'3 rds'}</span>${tag(b)}</div>
+    <div class="trow">
+      <span class="nm" style="color:${b.p_a>=.5?'var(--bone)':'var(--mute)'}">${esc(b.a)}</span>
+      <span class="mono pnum" style="color:${b.p_a>=.5?'var(--redsoft)':'var(--dim)'}">${P0(b.p_a)}</span>
+    </div>
+    <div class="gauge"><i style="width:${b.p_a*100}%;background:var(--red)"></i>
+      <i style="width:${b.p_b*100}%;background:var(--blue)"></i></div>
+    ${mk?`<div class="gaplink">${w>.01?`<i style="left:${lo*100}%;width:${w*100}%"></i>`:''}</div>
+      <div class="mkt"><i style="width:${b.p_market*100}%"></i></div>`:''}
+    <div class="trow" style="margin-top:4px">
+      <span class="nm" style="color:${b.p_a<.5?'var(--bone)':'var(--mute)'}">${esc(b.b)}</span>
+      <span class="mono pnum" style="color:${b.p_a<.5?'var(--bluesoft)':'var(--dim)'}">${P0(b.p_b)}</span>
+    </div>
+    ${propChips(b)}
+  </button>`;
 }
 
 function lastCard(){
-  const c = HIST && HIST.cards && HIST.cards[0];
-  if(!c) return '';
-  const pc = Math.round(100*c.right/c.n);
-  const rows = c.bouts.map(b=>{
-    const t=Math.floor(b.seconds/60)+':'+String(b.seconds%60).padStart(2,'0');
-    return `<div class="prow">
-      <div style="width:150px;flex:none;font-size:12px;color:var(--mute)">${esc(b.winner)}
-        <span class="lbl" style="display:block;margin-top:2px">${esc(b.method)} · ${t}</span></div>
-      <div style="flex:1;font-size:12px;color:var(--dim)">${esc(b.bout)}</div>
-      <span class="edgeTag ${b.model_right?'hit':'miss'}">${b.model_right?'✓':'✗'} ${P0(Math.max(b.p_a,1-b.p_a))}%</span>
-    </div>`;}).join('');
-  return `<div class="pgroup" style="margin:26px 0 22px;border-color:${pc>=50?'#6FBF73':'var(--line)'}">
-    <div class="ghead"><span class="gname" style="color:${pc>=50?'#6FBF73':'var(--mute)'}">
-      Last card — ${esc(c.event)}</span>
+  const c=HIST&&HIST.cards&&HIST.cards[0]; if(!c) return '';
+  const pc=Math.round(100*c.right/c.n);
+  return `<div class="seg"><div class="seghd">
+      <h2 style="color:var(--good)">Last card — ${esc(c.event)}</h2>
       <span class="lbl">${c.right}/${c.n} winners correct · ${pc}%</span></div>
-    ${rows}</div>`;
+    <div class="grid">${c.bouts.map(b=>{
+      const t=Math.floor(b.seconds/60)+':'+String(b.seconds%60).padStart(2,'0');
+      return `<div class="tile" style="cursor:default">
+        <div class="trow" style="margin-bottom:4px"><span class="lbl">${esc(b.method)} · ${t}</span>
+          <span class="edgeTag ${b.model_right?'hit':'miss'}">${b.model_right?'✓':'✗'} ${P0(Math.max(b.p_a,1-b.p_a))}%</span></div>
+        <div class="nm" style="max-width:100%">${esc(b.winner)}</div>
+        <div class="lbl" style="margin-top:3px">${esc(b.bout)}</div></div>`;}).join('')}</div></div>`;
 }
 
-function trackPanel(){
-  const t=DATA.track_record; if(!t||!t.winner) return '';
-  const w=t.winner;
-  const bands=(w.bands||[]).map(b=>`
-    <div class="mrow"><span>Said ${esc(b.said)}</span>
-      <div class="t"><i style="width:${b.right*100}%;background:${b.right>=0.5?'var(--gold)':'var(--dim)'}"></i></div>
-      <b>${Math.round(b.right*100)}%</b></div>`).join('');
-  const rows=[];
-  ['takedown','knockdown'].forEach(k=>{
-    const r=t[k]; if(!r) return;
-    if(r.said_likely) rows.push(`<li>Called a <b>${k}</b> likely (avg ${Math.round(r.said_likely.avg_said*100)}%) →
-      one happened <b>${Math.round(r.said_likely.happened*100)}%</b> of the time, ${r.said_likely.n} fights.</li>`);
-    if(r.said_unlikely) rows.push(`<li>Called a <b>${k}</b> unlikely (avg ${Math.round(r.said_unlikely.avg_said*100)}%) →
-      one happened <b>${Math.round(r.said_unlikely.happened*100)}%</b> of the time, ${r.said_unlikely.n} fights.</li>`);
-  });
-  Object.keys(t.ranges||{}).forEach(k=>{
-    const r=t.ranges[k];
-    rows.push(`<li>The <b>${esc(k)}</b> range claims to cover 80% →
-      it covered <b>${(r.actual*100).toFixed(0)}%</b>, ${r.n} fighter-fights.</li>`);
-  });
-  return `<div class="card" style="margin-top:26px">
-    <div class="seghead"><div class="lbl">Track record</div>
-      <div class="lbl">${w.n_tested} fights it never saw · ${esc(w.tested_from)} to ${esc(w.tested_to)}</div></div>
-    <p style="font-size:12.5px;color:var(--mute);margin:0 0 14px;line-height:1.6">
-      Not a rating we invented — just what happened on fights held out of training.
-      When it says a number, how often does that turn out?</p>
-    <div class="lbl" style="margin-bottom:8px">Winner picks, by how confident it was</div>
-    ${bands}
-    <ul style="font-size:12.5px;color:var(--mute);line-height:1.8;margin:14px 0 0;padding-left:18px">${rows.join('')}</ul>
-  </div>`;
-}
-
-function renderCard(){
+function render(){
   const d=DATA;
-  const boutHtml=(b,i)=>`
-    <button class="bout" data-i="${i}">
-      <div class="btop">
-        <div class="lbl">${b.rounds===5?'5 rounds':'3 rounds'}</div>
-        ${b.result?resultBadge(b):deltaChip(b)}
-      </div>
-      <div class="names">
-        <div class="side"><div class="nm" style="color:${b.p_a>=.5?'var(--bone)':'var(--mute)'}">${esc(b.a)}</div></div>
-        <div class="pc">
-          <div class="pnum mono">
-            <b style="color:${b.p_a>=.5?'var(--redsoft)':'var(--dim)'}">${P0(b.p_a)}</b>
-            <span class="lbl">vs</span>
-            <b style="color:${b.p_a<.5?'var(--bluesoft)':'var(--dim)'}">${P0(b.p_b)}</b>
-          </div>${gauge(b.p_a,b.p_market)}
-        </div>
-        <div class="side r"><div class="nm" style="color:${b.p_a<.5?'var(--bone)':'var(--mute)'}">${esc(b.b)}</div></div>
-      </div>
-      <div class="verdict">${verdict(b)}</div>
-    </button>`;
-  const nr=(d.no_read||[]).map(n=>`<div class="noread"><b>${esc(n.a)}</b> vs. <b>${esc(n.b)}</b>
-      <div class="lbl" style="margin-top:5px">No read — ${esc(n.reason)}</div></div>`).join('');
-  const node=el(`<div class="fade">
-    <div class="lbl">${esc(d.venue||'')}</div>
-    <h1>${esc(d.event||'Upcoming card')}</h1>
-    <div class="evmeta">
-      <span class="chip mono" style="color:var(--gold);border-color:var(--gold)">${esc(d.date||'')}</span>
-      <span class="chip">${d.bouts.length} modelled</span>
-      ${d.no_read&&d.no_read.length?`<span class="chip">${d.no_read.length} no read</span>`:''}
-      ${d.bouts.some(b=>b.books)?`<span class="chip">${Math.max(...d.bouts.map(b=>b.books||0))} books${d.market_source?` · ${esc(d.market_source)}`:''}</span>`:''}
-    </div>
-    ${resultsStrip(d)}
-    ${headline(d)}
-    <div class="seghead"><div class="lbl">Card</div>
-      <div class="lbl" style="color:var(--gold)">▏gold tick = market price</div></div>
-    ${['Main card','Prelims','Early prelims'].map(seg=>{
-        const inSeg=d.bouts.map((b,i)=>[b,i]).filter(([b])=>(b.segment||'Main card')===seg);
-        const nrSeg=(d.no_read||[]).filter(n=>(n.segment||'Main card')===seg);
-        if(!inSeg.length&&!nrSeg.length) return '';
-        return `<div class="cardseg">
-          <div class="seghead segbar"><div class="gname">${esc(seg)}</div>
-            <div class="lbl">${inSeg.length} modelled${nrSeg.length?` · ${nrSeg.length} no read`:''}</div></div>
-          ${inSeg.map(([b,i])=>boutHtml(b,i)).join('')}
-          ${nrSeg.map(n=>`<div class="noread"><b>${esc(n.a)}</b> vs. <b>${esc(n.b)}</b>
-             <div class="lbl" style="margin-top:5px">No read — ${esc(n.reason)}</div></div>`).join('')}
-        </div>`;
-      }).join('')}
-
-    ${lastCard()}
-    ${trackPanel()}
-    <div class="note"><b>How to read this.</b> Win probability comes from a logistic
-      model on 14 opponent-adjusted differentials, trained only on fights that happened
-      before the ones it is scoring. Method and round probabilities come from a
-      competing-risks hazard model and sum to exactly 100%. Output ranges cover the
-      real result 79% of the time against a claimed 80%. Fights where either fighter
-      has too little UFC history are shown as “no read” rather than guessed at.
-      The model tests at 67% accuracy against 70% for the closing line: it does not
-      beat the market, and where the two disagree the market has historically been
-      right more often.</div></div>`);
-  node.querySelectorAll('.bout').forEach(btn=>
-    btn.addEventListener('click',()=>show(+btn.dataset.i)));
-  return node;
+  document.getElementById('evline').innerHTML=
+    `<span class="evname">${esc(d.event||'Upcoming card')}</span>
+     <span class="chip mono" style="color:var(--gold);border-color:var(--gold)">${esc(d.date||'')}</span>
+     <span class="chip">${esc(d.venue||'')}</span>
+     <span class="chip">${d.bouts.length} modelled</span>
+     ${d.market_source?`<span class="chip">market: ${esc(d.market_source)}</span>`:''}`;
+  const segs=SEGS.map(s=>{
+    const bs=d.bouts.filter(b=>(b.segment||'Main card')===s);
+    const nr=(d.no_read||[]).filter(n=>(n.segment||'Main card')===s);
+    if(!bs.length&&!nr.length) return '';
+    return `<div class="seg"><div class="seghd"><h2>${esc(s)}</h2>
+        <span class="lbl">${bs.length} bout${bs.length===1?'':'s'}${nr.length?` · ${nr.length} no read`:''}</span></div>
+      <div class="grid">${bs.map(tile).join('')}
+        ${nr.map(n=>`<div class="noread"><b>${esc(n.a)}</b> vs. <b>${esc(n.b)}</b>
+          <div class="lbl" style="margin-top:4px">No read — ${esc(n.reason)}</div></div>`).join('')}</div></div>`;
+  }).join('');
+  document.getElementById('app').innerHTML=strip()+segs+lastCard()+`
+    <div class="note" style="margin-top:16px;max-width:900px">
+      Win probability is a logistic model on 14 opponent-adjusted differentials, trained only on
+      earlier fights. Method and round come from a competing-risks hazard model and sum to 100%.
+      Ranges cover the real result 79% of the time against a claimed 80%. Only the moneyline
+      carries a market price; every prop below it is a projection with nothing to check it against.
+    </div>`;
+  document.querySelectorAll('[data-id]').forEach(el=>
+    el.addEventListener('click',()=>open_(el.dataset.id)));
 }
 
-/* every market the model can price, with a market marker where one exists */
-/* plain-language reliability, measured, no invented index */
-function track(key){
-  const r=(DATA.track_record||{})[key];
-  if(!r||!r.said_likely) return '';
-  return `said likely → ${Math.round(r.said_likely.happened*100)}% happened`;
-}
-
-function propRow(name, p, col, marker, note){
-  const mk = marker==null ? '' :
-    `<div style="position:absolute;left:calc(${marker*100}% - 4px);top:-3px;
-       color:var(--gold);font-size:11px;line-height:1">◆</div>`;
+/* ---- drawer ---- */
+function propRow(name,p,col,marker,note){
+  const mk=marker==null?'':`<div style="position:absolute;left:calc(${marker*100}% - 4px);top:-3px;
+    color:var(--gold);font-size:10px;line-height:1">◆</div>`;
   return `<div class="prow">
-    <div style="width:150px;flex:none;font-size:12px;color:var(--mute)">${esc(name)}
-      ${note?`<span class="lbl" style="display:block;margin-top:2px">${esc(note)}</span>`:''}</div>
-    <div style="flex:1;position:relative;height:9px">
-      <div style="position:absolute;inset:0;background:var(--soft);border-radius:5px"></div>
-      <div style="position:absolute;left:0;top:0;height:9px;border-radius:5px;
+    <div style="width:146px;flex:none;font-size:11.5px;color:var(--mute)">${esc(name)}
+      ${note?`<span class="lbl" style="display:block;margin-top:1px">${esc(note)}</span>`:''}</div>
+    <div style="flex:1;position:relative;height:8px">
+      <div style="position:absolute;inset:0;background:var(--soft);border-radius:4px"></div>
+      <div style="position:absolute;left:0;top:0;height:8px;border-radius:4px;
         width:${Math.max(0,Math.min(100,p*100))}%;background:${col}"></div>${mk}</div>
-    <div class="mono" style="width:52px;text-align:right;font-size:12.5px;font-weight:600">${P1(p)}%</div>
-  </div>`;
+    <div class="mono" style="width:48px;text-align:right;font-size:12px;font-weight:600">${P1(p)}%</div></div>`;
 }
-
-function propGroup(title, sub, rows, priced){
+function group(title,sub,rows,priced){
   if(!rows.length) return '';
-  return `<div class="pgroup${priced?' priced':''}">
-    <div class="ghead"><span class="gname">${esc(title)}</span>
-      <span class="lbl">${esc(sub)}</span></div>
-    ${rows.join('')}</div>`;
+  return `<div class="pgroup${priced?' priced':''}"><div class="ghead">
+    <span class="gname">${esc(title)}</span><span class="lbl">${esc(sub)}</span></div>${rows.join('')}</div>`;
 }
+function track(k){ const r=(DATA.track_record||{})[k];
+  return (r&&r.said_likely)?`said likely → ${Math.round(r.said_likely.happened*100)}% happened`:''; }
 
-function propRows(b){
-  const tdn=track('takedown'), kdn=track('knockdown');
-  const mk = b.p_market!=null;
-  const winner=[
-    propRow(`${b.a} wins`, b.p_a, 'var(--red)', mk?b.p_market:null,
-            mk?`market ${P1(b.p_market)}%`:null),
-    propRow(`${b.b} wins`, b.p_b, 'var(--blue)', mk?1-b.p_market:null,
-            mk?`market ${P1(1-b.p_market)}%`:null)];
-  const dist=[
-    propRow('Goes the distance', b.m_decision, 'var(--mute)'),
-    propRow('Ends inside distance', b.p_finish, 'var(--warn)')];
-  if(b.totals) Object.keys(b.totals).forEach(k=>
-    dist.push(propRow(`Over ${k.replace('over_','').replace('_','.')} rounds`,
-                      b.totals[k], 'var(--gold)')));
-  const meth=[
-    propRow(`${b.a} by KO/TKO`, b.m_a_ko, 'var(--red)'),
-    propRow(`${b.a} by submission`, b.m_a_sub, 'var(--red)'),
-    propRow(`${b.b} by KO/TKO`, b.m_b_ko, 'var(--blue)'),
-    propRow(`${b.b} by submission`, b.m_b_sub, 'var(--blue)')];
-  const rnd=[];
-  [1,2,3,4,5].forEach(k=>{ const v=b['p_end_r'+k];
-    if(v!=null) rnd.push(propRow(`Ends in round ${k}`, v, 'var(--gold)')); });
-  const act=[
-    propRow(`${b.a} lands a takedown`, b.a_p_takedown, 'var(--red)', null, tdn),
-    propRow(`${b.b} lands a takedown`, b.b_p_takedown, 'var(--blue)', null, tdn),
-    propRow(`${b.a} scores a knockdown`, b.a_p_knockdown, 'var(--red)', null, kdn),
-    propRow(`${b.b} scores a knockdown`, b.b_p_knockdown, 'var(--blue)', null, kdn)];
-  return propGroup('Winner', mk?'market price shown':'no market feed', winner, mk)
-       + propGroup('How long', 'from the survival curve', dist)
-       + propGroup('Method', 'sums to 100% with decision', meth)
-       + propGroup('Finish round', 'projection only', rnd)
-       + propGroup('Fight action', 'hit rates measured below', act);
-}
-
-function rangeRow(name,lo,mid,hi,unit,col){
-  const sc=Math.max(hi,1e-6)*1.15;
-  return `<div class="rng">
-    <div style="width:128px;flex:none;font-size:11.5px;color:var(--mute)">${esc(name)}</div>
-    <div class="rngbar">
-      <div class="zone" style="left:${lo/sc*100}%;width:${(hi-lo)/sc*100}%;background:${col}"></div>
-      <div class="pt" style="left:${mid/sc*100}%"></div></div>
-    <div class="mono" style="width:96px;text-align:right;font-size:12px;color:var(--mute)">
-      ${lo.toFixed(1)}–${hi.toFixed(1)}<span class="lbl"> ${esc(unit)}</span></div></div>`;
-}
-
-/* the headline comparison, stated outright rather than implied by a tick */
-function divergence(b){
-  if(b.edge==null) return '';
-  const e=b.edge, a=Math.abs(e);
-  const who = e>0 ? b.a : b.b;
-  const mine = e>0 ? b.p_a : b.p_b;
-  const theirs = e>0 ? b.p_market : 1-b.p_market;
-  const drv=(b.drivers||[]).filter(x=>(x.favours==='a')===(e>0))[0];
-  const verdictTxt = a<0.05
-    ? `The model and the market agree here, within ${(a*100).toFixed(0)} points.`
-    : `The model is <b>${(a*100).toFixed(0)} points higher on ${esc(who)}</b> than the
-       market${drv?`, driven mostly by <b>${esc(drv.label)}</b>`:''}. Tested, the market
-       wins these disagreements more often than we do — treat it as an argument, not a tip.`;
-  return `<div class="card" style="border-left:3px solid ${a>=0.12?'var(--warn)':'var(--line)'}">
-    <div class="seghead"><div class="lbl">Model vs market</div>${deltaChip(b,true)}</div>
-    <div style="display:flex;align-items:flex-end;gap:18px;margin:4px 0 12px">
-      <div><div class="lbl">Model on ${esc(who)}</div>
-        <div class="mono" style="font-size:30px;font-weight:800;letter-spacing:-.03em">${P1(mine)}<span style="font-size:14px">%</span></div></div>
-      <div style="font-size:22px;color:var(--dim);padding-bottom:6px">→</div>
-      <div><div class="lbl" style="color:var(--gold)">Market</div>
-        <div class="mono" style="font-size:30px;font-weight:800;letter-spacing:-.03em;color:var(--gold)">${P1(theirs)}<span style="font-size:14px">%</span></div></div>
-      <div style="margin-left:auto;text-align:right">
-        <div class="lbl">Gap</div>
-        <div class="mono" style="font-size:30px;font-weight:800;letter-spacing:-.03em;
-          color:${a>=0.12?'var(--warn)':'var(--mute)'}">${e>0?'+':'−'}${(a*100).toFixed(1)}</div></div>
-    </div>
-    <p style="font-size:12.5px;color:var(--mute);margin:0;line-height:1.6">${verdictTxt}</p>
-  </div>`;
-}
-
-function show(i){
-  const b=DATA.bouts[i];
+function open_(id){
+  const b=DATA.bouts.find(x=>x.bout===id); if(!b) return;
+  const mk=b.p_market!=null;
+  const drv=(b.drivers||[]);
+  const mx=drv.length?Math.max(...drv.map(d=>Math.abs(d.value))):1;
   const rr=[1,2,3,4,5].map(k=>[k,b['p_end_r'+k]]).filter(x=>x[1]!=null);
-  const node=el(`<div class="fade">
-    <button class="back">← BACK TO CARD</button>
-    <div class="names" style="align-items:flex-start">
-      <div class="side">
-        <div class="lbl" style="color:var(--redsoft)">Red corner</div>
-        <div style="font-size:22px;font-weight:800;text-transform:uppercase;letter-spacing:-.025em;margin-top:4px">${esc(b.a)}</div></div>
-      <div class="lbl" style="padding-top:20px">vs</div>
-      <div class="side r">
-        <div class="lbl" style="color:var(--bluesoft)">Blue corner</div>
-        <div style="font-size:22px;font-weight:800;text-transform:uppercase;letter-spacing:-.025em;margin-top:4px">${esc(b.b)}</div></div>
+  const tdn=track('takedown'), kdn=track('knockdown');
+  const totals=b.totals?Object.keys(b.totals).map(k=>
+    propRow(`Over ${k.replace('over_','').replace('_','.')} rounds`,b.totals[k],'var(--gold)')):[];
+  document.getElementById('drawin').innerHTML=`
+    <button class="xbtn" id="xb">close ✕</button>
+    <div class="lbl">${esc(b.segment||'')} · ${b.rounds===5?'5 rounds':'3 rounds'}</div>
+    <div style="font-size:19px;font-weight:800;text-transform:uppercase;letter-spacing:-.02em;margin:4px 0 12px">
+      ${esc(b.a)} <span style="color:var(--dim)">vs</span> ${esc(b.b)}</div>
+    ${mk?`<div class="card" style="border-left:3px solid ${Math.abs(b.edge)>=.12?'var(--warn)':'var(--line)'}">
+      <div class="ghead" style="background:none;border:none;padding:0 0 8px">
+        <span class="gname">Model vs market</span>${tag(b)}</div>
+      <div style="display:flex;align-items:flex-end;gap:16px">
+        <div><div class="lbl">model</div><div class="mono" style="font-size:26px;font-weight:800">${P1(b.p_a)}%</div></div>
+        <div style="font-size:18px;color:var(--dim);padding-bottom:4px">→</div>
+        <div><div class="lbl" style="color:var(--gold)">market</div>
+          <div class="mono" style="font-size:26px;font-weight:800;color:var(--gold)">${P1(b.p_market)}%</div></div>
+        <div style="margin-left:auto;text-align:right"><div class="lbl">gap</div>
+          <div class="mono" style="font-size:26px;font-weight:800;color:${Math.abs(b.edge)>=.12?'var(--warn)':'var(--mute)'}">
+            ${b.edge>0?'+':'−'}${(Math.abs(b.edge)*100).toFixed(1)}</div></div></div>
+      <div class="note" style="margin-top:9px">Tested, the market wins these disagreements more
+        often than we do. Treat a gap as an argument, not a tip.</div></div>`:''}
+    ${drv.length?`<div class="card"><div class="ghead" style="background:none;border:none;padding:0 0 6px">
+      <span class="gname">Why</span><span class="lbl">push on the log-odds</span></div>
+      ${drv.map(d=>{const w=Math.abs(d.value)/mx*50, red=d.favours==='a';
+        return `<div class="drv"><div style="width:120px;flex:none;font-size:11.5px;color:var(--mute)">${esc(d.label)}</div>
+          <div class="dt"><div class="bg"></div><div class="zero"></div>
+            <i style="${red?'right:50%':'left:50%'};width:${w}%;background:${red?'var(--red)':'var(--blue)'}"></i></div>
+          <div class="mono" style="width:52px;text-align:right;font-size:11px;color:var(--dim)">${d.value>0?'+':''}${d.value.toFixed(2)}</div></div>`;}).join('')}
+      </div>`:''}
+    <div class="card"><div class="ghead" style="background:none;border:none;padding:0 0 8px">
+      <span class="gname">All markets priced</span><span class="lbl">${mk?'◆ = market':'no market feed'}</span></div>
+      ${group('Winner',mk?'market price shown':'no feed',[
+        propRow(`${b.a} wins`,b.p_a,'var(--red)',mk?b.p_market:null,mk?`market ${P1(b.p_market)}%`:null),
+        propRow(`${b.b} wins`,b.p_b,'var(--blue)',mk?1-b.p_market:null,mk?`market ${P1(1-b.p_market)}%`:null)],mk)}
+      ${group('How long','from the survival curve',[
+        propRow('Goes the distance',b.m_decision,'var(--mute)'),
+        propRow('Ends inside distance',b.p_finish,'var(--warn)')].concat(totals))}
+      ${group('Method','sums to 100% with decision',[
+        propRow(`${b.a} by KO/TKO`,b.m_a_ko,'var(--red)'),
+        propRow(`${b.a} by submission`,b.m_a_sub,'var(--red)'),
+        propRow(`${b.b} by KO/TKO`,b.m_b_ko,'var(--blue)'),
+        propRow(`${b.b} by submission`,b.m_b_sub,'var(--blue)')])}
+      ${group('Finish round','projection only',rr.map(([k,v])=>propRow(`Ends in round ${k}`,v,'var(--gold)')))}
+      ${group('Fight action','measured hit rates',[
+        propRow(`${b.a} lands a takedown`,b.a_p_takedown,'var(--red)',null,tdn),
+        propRow(`${b.b} lands a takedown`,b.b_p_takedown,'var(--blue)',null,tdn),
+        propRow(`${b.a} scores a knockdown`,b.a_p_knockdown,'var(--red)',null,kdn),
+        propRow(`${b.b} scores a knockdown`,b.b_p_knockdown,'var(--blue)',null,kdn)])}
     </div>
-
-    <div class="card" style="margin-top:22px">
-      <div class="pnum mono" style="margin-bottom:10px">
-        <b style="font-size:32px;color:var(--redsoft);letter-spacing:-.03em">${P1(b.p_a)}<span style="font-size:14px">%</span></b>
-        <span class="lbl">Model</span>
-        <b style="font-size:32px;color:var(--bluesoft);letter-spacing:-.03em">${P1(b.p_b)}<span style="font-size:14px">%</span></b>
-      </div>
-      ${gauge(b.p_a,b.p_market,true)}
-      <div class="gkey"><span>${esc(b.a)}</span>
-        ${b.p_market!=null?`<span style="color:var(--gold)">market ${P1(b.p_market)} / ${P1(1-b.p_market)}${b.books?` · ${b.books} books`:''}</span>`:'<span>no market price</span>'}
-        <span>${esc(b.b)}</span></div>
-    </div>
-
-    ${divergence(b)}
-
-    ${b.drivers&&b.drivers.length?`<div class="card">
-      <div class="seghead"><div class="lbl">Why</div>
-        <div class="lbl">push on the log-odds</div></div>
-      ${driverRows(b)}
-      <div style="font-size:11px;color:var(--dim);margin-top:10px;line-height:1.6">
-        Each bar is one feature's contribution, scaled and signed. This is the part
-        a price cannot give you — the market publishes a number and no reasoning.</div>
-    </div>`:''}
-
-    <div class="card">
-      <div class="seghead"><div class="lbl">How it ends</div><div class="lbl">sums to 100%</div></div>
-      <div class="grid2">
-        <div>
-          <div class="lbl" style="margin-bottom:9px;color:var(--redsoft)">${esc(b.a)}</div>
-          <div class="mrow"><span>by KO/TKO</span><div class="t"><i style="width:${Math.min(100,b.m_a_ko*220)}%;background:var(--red)"></i></div><b>${P1(b.m_a_ko)}%</b></div>
-          <div class="mrow"><span>by submission</span><div class="t"><i style="width:${Math.min(100,b.m_a_sub*220)}%;background:var(--red)"></i></div><b>${P1(b.m_a_sub)}%</b></div>
-        </div>
-        <div>
-          <div class="lbl" style="margin-bottom:9px;color:var(--bluesoft)">${esc(b.b)}</div>
-          <div class="mrow"><span>by KO/TKO</span><div class="t"><i style="width:${Math.min(100,b.m_b_ko*220)}%;background:var(--blue)"></i></div><b>${P1(b.m_b_ko)}%</b></div>
-          <div class="mrow"><span>by submission</span><div class="t"><i style="width:${Math.min(100,b.m_b_sub*220)}%;background:var(--blue)"></i></div><b>${P1(b.m_b_sub)}%</b></div>
-        </div>
-      </div>
-      <div class="mrow" style="margin-top:14px"><span>Decision</span>
-        <div class="t"><i style="width:${Math.min(100,b.m_decision*100)}%;background:var(--mute)"></i></div>
-        <b>${P1(b.m_decision)}%</b></div>
-      ${rr.length?`<div style="margin-top:16px">
-        <div class="lbl" style="margin-bottom:9px">Finish by round</div>
-        ${rr.map(([k,v])=>`<div class="mrow"><span>Round ${k}</span>
-          <div class="t"><i style="width:${Math.min(100,v*300)}%;background:var(--gold)"></i></div>
-          <b>${P1(v)}%</b></div>`).join('')}</div>`:''}
-    </div>
-
-    <div class="card">
-      <div class="seghead"><div class="lbl">All markets the model prices</div>
-        <div class="lbl">${b.p_market!=null?'◆ = market price':'no market feed'}</div></div>
-      ${propRows(b)}
-      <div style="font-size:11px;color:var(--dim);margin-top:12px;line-height:1.6">
-        Only the moneyline carries a market marker. No free odds feed quotes MMA
-        props — The Odds API covers fight winner only — so everything below the
-        first row is a projection with nothing to check it against. Method and
-        round figures come from the hazard model and sum to 100% across outcomes.
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="seghead"><div class="lbl">Projected output</div><div class="lbl">80% range</div></div>
-      ${rangeRow(b.a+' strikes',b.a_slpm_lo,b.a_slpm_mid,b.a_slpm_hi,'/min','var(--red)')}
-      ${rangeRow(b.b+' strikes',b.b_slpm_lo,b.b_slpm_mid,b.b_slpm_hi,'/min','var(--blue)')}
-      ${rangeRow(b.a+' control',b.a_ctrl_lo,b.a_ctrl_mid,b.a_ctrl_hi,'sec/min','var(--red)')}
-      ${rangeRow(b.b+' control',b.b_ctrl_lo,b.b_ctrl_mid,b.b_ctrl_hi,'sec/min','var(--blue)')}
-      <div style="font-size:11px;color:var(--dim);margin-top:12px;line-height:1.6">
-        Takedown probability is the strongest of these (AUC .742). Strike and control
-        figures are ranges because a single fight's stat line is mostly noise — the
-        model explains about 11% of the variance, but ranks fights meaningfully
-        better than a career average does.</div>
-    </div></div>`);
-  node.querySelector('.back').addEventListener('click',home);
-  const a=document.getElementById('app'); a.innerHTML=''; a.appendChild(node); window.scrollTo(0,0);
+    <div class="card"><div class="ghead" style="background:none;border:none;padding:0 0 8px">
+      <span class="gname">Projected output</span><span class="lbl">80% range</span></div>
+      ${[[b.a,b.a_slpm_lo,b.a_slpm_hi,'strikes /min','var(--red)'],
+         [b.b,b.b_slpm_lo,b.b_slpm_hi,'strikes /min','var(--blue)'],
+         [b.a,b.a_ctrl_lo,b.a_ctrl_hi,'control sec/min','var(--red)'],
+         [b.b,b.b_ctrl_lo,b.b_ctrl_hi,'control sec/min','var(--blue)']].map(([n,lo,hi,u,c])=>
+        `<div class="mrow"><span>${esc(n.split(' ').slice(-1)[0])}</span>
+          <div class="t"><i style="width:${Math.min(100,hi/ (u[0]==='c'?40:9) *100)}%;background:${c}"></i></div>
+          <b class="mono">${lo.toFixed(1)}–${hi.toFixed(1)}</b></div>`).join('')}
+      <div class="note" style="margin-top:6px">A single fight's stat line is mostly noise, so these
+        are ranges. The model explains ~11% of the variance but ranks fights better than a career average.</div>
+    </div>`;
+  document.getElementById('xb').addEventListener('click',close_);
+  document.getElementById('draw').classList.add('on');
+  document.getElementById('draw').setAttribute('aria-hidden','false');
+  document.getElementById('scrim').classList.add('on');
 }
-function home(){ const a=document.getElementById('app'); a.innerHTML=''; a.appendChild(renderCard()); window.scrollTo(0,0); }
+function close_(){
+  document.getElementById('draw').classList.remove('on');
+  document.getElementById('draw').setAttribute('aria-hidden','true');
+  document.getElementById('scrim').classList.remove('on');
+}
+document.getElementById('scrim').addEventListener('click',close_);
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') close_(); });
+document.getElementById('home').addEventListener('click',()=>{ close_(); window.scrollTo(0,0); });
 
-let HIST=null;
 Promise.all([
-  fetch('predictions.json',{cache:'no-store'})
-    .then(r=>{ if(!r.ok) throw new Error('predictions.json not found ('+r.status+')'); return r.json(); }),
-  // history is optional: it does not exist until a card has been archived AND
-  // its results have reached the corpus, which can be a day or more apart
+  fetch('predictions.json',{cache:'no-store'}).then(r=>{ if(!r.ok) throw new Error('predictions.json not found ('+r.status+')'); return r.json(); }),
   fetch('history.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null)
-]).then(([j,h])=>{ DATA=j; HIST=h;
-    document.getElementById('stamp').textContent=j.generated_utc?'updated '+j.generated_utc.slice(0,10):'';
-    home(); })
-  .catch(e=>{ document.getElementById('app').innerHTML=
-    '<div class="note"><b>Could not load predictions.</b><br>'+esc(e.message)+
-    '<br><br>Run <span class="mono">python -m mmastat.upcoming --json</span> to generate '+
-    '<span class="mono">site/predictions.json</span>, or wait for the daily refresh job.</div>'; });
+]).then(([j,h])=>{
+  DATA=j; HIST=h;
+  // full timestamp, to the minute: you need to know WHICH run produced this
+  const t=j.generated_utc?j.generated_utc.replace('T',' ').replace(/(\+.*|Z)$/,''):'';
+  document.getElementById('stamp').textContent=t?('updated '+t.slice(0,16)+' UTC'):'';
+  render();
+}).catch(e=>{
+  document.getElementById('app').innerHTML='<div class="note"><b>Could not load predictions.</b><br>'+
+    esc(e.message)+'<br><br>Run <span class="mono">python -m mmastat.upcoming --json</span>.</div>';
+});
 </script>
 </body>
 </html>
