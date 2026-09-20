@@ -97,6 +97,9 @@
   .pgroup.priced .gname{color:var(--gold)}
   .prow{display:flex;align-items:center;gap:9px;padding:6px 11px}
   .prow+.prow{border-top:1px solid var(--soft)}
+  .fo{width:52px;text-align:right;font-size:11px;color:var(--gold)}
+  .rec{width:132px;text-align:right;font-size:9px;letter-spacing:.06em;text-transform:uppercase}
+  .rec.none{color:#454D5B} .rec.good{color:var(--good)} .rec.bad{color:var(--warn)}
   .drv{display:flex;align-items:center;gap:9px;padding:5px 0}
   .drv .dt{flex:1;position:relative;height:7px}
   .drv .dt .bg{position:absolute;inset:0;background:var(--soft);border-radius:4px}
@@ -155,7 +158,7 @@
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const P1=x=>(x*100).toFixed(1), P0=x=>Math.round(x*100);
 const SEGS=['Main card','Prelims','Early prelims'];
-let DATA=null, HIST=null, BR=null;
+let DATA=null, HIST=null, BR=null, SC=null;
 
 function gap(b){ return b.edge==null?null:Math.abs(b.edge); }
 function tag(b){
@@ -353,7 +356,25 @@ function vsBase(cid, side, bands, model){
   return `fights like this: ${(b.rate*100).toFixed(0)}% (Q${b.q}, n=${b.n}) — model is ${verdict} it`;
 }
 
-function propRow(name,p,col,marker,note){
+/* A probability is not the unit a reader checks a sportsbook in. Printing the
+   fair price next to it removes the arithmetic between "the model says 60.5%"
+   and "the book is offering -140", which is the whole point of a sidecar. */
+function fairOdds(p){
+  p=Math.min(Math.max(p,1e-6),1-1e-6);
+  const dec=(1/p), us = p>=0.5 ? -100*p/(1-p) : 100*(1-p)/p;
+  return {dec:dec.toFixed(2), us:(us>0?'+':'')+Math.round(us)};
+}
+/* A market shows its own record, or says it has none yet. Borrowing the
+   winner model's credibility for a round-3 projection would be the easiest
+   dishonest thing this site could do. */
+function marketRecord(mk){
+  const m=SC&&SC.markets&&SC.markets[mk];
+  if(!m||m.n<25) return {txt:'no record yet', cls:'none', n:m?m.n:0};
+  const better=m.skill>0;
+  return {txt:`${m.n} graded · ${better?'beats':'below'} base rate`, cls:better?'good':'bad', n:m.n};
+}
+
+function propRow(name,p,col,marker,note,mkey){
   const mk=marker==null?'':`<div style="position:absolute;left:calc(${marker*100}% - 4px);top:-3px;
     color:var(--gold);font-size:10px;line-height:1">◆</div>`;
   return `<div class="prow">
@@ -363,7 +384,11 @@ function propRow(name,p,col,marker,note){
       <div style="position:absolute;inset:0;background:var(--soft);border-radius:4px"></div>
       <div style="position:absolute;left:0;top:0;height:8px;border-radius:4px;
         width:${Math.max(0,Math.min(100,p*100))}%;background:${col}"></div>${mk}</div>
-    <div class="mono" style="width:48px;text-align:right;font-size:12px;font-weight:600">${P1(p)}%</div></div>`;
+    <div class="mono" style="width:48px;text-align:right;font-size:12px;font-weight:600">${P1(p)}%</div>
+    <div class="mono fo" title="fair price implied by this probability">${fairOdds(p).us}</div>
+    ${mkey?(()=>{const r=marketRecord(mkey);
+      return `<span class="rec ${r.cls}" title="${r.n} graded claims for this market">${esc(r.txt)}</span>`;})():'<span class="rec none"></span>'}
+    </div>`;
 }
 /* Ranges need a shared axis per stat and an explicit label, or the reader is
    left with two bare numbers and no idea what they measure. Both fighters are
@@ -416,7 +441,7 @@ function open_(id){
   const mx=drv.length?Math.max(...drv.map(d=>Math.abs(d.value))):1;
   const rr=[1,2,3,4,5].map(k=>[k,b['p_end_r'+k]]).filter(x=>x[1]!=null);
   const totals=b.totals?Object.keys(b.totals).map(k=>
-    propRow(`Over ${k.replace('over_','').replace('_','.')} rounds`,b.totals[k],'var(--gold)')):[];
+    propRow(`Over ${k.replace('over_','').replace('_','.')} rounds`,b.totals[k],'var(--gold)',null,null,'total_'+k)):[];
   document.getElementById('drawin').innerHTML=`
     <button class="xbtn" id="xb">close ✕</button>
     <div class="lbl">${esc(b.segment||'')} · ${b.rounds===5?'5 rounds':'3 rounds'}</div>
@@ -444,24 +469,24 @@ function open_(id){
           <div class="mono" style="width:52px;text-align:right;font-size:11px;color:var(--dim)">${d.value>0?'+':''}${d.value.toFixed(2)}</div></div>`;}).join('')}
       </div>`:''}
     <div class="card"><div class="ghead" style="background:none;border:none;padding:0 0 8px">
-      <span class="gname">All markets priced</span><span class="lbl">${mk?'◆ = market':'no market feed'}</span></div>
+      <span class="gname">All markets priced</span><span class="lbl">probability · fair price · track record</span></div>
       ${group('Winner',mk?'market price shown':'no feed',[
-        propRow(`${b.a} wins`,b.p_a,'var(--red)',mk?b.p_market:null,mk?`market ${P1(b.p_market)}%`:null),
+        propRow(`${b.a} wins`,b.p_a,'var(--red)',mk?b.p_market:null,mk?`market ${P1(b.p_market)}%`:null,'winner_a'),
         propRow(`${b.b} wins`,b.p_b,'var(--blue)',mk?1-b.p_market:null,mk?`market ${P1(1-b.p_market)}%`:null)],mk)}
       ${group('How long','from the survival curve',[
-        propRow('Goes the distance',b.m_decision,'var(--mute)',null,vsBase('C9','fight',b.bands,b.m_decision)),
-        propRow('Ends inside distance',b.p_finish,'var(--warn)',null,vsBase('C4','fight',b.bands,b.p_finish))].concat(totals))}
+        propRow('Goes the distance',b.m_decision,'var(--mute)',null,vsBase('C9','fight',b.bands,b.m_decision),'decision'),
+        propRow('Ends inside distance',b.p_finish,'var(--warn)',null,vsBase('C4','fight',b.bands,b.p_finish),'inside_distance')].concat(totals))}
       ${group('Method','sums to 100% with decision',[
-        propRow(`${b.a} by KO/TKO`,b.m_a_ko,'var(--red)'),
-        propRow(`${b.a} by submission`,b.m_a_sub,'var(--red)'),
-        propRow(`${b.b} by KO/TKO`,b.m_b_ko,'var(--blue)'),
-        propRow(`${b.b} by submission`,b.m_b_sub,'var(--blue)')])}
-      ${group('Finish round','projection only',rr.map(([k,v])=>propRow(`Ends in round ${k}`,v,'var(--gold)')))}
+        propRow(`${b.a} by KO/TKO`,b.m_a_ko,'var(--red)',null,null,'ko_a'),
+        propRow(`${b.a} by submission`,b.m_a_sub,'var(--red)',null,null,'sub_a'),
+        propRow(`${b.b} by KO/TKO`,b.m_b_ko,'var(--blue)',null,null,'ko_b'),
+        propRow(`${b.b} by submission`,b.m_b_sub,'var(--blue)',null,null,'sub_b')])}
+      ${group('Finish round','projection only',rr.map(([k,v])=>propRow(`Ends in round ${k}`,v,'var(--gold)',null,null,'end_r'+k)))}
       ${group('Fight action',trackLine(),[
-        propRow(`${b.a} lands a takedown`,b.a_p_takedown,'var(--red)',null,vsBase('C1','a',b.bands,b.a_p_takedown)),
-        propRow(`${b.b} lands a takedown`,b.b_p_takedown,'var(--blue)',null,vsBase('C1','b',b.bands,b.b_p_takedown)),
-        propRow(`${b.a} scores a knockdown`,b.a_p_knockdown,'var(--red)',null,vsBase('C3','a',b.bands,b.a_p_knockdown)),
-        propRow(`${b.b} scores a knockdown`,b.b_p_knockdown,'var(--blue)',null,vsBase('C3','b',b.bands,b.b_p_knockdown))])}
+        propRow(`${b.a} lands a takedown`,b.a_p_takedown,'var(--red)',null,vsBase('C1','a',b.bands,b.a_p_takedown),'takedown_a'),
+        propRow(`${b.b} lands a takedown`,b.b_p_takedown,'var(--blue)',null,vsBase('C1','b',b.bands,b.b_p_takedown),'takedown_b'),
+        propRow(`${b.a} scores a knockdown`,b.a_p_knockdown,'var(--red)',null,vsBase('C3','a',b.bands,b.a_p_knockdown),'knockdown_a'),
+        propRow(`${b.b} scores a knockdown`,b.b_p_knockdown,'var(--blue)',null,vsBase('C3','b',b.bands,b.b_p_knockdown),'knockdown_b')])}
     </div>
     ${b.bands?`<div class="card"><div class="ghead" style="background:none;border:none;padding:0 0 8px">
       <span class="gname">Where this bout sits</span><span class="lbl">markers show each corner</span></div>
@@ -493,9 +518,10 @@ document.addEventListener('keydown',e=>{ if(e.key==='Escape') close_(); });
 Promise.all([
   fetch('predictions.json',{cache:'no-store'}).then(r=>{ if(!r.ok) throw new Error('predictions.json not found ('+r.status+')'); return r.json(); }),
   fetch('history.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null),
-  fetch('baserates.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null)
-]).then(([j,h,br])=>{
-  DATA=j; HIST=h; BR=br;
+  fetch('baserates.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null),
+  fetch('scorecard.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null)
+]).then(([j,h,br,sc])=>{
+  DATA=j; HIST=h; BR=br; SC=sc;
   // full timestamp, to the minute: you need to know WHICH run produced this
   const t=j.generated_utc?j.generated_utc.replace('T',' ').replace(/(\+.*|Z)$/,''):'';
   document.getElementById('stamp').textContent=t?('updated '+t.slice(0,16)+' UTC'):'';

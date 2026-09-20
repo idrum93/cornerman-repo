@@ -31,6 +31,7 @@ import unicodedata
 
 import numpy as np
 import pandas as pd
+from pathlib import Path
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
 
@@ -657,9 +658,33 @@ def write_json(out, skipped, unresolved, path="site/predictions.json",
 
 
 if __name__ == "__main__":
+    import json as _json
     import sys
+
     from .loaders import load
+
     f, p, _ = load(verbose=False)
     out, skipped, unresolved = predict_card("data/upcoming.txt", f, p)
     if "--json" in sys.argv:
-        print("\nwrote", write_json(out, skipped, unresolved))
+        path = write_json(out, skipped, unresolved)
+        print("\nwrote", path)
+
+        # Grade any archived card whose results have since reached the corpus.
+        # This call was missing entirely: archive_previous() ran inside
+        # write_json, so cards were being saved, but nothing ever graded them
+        # and site/history.json was never written.
+        try:
+            grade_archive(f)
+        except Exception as e:
+            print(f"note: grading unavailable ({e})")
+
+        # Record every market this card claims, before it happens, so each one
+        # accumulates its own hit rate instead of borrowing trust from the
+        # winner model.
+        try:
+            from .scorecard import log as sc_log, settle as sc_settle, scorecard as sc_build
+            sc_log(_json.loads(Path(path).read_text(encoding="utf-8")))
+            sc_settle(f)
+            sc_build()
+        except Exception as e:
+            print(f"note: scorecard unavailable ({e})")
