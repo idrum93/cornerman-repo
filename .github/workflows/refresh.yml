@@ -2,6 +2,13 @@ name: refresh
 on:
   schedule:
     - cron: "0 11 * * *"
+  # Also on push, so editing site/index.html by hand actually deploys. Folding
+  # the Pages deploy into this job fixed the GITHUB_TOKEN trigger problem but
+  # left no path from a manual commit to a live site — the page silently stayed
+  # on the previous build. No recursion risk: the same GITHUB_TOKEN rule means
+  # this job's own commit cannot re-trigger it.
+  push:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -51,10 +58,3 @@ jobs:
           path: site
       - id: deployment
         uses: actions/deploy-pages@v4
-      - name: commit
-        run: |
-          git config user.name "cornerman-bot"
-          git config user.email "bot@users.noreply.github.com"
-          git add data/upcoming.txt site/predictions.json site/index.html
-          git diff --staged --quiet || git commit -m "refresh: $(date -u +%Y-%m-%d)"
-          git push
