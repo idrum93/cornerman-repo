@@ -55,18 +55,39 @@ number next to a market number is a comparison and a model number by itself
 is not.
 
 `site/index.html` is the whole front end — one file, no framework, no build
-step. It fetches `site/predictions.json` and renders the card, then a breakdown
+step. It is a **single-screen dashboard**, not a scrolling list: the whole card
+fits at once as a grid of tiles grouped by Main card / Prelims / Early prelims,
+with detail in a slide-over drawer so you never lose your place.
+
+Reading order is deliberate. The **model-vs-market strip** sits at the very top,
+because disagreement is the only thing here a price cannot tell you. Each tile
+carries a model bar, a gold market bar directly beneath it, and an amber
+connector spanning the gap — so agreement and divergence read without a legend.
+Prop chips on each tile surface the loudest projections (inside-the-distance,
+takedown, round total, knockdown), with the strongest ones highlighted.
+
+The timestamp is to the minute, so you can tell which scheduled run produced
+what is on screen. It fetches `site/predictions.json` and renders the card, then a breakdown
 per bout: win probability, a method distribution that sums to 100%, round-by-round
 finish probabilities, and 80% ranges for strikes and control.
 
 Publish it free on GitHub Pages: **Settings -> Pages -> Source -> "GitHub
 Actions"**, once.
 
-`pages.yml` deploys on push AND on `workflow_run` after refresh or capture.
-That second trigger is required, not belt-and-braces: GitHub deliberately does
-not fire workflows for pushes made with the default `GITHUB_TOKEN`, so the
-refresh job's commit never triggered a deploy and the site silently served a
-stale card while every job reported success.
+**The deploy lives inside `refresh.yml`**, as its last three steps. There is
+no separate pages workflow, on purpose.
+
+A standalone `pages.yml` listening on `push` never fires, because GitHub
+deliberately does not trigger workflows for pushes made with the default
+`GITHUB_TOKEN` — so the refresh job would commit a new `predictions.json`,
+report success, and the site would keep serving a stale card. The obvious fix,
+a `workflow_run` trigger, adds cross-workflow timing and a checkout-ref
+subtlety of its own. Deploying in the same job that produced the files removes
+the whole class of problem: the artifact uploaded is, by construction, the one
+just generated.
+
+`capture.yml` does not deploy, because the ledger it writes is not read by the
+site.
 
 To preview locally, serve the folder (opening the file directly will not work —
 `fetch` is blocked on `file://`):
