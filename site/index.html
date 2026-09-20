@@ -114,6 +114,24 @@
     border-radius:3px;font-weight:700;white-space:nowrap;border:1px solid currentColor}
   .edgeTag.agree{color:var(--dim)} .edgeTag.lean{color:var(--mute)}
   .edgeTag.wide{color:var(--warn)} .edgeTag.hit{color:var(--good)} .edgeTag.miss{color:var(--red)}
+  .intro{position:relative;border:1px solid var(--line);border-left:3px solid var(--bluesoft);
+    background:var(--panel);border-radius:4px;padding:14px 16px;margin:12px 0 4px;max-width:900px}
+  .intro h3{margin:0 0 6px;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--bluesoft)}
+  .intro p{margin:0 0 7px;font-size:12.5px;line-height:1.6;color:var(--mute)}
+  .intro p:last-child{margin-bottom:0}
+  .intro b{color:var(--bone)}
+  .xsm{position:absolute;top:8px;right:9px;background:none;border:none;color:var(--dim);
+    cursor:pointer;font-size:13px;line-height:1;padding:2px 4px}
+  .xsm:hover{color:var(--bone)}
+  .verdict{font-size:13px;line-height:1.6;color:var(--mute);border-left:2px solid var(--line);
+    padding-left:11px;margin-bottom:14px}
+  .verdict b{color:var(--bone)}
+  .filt{display:flex;align-items:center;gap:7px;margin:10px 0 2px;flex-wrap:wrap}
+  .fb{font:inherit;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+    background:var(--panel);border:1px solid var(--line);color:var(--mute);
+    padding:4px 11px;border-radius:999px;cursor:pointer}
+  .fb:hover{border-color:#3B4557;color:var(--bone)}
+  .fb.on{border-color:var(--gold);color:var(--gold)}
   .conds{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(258px,1fr))}
   .cond{border:1px solid var(--line);border-radius:4px;background:var(--panel);padding:9px 10px}
   .cond.flat{opacity:.72}
@@ -158,7 +176,7 @@
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const P1=x=>(x*100).toFixed(1), P0=x=>Math.round(x*100);
 const SEGS=['Main card','Prelims','Early prelims'];
-let DATA=null, HIST=null, BR=null, SC=null;
+let DATA=null, HIST=null, BR=null, SC=null, ONLY_GAPS=false;
 
 function gap(b){ return b.edge==null?null:Math.abs(b.edge); }
 function tag(b){
@@ -169,6 +187,29 @@ function tag(b){
 }
 
 /* the model-vs-market strip, first thing on the page */
+/* A first-time visitor has no idea what this is, and the most important
+   thing to say is the least flattering one: it does not beat the market.
+   Leading with that is the only way the rest of the numbers mean anything. */
+function intro(){
+  let seen=false; try{ seen=localStorage.getItem('cm_intro')==='1'; }catch(e){}
+  if(seen) return '';
+  return `<div class="intro">
+    <button class="xsm" id="dismiss" title="dismiss">✕</button>
+    <h3>What this is</h3>
+    <p>A statistical model of UFC fights, trained only on fights that happened before
+    the ones it is scoring. For each bout it publishes a probability for the winner and
+    fifteen other markets — method, round, totals, takedowns, knockdowns — plus the fair
+    price each one implies.</p>
+    <p><b>It does not beat the betting market.</b> Tested on 829 fights it had never seen,
+    it called 67% of winners against the closing line's 70%, and where the two disagreed
+    the market was right more often. That is measured, published, and not expected to change.</p>
+    <p>What it offers instead is <b>a number with its workings shown</b>: which features moved
+    it, what happened historically in fights that looked similar, and a growing record of how
+    often each market's projections have actually come in. A price tells you what to pay.
+    This tells you why, and how much to trust it.</p>
+  </div>`;
+}
+
 function strip(){
   const w=DATA.bouts.filter(b=>b.edge!=null).sort((x,y)=>Math.abs(y.edge)-Math.abs(x.edge));
   if(!w.length) return `<div class="note" style="padding:10px 0">No market prices in this
@@ -316,9 +357,11 @@ function render(){
      <span class="chip">${esc(d.venue||'')}</span>
      <span class="chip">${d.bouts.length} modelled</span>
      ${d.market_source?`<span class="chip">market: ${esc(d.market_source)}</span>`:''}`;
+  const pass=b=>!ONLY_GAPS||(b.edge!=null&&Math.abs(b.edge)>=0.05);
+  const nGaps=d.bouts.filter(b=>b.edge!=null&&Math.abs(b.edge)>=0.05).length;
   const segs=SEGS.map(s=>{
-    const bs=d.bouts.filter(b=>(b.segment||'Main card')===s);
-    const nr=(d.no_read||[]).filter(n=>(n.segment||'Main card')===s);
+    const bs=d.bouts.filter(b=>(b.segment||'Main card')===s).filter(pass);
+    const nr=ONLY_GAPS?[]:(d.no_read||[]).filter(n=>(n.segment||'Main card')===s);
     if(!bs.length&&!nr.length) return '';
     return `<div class="seg"><div class="seghd"><h2>${esc(s)}</h2>
         <span class="lbl">${bs.length} bout${bs.length===1?'':'s'}${nr.length?` · ${nr.length} no read`:''}</span></div>
@@ -326,7 +369,11 @@ function render(){
         ${nr.map(n=>`<div class="noread"><b>${esc(n.a)}</b> vs. <b>${esc(n.b)}</b>
           <div class="lbl" style="margin-top:4px">No read — ${esc(n.reason)}</div></div>`).join('')}</div></div>`;
   }).join('');
-  document.getElementById('app').innerHTML=strip()+segs+lastCard()+baseRatePanel(null,null)+`
+  const filt=`<div class="filt">
+      <button class="fb ${ONLY_GAPS?'':'on'}" data-f="all">All ${d.bouts.length} bouts</button>
+      <button class="fb ${ONLY_GAPS?'on':''}" data-f="gaps">Only disagreements${nGaps?` (${nGaps})`:''}</button>
+      <span class="lbl" style="margin-left:6px">a disagreement is 5+ points from the market</span></div>`;
+  document.getElementById('app').innerHTML=intro()+strip()+filt+segs+lastCard()+baseRatePanel(null,null)+`
     <div class="note" style="margin-top:16px;max-width:900px">
       Win probability is a logistic model on 14 opponent-adjusted differentials, trained only on
       earlier fights. Method and round come from a competing-risks hazard model and sum to 100%.
@@ -335,6 +382,10 @@ function render(){
     </div>`;
   document.querySelectorAll('[data-id]').forEach(el=>
     el.addEventListener('click',()=>open_(el.dataset.id)));
+  document.querySelectorAll('[data-f]').forEach(el=>
+    el.addEventListener('click',()=>{ ONLY_GAPS = el.dataset.f==='gaps'; render(); }));
+  const dm=document.getElementById('dismiss');
+  if(dm) dm.addEventListener('click',()=>{ try{localStorage.setItem('cm_intro','1');}catch(e){} render(); });
 }
 
 /* ---- drawer ---- */
@@ -434,6 +485,32 @@ function trackLine(){
   return bits.join(' · ') || 'projection only';
 }
 
+/* One sentence before any number. Sixteen markets is a lot to arrive at
+   cold; this says what the model thinks in the order a person would say it. */
+function verdictLine(b){
+  const fav = b.p_a>=.5?b.a:b.b, pf=Math.max(b.p_a,b.p_b);
+  const strength = pf<.56?'barely favours':pf<.68?'favours':'strongly favours';
+  let t = `The model ${strength} <b>${esc(fav)}</b> at ${P0(pf)}%`;
+  if(b.edge!=null){
+    const e=Math.abs(b.edge);
+    t += e<0.05 ? `, essentially where the market has it.`
+      : `, while the market says ${P0(b.edge>0?b.p_market:1-b.p_market)}% — a <b>${(e*100).toFixed(0)}-point disagreement</b>.`;
+  } else t += '.';
+  const fin=b.p_finish!=null?b.p_finish:null;
+  if(fin!=null){
+    const rr=[1,2,3,4,5].map(k=>[k,b['p_end_r'+k]]).filter(x=>x[1]!=null).sort((x,y)=>y[1]-x[1])[0];
+    t += fin>=.55 ? ` It expects an early finish — ${P0(fin)}% inside the distance${rr?`, most likely round ${rr[0]}`:''}.`
+       : fin<=.4 ? ` It expects this to go the distance (${P0(b.m_decision)}%).`
+       : ` It is split on whether this goes the distance.`;
+  }
+  const td=Math.max(b.a_p_takedown||0,b.b_p_takedown||0);
+  if(td>=.65){
+    const who=(b.a_p_takedown||0)>=(b.b_p_takedown||0)?b.a:b.b;
+    t += ` Grappling is the likeliest story: ${esc(who)} lands a takedown ${P0(td)}% of the time in spots like this.`;
+  }
+  return t;
+}
+
 function open_(id){
   const b=DATA.bouts.find(x=>x.bout===id); if(!b) return;
   const mk=b.p_market!=null;
@@ -445,8 +522,9 @@ function open_(id){
   document.getElementById('drawin').innerHTML=`
     <button class="xbtn" id="xb">close ✕</button>
     <div class="lbl">${esc(b.segment||'')} · ${b.rounds===5?'5 rounds':'3 rounds'}</div>
-    <div style="font-size:19px;font-weight:800;text-transform:uppercase;letter-spacing:-.02em;margin:4px 0 12px">
+    <div style="font-size:19px;font-weight:800;text-transform:uppercase;letter-spacing:-.02em;margin:4px 0 10px">
       ${esc(b.a)} <span style="color:var(--dim)">vs</span> ${esc(b.b)}</div>
+    <div class="verdict">${verdictLine(b)}</div>
     ${mk?`<div class="card" style="border-left:3px solid ${Math.abs(b.edge)>=.12?'var(--warn)':'var(--line)'}">
       <div class="ghead" style="background:none;border:none;padding:0 0 8px">
         <span class="gname">Model vs market</span>${tag(b)}</div>
