@@ -167,8 +167,18 @@ UFCStats' upcoming page sits behind a JavaScript interstitial, and the Kaggle
 no terminal, and nothing that can break silently:
 
     # UFC 331 | 2026-09-19 | Crypto.com Arena, Los Angeles
-    Joshua Van vs. Alexandre Pantoja
+    ## Main card
+    Joshua Van vs. Alexandre Pantoja | 5
     Arman Tsarukyan vs. Mauricio Ruffy
+    ## Prelims
+    Charles Jourdain vs. Marlon Vera
+    ## Early prelims
+    Giga Chikadze vs. Joanderson Brito
+
+`## Main card` / `## Prelims` / `## Early prelims` group the card, and the site
+renders each segment as its own block. `| 5` marks a five-round bout. The
+Wikipedia parser reads these segments off the table's header rows, so the
+grouping is automatic. A file with no markers is treated as all Main card.
 
 `upcoming.py` resolves those names against the corpus, then emits win
 probability, strike and control ranges, and takedown/knockdown probabilities per

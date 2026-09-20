@@ -136,7 +136,7 @@ def capture(fights, fighters, card_path="data/upcoming.txt", path=LEDGER,
     as_of = pd.Timestamp(meta.get("date") or fights.date.max())
 
     rows, ts = [], _now()
-    for na, nb, n_rounds in bouts:
+    for na, nb, n_rounds, _segment in bouts:
         hit = book.get(frozenset((_key(na), _key(nb))))
         if hit is None or na not in ids or nb not in ids:
             continue

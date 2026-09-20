@@ -98,9 +98,31 @@ def parse_card_html(html):
     from bs4 import BeautifulSoup
     soup = BeautifulSoup(html, "html.parser")
     bouts, seen = [], set()
+    # Wikipedia puts the segment in a header row spanning the table
+    # ("Main card (Paramount+)", "Preliminary card", "Early preliminary card").
+    # Tracking it as we walk gives each bout its place on the card, which is
+    # the single most useful piece of context a reader wants and which the
+    # bout list alone cannot convey.
+    segment = "Main card"
+
+    def _seg(text):
+        t = text.lower()
+        if "early prelim" in t:
+            return "Early prelims"
+        if "prelim" in t:
+            return "Prelims"
+        if "main card" in t:
+            return "Main card"
+        return None
+
     for row in soup.find_all("tr"):
         cells = row.find_all(["td", "th"])
         texts = [c.get_text(" ", strip=True) for c in cells]
+        if len(cells) <= 2:                       # a spanning header row
+            hit = _seg(" ".join(texts))
+            if hit:
+                segment = hit
+                continue
         for i, t in enumerate(texts):
             if t.strip().lower().rstrip(".") == "vs" and 0 < i < len(texts) - 1:
                 a, b = _clean_name(texts[i - 1]), _clean_name(texts[i + 1])
@@ -108,7 +130,7 @@ def parse_card_html(html):
                     key = frozenset((a.lower(), b.lower()))
                     if key not in seen:
                         seen.add(key)
-                        bouts.append((a, b))
+                        bouts.append((a, b, segment))
                 break
     return bouts
 
@@ -141,7 +163,7 @@ def parse_card_prose(text):
         key = frozenset((a.lower(), b.lower()))
         if key not in seen:
             seen.add(key)
-            out.append((a, b))
+            out.append((a, b, "Main card"))   # prose gives no segment
     return out
 
 
@@ -247,9 +269,19 @@ def fetch_upcoming(title=None):
 
 
 def render_upcoming(meta, bouts):
+    """Segment markers are written as `## Main card` lines so the file stays
+    hand-editable and the parser stays trivial."""
     head = (f"# {meta.get('event','UFC')} | {meta.get('date','')} | "
             f"{meta.get('venue','')}{', ' + meta['city'] if meta.get('city') else ''}")
-    return "\n".join([head] + [f"{a} vs. {b}" for a, b in bouts]) + "\n"
+    lines, cur = [head], None
+    order = {"Main card": 0, "Prelims": 1, "Early prelims": 2}
+    for a, b, seg in sorted(bouts, key=lambda x: order.get(x[2], 9)):
+        if seg != cur:
+            lines.append(f"## {seg}")
+            cur = seg
+        # five rounds for the main event, which is the first bout of the card
+        lines.append(f"{a} vs. {b}" + (" | 5" if len(lines) == 2 else ""))
+    return "\n".join(lines) + "\n"
 
 
 def refresh_upcoming(path="data/upcoming.txt", title=None, verbose=True,

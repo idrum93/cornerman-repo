@@ -47,12 +47,24 @@ def _key(s):
     return re.sub(r"[^a-z ]", "", re.sub(r"\s+", " ", s).strip().lower())
 
 
+SEGMENTS = ["Main card", "Prelims", "Early prelims"]
+
+
 def parse_card(path):
-    """Returns (meta dict, list of (name_a, name_b))."""
+    """Returns (meta, [(name_a, name_b, rounds, segment)]).
+
+    `## Main card` / `## Prelims` / `## Early prelims` lines set the segment
+    for everything under them. A file with no markers is all Main card, which
+    keeps older hand-written files working."""
     meta, bouts = {}, []
+    segment = "Main card"
     for line in open(path, encoding="utf-8"):
         line = line.strip()
         if not line:
+            continue
+        if line.startswith("##"):
+            seg = line.lstrip("#").strip()
+            segment = next((s2 for s2 in SEGMENTS if s2.lower() == seg.lower()), seg)
             continue
         if line.startswith("#"):
             parts = [p.strip() for p in line.lstrip("#").split("|")]
@@ -66,7 +78,7 @@ def parse_card(path):
                 rounds = 5
         m = re.split(r"\s+vs\.?\s+", line, maxsplit=1, flags=re.I)
         if len(m) == 2:
-            bouts.append((m[0].strip(), m[1].strip(), rounds))
+            bouts.append((m[0].strip(), m[1].strip(), rounds, segment))
     return meta, bouts
 
 
@@ -291,14 +303,15 @@ def predict_card(path, fights, fighters, verbose=True):
         return out, by_r, curve
 
     rows, skipped = [], []
-    for na, nb, n_rounds in bouts:
+    for na, nb, n_rounds, segment in bouts:
         if na not in ids or nb not in ids:
-            skipped.append((na, nb, "name not in UFCStats corpus"))
+            skipped.append((na, nb, "name not in UFCStats corpus", segment))
             continue
         A, B = states[ids[na]], states[ids[nb]]
         if min(A.n_fights, B.n_fights) < MIN_PRIOR:
             skipped.append((na, nb,
-                            f"insufficient history ({A.n_fights} / {B.n_fights} prior bouts)"))
+                            f"insufficient history ({A.n_fights} / {B.n_fights} prior bouts)",
+                            segment))
             continue
         sa, sb = A.snapshot(as_of), B.snapshot(as_of)
         sa["elo"], sb["elo"] = elo_eff(A, as_of), elo_eff(B, as_of)
@@ -314,6 +327,7 @@ def predict_card(path, fights, fighters, verbose=True):
             key=lambda kv: -abs(kv[1]))
 
         r = dict(bout=f"{na} vs. {nb}", a=na, b=nb, rounds=n_rounds,
+                 segment=segment,
                  p_a=round(p_a, 4), p_b=round(1 - p_a, 4))
         r["drivers"] = [{"label": LABELS.get(k, k), "value": round(v, 4),
                          "favours": "a" if v > 0 else "b"}
@@ -375,6 +389,28 @@ def predict_card(path, fights, fighters, verbose=True):
                     float(evt_models[t].predict_proba(xx)[0, 1]), 3)
         rows.append(r)
 
+    # Results, once the corpus has them. Not live: the UFCStats CSVs refresh
+    # roughly a day after an event, so a card grades the morning after rather
+    # than round by round. Showing a half-filled live card would mean inventing
+    # a results feed we do not have.
+    from .upcoming import _key as _k2
+    done = {}
+    _parts = fights.bout.str.split(" vs. ", n=1, expand=True)
+    for r_, b_, w, mth, dt, ts in zip(_parts[0], _parts[1], fights.winner,
+                                      fights.method, fights.date, fights.total_sec):
+        done[frozenset((_k2(r_), _k2(b_)))] = (_k2(r_), w, mth, dt, ts)
+    for r in rows:
+        hit = done.get(frozenset((_key(r["a"]), _key(r["b"]))))
+        if not hit:
+            continue
+        red, w, mth, dt, ts = hit
+        if abs((pd.Timestamp(dt) - as_of).days) > 4 or w not in ("r", "b"):
+            continue
+        a_won = (w == "r") == (_key(r["a"]) == red)
+        r["result"] = {"winner": r["a"] if a_won else r["b"], "method": mth,
+                       "seconds": int(ts),
+                       "model_right": bool((r["p_a"] > 0.5) == a_won)}
+
     # Measured reliability, recomputed each run so the site quotes its own
     # current track record rather than a figure hard-coded months ago.
     try:
@@ -402,7 +438,7 @@ def predict_card(path, fights, fighters, verbose=True):
             print(show.to_string(index=False))
         if skipped:
             print("\nNO READ (reported, not guessed):")
-            for na, nb, why in skipped:
+            for na, nb, why, _seg in skipped:
                 print(f"  {na} vs. {nb}  --  {why}")
         if unresolved:
             print("\nunmatched names:", ", ".join(unresolved))
@@ -471,7 +507,8 @@ def write_json(out, skipped, unresolved, path="site/predictions.json",
         "venue": meta.get("venue"),
         "generated_utc": pd.Timestamp.now('UTC').isoformat(),
         "bouts": out.to_dict(orient="records"),
-        "no_read": [{"a": a, "b": b, "reason": why} for a, b, why in skipped],
+        "no_read": [{"a": a, "b": b, "reason": why, "segment": seg}
+                    for a, b, why, seg in skipped],
         "unresolved_names": unresolved,
         "market_source": MARKET_SRC.get("src"),
         "track_record": TRACK.get("rec"),

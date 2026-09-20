@@ -78,6 +78,14 @@
   .edgeTag.agree{color:var(--dim)}
   .edgeTag.lean{color:var(--mute)}
   .edgeTag.wide{color:var(--warn);background:rgba(217,140,58,.10)}
+  .edgeTag.hit{color:#6FBF73;background:rgba(111,191,115,.10)}
+  .edgeTag.miss{color:var(--red);background:rgba(200,68,47,.10)}
+  .cardseg{margin-bottom:22px}
+  .segbar{background:var(--panel2);border:1px solid var(--line);border-bottom:none;
+    border-radius:4px 4px 0 0;padding:9px 13px;margin-bottom:0}
+  .cardseg .bout{border-radius:0;margin-bottom:0;border-top:none}
+  .cardseg .bout:last-child{border-radius:0 0 4px 4px}
+  .cardseg .noread{border-radius:0;margin-bottom:0;border-top:none}
 
   /* model over market, sharing one axis: the offset is the message */
   .dual{display:flex;flex-direction:column;gap:3px}
@@ -199,7 +207,20 @@ function deltaChip(b, big){
 
 
 /* a readable sentence, not a number dump */
+function resultBadge(b){
+  const r=b.result;
+  const t=Math.floor(r.seconds/60)+':'+String(r.seconds%60).padStart(2,'0');
+  return `<span class="edgeTag ${r.model_right?'hit':'miss'}">
+    ${r.model_right?'✓':'✗'} ${esc(r.winner.split(' ').slice(-1)[0])} · ${esc(r.method)} · ${t}</span>`;
+}
+
 function verdict(b){
+  if(b.result){
+    const r=b.result;
+    return `<b>${esc(r.winner)}</b> won by ${esc(r.method)} at ${Math.floor(r.seconds/60)}:${String(r.seconds%60).padStart(2,'0')}. `+
+           `The model had ${esc(b.p_a>=.5?b.a:b.b)} at ${P0(Math.max(b.p_a,b.p_b))}% — `+
+           `<b>${r.model_right?'correct':'wrong'}</b>.`;
+  }
   const fav = b.p_a>=.5 ? b.a : b.b;
   const p   = Math.max(b.p_a,b.p_b);
   const lean= p<0.56 ? 'barely favours' : p<0.68 ? 'favours' : 'strongly favours';
@@ -232,6 +253,19 @@ function driverRows(b){
            background:${red?'var(--red)':'var(--blue)'}"></i></div>
       <div class="dv mono">${d.value>0?'+':''}${d.value.toFixed(2)}</div></div>`;
   }).join('');
+}
+
+function resultsStrip(d){
+  const done=d.bouts.filter(b=>b.result);
+  if(!done.length) return '';
+  const right=done.filter(b=>b.result.model_right).length;
+  const fin=done.filter(b=>b.result.method!=='DEC').length;
+  return `<div class="lede" style="border-left-color:#6FBF73">
+    <h3 style="color:#6FBF73">Card graded</h3>
+    <p><b>${right} of ${done.length}</b> winners called correctly
+    (${Math.round(100*right/done.length)}%). ${fin} of ${done.length} ended inside
+    the distance. Results arrive with the next corpus refresh, not live — the
+    UFCStats feed updates roughly a day after an event.</p></div>`;
 }
 
 function headline(d){
@@ -294,7 +328,7 @@ function renderCard(){
     <button class="bout" data-i="${i}">
       <div class="btop">
         <div class="lbl">${b.rounds===5?'5 rounds':'3 rounds'}</div>
-        ${deltaChip(b)}
+        ${b.result?resultBadge(b):deltaChip(b)}
       </div>
       <div class="names">
         <div class="side"><div class="nm" style="color:${b.p_a>=.5?'var(--bone)':'var(--mute)'}">${esc(b.a)}</div></div>
@@ -320,11 +354,23 @@ function renderCard(){
       ${d.no_read&&d.no_read.length?`<span class="chip">${d.no_read.length} no read</span>`:''}
       ${d.bouts.some(b=>b.books)?`<span class="chip">${Math.max(...d.bouts.map(b=>b.books||0))} books${d.market_source?` · ${esc(d.market_source)}`:''}</span>`:''}
     </div>
+    ${resultsStrip(d)}
     ${headline(d)}
     <div class="seghead"><div class="lbl">Card</div>
       <div class="lbl" style="color:var(--gold)">▏gold tick = market price</div></div>
-    ${d.bouts.map(boutHtml).join('')}
-    ${nr?`<div class="seghead" style="margin-top:26px"><div class="lbl">Not modelled</div></div>${nr}`:''}
+    ${['Main card','Prelims','Early prelims'].map(seg=>{
+        const inSeg=d.bouts.map((b,i)=>[b,i]).filter(([b])=>(b.segment||'Main card')===seg);
+        const nrSeg=(d.no_read||[]).filter(n=>(n.segment||'Main card')===seg);
+        if(!inSeg.length&&!nrSeg.length) return '';
+        return `<div class="cardseg">
+          <div class="seghead segbar"><div class="gname">${esc(seg)}</div>
+            <div class="lbl">${inSeg.length} modelled${nrSeg.length?` · ${nrSeg.length} no read`:''}</div></div>
+          ${inSeg.map(([b,i])=>boutHtml(b,i)).join('')}
+          ${nrSeg.map(n=>`<div class="noread"><b>${esc(n.a)}</b> vs. <b>${esc(n.b)}</b>
+             <div class="lbl" style="margin-top:5px">No read — ${esc(n.reason)}</div></div>`).join('')}
+        </div>`;
+      }).join('')}
+
     ${trackPanel()}
     <div class="note"><b>How to read this.</b> Win probability comes from a logistic
       model on 14 opponent-adjusted differentials, trained only on fights that happened
