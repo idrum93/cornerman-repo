@@ -6,10 +6,15 @@ on:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 jobs:
   refresh:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -27,10 +32,6 @@ jobs:
         continue-on-error: true
         run: python -m mmastat.sources
 
-      # Live moneyline prices. Optional: with no ODDS_API_KEY secret the market
-      # panel is simply omitted rather than showing a stale price.
-      # Free key at the-odds-api.com (500 requests/month; this uses ~30).
-      # Add it under Settings > Secrets and variables > Actions.
       - name: regenerate predictions
         env:
           ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
@@ -40,11 +41,16 @@ jobs:
         run: |
           git config user.name "cornerman-bot"
           git config user.email "bot@users.noreply.github.com"
-          git add data/upcoming.txt site/predictions.json
+          git add data/upcoming.txt site/
           git diff --staged --quiet || git commit -m "refresh: $(date -u +%Y-%m-%d)"
-          git push
+          git push || echo "nothing to push"
 
-
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deployment
+        uses: actions/deploy-pages@v4
       - name: commit
         run: |
           git config user.name "cornerman-bot"
