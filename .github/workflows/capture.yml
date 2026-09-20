@@ -28,6 +28,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: pip
       - run: pip install -r requirements.txt
 
       - name: corpus
@@ -58,4 +59,3 @@ jobs:
             python -m mmastat.ledger settle   # re-dedupe after the merge
           done
           echo "could not push after 3 attempts"; exit 1
-
