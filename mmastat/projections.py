@@ -28,6 +28,50 @@ from sklearn.ensemble import GradientBoostingRegressor, HistGradientBoostingClas
 from sklearn.metrics import brier_score_loss, r2_score, roc_auc_score
 
 from .features import PANEL_OWN, build_panel
+from sklearn.linear_model import LogisticRegression
+from sklearn.preprocessing import StandardScaler
+
+# Props where a short formula replaced the booster under PREREGISTRATION
+# addendum 14's rule: adopt the formula when its Brier is within 0.002 of the
+# booster's, because a number a reader can verify is worth more than a
+# marginally sharper one they cannot.
+#
+#   knockdown  formula .1432 vs booster .1445  (diff -0.0012, CI [-0.0050, +0.0025])
+#              -> tie, formula adopted
+#   takedown   formula .2109 vs booster .2008  (diff +0.0102, CI [+0.0038, +0.0161])
+#              -> booster kept; the takedown question has interactions a
+#                 four-input formula cannot represent
+#
+# Inputs are exactly as registered, including opp_sapm whose weight came out
+# near zero: dropping it after seeing the fit would be the forking path.
+FORMULAS = {"y_kd15": ["own_kd15", "opp_kd_against15", "opp_sapm"]}
+FORMULA_LABELS = {"own_kd15": "their knockdown rate",
+                  "opp_kd_against15": "opponent's knockdowns absorbed",
+                  "opp_sapm": "opponent's strikes absorbed"}
+
+
+class FormulaModel:
+    """A standardised logistic formula that accepts the same frame as the
+    booster, so it drops into the pipeline unchanged — and can print itself."""
+
+    def __init__(self, cols, labels=None):
+        self.cols = list(cols)
+        self.labels = labels or FORMULA_LABELS
+
+    def fit(self, X, y):
+        self.sc = StandardScaler().fit(X[self.cols])
+        self.m = LogisticRegression(max_iter=2000).fit(self.sc.transform(X[self.cols]), y)
+        return self
+
+    def predict_proba(self, X):
+        return self.m.predict_proba(self.sc.transform(X[self.cols]))
+
+    def describe(self):
+        return {"inputs": [{"key": c, "label": self.labels.get(c, c),
+                            "weight": round(float(w), 3)}
+                           for c, w in zip(self.cols, self.m.coef_[0])],
+                "intercept": round(float(self.m.intercept_[0]), 3),
+                "note": "weights are per standard deviation of each input"}
 
 FEATS = [f"own_{k}" for k in PANEL_OWN] + [f"opp_{k}" for k in PANEL_OWN]
 
@@ -152,3 +196,45 @@ if __name__ == "__main__":
     from .loaders import load
     f, p, _ = load(verbose=False)
     evaluate(f, p)
+
+
+# --- ends inside the distance (PREREGISTRATION addendum 15) -----------------
+#
+#   survival model P(finish): brier .2487, AUC .608, calibration slope 0.42
+#   6-input formula         : brier .2420, AUC .598, calibration slope 0.94
+#   difference -0.0068, CI [-0.0164, +0.0030] -> formula adopted for the LEVEL
+#
+# The survival model ranks fights slightly better but was badly overconfident:
+# fights it put at 74% finished 60% of the time. The formula sets how likely a
+# finish is; the survival model's split of that finish across method and
+# round is kept and rescaled, so every market still sums coherently.
+FINISH_INPUTS = ["kd", "ctrl", "pace", "agegap", "sub", "five"]
+FINISH_LABELS = {"kd": "both fighters' knockdown rates",
+                 "ctrl": "both fighters' control time",
+                 "pace": "both fighters' striking pace",
+                 "agegap": "age gap",
+                 "sub": "both fighters' submission attempts",
+                 "five": "scheduled for five rounds"}
+
+
+def finish_row(sa, sb, n_rounds):
+    return {"kd": sa["kd15"] + sb["kd15"],
+            "ctrl": sa["ctrl_share"] + sb["ctrl_share"],
+            "pace": sa["adj_slpm"] + sb["adj_slpm"],
+            "agegap": abs(sa["age"] - sb["age"]),
+            "sub": sa["sub15"] + sb["sub15"],
+            "five": int(n_rounds >= 5)}
+
+
+def fit_finish_formula(fights, fighters, min_date="2012-01-01"):
+    """Same definition as the registered test: every fight with 2+ prior bouts
+    per corner, outcome = anything other than a decision."""
+    from .features import walk
+    rows, ys = [], []
+    lo = pd.Timestamp(min_date)
+    for fight, sa, sb, npri in walk(fights, fighters):
+        if min(npri) < 2 or fight.date < lo:
+            continue
+        rows.append(finish_row(sa, sb, 5 if fight.sched_sec >= 1500 else 3))
+        ys.append(int(fight.method != "DEC"))
+    return FormulaModel(FINISH_INPUTS, FINISH_LABELS).fit(pd.DataFrame(rows), np.array(ys))

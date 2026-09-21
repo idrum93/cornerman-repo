@@ -864,3 +864,192 @@ code is needed — only the rule applied to rows it is already writing.
 - Reporting the 1.21-point figure as an edge. It is a hypothesis.
 - Tuning the 2-point threshold on forward data.
 - Combining this with the residual-rule ledger; they test different claims.
+
+## Addendum 10: display revision (2026-09-21)
+
+Layout only; no condition added, dropped, reordered or re-measured.
+
+The panel was first drawn one card per condition with the OUTCOME as each
+card's heading, so "Lands a takedown" appeared four times and "Ends inside the
+distance" four times, reading as different things. It is now grouped by
+outcome — takedown (C1, C2, C6, C10), knockdown (C3), finish (C4, C5, C7, C8,
+C9) — one row per registered condition, in registered order within each group.
+
+C9 was registered against "goes the distance", which is exactly one minus
+"ends inside the distance". It is displayed as its complement so the finish
+question has one home. Every cell is the same data inverted; significance and
+intervals are unchanged. The underlying `site/baserates.json` still records it
+as registered.
+
+Rows are labelled "clear pattern" (3-4 quarters differ from the base rate),
+"weak pattern" (1-2) or "no pattern" (0). That is a description of the
+significance counts already computed, not a new threshold, and flat rows are
+still shown.
+
+---
+
+# Addendum 14: the opponent's side, and simple formulas per prop (2026-09-21)
+
+Registered before measuring.
+
+## C11 and C12: the knockdown question had only one side
+
+Takedowns are shown from both corners — the fighter's rate and the defence in
+front of him. Knockdowns were shown from one. The knockdown projection already
+uses the opponent's durability (`opp_kd_against15`, `opp_sapm`,
+`opp_str_def`); the panel simply never displayed it.
+
+| # | condition | outcome | mechanism |
+|---|---|---|---|
+| C11 | opponent's knockdowns absorbed per 15 min | scores a knockdown | a chin that has gone before goes again |
+| C12 | opponent's strikes absorbed per minute | scores a knockdown | a hittable opponent gets hit cleanly more often |
+
+Added to the fixed display list under the same rules as addendum 10: always
+shown, flat or not.
+
+## Can a short formula replace the gradient booster for each prop?
+
+The panel is a one-variable-at-a-time model. The projection models are the
+many-variable version of the same thing. If a logistic regression on only the
+registered conditions for a prop matches the booster, the site can show the
+formula itself — "this number comes from his takedown rate and the defence in
+front of him" — which is exactly the checkable-service goal.
+
+    takedown   F-TD : own_adj_td15, opp_td_def, reach_diff, own_clinch+ground
+    knockdown  F-KD : own_kd15, opp_kd_against15, opp_sapm
+
+Compared against the current booster on the same held-out fighter-fights.
+Brier, AUC and calibration, with a bootstrap interval on the Brier difference.
+
+**Decision rule, fixed now:** if the formula's Brier is within 0.002 of the
+booster's (or better), the site adopts the formula for that prop, because a
+number a reader can verify is worth more than a marginally sharper one they
+cannot. If it is worse by more than 0.002, the booster stays.
+
+Pre-stated expectation: close for takedowns, where one input dominates;
+further for knockdowns, where the booster may be using interactions.
+
+## Addendum 14: RESULT (2026-09-21)
+
+### C11, C12
+
+| condition | Q1 | Q2 | Q3 | Q4 | verdict |
+|---|---|---|---|---|---|
+| C11 opponent's knockdowns absorbed | 14% | 18% | 22% | 24% | clear pattern |
+| C12 opponent's strikes absorbed | 18% | 21% | 19% | 20% | no pattern |
+
+The chin carries information; volume absorbed does not. Being hit a lot does
+not predict being knocked down — having been knocked down does. Both rows now
+render in the knockdown group, C12 dimmed as flat.
+
+### Formula vs booster — and a comparison error caught before acting
+
+The first comparison used a less regularised booster than production and
+showed the knockdown formula clearly ahead (-0.0055, CI excluding zero). Re-run
+against the **exact production settings**, the gap closed to a tie. The
+decision was made on the fair comparison:
+
+| prop | production booster | formula | difference | CI | decision |
+|---|---|---|---|---|---|
+| takedown (4 inputs) | .2008, AUC .742, slope 1.01 | .2109, AUC .723 | +0.0102 | [+0.0038, +0.0161] | **keep booster** |
+| knockdown (3 inputs) | .1445, AUC .668, slope 0.76 | .1432, AUC .668 | -0.0012 | [-0.0050, +0.0025] | **adopt formula** |
+
+Knockdowns: statistically indistinguishable, identical AUC, and the booster's
+calibration slope of 0.76 says it was overconfident at the top (said 47%,
+happened 41%). Under the fixed rule the formula wins the tie. Fitted weights:
+**+0.38 x own knockdown rate, +0.23 x opponent's knockdowns absorbed, -0.01 x
+opponent's strikes absorbed**, per standard deviation.
+
+Takedowns: the booster is genuinely better and near-perfectly calibrated
+(slope 1.01). Four clear single-variable patterns do not add up to a good
+formula, because they overlap — a strong wrestler tends to have both a high
+takedown rate and a high clinch share — and the booster models that overlap.
+
+So "a formula per prop" is the right question, answered one prop at a time:
+sometimes the short version is as good and should ship because it can be
+checked, and sometimes it is not.
+
+---
+
+# Addendum 15: a short formula for "ends inside the distance" (2026-09-21)
+
+Registered before measuring, same rule as addendum 14.
+
+## Formula
+
+    F-ITD : C4 combined knockdown rate, C5 combined control share,
+            C7 combined striking pace, C8 age gap, C9 combined submission
+            attempts, + scheduled rounds (3 or 5)
+
+Scheduled rounds is not one of the registered conditions; it is included
+because it is structural, not a pattern — a five-round fight has two more
+rounds in which to end, and any honest finish formula has to know that. It is
+declared here so it is not an after-the-fact addition.
+
+## Comparison
+
+Against the production competing-risks model's P(finish) = 1 - P(decision),
+trained, hazard-calibrated and tested on the same split it uses in production.
+Brier, AUC and calibration slope on the same held-out fights, bootstrap
+interval on the Brier difference. Both compared raw; the level drift noted in
+addendum 9 affects both equally and is not corrected for either.
+
+## Decision rule, fixed now
+
+Formula adopted if its Brier is within 0.002 of the survival model's, or
+better.
+
+## How a win would be applied, fixed now
+
+The survival model's outputs must keep summing to 100%. So the formula would
+set only the LEVEL: P(finish) comes from the formula, and the survival model's
+split of that finish across method and round is kept and rescaled to it.
+
+    P(method m, round r) = P_formula(finish) x P_survival(m, r | finish)
+
+Round and method probabilities stay coherent; only how likely a finish is at
+all changes.
+
+## Pre-stated expectation
+
+Survival model favoured. It sees the full 14-feature fighter comparison and
+models time directly; the formula sees five sums, three of which measured flat
+in the base-rate panel. A tie would be a surprise.
+
+## Addendum 15: RESULT (2026-09-21)
+
+**Formula adopted, and against the pre-stated expectation.**
+
+| | Brier | AUC | calibration slope | mean said |
+|---|---|---|---|---|
+| survival model P(finish) | .2487 | .608 | **0.42** | 51.3% |
+| 6-input formula | **.2420** | .598 | 0.94 | 47.4% |
+
+Held out: 812 fights, actual finish rate 47.5%. Difference -0.0068, 95% CI
+[-0.0164, +0.0030]; within the 0.002 rule, so adopted.
+
+The finding underneath matters more than the swap: **the survival model's
+finish probabilities were badly overconfident.** Fights it put at 74% finished
+60% of the time; at 55%, 45%. It ranks fights marginally better (AUC .608 vs
+.598) but spreads them far too wide. The formula's bands line up within about a
+point everywhere. Every "ends inside the distance", round and totals number the
+site had shown inherited that overconfidence.
+
+Weights: +0.31 combined knockdown rate, +0.21 combined submission attempts,
++0.12 five rounds, -0.09 pace, +0.04 age gap, -0.01 control. Consistent with the
+base-rate panel: the two rows with a pattern carry the formula, the three flat
+rows carry almost nothing.
+
+Applied as registered. The formula sets P(finish); the survival model's split
+across method, round and time is rescaled to it. Checked on the live card:
+methods, rounds and finish sum identically on every bout, and round totals
+remain monotone.
+
+### Consequences for other records
+
+- Addendum 9's frozen distance rule is defined on the hazard model's P(decision)
+  with a rolling anchor. It is unaffected: the forward test keeps its
+  registered probability; only the displayed number changed.
+- From 2026-09-21, scorecard claims for inside-the-distance, decision, method,
+  round and totals are the rescaled numbers. Earlier logged claims are from the
+  raw survival model. The switch date separates them.

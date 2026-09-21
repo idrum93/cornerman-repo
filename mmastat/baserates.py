@@ -45,6 +45,11 @@ CONDITIONS = [
      "grapplers hunting finishes"),
     ("C10", "Own clinch + ground share", "fighter", "pos_share", "y_td",
      "position-dependent offense needs the takedown first"),
+    # addendum 14: the knockdown question had only one side
+    ("C11", "Opponent's knockdowns absorbed", "fighter", "opp_kd_against15", "y_kd",
+     "a chin that has gone before goes again"),
+    ("C12", "Opponent's strikes absorbed", "fighter", "opp_sapm", "y_kd",
+     "a hittable opponent gets hit cleanly more often"),
 ]
 
 OUTCOME_LABEL = {"y_td": "lands a takedown", "y_kd": "scores a knockdown",

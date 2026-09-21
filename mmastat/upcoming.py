@@ -38,6 +38,8 @@ from sklearn.linear_model import LogisticRegression
 from .features import (PANEL_OWN, WIN_FEATURES, _init_states, build,
                        elo_eff, make_features)
 from .projections import FEATS as PROJ_FEATS, RANGE_TARGETS, EVENT_TARGETS
+from .projections import FORMULAS, FormulaModel, fit_finish_formula, finish_row
+FORMULA_INFO = {}
 
 MIN_PRIOR = 2
 
@@ -288,10 +290,15 @@ def predict_card(path, fights, fighters, verbose=True):
                   for t, cfg in RANGE_TARGETS.items()}
     evt_models = {}
     for t in EVENT_TARGETS:
-        evt_models[t] = HistGradientBoostingClassifier(
-            max_iter=300, learning_rate=0.05, max_leaf_nodes=15,
-            min_samples_leaf=40, l2_regularization=1.0,
-            random_state=7).fit(P[PROJ_FEATS], (P[t] > 0).astype(int))
+        yb = (P[t] > 0).astype(int)
+        if t in FORMULAS:
+            evt_models[t] = FormulaModel(FORMULAS[t]).fit(P, yb)
+            FORMULA_INFO[EVENT_TARGETS[t][0]] = evt_models[t].describe()
+        else:
+            evt_models[t] = HistGradientBoostingClassifier(
+                max_iter=300, learning_rate=0.05, max_leaf_nodes=15,
+                min_samples_leaf=40, l2_regularization=1.0,
+                random_state=7).fit(P[PROJ_FEATS], yb)
 
     # --- competing-risks model for method and round, fitted once
     from .survival import (expand as sv_expand, fit as sv_fit, CLASSES,
@@ -304,6 +311,8 @@ def predict_card(path, fights, fighters, verbose=True):
     sv_cal = calibrate_hazards(sv_model, sv_cols, sv_pr[sv_pr.date > _vc],
                                fights.set_index("fight_id"))
     sum_keys = [c for c in sv_feats if c.startswith("sum_")]
+    fin_model = fit_finish_formula(fights, fighters)
+    FORMULA_INFO["finish"] = fin_model.describe()
 
     def method_round(sa, sb, n_rounds):
         row = {f"d_{k.replace('d_', '')}": 0.0 for k in []}
@@ -378,7 +387,8 @@ def predict_card(path, fights, fighters, verbose=True):
                     "str_acc": round(S["str_acc"], 3), "str_def": round(S["str_def"], 3),
                     "td15": round(S["adj_td15"], 2), "td_def": round(S["td_def"], 3),
                     "sub15": round(S["sub15"], 2), "ctrl": round(S["ctrl_share"], 3),
-                    "kd15": round(S["kd15"], 2), "ko_loss": round(S["ko_loss_rate"], 3)}
+                    "kd15": round(S["kd15"], 2), "kd_against15": round(S["kd_against15"], 2),
+                    "ko_loss": round(S["ko_loss_rate"], 3)}
         sa["stance_name"] = A.stance
         sb["stance_name"] = B.stance
         r["stats"] = {"a": tot(sa, A.wins, A.losses, A.n_fights),
@@ -400,6 +410,19 @@ def predict_card(path, fights, fighters, verbose=True):
 
         try:
             dist, by_r, curve = method_round(sa, sb, n_rounds)
+            # Formula sets the LEVEL of finishing; the survival model's shape
+            # across method, round and time is kept and rescaled to it, so
+            # methods, rounds and totals all still sum to the same number.
+            p_sv = 1 - dist["decision"]
+            p_fm = float(fin_model.predict_proba(
+                pd.DataFrame([finish_row(sa, sb, n_rounds)]))[0, 1])
+            k_fin = p_fm / p_sv if p_sv > 1e-6 else 1.0
+            for _m in ("a_ko", "b_ko", "a_sub", "b_sub"):
+                dist[_m] *= k_fin
+            dist["decision"] = 1 - p_fm
+            by_r = {rr: v * k_fin for rr, v in by_r.items()}
+            curve = [1 - k_fin * (1 - c) for c in curve]
+            r["p_finish_survival_raw"] = round(p_sv, 4)
             r["m_a_ko"] = round(dist["a_ko"], 4)
             r["m_b_ko"] = round(dist["b_ko"], 4)
             r["m_a_sub"] = round(dist["a_sub"], 4)
@@ -491,6 +514,8 @@ def predict_card(path, fights, fighters, verbose=True):
                 "C6": (sa2["reach"] - sb2["reach"], sb2["reach"] - sa2["reach"]),
                 "C10": (sa2["clinch_share"] + sa2["ground_share"],
                         sb2["clinch_share"] + sb2["ground_share"]),
+                "C11": (sb2["kd_against15"], sa2["kd_against15"]),   # the chin in front of you
+                "C12": (sb2["sapm"], sa2["sapm"]),
             }
             per_fight = {
                 "C4": sa2["kd15"] + sb2["kd15"],
@@ -730,6 +755,7 @@ def write_json(out, skipped, unresolved, path="site/predictions.json",
         "unresolved_names": unresolved,
         "market_source": MARKET_SRC.get("src"),
         "track_record": TRACK.get("rec"),
+        "formulas": FORMULA_INFO,
     }
     Path(path).parent.mkdir(parents=True, exist_ok=True)
     Path(path).write_text(json.dumps(clean(payload), indent=1, allow_nan=False),

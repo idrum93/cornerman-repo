@@ -246,6 +246,7 @@ REQUIRED_SITE_FEATURES = {
     "function fairOdds": "fair price beside each projection",
     "data-f=\"gaps\"": "disagreement filter",
     "cornerman build:": "build marker",
+    "function formulaNote": "the knockdown formula shown in the drawer",
 }
 
 
