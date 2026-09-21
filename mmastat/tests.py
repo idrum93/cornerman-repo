@@ -247,6 +247,9 @@ REQUIRED_SITE_FEATURES = {
     "data-f=\"gaps\"": "disagreement filter",
     "cornerman build:": "build marker",
     "function formulaNote": "the knockdown formula shown in the drawer",
+    "function openPast": "openable last-card results",
+    "function surname": "surnames on tiles",
+    "class=\"zone ": "separated upcoming / results / history zones",
 }
 
 

@@ -656,23 +656,125 @@ def archive_previous(new_event, path="site/predictions.json",
     return str(dest)
 
 
+def _base_rates(fights, min_date="2012-01-01"):
+    """What a site with no model would have said: the historical rate of each
+    outcome. Every graded prop is compared against this, because "right side"
+    on a rare event is cheap — a knockdown happens in ~19% of fighter-fights,
+    so always saying no is right four times in five."""
+    F = fights[fights.date >= pd.Timestamp(min_date)]
+    dec = F[F.method.isin(["KO/TKO", "SUB", "DEC"])]
+    over = {}
+    for sched, nr in ((900, 3), (1500, 5)):
+        G = F[F.sched_sec == sched]
+        for line in (1.5, 2.5, 3.5, 4.5):
+            if line < nr and len(G):
+                over[(nr, line)] = float((G.total_sec > line * 300).mean())
+    return {"td": float(np.r_[(F.r_td_landed > 0).values, (F.b_td_landed > 0).values].mean()),
+            "kd": float(np.r_[(F.r_kd > 0).values, (F.b_kd > 0).values].mean()),
+            "itd": float((dec.method != "DEC").mean()), "over": over}
+
+
+def _grade_bout(b, row, a_is_red, base):
+    """Every claim a bout made, against what happened.
+
+    Binary props are scored "right side" (said over 50% and it happened, or
+    under and it did not) and set beside what the base rate alone would have
+    said. Method and round are scored on the model's top pick, with the
+    probability it gave to what actually happened. The winner is also scored
+    against the market: who put more probability on the fighter who won."""
+    import math
+    a, bb = b["a"], b["b"]
+    a_won = (row.winner == "r") == a_is_red
+    meth = row.method
+    finish = meth != "DEC"
+    n_rounds = b.get("rounds") or (5 if row.sched_sec >= 1500 else 3)
+    rnd = min(5, max(1, int(math.ceil(row.total_sec / 300.0)))) if row.total_sec else 1
+    pick = lambda r_, b_: (r_ if a_is_red else b_)
+    a_td, b_td = pick(row.r_td_landed, row.b_td_landed) > 0, pick(row.b_td_landed, row.r_td_landed) > 0
+    a_kd, b_kd = pick(row.r_kd, row.b_kd) > 0, pick(row.b_kd, row.r_kd) > 0
+
+    rep = []
+
+    def binrow(label, p, happened, basep):
+        if p is None:
+            return
+        rep.append({"kind": "prop", "label": label, "said": round(float(p), 3),
+                    "happened": bool(happened), "right": bool((p >= 0.5) == bool(happened)),
+                    "base": None if basep is None else round(basep, 3),
+                    "base_right": None if basep is None else bool((basep >= 0.5) == bool(happened))})
+
+    # how it ended
+    probs = {"a_ko": b.get("m_a_ko"), "a_sub": b.get("m_a_sub"),
+             "b_ko": b.get("m_b_ko"), "b_sub": b.get("m_b_sub"), "decision": b.get("m_decision")}
+    names = {"a_ko": f"{a} by KO/TKO", "a_sub": f"{a} by submission",
+             "b_ko": f"{bb} by KO/TKO", "b_sub": f"{bb} by submission", "decision": "decision"}
+    actual = ("decision" if meth == "DEC" else
+              (("a" if a_won else "b") + ("_ko" if meth == "KO/TKO" else "_sub"))
+              if meth in ("KO/TKO", "SUB") else None)
+    if actual and all(v is not None for v in probs.values()):
+        top = max(probs, key=probs.get)
+        rep.append({"kind": "method", "label": "How it ended", "actual": names[actual],
+                    "said": round(probs[actual], 3), "top": names[top],
+                    "top_p": round(probs[top], 3), "right": actual == top})
+    if finish:
+        rp = {r: b.get(f"p_end_r{r}") for r in range(1, 6) if b.get(f"p_end_r{r}") is not None}
+        if rp and rnd in rp:
+            modal = max(rp, key=rp.get)
+            rep.append({"kind": "round", "label": "Round it ended", "actual": f"round {rnd}",
+                        "said": round(rp[rnd], 3), "top": f"round {modal}",
+                        "top_p": round(rp[modal], 3), "right": rnd == modal})
+
+    binrow("Ends inside the distance", b.get("p_finish"), finish, base["itd"])
+    for k, v in (b.get("totals") or {}).items():
+        line = float(k.replace("over_", "").replace("_", "."))
+        binrow(f"Over {line:g} rounds", v, row.total_sec > line * 300,
+               base["over"].get((n_rounds, line)))
+    binrow(f"{a} lands a takedown", b.get("a_p_takedown"), a_td, base["td"])
+    binrow(f"{bb} lands a takedown", b.get("b_p_takedown"), b_td, base["td"])
+    binrow(f"{a} scores a knockdown", b.get("a_p_knockdown"), a_kd, base["kd"])
+    binrow(f"{bb} scores a knockdown", b.get("b_p_knockdown"), b_kd, base["kd"])
+
+    props = [r for r in rep if r["kind"] == "prop"]
+    p_win_model = b["p_a"] if a_won else 1 - b["p_a"]
+    out = {"bout": b["bout"], "a": a, "b": bb, "p_a": b["p_a"],
+           "segment": b.get("segment"), "rounds": n_rounds,
+           "winner": a if a_won else bb, "method": meth, "round": rnd,
+           "seconds": int(row.total_sec), "model_right": bool((b["p_a"] > 0.5) == a_won),
+           "p_winner_model": round(p_win_model, 3), "report": rep,
+           "props_n": len(props), "props_right": sum(r["right"] for r in props),
+           "props_base_n": sum(r["base_right"] is not None for r in props),
+           "props_base_right": sum(bool(r["base_right"]) for r in props)}
+    pm = b.get("p_market")
+    if pm is not None:
+        p_win_mkt = pm if a_won else 1 - pm
+        out["market"] = {"p_market": pm, "p_winner_market": round(p_win_mkt, 3),
+                         "market_right": bool((pm > 0.5) == a_won),
+                         "gap": round(b["p_a"] - pm, 3),
+                         "picks_differ": bool((pm > 0.5) != (b["p_a"] > 0.5)),
+                         "model_closer": bool(p_win_model > p_win_mkt)}
+    return out
+
+
 def grade_archive(fights, archive_dir="site/archive", out_path="site/history.json",
                   keep=8, verbose=True):
     """Grade archived cards against the corpus and write the history file.
 
-    Re-graded from scratch every run: a card archived before its results
-    existed simply grades on a later pass, with no state to get stuck.
+    Every market the card priced is graded, not only the winner — method,
+    round, finish, totals, takedowns and knockdowns — and set beside what the
+    base rate alone would have said, so "right on 30 of 40 props" can be read
+    against "guessing the usual outcome got 27". Re-graded from scratch every
+    run, so a card archived before its results existed grades on a later pass.
     """
     import json
     from pathlib import Path
     d = Path(archive_dir)
     if not d.exists():
         return None
-    done = {}
+    base = _base_rates(fights)
     parts = fights.bout.str.split(" vs. ", n=1, expand=True)
-    for r_, b_, w, mth, dt, ts in zip(parts[0], parts[1], fights.winner,
-                                      fights.method, fights.date, fights.total_sec):
-        done[frozenset((_key(r_), _key(b_)))] = (_key(r_), w, mth, dt, int(ts))
+    idx = {}
+    for i, (r_, b_) in enumerate(zip(parts[0], parts[1])):
+        idx.setdefault(frozenset((_key(r_), _key(b_))), []).append(i)
 
     cards = []
     for fp in sorted(d.glob("*.json")):
@@ -681,39 +783,51 @@ def grade_archive(fights, archive_dir="site/archive", out_path="site/history.jso
         except Exception:
             continue
         ev_date = pd.to_datetime(card.get("date"), errors="coerce")
-        graded, right = [], 0
+        graded = []
         for b in card.get("bouts", []):
-            hit = done.get(frozenset((_key(b["a"]), _key(b["b"]))))
-            if not hit:
+            best = None
+            for i in idx.get(frozenset((_key(b["a"]), _key(b["b"]))), []):
+                row = fights.iloc[i]
+                if pd.notna(ev_date):
+                    gap = abs((pd.Timestamp(row.date) - ev_date).days)
+                    if gap > 4 or (best and gap >= best[0]):
+                        continue
+                    best = (gap, row)
+            if not best or best[1].winner not in ("r", "b"):
                 continue
-            red, w, mth, dt, ts = hit
-            if w not in ("r", "b"):
-                continue
-            if pd.notna(ev_date) and abs((pd.Timestamp(dt) - ev_date).days) > 4:
-                continue
-            a_won = (w == "r") == (_key(b["a"]) == red)
-            ok = (b["p_a"] > 0.5) == a_won
-            right += ok
-            graded.append({"bout": b["bout"], "a": b["a"], "b": b["b"],
-                           "p_a": b["p_a"], "segment": b.get("segment"),
-                           "winner": b["a"] if a_won else b["b"],
-                           "method": mth, "seconds": ts, "model_right": bool(ok)})
-        if graded:
-            cards.append({"event": card.get("event"), "date": card.get("date"),
-                          "venue": card.get("venue"), "n": len(graded),
-                          "right": int(right), "bouts": graded})
+            row = best[1]
+            red = _key(row.bout.split(" vs. ")[0])
+            graded.append(_grade_bout(b, row, _key(b["a"]) == red, base))
+        if not graded:
+            continue
+        mk = [g for g in graded if "market" in g]
+        dis = [g for g in mk if abs(g["market"]["gap"]) >= 0.05]
+        meth = [r for g in graded for r in g["report"] if r["kind"] == "method"]
+        rnds = [r for g in graded for r in g["report"] if r["kind"] == "round"]
+        cards.append({
+            "event": card.get("event"), "date": card.get("date"), "venue": card.get("venue"),
+            "n": len(graded), "right": sum(g["model_right"] for g in graded),
+            "method_n": len(meth), "method_right": sum(r["right"] for r in meth),
+            "round_n": len(rnds), "round_right": sum(r["right"] for r in rnds),
+            "props_n": sum(g["props_n"] for g in graded),
+            "props_right": sum(g["props_right"] for g in graded),
+            "props_base_n": sum(g["props_base_n"] for g in graded),
+            "props_base_right": sum(g["props_base_right"] for g in graded),
+            "market_n": len(mk), "market_right": sum(g["market"]["market_right"] for g in mk),
+            "model_closer": sum(g["market"]["model_closer"] for g in mk),
+            "disagree_n": len(dis), "disagree_model_closer": sum(g["market"]["model_closer"] for g in dis),
+            "bouts": graded})
     cards.sort(key=lambda c: str(c.get("date")), reverse=True)
     cards = cards[:keep]
     Path(out_path).parent.mkdir(parents=True, exist_ok=True)
     Path(out_path).write_text(json.dumps(
-        {"cards": cards,
-         "total_graded": sum(c["n"] for c in cards),
+        {"cards": cards, "total_graded": sum(c["n"] for c in cards),
          "total_right": sum(c["right"] for c in cards)}, indent=1), encoding="utf-8")
     if verbose and cards:
-        tot = sum(c["n"] for c in cards)
-        rt = sum(c["right"] for c in cards)
-        print(f"graded {len(cards)} past card(s), {rt}/{tot} winners correct "
-              f"-> {out_path}")
+        c = cards[0]
+        print(f"graded {c['event']}: winners {c['right']}/{c['n']}, method top pick "
+              f"{c['method_right']}/{c['method_n']}, props {c['props_right']}/{c['props_n']} "
+              f"(base rate alone {c['props_base_right']}/{c['props_base_n']})")
     return out_path
 
 
