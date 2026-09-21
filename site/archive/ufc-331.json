@@ -2,7 +2,7 @@
  "event": "UFC 331",
  "date": "2026-09-19",
  "venue": "Crypto.com Arena, Los Angeles",
- "generated_utc": "2026-09-20T23:07:38.380158+00:00",
+ "generated_utc": "2026-09-21T01:27:15.543722+00:00",
  "bouts": [
   {
    "bout": "Joshua Van vs. Alexandre Pantoja",
@@ -12,31 +12,89 @@
    "segment": "Main card",
    "p_a": 0.7127,
    "p_b": 0.2873,
+   "stats": {
+    "a": {
+     "record": "9-1",
+     "n_fights": 10,
+     "age": 24.9,
+     "height": 65.0,
+     "reach": 65.0,
+     "stance": "Orthodox",
+     "elo": 1599,
+     "opp_elo": 1530,
+     "slpm": 7.33,
+     "sapm": 5.67,
+     "str_acc": 0.572,
+     "str_def": 0.589,
+     "td15": 0.96,
+     "td_def": 0.723,
+     "sub15": 0.3,
+     "ctrl": 0.084,
+     "kd15": 0.43,
+     "ko_loss": 0.157
+    },
+    "b": {
+     "record": "14-4",
+     "n_fights": 18,
+     "age": 36.4,
+     "height": 65.0,
+     "reach": 67.0,
+     "stance": "Orthodox",
+     "elo": 1616,
+     "opp_elo": 1529,
+     "slpm": 4.58,
+     "sapm": 3.89,
+     "str_acc": 0.503,
+     "str_def": 0.499,
+     "td15": 2.53,
+     "td_def": 0.682,
+     "sub15": 0.93,
+     "ctrl": 0.313,
+     "kd15": 0.28,
+     "ko_loss": 0.1
+    }
+   },
+   "evidence": {
+    "a": 10,
+    "b": 18,
+    "min": 10
+   },
    "drivers": [
     {
      "label": "age",
      "value": 0.8982,
-     "favours": "a"
+     "favours": "a",
+     "key": "d_age"
     },
     {
      "label": "striking output",
      "value": 0.4676,
-     "favours": "a"
+     "favours": "a",
+     "key": "d_adj_slpm"
     },
     {
      "label": "strikes absorbed",
      "value": -0.3349,
-     "favours": "b"
+     "favours": "b",
+     "key": "d_sapm"
     },
     {
      "label": "takedown threat",
      "value": -0.1387,
-     "favours": "b"
+     "favours": "b",
+     "key": "grapple_edge"
     },
     {
      "label": "striking defence",
      "value": 0.1288,
-     "favours": "a"
+     "favours": "a",
+     "key": "d_str_def"
+    },
+    {
+     "label": "career quality",
+     "value": -0.1048,
+     "favours": "b",
+     "key": "d_elo"
     }
    ],
    "p_market": 0.5483,
@@ -121,31 +179,89 @@
    "segment": "Main card",
    "p_a": 0.751,
    "p_b": 0.249,
+   "stats": {
+    "a": {
+     "record": "10-2",
+     "n_fights": 12,
+     "age": 29.9,
+     "height": 67.0,
+     "reach": 72.0,
+     "stance": "Orthodox",
+     "elo": 1615,
+     "opp_elo": 1559,
+     "slpm": 4.05,
+     "sapm": 2.0,
+     "str_acc": 0.499,
+     "str_def": 0.549,
+     "td15": 3.08,
+     "td_def": 0.712,
+     "sub15": 0.19,
+     "ctrl": 0.401,
+     "kd15": 0.3,
+     "ko_loss": 0.075
+    },
+    "b": {
+     "record": "5-1",
+     "n_fights": 6,
+     "age": 30.3,
+     "height": 71.0,
+     "reach": 75.0,
+     "stance": "Orthodox",
+     "elo": 1556,
+     "opp_elo": 1517,
+     "slpm": 3.7,
+     "sapm": 3.81,
+     "str_acc": 0.561,
+     "str_def": 0.592,
+     "td15": 0.67,
+     "td_def": 0.739,
+     "sub15": 0.24,
+     "ctrl": 0.079,
+     "kd15": 1.34,
+     "ko_loss": 0.12
+    }
+   },
+   "evidence": {
+    "a": 12,
+    "b": 6,
+    "min": 6
+   },
    "drivers": [
     {
      "label": "strength of schedule",
      "value": 0.3973,
-     "favours": "a"
+     "favours": "a",
+     "key": "d_opp_elo"
     },
     {
      "label": "career quality",
      "value": 0.3642,
-     "favours": "a"
+     "favours": "a",
+     "key": "d_elo"
     },
     {
      "label": "strikes absorbed",
      "value": 0.339,
-     "favours": "a"
+     "favours": "a",
+     "key": "d_sapm"
     },
     {
      "label": "takedown threat",
      "value": 0.2137,
-     "favours": "a"
+     "favours": "a",
+     "key": "grapple_edge"
     },
     {
      "label": "experience",
      "value": -0.0961,
-     "favours": "b"
+     "favours": "b",
+     "key": "d_log_exp"
+    },
+    {
+     "label": "reach",
+     "value": -0.0902,
+     "favours": "b",
+     "key": "d_reach"
     }
    ],
    "p_market": 0.7277,
@@ -228,31 +344,89 @@
    "segment": "Main card",
    "p_a": 0.452,
    "p_b": 0.548,
+   "stats": {
+    "a": {
+     "record": "1-1",
+     "n_fights": 2,
+     "age": 39.2,
+     "height": 66.0,
+     "reach": 67.0,
+     "stance": "Orthodox",
+     "elo": 1504,
+     "opp_elo": 1564,
+     "slpm": 2.9,
+     "sapm": 3.93,
+     "str_acc": 0.484,
+     "str_def": 0.527,
+     "td15": 2.0,
+     "td_def": 0.625,
+     "sub15": 0.55,
+     "ctrl": 0.144,
+     "kd15": 0.15,
+     "ko_loss": 0.2
+    },
+    "b": {
+     "record": "6-3",
+     "n_fights": 10,
+     "age": 35.4,
+     "height": 70.0,
+     "reach": 70.0,
+     "stance": "Orthodox",
+     "elo": 1549,
+     "opp_elo": 1518,
+     "slpm": 4.91,
+     "sapm": 4.36,
+     "str_acc": 0.553,
+     "str_def": 0.57,
+     "td15": 1.32,
+     "td_def": 0.62,
+     "sub15": 0.56,
+     "ctrl": 0.185,
+     "kd15": 0.74,
+     "ko_loss": 0.229
+    }
+   },
+   "evidence": {
+    "a": 2,
+    "b": 10,
+    "min": 2
+   },
    "drivers": [
     {
      "label": "strength of schedule",
      "value": 0.4407,
-     "favours": "a"
+     "favours": "a",
+     "key": "d_opp_elo"
     },
     {
      "label": "striking output",
      "value": -0.3421,
-     "favours": "b"
+     "favours": "b",
+     "key": "d_adj_slpm"
     },
     {
      "label": "age",
      "value": -0.294,
-     "favours": "b"
+     "favours": "b",
+     "key": "d_age"
     },
     {
      "label": "career quality",
      "value": -0.2745,
-     "favours": "b"
+     "favours": "b",
+     "key": "d_elo"
     },
     {
      "label": "experience",
      "value": 0.2016,
-     "favours": "a"
+     "favours": "a",
+     "key": "d_log_exp"
+    },
+    {
+     "label": "takedown threat",
+     "value": 0.0923,
+     "favours": "a",
+     "key": "grapple_edge"
     }
    ],
    "p_market": null,
@@ -335,31 +509,89 @@
    "segment": "Main card",
    "p_a": 0.6717,
    "p_b": 0.3283,
+   "stats": {
+    "a": {
+     "record": "13-7",
+     "n_fights": 20,
+     "age": 37.3,
+     "height": 71.0,
+     "reach": 72.0,
+     "stance": "Orthodox",
+     "elo": 1587,
+     "opp_elo": 1549,
+     "slpm": 4.31,
+     "sapm": 3.59,
+     "str_acc": 0.491,
+     "str_def": 0.596,
+     "td15": 1.74,
+     "td_def": 0.646,
+     "sub15": 0.56,
+     "ctrl": 0.216,
+     "kd15": 0.18,
+     "ko_loss": 0.175
+    },
+    "b": {
+     "record": "8-5",
+     "n_fights": 14,
+     "age": 35.6,
+     "height": 68.0,
+     "reach": 69.0,
+     "stance": "Switch",
+     "elo": 1560,
+     "opp_elo": 1574,
+     "slpm": 4.32,
+     "sapm": 6.21,
+     "str_acc": 0.374,
+     "str_def": 0.493,
+     "td15": 1.05,
+     "td_def": 0.591,
+     "sub15": 0.89,
+     "ctrl": 0.093,
+     "kd15": 0.38,
+     "ko_loss": 0.178
+    }
+   },
+   "evidence": {
+    "a": 20,
+    "b": 14,
+    "min": 14
+   },
    "drivers": [
     {
      "label": "strikes absorbed",
      "value": 0.4911,
-     "favours": "a"
+     "favours": "a",
+     "key": "d_sapm"
     },
     {
      "label": "strength of schedule",
      "value": -0.2315,
-     "favours": "b"
+     "favours": "b",
+     "key": "d_opp_elo"
     },
     {
      "label": "career quality",
      "value": 0.1689,
-     "favours": "a"
+     "favours": "a",
+     "key": "d_elo"
     },
     {
      "label": "striking defence",
      "value": 0.1469,
-     "favours": "a"
+     "favours": "a",
+     "key": "d_str_def"
     },
     {
      "label": "age",
      "value": -0.1372,
-     "favours": "b"
+     "favours": "b",
+     "key": "d_age"
+    },
+    {
+     "label": "takedown threat",
+     "value": 0.1194,
+     "favours": "a",
+     "key": "grapple_edge"
     }
    ],
    "p_market": 0.6483,
@@ -442,31 +674,89 @@
    "segment": "Main card",
    "p_a": 0.6385,
    "p_b": 0.3615,
+   "stats": {
+    "a": {
+     "record": "3-0",
+     "n_fights": 3,
+     "age": 27.8,
+     "height": 72.0,
+     "reach": 73.0,
+     "stance": "Orthodox",
+     "elo": 1541,
+     "opp_elo": 1473,
+     "slpm": 4.83,
+     "sapm": 4.9,
+     "str_acc": 0.535,
+     "str_def": 0.542,
+     "td15": 1.51,
+     "td_def": 0.663,
+     "sub15": 0.54,
+     "ctrl": 0.176,
+     "kd15": 2.07,
+     "ko_loss": 0.171
+    },
+    "b": {
+     "record": "11-6",
+     "n_fights": 18,
+     "age": 38.9,
+     "height": 72.0,
+     "reach": 76.0,
+     "stance": "Orthodox",
+     "elo": 1559,
+     "opp_elo": 1520,
+     "slpm": 3.57,
+     "sapm": 3.91,
+     "str_acc": 0.533,
+     "str_def": 0.512,
+     "td15": 0.67,
+     "td_def": 0.753,
+     "sub15": 0.27,
+     "ctrl": 0.228,
+     "kd15": 0.63,
+     "ko_loss": 0.236
+    }
+   },
+   "evidence": {
+    "a": 3,
+    "b": 18,
+    "min": 3
+   },
    "drivers": [
     {
      "label": "age",
      "value": 0.8674,
-     "favours": "a"
+     "favours": "a",
+     "key": "d_age"
     },
     {
      "label": "strength of schedule",
      "value": -0.4446,
-     "favours": "b"
+     "favours": "b",
+     "key": "d_opp_elo"
     },
     {
      "label": "experience",
      "value": 0.2418,
-     "favours": "a"
+     "favours": "a",
+     "key": "d_log_exp"
     },
     {
      "label": "striking output",
      "value": 0.214,
-     "favours": "a"
+     "favours": "a",
+     "key": "d_adj_slpm"
     },
     {
      "label": "strikes absorbed",
      "value": -0.1859,
-     "favours": "b"
+     "favours": "b",
+     "key": "d_sapm"
+    },
+    {
+     "label": "knockout threat",
+     "value": -0.1381,
+     "favours": "b",
+     "key": "ko_edge"
     }
    ],
    "p_market": 0.6811,
@@ -549,31 +839,89 @@
    "segment": "Prelims",
    "p_a": 0.6059,
    "p_b": 0.3941,
+   "stats": {
+    "a": {
+     "record": "9-6",
+     "n_fights": 16,
+     "age": 30.8,
+     "height": 69.0,
+     "reach": 69.0,
+     "stance": "Switch",
+     "elo": 1558,
+     "opp_elo": 1518,
+     "slpm": 5.34,
+     "sapm": 4.06,
+     "str_acc": 0.494,
+     "str_def": 0.573,
+     "td15": 0.39,
+     "td_def": 0.519,
+     "sub15": 0.63,
+     "ctrl": 0.118,
+     "kd15": 0.52,
+     "ko_loss": 0.06
+    },
+    "b": {
+     "record": "15-11",
+     "n_fights": 26,
+     "age": 33.8,
+     "height": 68.0,
+     "reach": 70.0,
+     "stance": "Switch",
+     "elo": 1565,
+     "opp_elo": 1535,
+     "slpm": 4.78,
+     "sapm": 5.29,
+     "str_acc": 0.476,
+     "str_def": 0.501,
+     "td15": 0.57,
+     "td_def": 0.703,
+     "sub15": 0.75,
+     "ctrl": 0.09,
+     "kd15": 0.53,
+     "ko_loss": 0.04
+    }
+   },
+   "evidence": {
+    "a": 16,
+    "b": 26,
+    "min": 16
+   },
    "drivers": [
     {
      "label": "age",
      "value": 0.2334,
-     "favours": "a"
+     "favours": "a",
+     "key": "d_age"
     },
     {
      "label": "strikes absorbed",
      "value": 0.2297,
-     "favours": "a"
+     "favours": "a",
+     "key": "d_sapm"
     },
     {
      "label": "strength of schedule",
      "value": -0.1675,
-     "favours": "b"
+     "favours": "b",
+     "key": "d_opp_elo"
     },
     {
      "label": "striking defence",
      "value": 0.103,
-     "favours": "a"
+     "favours": "a",
+     "key": "d_str_def"
     },
     {
      "label": "striking output",
      "value": 0.0956,
-     "favours": "a"
+     "favours": "a",
+     "key": "d_adj_slpm"
+    },
+    {
+     "label": "experience",
+     "value": 0.0718,
+     "favours": "a",
+     "key": "d_log_exp"
     }
    ],
    "p_market": 0.6548,
@@ -656,31 +1004,89 @@
    "segment": "Prelims",
    "p_a": 0.456,
    "p_b": 0.544,
+   "stats": {
+    "a": {
+     "record": "8-10",
+     "n_fights": 18,
+     "age": 33.5,
+     "height": 74.0,
+     "reach": 75.0,
+     "stance": "Southpaw",
+     "elo": 1485,
+     "opp_elo": 1537,
+     "slpm": 3.16,
+     "sapm": 4.55,
+     "str_acc": 0.485,
+     "str_def": 0.432,
+     "td15": 0.27,
+     "td_def": 0.609,
+     "sub15": 0.1,
+     "ctrl": 0.13,
+     "kd15": 0.73,
+     "ko_loss": 0.191
+    },
+    "b": {
+     "record": "1-1",
+     "n_fights": 2,
+     "age": 38.0,
+     "height": 79.0,
+     "reach": 84.0,
+     "stance": "Orthodox",
+     "elo": 1501,
+     "opp_elo": 1472,
+     "slpm": 2.56,
+     "sapm": 2.81,
+     "str_acc": 0.616,
+     "str_def": 0.467,
+     "td15": 0.85,
+     "td_def": 0.644,
+     "sub15": 0.4,
+     "ctrl": 0.09,
+     "kd15": 0.53,
+     "ko_loss": 0.2
+    }
+   },
+   "evidence": {
+    "a": 18,
+    "b": 2,
+    "min": 2
+   },
    "drivers": [
     {
      "label": "strength of schedule",
      "value": 0.6132,
-     "favours": "a"
+     "favours": "a",
+     "key": "d_opp_elo"
     },
     {
      "label": "age",
      "value": 0.3531,
-     "favours": "a"
+     "favours": "a",
+     "key": "d_age"
     },
     {
      "label": "strikes absorbed",
      "value": -0.3269,
-     "favours": "b"
+     "favours": "b",
+     "key": "d_sapm"
     },
     {
      "label": "experience",
      "value": -0.2864,
-     "favours": "b"
+     "favours": "b",
+     "key": "d_log_exp"
     },
     {
      "label": "reach",
      "value": -0.2707,
-     "favours": "b"
+     "favours": "b",
+     "key": "d_reach"
+    },
+    {
+     "label": "striking accuracy",
+     "value": -0.1255,
+     "favours": "b",
+     "key": "d_str_acc"
     }
    ],
    "p_market": 0.1796,
@@ -763,31 +1169,89 @@
    "segment": "Early prelims",
    "p_a": 0.6688,
    "p_b": 0.3312,
+   "stats": {
+    "a": {
+     "record": "9-6",
+     "n_fights": 15,
+     "age": 28.8,
+     "height": 74.0,
+     "reach": 75.0,
+     "stance": "Orthodox",
+     "elo": 1544,
+     "opp_elo": 1527,
+     "slpm": 3.74,
+     "sapm": 3.87,
+     "str_acc": 0.485,
+     "str_def": 0.504,
+     "td15": 1.43,
+     "td_def": 0.662,
+     "sub15": 0.4,
+     "ctrl": 0.17,
+     "kd15": 0.73,
+     "ko_loss": 0.221
+    },
+    "b": {
+     "record": "6-4",
+     "n_fights": 10,
+     "age": 33.9,
+     "height": 70.0,
+     "reach": 72.0,
+     "stance": "Orthodox",
+     "elo": 1528,
+     "opp_elo": 1519,
+     "slpm": 3.09,
+     "sapm": 3.75,
+     "str_acc": 0.481,
+     "str_def": 0.521,
+     "td15": 1.16,
+     "td_def": 0.568,
+     "sub15": 0.61,
+     "ctrl": 0.082,
+     "kd15": 0.52,
+     "ko_loss": 0.229
+    }
+   },
+   "evidence": {
+    "a": 15,
+    "b": 10,
+    "min": 10
+   },
    "drivers": [
     {
      "label": "age",
      "value": 0.3944,
-     "favours": "a"
+     "favours": "a",
+     "key": "d_age"
     },
     {
      "label": "striking output",
      "value": 0.1103,
-     "favours": "a"
+     "favours": "a",
+     "key": "d_adj_slpm"
     },
     {
      "label": "career quality",
      "value": 0.0961,
-     "favours": "a"
+     "favours": "a",
+     "key": "d_elo"
     },
     {
      "label": "reach",
      "value": 0.0902,
-     "favours": "a"
+     "favours": "a",
+     "key": "d_reach"
     },
     {
      "label": "takedown threat",
      "value": 0.0796,
-     "favours": "a"
+     "favours": "a",
+     "key": "grapple_edge"
+    },
+    {
+     "label": "strength of schedule",
+     "value": 0.0688,
+     "favours": "a",
+     "key": "d_opp_elo"
     }
    ],
    "p_market": 0.611,
@@ -870,31 +1334,89 @@
    "segment": "Early prelims",
    "p_a": 0.6439,
    "p_b": 0.3561,
+   "stats": {
+    "a": {
+     "record": "6-2",
+     "n_fights": 8,
+     "age": 29.0,
+     "height": 66.0,
+     "reach": 69.0,
+     "stance": "Orthodox",
+     "elo": 1550,
+     "opp_elo": 1505,
+     "slpm": 7.17,
+     "sapm": 5.3,
+     "str_acc": 0.521,
+     "str_def": 0.575,
+     "td15": 1.23,
+     "td_def": 0.672,
+     "sub15": 0.67,
+     "ctrl": 0.24,
+     "kd15": 0.21,
+     "ko_loss": 0.1
+    },
+    "b": {
+     "record": "3-2",
+     "n_fights": 5,
+     "age": 32.6,
+     "height": 66.0,
+     "reach": 67.0,
+     "stance": "Orthodox",
+     "elo": 1514,
+     "opp_elo": 1509,
+     "slpm": 2.54,
+     "sapm": 2.89,
+     "str_acc": 0.381,
+     "str_def": 0.583,
+     "td15": 2.92,
+     "td_def": 0.693,
+     "sub15": 0.34,
+     "ctrl": 0.372,
+     "kd15": 0.09,
+     "ko_loss": 0.133
+    }
+   },
+   "evidence": {
+    "a": 8,
+    "b": 5,
+    "min": 5
+   },
    "drivers": [
     {
      "label": "striking output",
      "value": 0.7857,
-     "favours": "a"
+     "favours": "a",
+     "key": "d_adj_slpm"
     },
     {
      "label": "strikes absorbed",
      "value": -0.4517,
-     "favours": "b"
+     "favours": "b",
+     "key": "d_sapm"
     },
     {
      "label": "age",
      "value": 0.282,
-     "favours": "a"
+     "favours": "a",
+     "key": "d_age"
     },
     {
      "label": "career quality",
      "value": 0.216,
-     "favours": "a"
+     "favours": "a",
+     "key": "d_elo"
     },
     {
      "label": "takedown threat",
      "value": -0.203,
-     "favours": "b"
+     "favours": "b",
+     "key": "grapple_edge"
+    },
+    {
+     "label": "knockout threat",
+     "value": -0.1829,
+     "favours": "b",
+     "key": "ko_edge"
     }
    ],
    "p_market": 0.6678,
@@ -977,31 +1499,89 @@
    "segment": "Early prelims",
    "p_a": 0.3608,
    "p_b": 0.6392,
+   "stats": {
+    "a": {
+     "record": "8-4",
+     "n_fights": 12,
+     "age": 38.1,
+     "height": 72.0,
+     "reach": 74.0,
+     "stance": "Orthodox",
+     "elo": 1545,
+     "opp_elo": 1535,
+     "slpm": 4.21,
+     "sapm": 3.52,
+     "str_acc": 0.422,
+     "str_def": 0.61,
+     "td15": 0.44,
+     "td_def": 0.671,
+     "sub15": 0.26,
+     "ctrl": 0.035,
+     "kd15": 0.54,
+     "ko_loss": 0.138
+    },
+    "b": {
+     "record": "7-3",
+     "n_fights": 10,
+     "age": 31.6,
+     "height": 68.0,
+     "reach": 72.0,
+     "stance": "Orthodox",
+     "elo": 1567,
+     "opp_elo": 1525,
+     "slpm": 2.46,
+     "sapm": 2.57,
+     "str_acc": 0.487,
+     "str_def": 0.439,
+     "td15": 2.6,
+     "td_def": 0.613,
+     "sub15": 1.18,
+     "ctrl": 0.335,
+     "kd15": 0.2,
+     "ko_loss": 0.086
+    }
+   },
+   "evidence": {
+    "a": 12,
+    "b": 10,
+    "min": 10
+   },
    "drivers": [
     {
      "label": "age",
      "value": -0.5055,
-     "favours": "b"
+     "favours": "b",
+     "key": "d_age"
     },
     {
      "label": "striking output",
      "value": 0.2963,
-     "favours": "a"
+     "favours": "a",
+     "key": "d_adj_slpm"
     },
     {
      "label": "striking defence",
      "value": 0.2436,
-     "favours": "a"
+     "favours": "a",
+     "key": "d_str_def"
     },
     {
      "label": "takedown threat",
      "value": -0.2406,
-     "favours": "b"
+     "favours": "b",
+     "key": "grapple_edge"
     },
     {
      "label": "strikes absorbed",
      "value": -0.1775,
-     "favours": "b"
+     "favours": "b",
+     "key": "d_sapm"
+    },
+    {
+     "label": "career quality",
+     "value": -0.1326,
+     "favours": "b",
+     "key": "d_elo"
     }
    ],
    "p_market": 0.2322,
