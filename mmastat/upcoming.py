@@ -182,7 +182,41 @@ def _market_for_card(card_path, odds_path="data/ufc_betting_odds_daily.csv"):
     price presented as current.
     """
     import os
-    # Live API first: it is the only source a CI job can reach.
+    # The ledger FIRST. The capture job has already paid for these prices and
+    # written them down; refresh making its own call was buying the same
+    # numbers twice, at 3 credits a day for nothing. Latest capture per bout.
+    try:
+        from .ledger import read as _lread
+        L = _lread()
+        if not L.empty and "venue" in L.columns:
+            L = L[L.venue == "sportsbook"].sort_values("captured_utc")
+            last = L.groupby(["fighter", "opponent"]).tail(1)
+            out = {}
+            for r in last.itertuples():
+                k = frozenset((_key(r.fighter), _key(r.opponent)))
+                if k not in out:
+                    out[k] = (_key(r.fighter), float(r.p_market_devig), r.books)
+            # Use the ledger only if it actually covers THIS card. The first
+            # version returned early whenever the ledger held any prices at
+            # all — so right after a card advanced, the ledger held only the
+            # finished card's bouts, matched none of the new ones, and the
+            # site showed no market prices while never falling back to the API.
+            try:
+                _, card = parse_card(card_path)
+                want = {frozenset((_key(a), _key(b))) for a, b, *_ in card}
+                have = sum(1 for k in want if k in out)
+                cover = have / len(want) if want else 0.0
+            except Exception:
+                cover = 0.0
+            if out and cover >= 0.5:
+                return out, f"ledger (latest capture, {cover:.0%} of card)"
+            if out:
+                print(f"note: ledger covers only {cover:.0%} of this card - "
+                      f"fetching live instead")
+    except Exception as e:
+        print(f"note: ledger prices unavailable ({e})")
+    # Only if the ledger has nothing — e.g. a card listed before its first
+    # capture — spend a call on it.
     try:
         from .odds_live import fetch_moneylines
         live = fetch_moneylines()
@@ -331,9 +365,31 @@ def predict_card(path, fights, fighters, verbose=True):
         r = dict(bout=f"{na} vs. {nb}", a=na, b=nb, rounds=n_rounds,
                  segment=segment,
                  p_a=round(p_a, 4), p_b=round(1 - p_a, 4))
+        # Raw pre-fight numbers. Without these the drawer can say "age pushes
+        # +0.90" and never that one man is 36 and the other 24 — the model
+        # shows its reasoning in standard deviations, which is the wrong unit
+        # for a reader.
+        def tot(S, W, L, N):
+            return {"record": f"{W}-{L}", "n_fights": N,
+                    "age": round(S["age"], 1), "height": round(S["height"], 1),
+                    "reach": round(S["reach"], 1), "stance": S.get("stance_name", ""),
+                    "elo": round(S["elo"]), "opp_elo": round(S["opp_elo"]),
+                    "slpm": round(S["adj_slpm"], 2), "sapm": round(S["sapm"], 2),
+                    "str_acc": round(S["str_acc"], 3), "str_def": round(S["str_def"], 3),
+                    "td15": round(S["adj_td15"], 2), "td_def": round(S["td_def"], 3),
+                    "sub15": round(S["sub15"], 2), "ctrl": round(S["ctrl_share"], 3),
+                    "kd15": round(S["kd15"], 2), "ko_loss": round(S["ko_loss_rate"], 3)}
+        sa["stance_name"] = A.stance
+        sb["stance_name"] = B.stance
+        r["stats"] = {"a": tot(sa, A.wins, A.losses, A.n_fights),
+                      "b": tot(sb, B.wins, B.losses, B.n_fights)}
+        # How much evidence stands behind this number at all.
+        r["evidence"] = {"a": A.n_fights, "b": B.n_fights,
+                         "min": min(A.n_fights, B.n_fights)}
+
         r["drivers"] = [{"label": LABELS.get(k, k), "value": round(v, 4),
-                         "favours": "a" if v > 0 else "b"}
-                        for k, v in contrib[:5] if abs(v) > 0.01]
+                         "favours": "a" if v > 0 else "b", "key": k}
+                        for k, v in contrib[:6] if abs(v) > 0.01]
         hit = market.get(frozenset((_key(na), _key(nb))))
         if hit:
             src, pm, nbooks = hit
@@ -453,6 +509,30 @@ def predict_card(path, fights, fighters, verbose=True):
             r["bands"] = bands
     except Exception as e:
         print(f"note: base rates unavailable ({e})")
+
+    # Opening price: the FIRST ledger capture for each bout. The market is far
+    # sharper at the close than the open (log loss 0.597 -> 0.567), and the
+    # exploratory finding in PREREGISTRATION addendum 13 is that the model
+    # anticipates which way it moves. Showing where the line started is what
+    # lets a reader see that, bout by bout.
+    try:
+        from .ledger import read as _lread
+        L = _lread()
+        if not L.empty and "venue" in L.columns:
+            _ed = pd.to_datetime(meta.get("date"), errors="coerce")
+            _d = pd.to_datetime(L.event_date, errors="coerce")
+            L = L[(L.venue == "sportsbook") & ((_d - _ed).abs() <= pd.Timedelta(days=1))]
+            L = L.sort_values("captured_utc")
+            first = L.groupby(["fighter", "opponent"]).p_market_devig.first()
+            for r in rows:
+                v = first.get((r["a"], r["b"]))
+                if v is None:
+                    v2 = first.get((r["b"], r["a"]))
+                    v = (1 - v2) if v2 is not None else None
+                if v is not None:
+                    r["p_open"] = round(float(v), 4)
+    except Exception as e:
+        print(f"note: opening prices unavailable ({e})")
 
     # Measured reliability, recomputed each run so the site quotes its own
     # current track record rather than a figure hard-coded months ago.
@@ -673,6 +753,14 @@ if __name__ == "__main__":
         # This call was missing entirely: archive_previous() ran inside
         # write_json, so cards were being saved, but nothing ever graded them
         # and site/history.json was never written.
+        try:
+            from .odds_live import read_usage
+            u = read_usage()
+            if u:
+                Path("site/usage.json").write_text(_json.dumps(u, indent=1), encoding="utf-8")
+        except Exception:
+            pass
+
         try:
             grade_archive(f)
         except Exception as e:

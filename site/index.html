@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- cornerman build: dashboard-v3 -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -10,6 +11,8 @@
     --soft:#1C222C; --bone:#ECE8E0; --mute:#8D95A6; --dim:#59616F;
     --red:#C8442F; --redsoft:#E87D68; --blue:#3E85B4; --bluesoft:#78B2D8;
     --gold:#CDA43A; --warn:#DE8C34; --good:#6FBF73;
+    /* reserved for exactly one meaning: model and market disagree by 5+ pts */
+    --hot:#FF5A36;
   }
   *{box-sizing:border-box}
   body{margin:0;background:var(--ink);color:var(--bone);
@@ -114,6 +117,8 @@
     border-radius:3px;font-weight:700;white-space:nowrap;border:1px solid currentColor}
   .edgeTag.agree{color:var(--dim)} .edgeTag.lean{color:var(--mute)}
   .edgeTag.wide{color:var(--warn)} .edgeTag.hit{color:var(--good)} .edgeTag.miss{color:var(--red)}
+  .ubar{display:inline-block;width:46px;height:3px;background:var(--soft);border-radius:2px;overflow:hidden}
+  .ubar i{display:block;height:100%}
   .intro{position:relative;border:1px solid var(--line);border-left:3px solid var(--bluesoft);
     background:var(--panel);border-radius:4px;padding:14px 16px;margin:12px 0 4px;max-width:900px}
   .intro h3{margin:0 0 6px;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--bluesoft)}
@@ -123,6 +128,18 @@
   .xsm{position:absolute;top:8px;right:9px;background:none;border:none;color:var(--dim);
     cursor:pointer;font-size:13px;line-height:1;padding:2px 4px}
   .xsm:hover{color:var(--bone)}
+  .tt{display:flex;align-items:baseline;gap:8px;padding:3px 0;border-bottom:1px solid var(--soft)}
+  .tth{border-bottom:1px solid var(--line);padding-bottom:5px;margin-bottom:3px}
+  .tth .tv{font-weight:800;font-size:11.5px;text-transform:uppercase;letter-spacing:-.01em;color:var(--bone)}
+  .tt .tv{width:84px;flex:none;font-size:12px;color:var(--dim);
+    font-family:ui-monospace,Menlo,monospace;font-variant-numeric:tabular-nums}
+  .tt .tv.r{text-align:right}
+  .tt .tv.lead{color:var(--bone);font-weight:700}
+  .tt .tv.lead.a{color:var(--redsoft)} .tt .tv.lead.b{color:var(--bluesoft)}
+  .tt .tk{flex:1;text-align:center;font-size:9.5px;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--dim)}
+  .drvraw{display:block;font-size:9.5px;letter-spacing:.06em;color:#4F5766;margin-top:1px;
+    font-family:ui-monospace,Menlo,monospace}
   .verdict{font-size:13px;line-height:1.6;color:var(--mute);border-left:2px solid var(--line);
     padding-left:11px;margin-bottom:14px}
   .verdict b{color:var(--bone)}
@@ -150,6 +167,45 @@
   .qpct{font-size:8.5px;color:var(--dim);margin-left:1px}
   .qn{font-size:8.5px;letter-spacing:.08em}
   .cwhy{margin-top:5px;font-size:9px;letter-spacing:.06em;color:#4C5462}
+  .dialrow{display:flex;align-items:center;gap:4px}
+  .fcol{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:4px}
+  .fcol.r{align-items:flex-end;text-align:right}
+  .fcol .nm{max-width:100%}
+  .gauge-svg{width:148px;height:82px;flex:none;overflow:visible}
+  .g-track{fill:none;stroke:var(--soft);stroke-width:9;stroke-linecap:round}
+  .g-side-a{fill:none;stroke:var(--red);stroke-width:3;opacity:.35}
+  .g-side-b{fill:none;stroke:var(--blue);stroke-width:3;opacity:.35}
+  .g-gap{fill:none;stroke:#5A6272;stroke-width:9;stroke-linecap:round;opacity:.7}
+  .g-gap.hot{stroke:var(--hot);opacity:.95}
+  .g-mkt{stroke:var(--gold);stroke-width:2.5;stroke-linecap:round}
+  .g-open{stroke:var(--gold);stroke-width:1.5;stroke-dasharray:2 2;opacity:.8}
+  .g-needle{stroke:var(--bone);stroke-width:2.5;stroke-linecap:round}
+  .g-hub{fill:var(--bone)}
+  .g-num{fill:var(--bone);font:800 17px ui-monospace,Menlo,monospace;text-anchor:middle}
+  .gkey{display:flex;gap:10px;justify-content:center;font-size:9px;letter-spacing:.08em;
+    text-transform:uppercase;color:var(--dim);margin-top:1px}
+  .gkey span{display:flex;align-items:center;gap:4px}
+  .gkey i{display:inline-block;width:10px;height:0}
+  .k-needle{border-top:2px solid var(--bone)} .k-mkt{border-top:2px solid var(--gold)}
+  .k-open{border-top:1.5px dashed var(--gold)}
+  .mono-av{width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;
+    justify-content:center;font:800 10px ui-sans-serif,system-ui;letter-spacing:.02em;
+    color:#fff;flex:none}
+  .mono-av.a{background:var(--red)} .mono-av.b{background:var(--blue)}
+  .tile.is-hot{border-color:rgba(255,90,54,.55);
+    box-shadow:0 0 0 1px rgba(255,90,54,.18),0 6px 22px -12px rgba(255,90,54,.55)}
+  .tile.is-hot:hover{border-color:var(--hot)}
+  .dcard{border-color:rgba(255,90,54,.6)!important}
+  .dcard .dgap{color:var(--hot)!important}
+  .edgeTag.wide{color:var(--hot)!important;background:rgba(255,90,54,.10)}
+  @media (prefers-reduced-motion:no-preference){
+    .g-needle{transform-origin:74px 76px;animation:sweep .9s cubic-bezier(.2,.8,.2,1) both}
+    @keyframes sweep{from{transform:rotate(var(--deg))} to{transform:rotate(0deg)}}
+    .g-gap{stroke-dasharray:400;stroke-dashoffset:400;animation:draw .8s .35s ease-out forwards}
+    @keyframes draw{to{stroke-dashoffset:0}}
+    .tile{animation:rise .45s ease both}
+    @keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  }
   footer{border-top:1px solid var(--line);margin-top:22px;padding:14px 0 26px;
     font-size:10px;color:var(--dim);line-height:1.6}
   .note{font-size:10.5px;color:var(--dim);line-height:1.6}
@@ -161,12 +217,16 @@
   <header>
     <span class="brand">Cornerman</span>
     <div class="evline" id="evline"></div>
-    <div class="mono" id="stamp" style="font-size:10.5px;color:var(--mute);white-space:nowrap"></div>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px">
+      <div class="mono" id="stamp" style="font-size:10.5px;color:var(--mute);white-space:nowrap"></div>
+      <div class="mono" id="usage" style="font-size:9.5px;display:flex;align-items:center;gap:6px"></div>
+    </div>
   </header>
   <div id="app" style="padding:4px 0 0"><div class="lbl">Loading…</div></div>
   <footer>
     Not affiliated with the UFC. Statistics from public records. Analysis tool, not betting
     advice — tested at 67% accuracy against 70% for the closing line. It does not beat the market.
+    <span class="mono" style="color:#333A46"> · build dashboard-v3</span>
   </footer>
 </div>
 <div class="scrim" id="scrim"></div>
@@ -176,7 +236,29 @@
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const P1=x=>(x*100).toFixed(1), P0=x=>Math.round(x*100);
 const SEGS=['Main card','Prelims','Early prelims'];
-let DATA=null, HIST=null, BR=null, SC=null, ONLY_GAPS=false;
+function fmtET(iso){
+  // Eastern, to the minute, so you can tell which scheduled run produced
+  // what is on screen. Intl handles the EDT/EST switch in November.
+  if(!iso) return '';
+  const d=new Date(iso); if(isNaN(d)) return '';
+  try{
+    return 'updated '+new Intl.DateTimeFormat('en-US',{timeZone:'America/New_York',
+      month:'short',day:'numeric',hour:'numeric',minute:'2-digit',
+      hour12:true,timeZoneName:'short'}).format(d);
+  }catch(e){ return 'updated '+iso.slice(0,16)+' UTC'; }
+}
+/* Where the month's Odds API budget stands, read from headers the capture job
+   already receives — checking it costs nothing. Amber under 100 credits, red
+   under 30: a 429 in fight week would lose closing prices, the unrecoverable
+   half of every CLV measurement. */
+function showUsage(){
+  const el=document.getElementById('usage'); if(!el||!USG||USG.remaining==null) return;
+  const r=USG.remaining, tot=r+(USG.used||0), pct=tot?r/tot:0;
+  const col=r<30?'var(--red)':r<100?'var(--warn)':'var(--mute)';
+  el.innerHTML=`<span style="color:${col}">odds api: <b>${r}</b> of ${tot} credits left</span>
+    <span class="ubar"><i style="width:${(pct*100).toFixed(0)}%;background:${col}"></i></span>`;
+}
+let DATA=null, HIST=null, BR=null, SC=null, USG=null, ONLY_GAPS=false;
 
 function gap(b){ return b.edge==null?null:Math.abs(b.edge); }
 function tag(b){
@@ -240,23 +322,73 @@ function propChips(b){
   return `<div class="props">${c.join('')}</div>`;
 }
 
+/* Two fighters with three UFC bouts between them get the same confident
+   percentage as two twenty-fight veterans. The number of prior fights is the
+   single biggest determinant of how much the model can know, and it was
+   being used as a gate and then thrown away. */
+function evChip(b,short){
+  const e=b.evidence; if(!e) return '';
+  const thin=e.min<5;
+  if(short) return thin?` · <span style="color:var(--warn)">thin: ${e.min} prior</span>`:'';
+  return `<span class="lbl" style="color:${thin?'var(--warn)':'var(--dim)'}">
+    evidence: ${e.a} and ${e.b} prior UFC fights${thin?' — thin, treat with caution':''}</span>`;
+}
+
+/* One dial per bout. Needle = the model, solid tick = the market now, hollow
+   tick = where the line opened. The arc between model and market is the
+   disagreement, shaded in the one saturated colour on the site so the eye
+   goes straight to it. Reading left to right is the red corner's chance. */
+function gauge(b){
+  // The needle points AT the favoured fighter: red corner on the left, blue
+  // on the right, matching the names either side of the dial. The first
+  // version mapped a high red-corner probability to the right, so a 71%
+  // favourite's needle pointed at his opponent — the dial contradicting its
+  // own number. Rendered and caught before it shipped.
+  const W=148,H=82,cx=W/2,cy=76,R=62;
+  const pt=(p,r)=>{const t=Math.PI*p;return [cx+r*Math.cos(t),cy-r*Math.sin(t)];};
+  // pt(1) is the far left, pt(0) the far right; draw left-to-right over the top
+  const arc=(p1,p2,r)=>{const hi=Math.max(p1,p2),lo=Math.min(p1,p2);
+    const[x1,y1]=pt(hi,r),[x2,y2]=pt(lo,r);
+    return `M${x1.toFixed(1)},${y1.toFixed(1)} A${r},${r} 0 0 1 ${x2.toFixed(1)},${y2.toFixed(1)}`;};
+  const mk=b.p_market!=null, op=b.p_open!=null;
+  const hot=mk&&Math.abs(b.p_a-b.p_market)>=0.05;
+  const [nx,ny]=pt(b.p_a,R-8);
+  const tick=(p,cls)=>{const[a1,b1]=pt(p,R+6),[a2,b2]=pt(p,R-6);
+    return `<line class="${cls}" x1="${a1.toFixed(1)}" y1="${b1.toFixed(1)}" x2="${a2.toFixed(1)}" y2="${b2.toFixed(1)}"/>`;};
+  const favA=b.p_a>=.5;
+  return `<svg class="gauge-svg" viewBox="0 0 ${W} ${H}" role="img"
+      aria-label="model favours ${esc(favA?b.a:b.b)} at ${P0(Math.max(b.p_a,b.p_b))} percent${mk?', market has '+esc(b.a)+' at '+P0(b.p_market):''}">
+    <path d="${arc(0,1,R)}" class="g-track"/>
+    <path d="${arc(.5,1,R)}" class="g-side-a"/><path d="${arc(0,.5,R)}" class="g-side-b"/>
+    ${mk?`<path d="${arc(b.p_a,b.p_market,R)}" class="g-gap ${hot?'hot':''}"/>`:''}
+    ${op?tick(b.p_open,'g-open'):''}
+    ${mk?tick(b.p_market,'g-mkt'):''}
+    <line class="g-needle" x1="${cx}" y1="${cy}" x2="${nx.toFixed(1)}" y2="${ny.toFixed(1)}"
+      style="--deg:${(180*b.p_a-90).toFixed(1)}deg"/>
+    <circle cx="${cx}" cy="${cy}" r="3.5" class="g-hub"/>
+    <text x="${cx}" y="${cy-18}" class="g-num" style="fill:${favA?'var(--redsoft)':'var(--bluesoft)'}">${P0(Math.max(b.p_a,b.p_b))}</text>
+  </svg>`;
+}
+function mono(name,cls){
+  const p=String(name).trim().split(/\s+/);
+  const i=(p[0][0]+(p.length>1?p[p.length-1][0]:'')).toUpperCase();
+  return `<span class="mono-av ${cls}">${esc(i)}</span>`;
+}
+
 function tile(b){
-  const mk=b.p_market!=null;
-  const lo=mk?Math.min(b.p_a,b.p_market):0, w=mk?Math.abs(b.p_a-b.p_market):0;
-  return `<button class="tile ${gap(b)>=.12?'wide':''}" data-id="${esc(b.bout)}">
-    <div class="trow" style="margin-bottom:5px">
-      <span class="lbl">${b.rounds===5?'5 rds':'3 rds'}</span>${tag(b)}</div>
-    <div class="trow">
-      <span class="nm" style="color:${b.p_a>=.5?'var(--bone)':'var(--mute)'}">${esc(b.a)}</span>
-      <span class="mono pnum" style="color:${b.p_a>=.5?'var(--redsoft)':'var(--dim)'}">${P0(b.p_a)}</span>
+  const mk=b.p_market!=null, hot=mk&&Math.abs(b.edge)>=0.05;
+  return `<button class="tile ${hot?'is-hot':''}" data-id="${esc(b.bout)}">
+    <div class="trow" style="margin-bottom:2px">
+      <span class="lbl">${b.rounds===5?'5 rds':'3 rds'}${evChip(b,true)}</span>${tag(b)}</div>
+    <div class="dialrow">
+      <div class="fcol">${mono(b.a,'a')}<span class="nm" style="color:${b.p_a>=.5?'var(--bone)':'var(--mute)'}">${esc(b.a)}</span></div>
+      ${gauge(b)}
+      <div class="fcol r">${mono(b.b,'b')}<span class="nm" style="color:${b.p_a<.5?'var(--bone)':'var(--mute)'}">${esc(b.b)}</span></div>
     </div>
-    <div class="gauge"><i style="width:${b.p_a*100}%;background:var(--red)"></i>
-      <i style="width:${b.p_b*100}%;background:var(--blue)"></i></div>
-    ${mk?`<div class="gaplink">${w>.01?`<i style="left:${lo*100}%;width:${w*100}%"></i>`:''}</div>
-      <div class="mkt"><i style="width:${b.p_market*100}%"></i></div>`:''}
-    <div class="trow" style="margin-top:4px">
-      <span class="nm" style="color:${b.p_a<.5?'var(--bone)':'var(--mute)'}">${esc(b.b)}</span>
-      <span class="mono pnum" style="color:${b.p_a<.5?'var(--bluesoft)':'var(--dim)'}">${P0(b.p_b)}</span>
+    <div class="gkey">
+      <span><i class="k-needle"></i>model</span>
+      ${mk?`<span><i class="k-mkt"></i>market ${P0(b.p_market)}</span>`:''}
+      ${b.p_open!=null?`<span><i class="k-open"></i>opened ${P0(b.p_open)}</span>`:''}
     </div>
     ${propChips(b)}
   </button>`;
@@ -511,6 +643,48 @@ function verdictLine(b){
   return t;
 }
 
+const STAT_ROWS=[
+  ['record','Record',v=>v],['age','Age',v=>v],['reach','Reach',v=>v+'"'],
+  ['elo','Career rating',v=>v],['opp_elo','Opposition faced',v=>v],
+  ['slpm','Strikes landed /min',v=>v],['sapm','Strikes absorbed /min',v=>v],
+  ['str_acc','Striking accuracy',v=>(v*100).toFixed(0)+'%'],
+  ['str_def','Striking defence',v=>(v*100).toFixed(0)+'%'],
+  ['td15','Takedowns /15min',v=>v],
+  ['td_def','Takedown defence',v=>(v*100).toFixed(0)+'%'],
+  ['ctrl','Control share',v=>(v*100).toFixed(0)+'%'],
+  ['sub15','Sub attempts /15min',v=>v],['kd15','Knockdowns /15min',v=>v],
+];
+/* The numbers the model is reasoning over. It was showing contributions in
+   standard deviations and never the values themselves, so "age +0.90" gave a
+   reader no way to see that one man is 36 and the other 24. */
+function tale(b){
+  const A=b.stats&&b.stats.a, B=b.stats&&b.stats.b;
+  if(!A||!B) return '';
+  const rows=STAT_ROWS.filter(([k])=>A[k]!==undefined).map(([k,lab,fmt])=>{
+    const na=parseFloat(A[k]), nb=parseFloat(B[k]);
+    const cmp=(isNaN(na)||isNaN(nb))?0:(na>nb?1:na<nb?-1:0);
+    return `<div class="tt">
+      <div class="tv ${cmp>0?'lead a':''}">${esc(String(fmt(A[k])))}</div>
+      <div class="tk">${esc(lab)}</div>
+      <div class="tv r ${cmp<0?'lead b':''}">${esc(String(fmt(B[k])))}</div></div>`;}).join('');
+  return `<div class="card"><div class="ghead" style="background:none;border:none;padding:0 0 8px">
+      <span class="gname">Tale of the tape</span>
+      <span class="lbl">career to date, before this fight</span></div>
+    <div class="tt tth"><div class="tv">${esc(b.a)}</div><div class="tk"></div>
+      <div class="tv r">${esc(b.b)}</div></div>${rows}</div>`;
+}
+const DRV_STAT={'age':'age','career quality':'elo','strength of schedule':'opp_elo',
+  'experience':'n_fights','striking output':'slpm','strikes absorbed':'sapm',
+  'striking accuracy':'str_acc','striking defence':'str_def','reach':'reach',
+  'durability':'ko_loss','takedown threat':'td15','knockout threat':'kd15',
+  'submission threat':'sub15'};
+function drvRaw(b,label){
+  const k=DRV_STAT[label]; if(!k||!b.stats) return '';
+  const a=b.stats.a[k], c=b.stats.b[k]; if(a===undefined) return '';
+  const f=v=>(k==='str_acc'||k==='str_def'||k==='td_def'||k==='ko_loss')?(v*100).toFixed(0)+'%':v;
+  return `<span class="drvraw">${esc(String(f(a)))} v ${esc(String(f(c)))}</span>`;
+}
+
 function open_(id){
   const b=DATA.bouts.find(x=>x.bout===id); if(!b) return;
   const mk=b.p_market!=null;
@@ -522,6 +696,7 @@ function open_(id){
   document.getElementById('drawin').innerHTML=`
     <button class="xbtn" id="xb">close ✕</button>
     <div class="lbl">${esc(b.segment||'')} · ${b.rounds===5?'5 rounds':'3 rounds'}</div>
+    <div style="margin-top:2px">${evChip(b,false)}</div>
     <div style="font-size:19px;font-weight:800;text-transform:uppercase;letter-spacing:-.02em;margin:4px 0 10px">
       ${esc(b.a)} <span style="color:var(--dim)">vs</span> ${esc(b.b)}</div>
     <div class="verdict">${verdictLine(b)}</div>
@@ -541,7 +716,7 @@ function open_(id){
     ${drv.length?`<div class="card"><div class="ghead" style="background:none;border:none;padding:0 0 6px">
       <span class="gname">Why</span><span class="lbl">push on the log-odds</span></div>
       ${drv.map(d=>{const w=Math.abs(d.value)/mx*50, red=d.favours==='a';
-        return `<div class="drv"><div style="width:120px;flex:none;font-size:11.5px;color:var(--mute)">${esc(d.label)}</div>
+        return `<div class="drv"><div style="width:148px;flex:none;font-size:11.5px;color:var(--mute)">${esc(d.label)}${drvRaw(b,d.label)}</div>
           <div class="dt"><div class="bg"></div><div class="zero"></div>
             <i style="${red?'right:50%':'left:50%'};width:${w}%;background:${red?'var(--red)':'var(--blue)'}"></i></div>
           <div class="mono" style="width:52px;text-align:right;font-size:11px;color:var(--dim)">${d.value>0?'+':''}${d.value.toFixed(2)}</div></div>`;}).join('')}
@@ -566,6 +741,7 @@ function open_(id){
         propRow(`${b.a} scores a knockdown`,b.a_p_knockdown,'var(--red)',null,vsBase('C3','a',b.bands,b.a_p_knockdown),'knockdown_a'),
         propRow(`${b.b} scores a knockdown`,b.b_p_knockdown,'var(--blue)',null,vsBase('C3','b',b.bands,b.b_p_knockdown),'knockdown_b')])}
     </div>
+    ${tale(b)}
     ${b.bands?`<div class="card"><div class="ghead" style="background:none;border:none;padding:0 0 8px">
       <span class="gname">Where this bout sits</span><span class="lbl">markers show each corner</span></div>
       ${baseRatePanel(b.bands,b)}</div>`:''}
@@ -597,12 +773,12 @@ Promise.all([
   fetch('predictions.json',{cache:'no-store'}).then(r=>{ if(!r.ok) throw new Error('predictions.json not found ('+r.status+')'); return r.json(); }),
   fetch('history.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null),
   fetch('baserates.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null),
-  fetch('scorecard.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null)
-]).then(([j,h,br,sc])=>{
-  DATA=j; HIST=h; BR=br; SC=sc;
-  // full timestamp, to the minute: you need to know WHICH run produced this
-  const t=j.generated_utc?j.generated_utc.replace('T',' ').replace(/(\+.*|Z)$/,''):'';
-  document.getElementById('stamp').textContent=t?('updated '+t.slice(0,16)+' UTC'):'';
+  fetch('scorecard.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null),
+  fetch('usage.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null)
+]).then(([j,h,br,sc,us])=>{
+  DATA=j; HIST=h; BR=br; SC=sc; USG=us;
+  showUsage();
+  document.getElementById('stamp').textContent=fmtET(j.generated_utc);
   render();
 }).catch(e=>{
   document.getElementById('app').innerHTML='<div class="note"><b>Could not load predictions.</b><br>'+

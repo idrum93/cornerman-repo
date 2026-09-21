@@ -311,6 +311,28 @@ And beating the closing line by shopping is not the same as beating the closing
 line by knowing something. The overround reduction is the robust part; treat
 the arbitrage figure as an upper bound.
 
+## The opening line — the most promising lead, and exploratory
+
+The market beats the model at the **close**. It may not at the **open**.
+
+On 315 bouts with repeated snapshots the closing line is far sharper than the
+opening one (log loss 0.5974 to 0.5670), so the market genuinely learns during
+fight week. And on 209 held-out bouts the model predicts which way it learns:
+where the model disagreed with the opening price, the line then moved toward
+the model's number (Spearman +0.186, p = 0.007). Betting the model's side at
+the open on every 2-point disagreement gave **mean CLV +1.21 points, 55.7%
+positive**.
+
+If it holds, the model is right but early — it reads the same public
+statistics the market eventually prices, and the market takes a week to get
+there. That is the first result in this project that points at a mechanism
+rather than a coefficient.
+
+**It is exploratory.** Thresholds were chosen on the same data, it is one
+analysis among many, and 209 bouts is small. The rule is frozen in
+PREREGISTRATION addendum 13 and the forward ledger is already recording the
+snapshots needed to test it honestly. Do not bet it.
+
 ## Favourite-longshot bias: there is less chaos than the market prices
 
 12,976 fighter-prices, 2010-2026, real payouts from raw American odds:
@@ -439,6 +461,10 @@ Recorded because a negative result you can't find gets re-tried forever.
 | recency weighting (exponential decay on career accumulators) | null at the validation-chosen 3-year half-life: +0.0000, CI [-0.0052, +0.0046]. Shorter half-lives were negative |
 | nine pre-registered style interactions (leg-kicks x stance, reach x range, power x chin, ...) | **0 of 9**; smallest p .060 against a .011 threshold. Reach x range and reach x clinch both came back with the WRONG sign — reach is a flat effect |
 | venue (Apex small cage), altitude, referee stoppage tendency, weight-class moves, career mileage | **0 of 5**. Referee career KO rates spread 0.160-0.437 but predict the next fight at AUC .523 |
+| damage-weighted striking (head 1.0 / body 0.6 / leg 0.4, from boxing and Muay Thai scoring) | null: +0.0000 added, -0.0017 when swapped in. **Swapping raised accuracy to 68.17%, the best this model has shown, while log loss got worse** — a live demonstration of why the pre-registered metric is log loss |
+| active vs stalling control (ground strikes per second of control, from IBJJF positional scoring) | null: -0.0004, CI [-0.0009, +0.0001] |
+| ten cross-field formulas (log-ratios, ape index, Sharpe consistency, volatility, method entropy, Gompertz age, sqrt experience, kinetic power, inverse-square reach) | **0 of 10**. Kinetic power had the smallest p-value AND a significantly negative effect — a "keep what's significant" search would have promoted a transform that hurts |
+| line drift beyond the closing price ("steam") | nothing beyond the close: +0.0006, CI [-0.013, +0.013] |
 | historical-analog dispersion as a chaos signal | correlates with market error at +.172, but the trivial "is the line close to even" baseline correlates at +.468; AUC 0.548 alone vs 0.642 for the price, and adds nothing on top |
 
 The style features are kept in the codebase because they demonstrably help

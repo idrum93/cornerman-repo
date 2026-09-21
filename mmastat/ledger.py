@@ -128,7 +128,13 @@ def dedupe(rows):
     """
     seen = {}
     for r in rows:
-        seen[tuple(str(r.get(k)) for k in KEY)] = r
+        k = tuple(str(r.get(k2)) for k2 in KEY)
+        if k in seen and seen[k].get("opening") and not r.get("opening"):
+            # Last-write-wins must never erase an opening marker: that flag
+            # records the first time a bout was seen, and a merge or a
+            # same-second recapture could otherwise silently turn it off.
+            r = dict(r, opening=True)
+        seen[k] = r
     return list(seen.values())
 
 
@@ -218,8 +224,8 @@ def _rewrite(path=None):
     return removed
 
 
-def capture(fights, fighters, card_path="data/upcoming.txt", path=LEDGER,
-            verbose=True):
+def capture(fights, fighters, card_path="data/upcoming.txt", path=None,
+            verbose=True, venues_only=None):
     """Log every priced bout on the upcoming card, at this moment."""
     from .odds_live import fetch_moneylines
     from .upcoming import parse_card, resolve, _states_after, _key
@@ -255,9 +261,11 @@ def capture(fights, fighters, card_path="data/upcoming.txt", path=LEDGER,
             venues["polymarket"] = pm
     except Exception as e:
         print(f"note: polymarket unavailable ({e})")
+    if venues_only:
+        venues = {k: v for k, v in venues.items() if k in venues_only}
     if not venues:
         if verbose:
-            print("no live prices from any venue - nothing captured")
+            print("capture: no card-keyed venues to record")
         return 0
     book = venues.get("sportsbook") or {}
 
@@ -333,6 +341,100 @@ def capture(fights, fighters, card_path="data/upcoming.txt", path=LEDGER,
         for v in per:
             print(f"  {v:<12} {per[v]:>3} prices, {b.get(v,0)} trigger the rule")
     return n
+
+
+def event_date_et(commence):
+    """UFCStats dates a card by its local evening; The Odds API gives UTC.
+    A Saturday-night card commences around 02:00 UTC Sunday, so the raw UTC
+    date is a day late and would never line up with the corpus. Eastern time
+    matches the corpus for nearly every card."""
+    ts = pd.to_datetime(commence, utc=True, errors="coerce")
+    if pd.isna(ts):
+        return None
+    return ts.tz_convert("America/New_York").date().isoformat()
+
+
+def sweep(fights, fighters, path=None, verbose=True):
+    """Log EVERY listed bout the model can price, at no extra API cost.
+
+    The point is the opening price. A bout's first appearance in the feed is
+    the closest thing to its true open, and the old capture only logged the
+    card in data/upcoming.txt — which advances once a day and often lags the
+    feed by a week or more. So a card was first captured days after its line
+    opened, after the softest price had already been bid away, systematically
+    understating the effect addendum 13 is trying to measure.
+
+    Each bout is guarded by its OWN start time, not the card's: a bout that
+    has already begun is never priced, which also closes off the resolved-
+    market failure at the root rather than filtering it afterwards.
+    """
+    from .odds_live import fetch_events
+    from .upcoming import resolve, _states_after
+    from .features import elo_eff, make_features
+
+    rule = load_rule()
+    try:
+        events = fetch_events()
+    except Exception as e:
+        if verbose:
+            print(f"sweep: odds unavailable ({e})")
+        return 0
+    if not events:
+        if verbose:
+            print("sweep: no events (set ODDS_API_KEY)")
+        return 0
+
+    now = pd.Timestamp.now(tz="UTC")
+    upcoming = [e for e in events
+                if pd.to_datetime(e["commence"], utc=True, errors="coerce") > now]
+    names = sorted({n for e in upcoming for n in (e["name1"], e["name2"])})
+    ids, _ = resolve(names, fighters)
+    states = _states_after(fights, fighters)
+
+    prior = {tuple(str(r.get(k)) for k in ("venue", "event_date", "fighter", "opponent"))
+             for r in migrate(_raw(path))}
+    rows, ts, new_bouts, skipped = [], _now(), 0, 0
+    for e in upcoming:
+        na, nb = e["name1"], e["name2"]
+        if na not in ids or nb not in ids:
+            skipped += 1                 # not a UFC fighter we have history for
+            continue
+        A, B = states[ids[na]], states[ids[nb]]
+        if min(A.n_fights, B.n_fights) < 2:
+            skipped += 1
+            continue
+        ed = event_date_et(e["commence"])
+        as_of = pd.Timestamp(ed)
+        sa, sb = A.snapshot(as_of), B.snapshot(as_of)
+        sa["elo"], sb["elo"] = elo_eff(A, as_of), elo_eff(B, as_of)
+        fv = make_features(sa, sb)
+        p_a = e["p1"] if _nm_key(na) == e["k1"] else 1 - e["p1"]
+        first_seen = ("sportsbook", ed, na, nb) not in prior
+        new_bouts += first_seen
+        for side, name, opp, pm in (("a", na, nb, p_a), ("b", nb, na, 1 - p_a)):
+            f = fv if side == "a" else {k: -v for k, v in fv.items()}
+            p_model = rule_probability(f, pm, rule)
+            implied = pm * (1 + 0.037 / 2)
+            rows.append(dict(
+                captured_utc=ts, venue="sportsbook", event=None, event_date=ed,
+                fighter=name, opponent=opp, side=side,
+                p_market_devig=round(pm, 5), implied_with_vig=round(implied, 5),
+                p_model=round(p_model, 5), edge=round(p_model - implied, 5),
+                books=e["books"], spread=None, depth_usd=None,
+                bet=bool(fires(p_model, implied, rule)),
+                opening=bool(first_seen),
+                rule_frozen_on=rule.get("frozen_on"), settled=False))
+    n = append(rows, path)
+    if verbose:
+        print(f"sweep: {len(upcoming)} upcoming bouts in feed, {n // 2} priced, "
+              f"{new_bouts} seen for the first time (opening prices), "
+              f"{skipped} skipped (no UFC history)")
+    return n
+
+
+def _nm_key(s):
+    from .odds_live import _nm
+    return _nm(s)
 
 
 def settle(fights, path=None, date_tol_days=4, verbose=True):
@@ -458,7 +560,11 @@ if __name__ == "__main__":
     f, p, _ = load(verbose=False)
     cmd = sys.argv[1] if len(sys.argv) > 1 else "report"
     if cmd == "capture":
-        capture(f, p)
+        # The sweep logs every listed bout, which includes the current card, so
+        # it replaces the card-only capture for the sportsbook venue. The
+        # card-only path still runs for Polymarket, which is keyed to the card.
+        sweep(f, p)
+        capture(f, p, venues_only=("polymarket",))
     elif cmd == "settle":
         prune_resolved()
         settle(f)

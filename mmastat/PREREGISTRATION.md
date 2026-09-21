@@ -645,3 +645,222 @@ There is none, because nothing is being claimed. The panel is correct if its
 numbers match the corpus and the holdout reproduces the SEEN rows within their
 intervals. If a SEEN row fails to reproduce, it is removed and the failure
 recorded here.
+
+---
+
+# Addendum 11: scoring conventions borrowed from other combat sports (2026-09-20)
+
+Registered before fitting. The question was whether wrestling, boxing, Muay
+Thai or BJJ analytics offer anything retrofittable. Most of what those sports
+use is either the same thing under another name (CompuBox punch counts are
+UFCStats significant strikes) or needs data that does not exist here
+(wrestling's scramble/transition models need positional tracking; boxing's
+round-scoring models need the fight to have happened).
+
+Two conventions ARE transferable, because both re-weight inputs we already
+record rather than requiring new measurement.
+
+| # | idea | source | predicted sign | rationale |
+|---|---|---|---|---|
+| S1 | **damage-weighted striking**: head 1.0, body 0.6, leg 0.4, instead of counting every significant strike equally | boxing and Muay Thai both score effect over volume; a jab to the arm and a head kick are one strike each to UFCStats | positive | our striking differential treats a leg kick and a head strike identically, which no combat sport's scoring does |
+| S2 | **active vs stalling control**: ground strikes landed per second of control time, and control differential weighted by it | IBJJF scores positional advance, not time held; judging distinguishes damage from stalling | positive | control time is currently one undifferentiated number, so a fighter smothering for four minutes scores the same as one passing and striking |
+
+## Fixed weights, not fitted ones
+
+S1's weights come from scoring convention, not from the corpus. Fitting them
+would rediscover whatever the data already says and guarantee a fit — the
+whole point is to test whether an *external* convention carries information
+our equal-weight version misses.
+
+## Analysis plan
+
+Each metric replaces (not supplements) its equal-weight counterpart in the
+frozen 14-feature win model — S1 swaps `d_adj_slpm`, S2 swaps `d_ctrl_share`
+where it appears via `grapple_edge`. Both are also tested as additions. Window
+2012 to 2026-03, walk-forward, bootstrap CI on the log-loss change.
+
+Separately, both are tested against the **projection** targets (strike volume,
+control time, takedown probability), because that is where style information
+has previously helped and the win model has rejected everything.
+
+Benjamini-Hochberg at FDR 0.10 across the family of four tests (2 metrics x
+{win model, projections}).
+
+## Pre-stated expectation
+
+Low for the win model, higher for the projections. Eight families have now
+come back null against the winner, including the style shares these weights
+are built from. But style shares DID help projections (strike-volume ranking
+Spearman .441 against .283), and S1/S2 are sharper versions of exactly that
+information. If they land anywhere it is there.
+
+## Addendum 11: RESULT (2026-09-20)
+
+**Zero of four supported.** Nothing approaches the BH thresholds (.025 to .10).
+
+### Win model
+
+| test | accuracy | log loss | gain | 95% CI | P(better) |
+|---|---|---|---|---|---|
+| frozen 14 | 67.54% | .6199 | — | — | — |
+| S1 damage-weighted, added | 67.54% | .6198 | +0.0000 | [-0.0006, +0.0007] | .544 |
+| S1 **swapped** for `d_adj_slpm` | 68.17% | .6216 | -0.0017 | [-0.0043, +0.0009] | .100 |
+| S2 active control, added | 67.42% | .6203 | -0.0004 | [-0.0009, +0.0001] | .056 |
+| both added | 67.54% | .6201 | -0.0003 | [-0.0010, +0.0005] | .260 |
+
+The swap is the interesting row and a trap worth naming. Replacing equal-weight
+striking with damage-weighted striking **raised accuracy to 68.17%**, the best
+figure this model has produced — while log loss got *worse* (-0.0017, CI
+crossing zero). Accuracy moved six correct calls out of 798; log loss says the
+probabilities degraded. Reporting the accuracy alone would be the single most
+misleading thing available in this dataset, which is why the pre-registered
+metric is log loss.
+
+### Projections
+
+| target | base | with S1+S2 |
+|---|---|---|
+| strike volume | Spearman .3855 | .3922 |
+| control time | Spearman .4394 | **.4477** (r2 .2334 to .2425) |
+| takedown | AUC .7405 | .7372 |
+
+Control time improves slightly and takedown gets slightly worse. Neither is
+close to significant at these sample sizes, and two of three moving in
+opposite directions is what noise looks like.
+
+### Conclusion
+
+Boxing and Muay Thai score effect over volume, and BJJ scores positional
+advance over time held. Both conventions are real and both are sound reasoning
+about the sport. Neither carries information beyond what equal-weight counting
+already gives this model.
+
+**Nine families now.** The consistent finding across all of them is that the
+constraint is not how the inputs are weighted but how few fights each athlete
+has: ~6.5 recorded bouts, one bit of outcome each. Re-weighting cannot create
+information that was never recorded.
+
+---
+
+# Addendum 12: formulas borrowed from other fields (2026-09-20)
+
+Registered before fitting. The request was to try every possible equation, and
+the honest version of that is a fixed family tested together under correction
+— testing fifty formulas at p < 0.05 and reporting the winners guarantees two
+or three spurious "discoveries" by arithmetic alone.
+
+Worth stating first: a gradient booster already represents every monotone
+transform, threshold and interaction of these inputs simultaneously, and it
+LOST to plain logistic regression. So the prior that some square root or
+exponent unlocks the data is low. These are included anyway because each has a
+specific structural reason from its own field.
+
+| # | formula | field | form | rationale |
+|---|---|---|---|---|
+| F1 | log-ratio striking | finance (log returns) | log(slpm_a / slpm_b) | differences treat 1-vs-2 like 10-vs-11; ratios are scale-invariant |
+| F2 | log-ratio takedowns | finance | log(td_a / td_b) | same, for the grappling axis |
+| F3 | ape index | anthropometry | (reach - height)_a - (reach - height)_b | wingspan relative to frame, a real combat-sports measure we never built |
+| F4 | performance volatility | finance (volatility) | sd of per-fight strike output, differenced | a consistent fighter and an erratic one can share a mean |
+| F5 | Sharpe-style consistency | finance (Sharpe ratio) | mean output / sd output | return per unit of risk |
+| F6 | method entropy | information theory | Shannon entropy of KO/SUB/DEC wins | a fighter who wins every way is harder to prepare for |
+| F7 | Gompertz age decline | actuarial / biology | exp(0.09 x (age - 30)) | mortality risk rises exponentially with age; our strongest feature is entered linearly |
+| F8 | sqrt experience | diminishing returns | sqrt(n_fights) | the 20th fight teaches less than the 2nd |
+| F9 | kinetic power | physics (KE = mv^2) | kd15 x weight_index^2 | striking force should scale with mass |
+| F10 | inverse-square reach | physics | sign(d) x d^2 | a reach edge may matter nonlinearly with distance |
+
+Each added individually to the frozen 14. Benjamini-Hochberg at FDR 0.10
+across all ten. Supported only if it survives correction AND improves log loss
+out of sample. Accuracy is not a criterion — addendum 11 showed accuracy rising
+while probabilities degraded.
+
+F7 is the one with the strongest prior. Age is the single most important
+feature in the model, and the Gompertz law is one of the best-replicated
+regularities in biology. If decline really accelerates, a linear age term is
+misspecified and this should show it.
+
+## Addendum 12: RESULT (2026-09-20)
+
+**Zero of ten supported.**
+
+| formula | gain | 95% CI | p | BH |
+|---|---|---|---|---|
+| kinetic power (KE = mv^2) | **-0.0013** | [-0.0023, -0.0004] | .012 | .010 |
+| Gompertz age | +0.0008 | [-0.0001, +0.0017] | .077 | .020 |
+| Sharpe consistency | -0.0022 | [-0.0055, +0.0007] | .165 | .030 |
+| method entropy | -0.0010 | [-0.0026, +0.0005] | .177 | .040 |
+| sqrt experience | +0.0027 | [-0.0017, +0.0069] | .216 | .050 |
+| volatility | -0.0023 | [-0.0061, +0.0016] | .232 | .060 |
+| inverse-square reach | +0.0007 | [-0.0006, +0.0021] | .303 | .070 |
+| log-ratio takedowns | +0.0007 | [-0.0013, +0.0026] | .501 | .080 |
+| ape index | +0.0001 | [-0.0001, +0.0002] | .505 | .090 |
+| log-ratio striking | +0.0000 | [-0.0001, +0.0002] | .645 | .100 |
+
+Kinetic power is the instructive row: the **smallest p-value in the family and
+a significantly NEGATIVE effect.** A "try every formula and keep what is
+significant" search would have promoted a transform that makes predictions
+worse. Gompertz, the strongest prior, points the right way and misses its
+threshold.
+
+---
+
+# Addendum 13: the opening line, EXPLORATORY (2026-09-20)
+
+**This is not a confirmatory result and must not be reported as one.** It was
+found after, and because of, a descriptive observation, with thresholds chosen
+on the same data. It is registered now, frozen, so that the forward ledger can
+test it honestly.
+
+## What prompted it
+
+On 315 bouts with repeated snapshots, the closing line beats the opening line
+substantially: log loss **0.5974 at open, 0.5670 at close**, AUC .7497 to .7781.
+The market genuinely learns between open and close. Drift adds nothing BEYOND
+the close (+0.0006, CI [-0.013, +0.013]), so there is no "follow the steam"
+edge.
+
+That reframes the question. The market beats the model at the close. It may
+not at the OPEN.
+
+## What was found
+
+On 209 held-out bouts, model trained only on fights before 2025-03:
+
+- correlation between (model minus opening price) and the subsequent line
+  move: **Spearman +0.186, p = 0.007**; Pearson +0.134, p = 0.053
+- where the model disagreed with the open by 8+ points (113 bouts), the line
+  then moved toward the model **59.3%** of the time, against 50% for no skill
+- betting the model's side at the open whenever it disagreed by 2+ points:
+  183 bets, **mean CLV +1.21 points, 55.7% positive**
+
+The interpretation, if it holds: the model is right but early. It reads the
+same public statistics the market eventually prices, and the market takes
+the week to get there. That is a coherent and well-documented pattern in
+sports betting — opening lines are softer, and sharp money moves them.
+
+## Why this is the most promising lead in the project, and why to distrust it
+
+Promising, because it is the first result that points at a mechanism rather
+than a coefficient, and positive CLV is the metric professional bettors
+actually use. Every previous family tried to beat the close and failed. This
+does not try to.
+
+Distrusted, because: one exploratory analysis among many run today; thresholds
+of 2 and 8 points chosen on this data; 209 bouts is small; and the p-value
+does not survive any honest accounting of how many analyses preceded it.
+
+## The frozen rule, for forward testing only
+
+    model      : the frozen 14-feature win model
+    price      : the FIRST capture in the ledger for each bout (proxy for open)
+    bet when   : |model - open| >= 0.02, on the model's side
+    metric     : CLV = closing price - price at first capture, on the backed side
+    success    : mean CLV > 0 with a 95% interval excluding zero, n >= 150 bets
+
+The ledger already records multiple snapshots per bout, so no new capture
+code is needed — only the rule applied to rows it is already writing.
+
+## Prohibited
+
+- Reporting the 1.21-point figure as an edge. It is a hypothesis.
+- Tuning the 2-point threshold on forward data.
+- Combining this with the residual-rule ledger; they test different claims.

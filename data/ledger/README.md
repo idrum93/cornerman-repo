@@ -18,6 +18,41 @@ move.
 times a day via `.github/workflows/capture.yml`. It **is** committed — unlike
 the rest of `data/` — because it is the experiment, not an input to it.
 
+## The sweep: opening prices at no extra cost
+
+Every call to The Odds API returns every listed MMA bout, often weeks of cards
+ahead. The first capture code kept only the bouts in `data/upcoming.txt`,
+which advances once a day and can lag the feed by a week — so a card was first
+recorded days after its line opened, once the softest price had already been
+bid away. That systematically understated the very effect addendum 13 is
+trying to measure.
+
+`sweep()` logs every bout the model can price from the same response. The
+first time a bout appears is flagged `opening: true`; that row is the closest
+available thing to its true open. It costs **nothing extra**, which matters:
+
+| | credits / month |
+|---|---|
+| capture, 4 a day x 3 regions | 360 |
+| refresh, 1 a day x 3 regions | 90 |
+| **total** | **450 of 500** |
+
+The API bills markets x regions per call, so each call is 3 credits, not 1.
+(An earlier note here said four daily captures cost about 120 a month. That
+was wrong by the same factor of three.) Adding calls to find opens sooner
+would exhaust the free tier, so the sweep extracts more from calls already
+being made.
+
+Each bout is guarded by its **own** start time, so a bout that has begun is
+never priced — closing off the resolved-market failure at its source rather
+than filtering it afterwards. Event dates are converted to US Eastern, because
+a Saturday card commences around 02:00 UTC Sunday and the raw UTC date would
+never match the corpus.
+
+Bouts involving fighters with no UFC history — PFL, Bellator and the rest of
+the feed — are skipped naturally, since the model has nothing to price them
+with.
+
 ## Two venues, never pooled
 
 | venue | source | auth | cost of trading |
