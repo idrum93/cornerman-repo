@@ -6,6 +6,19 @@
    "venue": "Crypto.com Arena, Los Angeles",
    "n": 8,
    "right": 6,
+   "method_n": 8,
+   "method_right": 3,
+   "round_n": 4,
+   "round_right": 2,
+   "props_n": 58,
+   "props_right": 30,
+   "props_base_n": 58,
+   "props_base_right": 33,
+   "market_n": 8,
+   "market_right": 6,
+   "model_closer": 5,
+   "disagree_n": 4,
+   "disagree_model_closer": 2,
    "bouts": [
     {
      "bout": "Joshua Van vs. Alexandre Pantoja",
@@ -13,10 +26,117 @@
      "b": "Alexandre Pantoja",
      "p_a": 0.7127,
      "segment": "Main card",
+     "rounds": 5,
      "winner": "Joshua Van",
      "method": "DEC",
+     "round": 5,
      "seconds": 1500,
-     "model_right": true
+     "model_right": true,
+     "p_winner_model": 0.713,
+     "report": [
+      {
+       "kind": "method",
+       "label": "How it ended",
+       "actual": "decision",
+       "said": 0.482,
+       "top": "decision",
+       "top_p": 0.482,
+       "right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Ends inside the distance",
+       "said": 0.518,
+       "happened": false,
+       "right": false,
+       "base": 0.495,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Over 1.5 rounds",
+       "said": 0.831,
+       "happened": true,
+       "right": true,
+       "base": 0.702,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Over 2.5 rounds",
+       "said": 0.706,
+       "happened": true,
+       "right": true,
+       "base": 0.563,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Over 3.5 rounds",
+       "said": 0.61,
+       "happened": true,
+       "right": true,
+       "base": 0.489,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Over 4.5 rounds",
+       "said": 0.523,
+       "happened": true,
+       "right": true,
+       "base": 0.43,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Joshua Van lands a takedown",
+       "said": 0.173,
+       "happened": false,
+       "right": true,
+       "base": 0.447,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Alexandre Pantoja lands a takedown",
+       "said": 0.695,
+       "happened": true,
+       "right": true,
+       "base": 0.447,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Joshua Van scores a knockdown",
+       "said": 0.164,
+       "happened": true,
+       "right": false,
+       "base": 0.187,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Alexandre Pantoja scores a knockdown",
+       "said": 0.146,
+       "happened": false,
+       "right": true,
+       "base": 0.187,
+       "base_right": true
+      }
+     ],
+     "props_n": 9,
+     "props_right": 7,
+     "props_base_n": 9,
+     "props_base_right": 5,
+     "market": {
+      "p_market": 0.5483,
+      "p_winner_market": 0.548,
+      "market_right": true,
+      "gap": 0.164,
+      "picks_differ": false,
+      "model_closer": true
+     }
     },
     {
      "bout": "Arman Tsarukyan vs. Mauricio Ruffy",
@@ -24,10 +144,108 @@
      "b": "Mauricio Ruffy",
      "p_a": 0.751,
      "segment": "Main card",
+     "rounds": 3,
      "winner": "Arman Tsarukyan",
      "method": "KO/TKO",
+     "round": 1,
      "seconds": 296,
-     "model_right": true
+     "model_right": true,
+     "p_winner_model": 0.751,
+     "report": [
+      {
+       "kind": "method",
+       "label": "How it ended",
+       "actual": "Arman Tsarukyan by KO/TKO",
+       "said": 0.251,
+       "top": "decision",
+       "top_p": 0.447,
+       "right": false
+      },
+      {
+       "kind": "round",
+       "label": "Round it ended",
+       "actual": "round 1",
+       "said": 0.24,
+       "top": "round 1",
+       "top_p": 0.24,
+       "right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Ends inside the distance",
+       "said": 0.553,
+       "happened": true,
+       "right": true,
+       "base": 0.495,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Over 1.5 rounds",
+       "said": 0.669,
+       "happened": false,
+       "right": false,
+       "base": 0.671,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Over 2.5 rounds",
+       "said": 0.507,
+       "happened": false,
+       "right": false,
+       "base": 0.545,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Arman Tsarukyan lands a takedown",
+       "said": 0.784,
+       "happened": true,
+       "right": true,
+       "base": 0.447,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Mauricio Ruffy lands a takedown",
+       "said": 0.13,
+       "happened": false,
+       "right": true,
+       "base": 0.447,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Arman Tsarukyan scores a knockdown",
+       "said": 0.147,
+       "happened": true,
+       "right": false,
+       "base": 0.187,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Mauricio Ruffy scores a knockdown",
+       "said": 0.379,
+       "happened": false,
+       "right": true,
+       "base": 0.187,
+       "base_right": true
+      }
+     ],
+     "props_n": 7,
+     "props_right": 4,
+     "props_base_n": 7,
+     "props_base_right": 2,
+     "market": {
+      "p_market": 0.7277,
+      "p_winner_market": 0.728,
+      "market_right": true,
+      "gap": 0.023,
+      "picks_differ": false,
+      "model_closer": true
+     }
     },
     {
      "bout": "Iwo Baraniewski vs. Alonzo Menifield",
@@ -35,10 +253,99 @@
      "b": "Alonzo Menifield",
      "p_a": 0.6385,
      "segment": "Main card",
+     "rounds": 3,
      "winner": "Alonzo Menifield",
      "method": "DEC",
+     "round": 3,
      "seconds": 900,
-     "model_right": false
+     "model_right": false,
+     "p_winner_model": 0.362,
+     "report": [
+      {
+       "kind": "method",
+       "label": "How it ended",
+       "actual": "decision",
+       "said": 0.239,
+       "top": "Iwo Baraniewski by KO/TKO",
+       "top_p": 0.459,
+       "right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Ends inside the distance",
+       "said": 0.761,
+       "happened": false,
+       "right": false,
+       "base": 0.495,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Over 1.5 rounds",
+       "said": 0.454,
+       "happened": true,
+       "right": false,
+       "base": 0.671,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Over 2.5 rounds",
+       "said": 0.282,
+       "happened": true,
+       "right": false,
+       "base": 0.545,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Iwo Baraniewski lands a takedown",
+       "said": 0.126,
+       "happened": true,
+       "right": false,
+       "base": 0.447,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Alonzo Menifield lands a takedown",
+       "said": 0.21,
+       "happened": true,
+       "right": false,
+       "base": 0.447,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Iwo Baraniewski scores a knockdown",
+       "said": 0.715,
+       "happened": false,
+       "right": false,
+       "base": 0.187,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Alonzo Menifield scores a knockdown",
+       "said": 0.348,
+       "happened": false,
+       "right": true,
+       "base": 0.187,
+       "base_right": true
+      }
+     ],
+     "props_n": 7,
+     "props_right": 1,
+     "props_base_n": 7,
+     "props_base_right": 5,
+     "market": {
+      "p_market": 0.6811,
+      "p_winner_market": 0.319,
+      "market_right": false,
+      "gap": -0.043,
+      "picks_differ": false,
+      "model_closer": true
+     }
     },
     {
      "bout": "Charles Jourdain vs. Marlon Vera",
@@ -46,10 +353,108 @@
      "b": "Marlon Vera",
      "p_a": 0.6059,
      "segment": "Prelims",
+     "rounds": 3,
      "winner": "Marlon Vera",
      "method": "KO/TKO",
+     "round": 3,
      "seconds": 722,
-     "model_right": false
+     "model_right": false,
+     "p_winner_model": 0.394,
+     "report": [
+      {
+       "kind": "method",
+       "label": "How it ended",
+       "actual": "Marlon Vera by KO/TKO",
+       "said": 0.118,
+       "top": "decision",
+       "top_p": 0.495,
+       "right": false
+      },
+      {
+       "kind": "round",
+       "label": "Round it ended",
+       "actual": "round 3",
+       "said": 0.136,
+       "top": "round 2",
+       "top_p": 0.199,
+       "right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Ends inside the distance",
+       "said": 0.505,
+       "happened": true,
+       "right": true,
+       "base": 0.495,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Over 1.5 rounds",
+       "said": 0.748,
+       "happened": true,
+       "right": true,
+       "base": 0.671,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Over 2.5 rounds",
+       "said": 0.563,
+       "happened": false,
+       "right": false,
+       "base": 0.545,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Charles Jourdain lands a takedown",
+       "said": 0.314,
+       "happened": false,
+       "right": true,
+       "base": 0.447,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Marlon Vera lands a takedown",
+       "said": 0.296,
+       "happened": true,
+       "right": false,
+       "base": 0.447,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Charles Jourdain scores a knockdown",
+       "said": 0.173,
+       "happened": false,
+       "right": true,
+       "base": 0.187,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Marlon Vera scores a knockdown",
+       "said": 0.198,
+       "happened": true,
+       "right": false,
+       "base": 0.187,
+       "base_right": false
+      }
+     ],
+     "props_n": 7,
+     "props_right": 4,
+     "props_base_n": 7,
+     "props_base_right": 3,
+     "market": {
+      "p_market": 0.6548,
+      "p_winner_market": 0.345,
+      "market_right": false,
+      "gap": -0.049,
+      "picks_differ": false,
+      "model_closer": true
+     }
     },
     {
      "bout": "Tai Tuivasa vs. Robelis Despaigne",
@@ -57,10 +462,99 @@
      "b": "Robelis Despaigne",
      "p_a": 0.456,
      "segment": "Prelims",
+     "rounds": 3,
      "winner": "Robelis Despaigne",
      "method": "DEC",
+     "round": 3,
      "seconds": 900,
-     "model_right": true
+     "model_right": true,
+     "p_winner_model": 0.544,
+     "report": [
+      {
+       "kind": "method",
+       "label": "How it ended",
+       "actual": "decision",
+       "said": 0.466,
+       "top": "decision",
+       "top_p": 0.466,
+       "right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Ends inside the distance",
+       "said": 0.534,
+       "happened": false,
+       "right": false,
+       "base": 0.495,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Over 1.5 rounds",
+       "said": 0.691,
+       "happened": true,
+       "right": true,
+       "base": 0.671,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Over 2.5 rounds",
+       "said": 0.516,
+       "happened": true,
+       "right": true,
+       "base": 0.545,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Tai Tuivasa lands a takedown",
+       "said": 0.105,
+       "happened": true,
+       "right": false,
+       "base": 0.447,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Robelis Despaigne lands a takedown",
+       "said": 0.182,
+       "happened": true,
+       "right": false,
+       "base": 0.447,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Tai Tuivasa scores a knockdown",
+       "said": 0.249,
+       "happened": false,
+       "right": true,
+       "base": 0.187,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Robelis Despaigne scores a knockdown",
+       "said": 0.28,
+       "happened": false,
+       "right": true,
+       "base": 0.187,
+       "base_right": true
+      }
+     ],
+     "props_n": 7,
+     "props_right": 4,
+     "props_base_n": 7,
+     "props_base_right": 5,
+     "market": {
+      "p_market": 0.1796,
+      "p_winner_market": 0.82,
+      "market_right": true,
+      "gap": 0.276,
+      "picks_differ": false,
+      "model_closer": false
+     }
     },
     {
      "bout": "Edmen Shahbazyan vs. Brunno Ferreira",
@@ -68,10 +562,99 @@
      "b": "Brunno Ferreira",
      "p_a": 0.6688,
      "segment": "Early prelims",
+     "rounds": 3,
      "winner": "Edmen Shahbazyan",
      "method": "DEC",
+     "round": 3,
      "seconds": 900,
-     "model_right": true
+     "model_right": true,
+     "p_winner_model": 0.669,
+     "report": [
+      {
+       "kind": "method",
+       "label": "How it ended",
+       "actual": "decision",
+       "said": 0.44,
+       "top": "decision",
+       "top_p": 0.44,
+       "right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Ends inside the distance",
+       "said": 0.56,
+       "happened": false,
+       "right": false,
+       "base": 0.495,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Over 1.5 rounds",
+       "said": 0.652,
+       "happened": true,
+       "right": true,
+       "base": 0.671,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Over 2.5 rounds",
+       "said": 0.488,
+       "happened": true,
+       "right": false,
+       "base": 0.545,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Edmen Shahbazyan lands a takedown",
+       "said": 0.37,
+       "happened": true,
+       "right": false,
+       "base": 0.447,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Brunno Ferreira lands a takedown",
+       "said": 0.377,
+       "happened": false,
+       "right": true,
+       "base": 0.447,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Edmen Shahbazyan scores a knockdown",
+       "said": 0.255,
+       "happened": true,
+       "right": false,
+       "base": 0.187,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Brunno Ferreira scores a knockdown",
+       "said": 0.175,
+       "happened": false,
+       "right": true,
+       "base": 0.187,
+       "base_right": true
+      }
+     ],
+     "props_n": 7,
+     "props_right": 3,
+     "props_base_n": 7,
+     "props_base_right": 5,
+     "market": {
+      "p_market": 0.611,
+      "p_winner_market": 0.611,
+      "market_right": true,
+      "gap": 0.058,
+      "picks_differ": false,
+      "model_closer": true
+     }
     },
     {
      "bout": "Casey O'Neill vs. Eduarda Moura",
@@ -79,10 +662,108 @@
      "b": "Eduarda Moura",
      "p_a": 0.6439,
      "segment": "Early prelims",
+     "rounds": 3,
      "winner": "Casey O'Neill",
      "method": "SUB",
+     "round": 1,
      "seconds": 202,
-     "model_right": true
+     "model_right": true,
+     "p_winner_model": 0.644,
+     "report": [
+      {
+       "kind": "method",
+       "label": "How it ended",
+       "actual": "Casey O'Neill by submission",
+       "said": 0.061,
+       "top": "decision",
+       "top_p": 0.645,
+       "right": false
+      },
+      {
+       "kind": "round",
+       "label": "Round it ended",
+       "actual": "round 1",
+       "said": 0.131,
+       "top": "round 1",
+       "top_p": 0.131,
+       "right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Ends inside the distance",
+       "said": 0.355,
+       "happened": true,
+       "right": false,
+       "base": 0.495,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Over 1.5 rounds",
+       "said": 0.814,
+       "happened": false,
+       "right": false,
+       "base": 0.671,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Over 2.5 rounds",
+       "said": 0.698,
+       "happened": false,
+       "right": false,
+       "base": 0.545,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Casey O'Neill lands a takedown",
+       "said": 0.158,
+       "happened": false,
+       "right": true,
+       "base": 0.447,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Eduarda Moura lands a takedown",
+       "said": 0.911,
+       "happened": false,
+       "right": false,
+       "base": 0.447,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Casey O'Neill scores a knockdown",
+       "said": 0.151,
+       "happened": false,
+       "right": true,
+       "base": 0.187,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Eduarda Moura scores a knockdown",
+       "said": 0.11,
+       "happened": false,
+       "right": true,
+       "base": 0.187,
+       "base_right": true
+      }
+     ],
+     "props_n": 7,
+     "props_right": 3,
+     "props_base_n": 7,
+     "props_base_right": 4,
+     "market": {
+      "p_market": 0.6678,
+      "p_winner_market": 0.668,
+      "market_right": true,
+      "gap": -0.024,
+      "picks_differ": false,
+      "model_closer": false
+     }
     },
     {
      "bout": "Giga Chikadze vs. Joanderson Brito",
@@ -90,10 +771,108 @@
      "b": "Joanderson Brito",
      "p_a": 0.3608,
      "segment": "Early prelims",
+     "rounds": 3,
      "winner": "Joanderson Brito",
      "method": "KO/TKO",
+     "round": 1,
      "seconds": 117,
-     "model_right": true
+     "model_right": true,
+     "p_winner_model": 0.639,
+     "report": [
+      {
+       "kind": "method",
+       "label": "How it ended",
+       "actual": "Joanderson Brito by KO/TKO",
+       "said": 0.184,
+       "top": "decision",
+       "top_p": 0.489,
+       "right": false
+      },
+      {
+       "kind": "round",
+       "label": "Round it ended",
+       "actual": "round 1",
+       "said": 0.195,
+       "top": "round 2",
+       "top_p": 0.205,
+       "right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Ends inside the distance",
+       "said": 0.511,
+       "happened": true,
+       "right": true,
+       "base": 0.495,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Over 1.5 rounds",
+       "said": 0.717,
+       "happened": false,
+       "right": false,
+       "base": 0.671,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Over 2.5 rounds",
+       "said": 0.544,
+       "happened": false,
+       "right": false,
+       "base": 0.545,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Giga Chikadze lands a takedown",
+       "said": 0.105,
+       "happened": false,
+       "right": true,
+       "base": 0.447,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Joanderson Brito lands a takedown",
+       "said": 0.574,
+       "happened": false,
+       "right": false,
+       "base": 0.447,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Giga Chikadze scores a knockdown",
+       "said": 0.183,
+       "happened": false,
+       "right": true,
+       "base": 0.187,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Joanderson Brito scores a knockdown",
+       "said": 0.145,
+       "happened": false,
+       "right": true,
+       "base": 0.187,
+       "base_right": true
+      }
+     ],
+     "props_n": 7,
+     "props_right": 4,
+     "props_base_n": 7,
+     "props_base_right": 4,
+     "market": {
+      "p_market": 0.2322,
+      "p_winner_market": 0.768,
+      "market_right": true,
+      "gap": 0.129,
+      "picks_differ": false,
+      "model_closer": false
+     }
     }
    ]
   }
