@@ -2,7 +2,7 @@
  "event": "UFC Fight Night: Rosas Jr. vs. Barcelos",
  "date": "2026-09-26",
  "venue": "Meta Apex, Enterprise, Nevada , United States",
- "generated_utc": "2026-09-21T05:31:20.205772+00:00",
+ "generated_utc": "2026-09-21T05:35:07.915908+00:00",
  "bouts": [
   {
    "bout": "Raul Rosas Jr vs. Raoni Barcelos",
@@ -98,7 +98,7 @@
     }
    ],
    "p_market": 0.6188,
-   "books": 19.0,
+   "books": 18.0,
    "edge": 0.1017,
    "m_a_ko": 0.1814,
    "m_b_ko": 0.1139,
@@ -265,9 +265,9 @@
      "key": "d_str_def"
     }
    ],
-   "p_market": 0.5395,
-   "books": 17.0,
-   "edge": -0.0222,
+   "p_market": 0.5367,
+   "books": 16.0,
+   "edge": -0.0194,
    "m_a_ko": 0.1266,
    "m_b_ko": 0.1273,
    "m_a_sub": 0.1027,
@@ -432,7 +432,7 @@
     }
    ],
    "p_market": 0.2653,
-   "books": 18.0,
+   "books": 17.0,
    "edge": 0.2523,
    "m_a_ko": 0.1078,
    "m_b_ko": 0.0808,
@@ -1095,9 +1095,9 @@
      "key": "ko_edge"
     }
    ],
-   "p_market": 0.1434,
-   "books": 17.0,
-   "edge": 0.0325,
+   "p_market": 0.1432,
+   "books": 16.0,
+   "edge": 0.0327,
    "m_a_ko": 0.0582,
    "m_b_ko": 0.0997,
    "m_a_sub": 0.0422,
