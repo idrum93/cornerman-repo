@@ -208,17 +208,42 @@ if __name__ == "__main__":
 # fights it put at 74% finished 60% of the time. The formula sets how likely a
 # finish is; the survival model's split of that finish across method and
 # round is kept and rescaled, so every market still sums coherently.
-FINISH_INPUTS = ["kd", "ctrl", "pace", "agegap", "sub", "five"]
+# addendum 16: division added, +0.0050 Brier, CI [+0.0016, +0.0085],
+# P(better) 0.997. Heavier divisions finish more beyond what the fighters' own
+# numbers say — their stats are shrunk toward league-wide means, which is the
+# wrong target at both ends of the weight range.
+FINISH_INPUTS = ["kd", "ctrl", "pace", "agegap", "sub", "five", "wt", "women"]
+DIVISION_LB = {"strawweight": 115, "flyweight": 125, "bantamweight": 135,
+               "featherweight": 145, "lightweight": 155, "welterweight": 170,
+               "middleweight": 185, "light heavyweight": 205, "heavyweight": 265}
+MEDIAN_LB = 155
+
+
+def division_lb(wc):
+    """Weight limit in pounds from a division label; catch weight or unknown
+    falls back to the median division, as registered."""
+    s = str(wc or "").lower()
+    for k in sorted(DIVISION_LB, key=len, reverse=True):
+        if k in s:
+            return DIVISION_LB[k]
+    return MEDIAN_LB
+
+
+def is_women(wc):
+    return int("women" in str(wc or "").lower())
 FINISH_LABELS = {"kd": "both fighters' knockdown rates",
                  "ctrl": "both fighters' control time",
                  "pace": "both fighters' striking pace",
                  "agegap": "age gap",
                  "sub": "both fighters' submission attempts",
-                 "five": "scheduled for five rounds"}
+                 "five": "scheduled for five rounds",
+                 "wt": "weight class (heavier)",
+                 "women": "women's division"}
 
 
-def finish_row(sa, sb, n_rounds):
-    return {"kd": sa["kd15"] + sb["kd15"],
+def finish_row(sa, sb, n_rounds, weight_class=None):
+    return {"wt": division_lb(weight_class), "women": is_women(weight_class),
+            "kd": sa["kd15"] + sb["kd15"],
             "ctrl": sa["ctrl_share"] + sb["ctrl_share"],
             "pace": sa["adj_slpm"] + sb["adj_slpm"],
             "agegap": abs(sa["age"] - sb["age"]),
@@ -235,6 +260,7 @@ def fit_finish_formula(fights, fighters, min_date="2012-01-01"):
     for fight, sa, sb, npri in walk(fights, fighters):
         if min(npri) < 2 or fight.date < lo:
             continue
-        rows.append(finish_row(sa, sb, 5 if fight.sched_sec >= 1500 else 3))
+        rows.append(finish_row(sa, sb, 5 if fight.sched_sec >= 1500 else 3,
+                               fight.weight_class))
         ys.append(int(fight.method != "DEC"))
     return FormulaModel(FINISH_INPUTS, FINISH_LABELS).fit(pd.DataFrame(rows), np.array(ys))

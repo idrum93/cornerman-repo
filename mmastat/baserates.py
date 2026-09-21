@@ -127,6 +127,40 @@ def band_for(value, table_entry):
     return None
 
 
+DIVISION_ORDER = ["Flyweight", "Bantamweight", "Featherweight", "Lightweight",
+                  "Welterweight", "Middleweight", "Light Heavyweight", "Heavyweight",
+                  "Women's Strawweight", "Women's Flyweight", "Women's Bantamweight"]
+
+
+def divisions(fights, min_date="2012-01-01"):
+    """What happens in each division (PREREGISTRATION addendum 16, test 1).
+    Descriptive counts: finishes and knockdowns rise with weight, takedowns
+    fall, and pace barely moves at all."""
+    import re
+    F = fights[(fights.date >= pd.Timestamp(min_date))
+               & fights.method.isin(["KO/TKO", "SUB", "DEC"])].copy()
+    def name(wc):
+        s = re.sub(r"\b(UFC|Interim|Title|Bout|Tournament|Championship)\b", "", str(wc), flags=re.I)
+        s = re.sub(r"\s+", " ", s).strip()
+        return s if s in DIVISION_ORDER else None
+    F["div"] = F.weight_class.map(name)
+    F = F[F["div"].notna()]
+    mins = (F.total_sec / 60).replace(0, np.nan)
+    out = []
+    for d in DIVISION_ORDER:
+        G = F[F["div"] == d]
+        if len(G) < 50:
+            continue
+        out.append({"division": d, "n": int(len(G)),
+                    "finish": round(float((G.method != "DEC").mean()), 3),
+                    "ko": round(float((G.method == "KO/TKO").mean()), 3),
+                    "sub": round(float((G.method == "SUB").mean()), 3),
+                    "any_kd": round(float(((G.r_kd > 0) | (G.b_kd > 0)).mean()), 3),
+                    "any_td": round(float(((G.r_td_landed > 0) | (G.b_td_landed > 0)).mean()), 3),
+                    "pace": round(float(((G.r_ss_landed + G.b_ss_landed) / mins.loc[G.index]).median()), 2)})
+    return out
+
+
 def write_json(fights, fighters, path="site/baserates.json", verbose=True):
     import json
     from pathlib import Path
@@ -134,7 +168,8 @@ def write_json(fights, fighters, path="site/baserates.json", verbose=True):
     Path(path).parent.mkdir(parents=True, exist_ok=True)
     Path(path).write_text(json.dumps(
         {"built_utc": pd.Timestamp.now(tz="UTC").isoformat(timespec="seconds"),
-         "min_cell": MIN_CELL, "conditions": tbl}, indent=1), encoding="utf-8")
+         "min_cell": MIN_CELL, "conditions": tbl,
+         "divisions": divisions(fights)}, indent=1), encoding="utf-8")
     if verbose:
         flat = sum(1 for t in tbl if t["spread"] < 0.03)
         print(f"base rates: {len(tbl)} conditions written to {path} "

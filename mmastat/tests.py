@@ -249,6 +249,8 @@ REQUIRED_SITE_FEATURES = {
     "function formulaNote": "the knockdown formula shown in the drawer",
     "function openPast": "openable last-card results",
     "function surname": "surnames on tiles",
+    "function divisionTable": "results by weight class",
+    "divShort(b.weight_class)": "weight class on each tile",
     "class=\"zone ": "separated upcoming / results / history zones",
 }
 

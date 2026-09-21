@@ -1053,3 +1053,88 @@ remain monotone.
 - From 2026-09-21, scorecard claims for inside-the-distance, decision, method,
   round and totals are the rescaled numbers. Earlier logged claims are from the
   raw survival model. The switch date separates them.
+
+---
+
+# Addendum 16: weight class (2026-09-21)
+
+Registered before measuring anything beyond the list of division labels.
+
+## Why it might matter to the model, not just the display
+
+Fighter statistics are shrunk toward LEAGUE-WIDE means before they are used.
+A heavyweight with three recorded fights has his knockdown rate pulled toward
+an average that includes flyweights, and a flyweight's toward one that
+includes heavyweights. If divisions differ a lot, the shrinkage target is
+wrong at both ends, and division should carry information the fighters' own
+numbers cannot — most of all for fighters with few fights.
+
+## Encoding, fixed now
+
+    wt     : division weight limit in pounds (115 strawweight ... 265 heavyweight),
+             read from the division name; title bouts use their division
+    women  : 1 for women's divisions
+
+Catch weight and unlabelled bouts are excluded from fitting and scored with
+the median division. Two inputs, added to the adopted formulas.
+
+## Tests
+
+1. Descriptive, no model: finish rate, knockdown rate, takedown rate and pace
+   by division.
+2. Added to the finish formula (addendum 15) and the knockdown formula
+   (addendum 14), each tested separately on the same held-out split.
+3. For the knockdown formula, also split by experience: does weight class help
+   more for fighters with fewer than 5 prior bouts, as the shrinkage argument
+   predicts?
+
+## Decision rule, fixed now
+
+Stricter than the tie-rule for replacing a model, because each added input is
+another chance to fit noise: an input is added only if Brier improves out of
+sample with bootstrap P(better) >= 0.95. Division is displayed on the site
+regardless — it is context whether or not the model uses it.
+
+## Addendum 16: RESULT (2026-09-21)
+
+### Test 1, by division (descriptive)
+
+| division | fights | finish | any KD | any TD | strikes/min |
+|---|---|---|---|---|---|
+| Flyweight | 419 | 45% | 33% | 80% | 6.4 |
+| Bantamweight | 747 | 45% | 38% | 72% | 7.3 |
+| Featherweight | 829 | 46% | 38% | 73% | 7.3 |
+| Lightweight | 1093 | 51% | 37% | 71% | 7.1 |
+| Welterweight | 1029 | 50% | 41% | 71% | 6.9 |
+| Middleweight | 814 | 56% | 40% | 69% | 6.8 |
+| Light Heavyweight | 519 | 61% | 44% | 60% | 7.5 |
+| Heavyweight | 507 | 63% | 41% | 55% | 7.4 |
+| Women's Strawweight | 379 | 34% | 16% | 83% | 7.5 |
+| Women's Flyweight | 279 | 37% | 15% | 84% | 7.5 |
+| Women's Bantamweight | 251 | 39% | 17% | 78% | 7.0 |
+
+Finishes rise with weight (45% to 63%), takedowns fall (80% to 55%), and pace
+barely moves at all (6.4 to 7.5, no trend) — the intuition that heavier
+fights are slower is not in the data. Women's divisions finish least and
+knock down least, and wrestle most.
+
+### Tests 2 and 3, added to the formulas
+
+| formula | gain | 95% CI | P(better) | decision |
+|---|---|---|---|---|
+| finish + weight class | +0.0050 | [+0.0016, +0.0085] | 0.997 | **added** |
+| knockdown + weight class | +0.0007 | [-0.0002, +0.0015] | 0.931 | not added |
+| knockdown, under 5 prior fights | +0.0014 | [-0.0005, +0.0032] | 0.929 | — |
+| knockdown, 5+ prior fights | +0.0004 | [-0.0006, +0.0014] | 0.818 | — |
+
+The shrinkage argument pointed the right way — the gain was 3.5x larger for
+thin records — but not decisively, and the knockdown formula stays unchanged.
+
+### An inference error caught before shipping
+
+Where a card does not name the division, it is inferred from the fighters'
+recent bouts. The first version took the most recent bout of any kind, and
+both O'Neill and Moura's were catchweights, so a women's flyweight fight was
+scored as a men's 155-lb bout: 38% to finish instead of 30%. Inference now
+skips catchweights and uses each fighter's most recent real division. The
+Wikipedia parser also now records the division directly from the card table.

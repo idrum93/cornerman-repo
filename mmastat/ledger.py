@@ -354,6 +354,61 @@ def event_date_et(commence):
     return ts.tz_convert("America/New_York").date().isoformat()
 
 
+def gate(verbose=True, throttle_min=60, near_hours=48, baseline_hours=20):
+    """Decide, for free, whether a paid odds call is worth its 3 credits.
+
+    The free events endpoint says what is on the board without costing
+    anything, so the paid call is only made when it can add information:
+
+      a NEW bout has appeared      -> its opening price, the thing addendum 13
+                                      needs and the easiest to miss
+      a bout starts within 48h     -> fight week, where lines actually move
+                                      and the closing price is set
+      nothing paid in ~a day       -> one baseline point, so a slow mid-week
+                                      drift is still recorded eventually
+
+    Anything else is a capture of prices that have not moved, which costs 3
+    credits and records nothing new. And a throttle: a second paid call within
+    an hour of the first is refused outright, because that is exactly what
+    manual testing from the Actions tab was burning.
+
+    Both ends of the line — open and close — are always captured. What is
+    given up is resolution in the middle of a quiet week.
+    """
+    from .odds_live import list_events, read_usage
+    u = read_usage()
+    now = pd.Timestamp.now(tz="UTC")
+    last = pd.to_datetime(u.get("last_paid_utc"), utc=True, errors="coerce")
+    since = (now - last).total_seconds() / 3600 if pd.notna(last) else 1e9
+
+    if since * 60 < throttle_min:
+        return False, (f"throttled: last paid call {since * 60:.0f} min ago "
+                       f"(minimum {throttle_min})")
+    try:
+        board = list_events()
+    except Exception as e:
+        return True, f"free event list unavailable ({e}); paying to be safe"
+    if not board:
+        return False, "no MMA events listed"
+
+    seen = {frozenset((str(r.get("fighter", "")).lower(), str(r.get("opponent", "")).lower()))
+            for r in _raw()}
+    from .odds_live import _nm
+    seen = {frozenset(_nm(x) for x in pair) for pair in seen}
+    new = [e for e in board if frozenset((e["k1"], e["k2"])) not in seen]
+    starts = [pd.to_datetime(e["commence"], utc=True, errors="coerce") for e in board]
+    near = [t for t in starts if pd.notna(t) and now < t <= now + pd.Timedelta(hours=near_hours)]
+
+    if new:
+        return True, f"{len(new)} bout(s) not seen before - capturing opening prices"
+    if near:
+        return True, f"{len(near)} bout(s) start within {near_hours}h - fight week"
+    if since >= baseline_hours:
+        return True, f"baseline: {since:.0f}h since last paid call"
+    return False, (f"skipped: nothing new, nothing within {near_hours}h, "
+                   f"last paid {since:.1f}h ago - would record unchanged prices")
+
+
 def sweep(fights, fighters, path=None, verbose=True):
     """Log EVERY listed bout the model can price, at no extra API cost.
 
@@ -560,11 +615,18 @@ if __name__ == "__main__":
     f, p, _ = load(verbose=False)
     cmd = sys.argv[1] if len(sys.argv) > 1 else "report"
     if cmd == "capture":
-        # The sweep logs every listed bout, which includes the current card, so
-        # it replaces the card-only capture for the sportsbook venue. The
-        # card-only path still runs for Polymarket, which is keyed to the card.
-        sweep(f, p)
+        go, why = gate()
+        print(f"gate: {'PAY' if go else 'SKIP'} - {why}")
+        if go:
+            # The sweep logs every listed bout, including the current card.
+            sweep(f, p)
+        # Polymarket is free and keyed to the card, so it runs regardless.
         capture(f, p, venues_only=("polymarket",))
+        from .odds_live import read_usage
+        u = read_usage()
+        if u.get("remaining") is not None:
+            print(f"odds api: {u['remaining']} credits remaining this month "
+                  f"({u['used']} used)")
     elif cmd == "settle":
         prune_resolved()
         settle(f)

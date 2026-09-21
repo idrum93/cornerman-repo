@@ -29,6 +29,64 @@ def _nm(s):
 
 
 _CACHE = {}
+USAGE_FILE = "data/ledger/usage.json"
+EVENTS_URL = "https://api.the-odds-api.com/v4/sports/mma_mixed_martial_arts/events"
+
+
+def _record_usage(headers, kind):
+    """Every response carries x-requests-remaining / -used / -last, so knowing
+    where the month stands costs nothing. Written to the ledger folder because
+    that is what the capture job commits — the throttle has to survive between
+    runs, and each workflow run starts from a fresh checkout."""
+    import json
+    from datetime import datetime, timezone
+    from pathlib import Path
+    try:
+        u = json.loads(Path(USAGE_FILE).read_text(encoding="utf-8"))
+    except Exception:
+        u = {"calls": []}
+    rem, used, last = (headers.get("x-requests-remaining"),
+                       headers.get("x-requests-used"), headers.get("x-requests-last"))
+    now = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    if rem is not None:
+        u.update({"remaining": int(float(rem)), "used": int(float(used or 0)),
+                  "as_of": now})
+    if kind == "paid":
+        u["last_paid_utc"] = now
+    u["calls"] = (u.get("calls", []) + [{"at": now, "kind": kind,
+                                          "cost": int(float(last or 0))}])[-60:]
+    Path(USAGE_FILE).parent.mkdir(parents=True, exist_ok=True)
+    Path(USAGE_FILE).write_text(json.dumps(u, indent=1), encoding="utf-8")
+    return u
+
+
+def read_usage():
+    import json
+    from pathlib import Path
+    try:
+        return json.loads(Path(USAGE_FILE).read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+
+
+def list_events(api_key=None, timeout=30):
+    """Listed MMA bouts WITHOUT odds. Free: does not count against the quota.
+
+    This is what makes gating possible. Deciding whether a paid call is worth
+    making needs to know what is on the board, and learning that used to cost
+    3 credits. Now it costs none.
+    """
+    import requests
+    key = api_key or os.environ.get("ODDS_API_KEY")
+    if not key:
+        return []
+    r = requests.get(EVENTS_URL, timeout=timeout, params={"apiKey": key})
+    if r.status_code == 401:
+        raise RuntimeError("ODDS_API_KEY rejected by The Odds API (401)")
+    r.raise_for_status()
+    _record_usage(r.headers, "free")
+    return [{"k1": _nm(e.get("home_team", "")), "k2": _nm(e.get("away_team", "")),
+             "commence": e.get("commence_time")} for e in r.json()]
 
 
 def fetch_events(api_key=None, regions="us,uk,eu", timeout=30):
@@ -57,6 +115,7 @@ def fetch_events(api_key=None, regions="us,uk,eu", timeout=30):
     if r.status_code == 429:
         raise RuntimeError("The Odds API monthly quota exhausted (429)")
     r.raise_for_status()
+    _record_usage(r.headers, "paid")
 
     out = []
     for ev in r.json():

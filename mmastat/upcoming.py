@@ -74,15 +74,53 @@ def parse_card(path):
             for k, v in zip(("event", "date", "venue"), parts):
                 meta[k] = v
             continue
-        rounds = 3
-        if "|" in line:                      # "A vs. B | 5" marks a 5-rounder
-            line, tail = line.rsplit("|", 1)
-            if tail.strip().startswith("5"):
-                rounds = 5
+        rounds, wc = 3, ""
+        if "|" in line:                      # "A vs. B | 5 | Flyweight"
+            head, *tails = [x.strip() for x in line.split("|")]
+            line = head
+            for t in tails:
+                if t.startswith("5"):
+                    rounds = 5
+                elif re.search(r"weight", t, re.I):
+                    wc = t
         m = re.split(r"\s+vs\.?\s+", line, maxsplit=1, flags=re.I)
         if len(m) == 2:
-            bouts.append((m[0].strip(), m[1].strip(), rounds, segment))
+            a, b = m[0].strip(), m[1].strip()
+            bouts.append((a, b, rounds, segment))
+            if wc:
+                meta.setdefault("weights", {})[(a, b)] = wc
     return meta, bouts
+
+
+def infer_division(fights, id_a, id_b):
+    """When the card does not say, use the most recent REAL division each
+    fighter fought in — skipping catchweights, which say nothing about which
+    division a fighter belongs to. The first version took the latest bout
+    whatever it was, and scored a women's flyweight fight as a men's 155-lb
+    one because both fighters' last bouts had been catchweights.
+
+    If the two differ the heavier is taken, since moving up for a booked bout
+    is more common than moving down."""
+    from .projections import DIVISION_LB, division_lb
+    got = []
+    for fid in (id_a, id_b):
+        m = fights[(fights.r_id == fid) | (fights.b_id == fid)].sort_values("date", ascending=False)
+        for wc in m.weight_class:
+            low = str(wc).lower()
+            if "catch" in low or "open" in low:
+                continue
+            if any(k in low for k in DIVISION_LB):
+                got.append(str(wc))
+                break
+    if not got:
+        return ""
+    return clean_division(max(got, key=division_lb))
+
+
+def clean_division(wc):
+    """"UFC Light Heavyweight Title Bout" -> "Light Heavyweight"."""
+    s = re.sub(r"\b(UFC|Interim|Title|Bout|Tournament|Championship)\b", "", str(wc or ""), flags=re.I)
+    return re.sub(r"\s+", " ", s).strip()
 
 
 def _alias_table(fighters):
@@ -371,8 +409,10 @@ def predict_card(path, fights, fighters, verbose=True):
             [(WIN_FEATURES[i], float(win.coef_[0][i] * z[i])) for i in range(len(WIN_FEATURES))],
             key=lambda kv: -abs(kv[1]))
 
+        wc = clean_division((meta.get("weights") or {}).get((na, nb), "")) \
+            or infer_division(fights, ids[na], ids[nb])
         r = dict(bout=f"{na} vs. {nb}", a=na, b=nb, rounds=n_rounds,
-                 segment=segment,
+                 segment=segment, weight_class=wc,
                  p_a=round(p_a, 4), p_b=round(1 - p_a, 4))
         # Raw pre-fight numbers. Without these the drawer can say "age pushes
         # +0.90" and never that one man is 36 and the other 24 — the model
@@ -415,7 +455,7 @@ def predict_card(path, fights, fighters, verbose=True):
             # methods, rounds and totals all still sum to the same number.
             p_sv = 1 - dist["decision"]
             p_fm = float(fin_model.predict_proba(
-                pd.DataFrame([finish_row(sa, sb, n_rounds)]))[0, 1])
+                pd.DataFrame([finish_row(sa, sb, n_rounds, wc)]))[0, 1])
             k_fin = p_fm / p_sv if p_sv > 1e-6 else 1.0
             for _m in ("a_ko", "b_ko", "a_sub", "b_sub"):
                 dist[_m] *= k_fin
@@ -738,6 +778,7 @@ def _grade_bout(b, row, a_is_red, base):
     p_win_model = b["p_a"] if a_won else 1 - b["p_a"]
     out = {"bout": b["bout"], "a": a, "b": bb, "p_a": b["p_a"],
            "segment": b.get("segment"), "rounds": n_rounds,
+           "weight_class": b.get("weight_class"),
            "winner": a if a_won else bb, "method": meth, "round": rnd,
            "seconds": int(row.total_sec), "model_right": bool((b["p_a"] > 0.5) == a_won),
            "p_winner_model": round(p_win_model, 3), "report": rep,

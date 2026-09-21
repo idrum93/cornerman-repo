@@ -130,7 +130,12 @@ def parse_card_html(html):
                     key = frozenset((a.lower(), b.lower()))
                     if key not in seen:
                         seen.add(key)
-                        bouts.append((a, b, segment))
+                        # the division is the row's first cell ("Flyweight",
+                        # "Women's Bantamweight"); kept only if it reads as one
+                        wc = texts[0].strip() if i > 1 else ""
+                        if not re.search(r"weight", wc, re.I):
+                            wc = ""
+                        bouts.append((a, b, segment, wc))
                 break
     return bouts
 
@@ -163,7 +168,7 @@ def parse_card_prose(text):
         key = frozenset((a.lower(), b.lower()))
         if key not in seen:
             seen.add(key)
-            out.append((a, b, "Main card"))   # prose gives no segment
+            out.append((a, b, "Main card", ""))   # prose gives no segment or division
     return out
 
 
@@ -296,12 +301,15 @@ def render_upcoming(meta, bouts):
             f"{meta.get('venue','')}{', ' + meta['city'] if meta.get('city') else ''}")
     lines, cur = [head], None
     order = {"Main card": 0, "Prelims": 1, "Early prelims": 2}
-    for a, b, seg in sorted(bouts, key=lambda x: order.get(x[2], 9)):
+    for bout in sorted(bouts, key=lambda x: order.get(x[2], 9)):
+        a, b, seg = bout[0], bout[1], bout[2]
+        wc = bout[3] if len(bout) > 3 else ""
         if seg != cur:
             lines.append(f"## {seg}")
             cur = seg
         # five rounds for the main event, which is the first bout of the card
-        lines.append(f"{a} vs. {b}" + (" | 5" if len(lines) == 2 else ""))
+        tail = (" | 5" if len(lines) == 2 else "") + (f" | {wc}" if wc else "")
+        lines.append(f"{a} vs. {b}{tail}")
     return "\n".join(lines) + "\n"
 
 
