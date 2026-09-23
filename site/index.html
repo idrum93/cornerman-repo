@@ -56,8 +56,8 @@
   .tile:focus-visible{outline:2px solid var(--bluesoft);outline-offset:2px}
   .tile.wide{border-color:rgba(222,140,52,.55)}
   .trow{display:flex;justify-content:space-between;align-items:center;gap:6px}
-  .nm{font-size:12.5px;font-weight:700;text-transform:uppercase;letter-spacing:-.01em;
-    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:108px}
+  .nm{font-size:13.5px;font-weight:700;text-transform:uppercase;letter-spacing:-.01em;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
   .pnum{font-size:14px;font-weight:800}
 
   .gauge{position:relative;height:7px;border-radius:4px;background:var(--soft);
@@ -119,6 +119,16 @@
   .edgeTag.wide{color:var(--warn)} .edgeTag.hit{color:var(--good)} .edgeTag.miss{color:var(--red)}
   .ubar{display:inline-block;width:46px;height:3px;background:var(--soft);border-radius:2px;overflow:hidden}
   .ubar i{display:block;height:100%}
+  .tipwrap{position:relative;display:inline-flex;align-items:center;gap:6px}
+  .tipbtn{width:15px;height:15px;border-radius:50%;border:1px solid var(--line);background:none;
+    color:var(--dim);font:700 9px ui-sans-serif,system-ui;cursor:help;padding:0;line-height:1}
+  .tipbtn:hover{color:var(--bone);border-color:var(--mute)}
+  .tip{display:none;position:absolute;top:24px;left:0;z-index:60;width:min(430px,86vw);
+    background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--bluesoft);
+    border-radius:4px;padding:12px 14px;font-size:12px;line-height:1.6;color:var(--mute);
+    box-shadow:0 18px 40px -18px #000}
+  .tip b{color:var(--bone)}
+  .tipwrap:hover .tip,.tipwrap:focus-within .tip{display:block}
   .intro{position:relative;border:1px solid var(--line);border-left:3px solid var(--bluesoft);
     background:var(--panel);border-radius:4px;padding:14px 16px;margin:12px 0 4px;max-width:900px}
   .intro h3{margin:0 0 6px;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--bluesoft)}
@@ -233,26 +243,25 @@
   .fcol.r{align-items:flex-end;text-align:right}
   .fcol .nm{max-width:100%}
   .gauge-svg{width:148px;height:82px;flex:none;overflow:visible}
-  .g-track{fill:none;stroke:var(--soft);stroke-width:9;stroke-linecap:round}
-  .g-side-a{fill:none;stroke:var(--red);stroke-width:3;opacity:.35}
-  .g-side-b{fill:none;stroke:var(--blue);stroke-width:3;opacity:.35}
-  .g-gap{fill:none;stroke:#5A6272;stroke-width:9;stroke-linecap:round;opacity:.7}
-  .g-gap.hot{stroke:var(--hot);opacity:.95}
+  .g-track{fill:none;stroke:var(--soft);stroke-width:10;stroke-linecap:round}
+  .g-a{fill:none;stroke:var(--red);stroke-width:10}
+  .g-b{fill:none;stroke:var(--blue);stroke-width:10}
+  .g-gap{fill:none;stroke:#5A6272;stroke-width:4;stroke-linecap:round;opacity:.8}
+  .g-gap.hot{stroke:var(--hot);opacity:1}
+  .g-edge{stroke:var(--ink);stroke-width:2.5}
   .g-mkt{stroke:var(--gold);stroke-width:2.5;stroke-linecap:round}
   .g-open{stroke:var(--gold);stroke-width:1.5;stroke-dasharray:2 2;opacity:.8}
-  .g-needle{stroke:var(--bone);stroke-width:2.5;stroke-linecap:round}
-  .g-hub{fill:var(--bone)}
-  .g-num{fill:var(--bone);font:800 17px ui-monospace,Menlo,monospace;text-anchor:middle}
+  .g-num{font:800 19px ui-monospace,Menlo,monospace;letter-spacing:-.02em}
+  .n-a{fill:var(--redsoft)} .n-b{fill:var(--bluesoft)} .n-s{fill:var(--dim);font-size:13px}
   .gkey{display:flex;gap:10px;justify-content:center;font-size:9px;letter-spacing:.08em;
     text-transform:uppercase;color:var(--dim);margin-top:1px}
   .gkey span{display:flex;align-items:center;gap:4px}
   .gkey i{display:inline-block;width:10px;height:0}
   .k-needle{border-top:2px solid var(--bone)} .k-mkt{border-top:2px solid var(--gold)}
   .k-open{border-top:1.5px dashed var(--gold)}
-  .mono-av{width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;
-    justify-content:center;font:800 10px ui-sans-serif,system-ui;letter-spacing:.02em;
-    color:#fff;flex:none}
-  .mono-av.a{background:var(--red)} .mono-av.b{background:var(--blue)}
+  .nm-a{color:var(--redsoft)} .nm-b{color:var(--bluesoft)}
+  .nm.fav{font-weight:800}
+  .nm:not(.fav){opacity:.72}
   .tile.is-hot{border-color:rgba(255,90,54,.55);
     box-shadow:0 0 0 1px rgba(255,90,54,.18),0 6px 22px -12px rgba(255,90,54,.55)}
   .tile.is-hot:hover{border-color:var(--hot)}
@@ -260,9 +269,9 @@
   .dcard .dgap{color:var(--hot)!important}
   .edgeTag.wide{color:var(--hot)!important;background:rgba(255,90,54,.10)}
   @media (prefers-reduced-motion:no-preference){
-    .g-needle{transform-origin:74px 76px;animation:sweep .9s cubic-bezier(.2,.8,.2,1) both}
-    @keyframes sweep{from{transform:rotate(var(--deg))} to{transform:rotate(0deg)}}
-    .g-gap{stroke-dasharray:400;stroke-dashoffset:400;animation:draw .8s .35s ease-out forwards}
+    .g-a,.g-b{stroke-dasharray:220;animation:grow .7s cubic-bezier(.2,.8,.2,1) both}
+    @keyframes grow{from{stroke-dashoffset:220}to{stroke-dashoffset:0}}
+    .g-gap{stroke-dasharray:400;stroke-dashoffset:400;animation:draw .8s .45s ease-out forwards}
     @keyframes draw{to{stroke-dashoffset:0}}
     .tile{animation:rise .45s ease both}
     @keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
@@ -276,7 +285,17 @@
 <body>
 <div class="wrap">
   <header>
-    <span class="brand">Cornerman</span>
+    <span class="tipwrap"><span class="brand">Cornerman</span><button class="tipbtn" aria-label="What this site is">?</button>
+      <span class="tip" role="tooltip">
+        <b>What this is.</b> A statistical model of UFC fights, trained only on fights that happened
+        before the ones it scores. Each bout gets a probability for the winner and fifteen other
+        markets, with the fair price each implies.<br><br>
+        <b>It does not beat the betting market.</b> On 829 fights it had never seen it called 67% of
+        winners against the closing line's 70%, and where they disagreed the market was right more
+        often. That is measured and published, not expected to change.<br><br>
+        What it offers instead is a number with its workings shown: which features moved it, what
+        happened historically in fights that looked similar, and a growing record of how often each
+        market's projections come in.</span></span>
     <div class="evline" id="evline"></div>
     <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px">
       <div class="mono" id="stamp" style="font-size:10.5px;color:var(--mute);white-space:nowrap"></div>
@@ -351,25 +370,6 @@ function tag(b){
 /* A first-time visitor has no idea what this is, and the most important
    thing to say is the least flattering one: it does not beat the market.
    Leading with that is the only way the rest of the numbers mean anything. */
-function intro(){
-  let seen=false; try{ seen=localStorage.getItem('cm_intro')==='1'; }catch(e){}
-  if(seen) return '';
-  return `<div class="intro">
-    <button class="xsm" id="dismiss" title="dismiss">✕</button>
-    <h3>What this is</h3>
-    <p>A statistical model of UFC fights, trained only on fights that happened before
-    the ones it is scoring. For each bout it publishes a probability for the winner and
-    fifteen other markets — method, round, totals, takedowns, knockdowns — plus the fair
-    price each one implies.</p>
-    <p><b>It does not beat the betting market.</b> Tested on 829 fights it had never seen,
-    it called 67% of winners against the closing line's 70%, and where the two disagreed
-    the market was right more often. That is measured, published, and not expected to change.</p>
-    <p>What it offers instead is <b>a number with its workings shown</b>: which features moved
-    it, what happened historically in fights that looked similar, and a growing record of how
-    often each market's projections have actually come in. A price tells you what to pay.
-    This tells you why, and how much to trust it.</p>
-  </div>`;
-}
 
 function strip(){
   const w=DATA.bouts.filter(b=>b.edge!=null).sort((x,y)=>Math.abs(y.edge)-Math.abs(x.edge));
@@ -418,41 +418,34 @@ function evChip(b,short){
    disagreement, shaded in the one saturated colour on the site so the eye
    goes straight to it. Reading left to right is the red corner's chance. */
 function gauge(b){
-  // The needle points AT the favoured fighter: red corner on the left, blue
-  // on the right, matching the names either side of the dial. The first
-  // version mapped a high red-corner probability to the right, so a 71%
-  // favourite's needle pointed at his opponent — the dial contradicting its
-  // own number. Rendered and caught before it shipped.
-  const W=148,H=82,cx=W/2,cy=76,R=62;
-  const pt=(p,r)=>{const t=Math.PI*p;return [cx+r*Math.cos(t),cy-r*Math.sin(t)];};
-  // pt(1) is the far left, pt(0) the far right; draw left-to-right over the top
-  const arc=(p1,p2,r)=>{const hi=Math.max(p1,p2),lo=Math.min(p1,p2);
-    const[x1,y1]=pt(hi,r),[x2,y2]=pt(lo,r);
-    return `M${x1.toFixed(1)},${y1.toFixed(1)} A${r},${r} 0 0 1 ${x2.toFixed(1)},${y2.toFixed(1)}`;};
+  // Territory, not a pointer. The first version drew the two colours at fixed
+  // halves and moved only a needle, so a 90-10 fight and a 51-49 fight showed
+  // identical arcs — the dial said nothing the number did not. Now each
+  // fighter's colour spans his own share, the gold tick is where the market
+  // would put the boundary, and the bridge between them is the disagreement.
+  const W=148,H=88,cx=W/2,cy=80,R=58,RB=R+11;
+  const pt=(x,r)=>{const t=Math.PI*(1-x);return [cx+r*Math.cos(t),cy-r*Math.sin(t)];};
+  const arc=(x1,x2,r)=>{const lo=Math.min(x1,x2),hi=Math.max(x1,x2);
+    const[ax,ay]=pt(lo,r),[bx,by]=pt(hi,r);
+    return `M${ax.toFixed(1)},${ay.toFixed(1)} A${r},${r} 0 0 1 ${bx.toFixed(1)},${by.toFixed(1)}`;};
+  const tick=(x,cls,over)=>{const[a1,b1]=pt(x,R+(over||6)),[a2,b2]=pt(x,R-(over||6));
+    return `<line class="${cls}" x1="${a1.toFixed(1)}" y1="${b1.toFixed(1)}" x2="${a2.toFixed(1)}" y2="${b2.toFixed(1)}"/>`;};
   const mk=b.p_market!=null, op=b.p_open!=null;
   const hot=mk&&Math.abs(b.p_a-b.p_market)>=0.05;
-  const [nx,ny]=pt(b.p_a,R-8);
-  const tick=(p,cls)=>{const[a1,b1]=pt(p,R+6),[a2,b2]=pt(p,R-6);
-    return `<line class="${cls}" x1="${a1.toFixed(1)}" y1="${b1.toFixed(1)}" x2="${a2.toFixed(1)}" y2="${b2.toFixed(1)}"/>`;};
-  const favA=b.p_a>=.5;
   return `<svg class="gauge-svg" viewBox="0 0 ${W} ${H}" role="img"
-      aria-label="model favours ${esc(favA?b.a:b.b)} at ${P0(Math.max(b.p_a,b.p_b))} percent${mk?', market has '+esc(b.a)+' at '+P0(b.p_market):''}">
+      aria-label="${esc(b.a)} ${P0(b.p_a)} percent, ${esc(b.b)} ${P0(b.p_b)} percent${mk?', market '+P0(b.p_market):''}">
     <path d="${arc(0,1,R)}" class="g-track"/>
-    <path d="${arc(.5,1,R)}" class="g-side-a"/><path d="${arc(0,.5,R)}" class="g-side-b"/>
-    ${mk?`<path d="${arc(b.p_a,b.p_market,R)}" class="g-gap ${hot?'hot':''}"/>`:''}
-    ${op?tick(b.p_open,'g-open'):''}
-    ${mk?tick(b.p_market,'g-mkt'):''}
-    <line class="g-needle" x1="${cx}" y1="${cy}" x2="${nx.toFixed(1)}" y2="${ny.toFixed(1)}"
-      style="--deg:${(180*b.p_a-90).toFixed(1)}deg"/>
-    <circle cx="${cx}" cy="${cy}" r="3.5" class="g-hub"/>
-    <text x="${cx}" y="${cy-18}" class="g-num" style="fill:${favA?'var(--redsoft)':'var(--bluesoft)'}">${P0(Math.max(b.p_a,b.p_b))}</text>
+    <path d="${arc(0,b.p_a,R)}" class="g-a"/>
+    <path d="${arc(b.p_a,1,R)}" class="g-b"/>
+    ${mk&&Math.abs(b.p_a-b.p_market)>0.005?`<path d="${arc(b.p_a,b.p_market,RB)}" class="g-gap ${hot?'hot':''}"/>`:''}
+    ${tick(b.p_a,'g-edge',5)}
+    ${op?tick(b.p_open,'g-open',9):''}
+    ${mk?tick(b.p_market,'g-mkt',9):''}
+    <text x="${cx}" y="${cy-20}" class="g-num" text-anchor="middle">
+      <tspan class="n-a">${P0(b.p_a)}</tspan><tspan class="n-s"> / </tspan><tspan class="n-b">${P0(b.p_b)}</tspan></text>
   </svg>`;
 }
-function mono(name,cls){
-  const p=String(name).trim().split(/\s+/);
-  const i=(p[0][0]+(p.length>1?p[p.length-1][0]:'')).toUpperCase();
-  return `<span class="mono-av ${cls}">${esc(i)}</span>`;
-}
+
 
 /* Bouts where a fighter has 0-1 prior UFC fights (PREREGISTRATION addendum 19).
    The win model was tested on exactly these and holds up, so they get a win
@@ -474,9 +467,9 @@ function tile(b){
     <div class="trow" style="margin-bottom:2px">
       <span class="lbl">${b.weight_class?`<b class="divc">${esc(divShort(b.weight_class))}</b> · `:''}${b.rounds===5?'5 rds':'3 rds'}${evChip(b,true)}</span>${tag(b)}</div>
     <div class="dialrow">
-      <div class="fcol">${mono(b.a,'a')}<span class="nm" title="${esc(b.a)}" style="color:${b.p_a>=.5?'var(--bone)':'var(--mute)'}">${esc(surname(b.a))}</span></div>
+      <div class="fcol"><span class="nm nm-a ${b.p_a>=.5?'fav':''}" title="${esc(b.a)}">${esc(surname(b.a))}</span></div>
       ${gauge(b)}
-      <div class="fcol r">${mono(b.b,'b')}<span class="nm" title="${esc(b.b)}" style="color:${b.p_a<.5?'var(--bone)':'var(--mute)'}">${esc(surname(b.b))}</span></div>
+      <div class="fcol r"><span class="nm nm-b ${b.p_a<.5?'fav':''}" title="${esc(b.b)}">${esc(surname(b.b))}</span></div>
     </div>
     <div class="gkey">
       <span><i class="k-needle"></i>model</span>
@@ -710,7 +703,7 @@ function render(){
   const lc=HIST&&HIST.cards&&HIST.cards[0];
   document.getElementById('app').innerHTML=nav+
     zone('z-up','z-upcoming','Upcoming card',`${esc(d.event||'')} · ${d.bouts.length} bouts modelled`,
-      intro()+strip()+filt+segs)+
+      strip()+filt+segs)+
     zone('z-res','z-results', lc?`Last card — ${esc(lc.event)}`:'Last card',
       'graded against what happened · click any fight', lastCard())+
     zone('z-hist','z-history','What usually happens','history of every fight since 2012, not predictions',
@@ -727,8 +720,7 @@ function render(){
     el.addEventListener('click',()=>openPast(el.dataset.past)));
   document.querySelectorAll('[data-f]').forEach(el=>
     el.addEventListener('click',()=>{ ONLY_GAPS = el.dataset.f==='gaps'; render(); }));
-  const dm=document.getElementById('dismiss');
-  if(dm) dm.addEventListener('click',()=>{ try{localStorage.setItem('cm_intro','1');}catch(e){} render(); });
+
 }
 
 /* ---- drawer ---- */

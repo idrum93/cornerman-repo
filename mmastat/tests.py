@@ -250,6 +250,8 @@ REQUIRED_SITE_FEATURES = {
     "function openPast": "openable last-card results",
     "function surname": "surnames on tiles",
     "function divisionTable": "results by weight class",
+    "class=\"tipwrap\"": "the what-is-this tooltip on the wordmark",
+    "class=\"g-a\"": "gauge arcs split at the probability",
     "divShort(b.weight_class)": "weight class on each tile",
     "class=\"zone ": "separated upcoming / results / history zones",
 }
@@ -290,7 +292,7 @@ def test_wiki_parser(_unused=None):
                 f"{'works' if right and wrong is False else 'BROKEN'}")
 
 
-def run_all(fights=None, fighters=None):
+def run_all(fights=None, fighters=None, data_only=False):
     if fights is None:
         fights, fighters, _ = make_corpus(n_fighters=520, n_events=320)
     X, _ = build(fights, fighters)
@@ -303,9 +305,14 @@ def run_all(fights=None, fighters=None):
         ("ledger reads old schema", test_ledger_reads_old_schema()),
         ("no resolved prices", test_no_resolved_prices()),
         ("opening marker survives", test_opening_marker_survives()),
-        ("site features intact", test_site_features()),
-        ("wiki record parser", test_wiki_parser()),
     ]
+    # Cosmetic checks guard the front end and the parked collector. They belong
+    # on a push, not in the nightly data job: a UI file that has not been
+    # uploaded yet should not stop the corpus refreshing and the site
+    # deploying.
+    if not data_only:
+        checks += [("site features intact", test_site_features()),
+                   ("wiki record parser", test_wiki_parser())]
     print(f"{'CHECK':<28} {'RESULT':<6}  DETAIL")
     print("-" * 78)
     allok = True
@@ -319,6 +326,10 @@ def run_all(fights=None, fighters=None):
 
 if __name__ == "__main__":
     import sys
+    # Exit non-zero when something fails. run_all returned its verdict and
+    # __main__ dropped it, so every check printed FAIL and the job still went
+    # green — the guards were not guarding anything.
+    data_only = "--data-only" in sys.argv
     if "--real" in sys.argv:
         # The refresh job's step is called "validation suite on the refreshed
         # corpus" — before this flag existed it ran on the SYNTHETIC corpus
@@ -326,6 +337,7 @@ if __name__ == "__main__":
         # through the one check meant to catch it.
         from .loaders import load
         _f, _p, _ = load(verbose=False)
-        run_all(_f, _p)
+        ok = run_all(_f, _p, data_only=data_only)
     else:
-        run_all()
+        ok = run_all(data_only=data_only)
+    sys.exit(0 if ok else 1)
