@@ -107,7 +107,7 @@ def parse_card_html(html):
 
     def _seg(text):
         t = text.lower()
-        if "early prelim" in t:
+        if "early prelim" in t or "fight pass" in t:
             return "Early prelims"
         if "prelim" in t:
             return "Prelims"

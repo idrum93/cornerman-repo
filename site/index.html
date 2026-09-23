@@ -174,6 +174,9 @@
   .zone-hd{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:6px}
   .zone-hd h2{margin:0;font-size:15px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--zc)}
   .zone .seg:first-of-type{margin-top:8px}
+  .tothd{letter-spacing:.18em;color:var(--dim)}
+  .totals{border:1px solid rgba(111,191,115,.25);border-radius:4px;
+    background:rgba(111,191,115,.05);padding:11px 13px}
   .rstats{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin-top:8px}
   .rstat{border:1px solid var(--line);border-radius:4px;background:var(--panel);padding:9px 11px}
   .rbig{font-size:22px;font-weight:800;letter-spacing:-.02em}
@@ -204,19 +207,18 @@
   .brgroup{border:1px solid var(--line);border-radius:4px;background:var(--panel);padding:11px 12px 6px}
   .brhead{display:flex;flex-direction:column;gap:2px;margin-bottom:6px}
   .brtitle{font-size:13px;font-weight:800;letter-spacing:.01em}
-  .braxis,.brrow{display:grid;grid-template-columns:minmax(120px,1.3fr) minmax(170px,2fr) 74px;gap:10px;align-items:center}
-  .braxis{margin-bottom:2px}
-  .braxis .lbl{text-align:center;font-size:8.5px}
+  .brrow{display:grid;grid-template-columns:1fr 104px 74px;gap:12px;align-items:center}
+  .brsent{display:block;font-size:11px;color:var(--mute);margin-top:3px;line-height:1.5}
+  .brsent b{color:var(--bone)}
   .brrow{padding:6px 0;border-top:1px solid var(--soft)}
   .brrow.flat{opacity:.62}
   .brlab{font-size:11.5px;color:var(--bone);line-height:1.3}
-  .brwhy{display:block;font-size:9px;letter-spacing:.05em;color:#4F5766;margin-top:2px;text-transform:uppercase}
   .brqs{display:flex;gap:4px}
   .brq{flex:1;text-align:center}
   .brq.thin{opacity:.42}
-  .brbar{position:relative;height:30px;background:var(--soft);border-radius:3px;overflow:hidden}
+  .brbar{position:relative;height:22px;background:var(--soft);border-radius:3px;overflow:hidden}
   .brbar i{position:absolute;bottom:0;left:16%;width:68%;border-radius:2px 2px 0 0}
-  .brv{font-size:11px;font-weight:700;margin-top:2px}
+  .brv{display:none}
   .brmk{height:10px;line-height:10px;font-size:8.5px}
   .brverd{font-size:9px;letter-spacing:.08em;text-transform:uppercase;text-align:right}
   .v-strong{color:var(--gold)} .v-weak{color:var(--mute)} .v-none{color:#4F5766}
@@ -476,10 +478,9 @@ function tile(b){
       <div class="fcol r"><span class="nm nm-b ${b.p_a<.5?'fav':''}" title="${esc(b.b)}">${esc(surname(b.b))}</span></div>
     </div>
     <div class="gkey">
-      <span class="k-model">model ${P0(b.p_a)}/${P0(b.p_b)}</span>
-      ${mk?`<span class="k-market">market ${P0(b.p_market)}</span>`:''}
+      ${mk?`<span class="k-market">market ${P0(b.p_market)}/${P0(1-b.p_market)}</span>`:'<span class="k-open-l">no market line</span>'}
+      ${b.p_open!=null?`<span class="k-open-l">opened ${P0(b.p_open)}/${P0(1-b.p_open)}</span>`:''}
       ${mk&&Math.abs(b.edge)>=0.02?`<span class="${b.edge>0?'k-lean-b':'k-lean-a'}">leans ${esc(surname(b.edge>0?b.b:b.a))} +${(Math.abs(b.edge)*100).toFixed(0)}</span>`:''}
-      ${b.p_open!=null?`<span class="k-open-l">opened ${P0(b.p_open)}</span>`:''}
     </div>
     ${b.thin?`<div class="props"><span class="pp" style="color:var(--warn);border-color:rgba(222,140,52,.4)">winner only · ${Math.min((b.evidence||{}).a??9,(b.evidence||{}).b??9)===0?'debut':'1 prior UFC fight'}</span></div>`:propChips(b)}
   </button>`;
@@ -536,6 +537,7 @@ function baseRatePanel(here,bout,inZone){
       const verdict = nsig>=3?['clear pattern','v-strong']:nsig>=1?['weak pattern','v-weak']:['no pattern','v-none'];
       const top=Math.max(base,...cells.map(q=>q.rate))*1.2||1;
       const mk=here?here[id]:null;
+      const lo=cells[0], hi=cells[cells.length-1];
       const qs=cells.map(q=>{
         const d=q.rate-base, sig=Math.abs(d)>q.ci;
         const fill=!sig?'#39414E':(d>0?'var(--gold)':'#7C8695');
@@ -551,16 +553,21 @@ function baseRatePanel(here,bout,inZone){
           <div class="mono brv">${(q.rate*100).toFixed(0)}<span class="qpct">%</span></div>
           <div class="brmk">${hits.map(([col,nm])=>`<span style="color:${col}" title="${esc(nm)}">▲</span>`).join('')}</div>
         </div>`;}).join('');
+      // A sentence first, the quartiles as a small shape beside it. Ten rows
+      // of four labelled bars with a dashed reference line was more chart than
+      // the finding needed: what a reader wants is "lowest quarter 24%,
+      // highest 63%, 44% overall".
       return `<div class="brrow ${nsig===0?'flat':''}">
-        <div class="brlab">${esc(BR_LABEL[id])}<span class="brwhy">${esc(BR_WHY[id]||c.why)}</span></div>
-        <div class="brqs">${qs}</div>
+        <div class="brlab">${esc(BR_LABEL[id])}
+          <span class="brsent">lowest quarter <b>${P0(lo.rate)}%</b> ·
+            highest <b>${P0(hi.rate)}%</b> · <span style="color:var(--dim)">${P0(base)}% overall</span></span></div>
+        <div class="brqs" title="${esc(BR_WHY[id]||c.why)}">${qs}</div>
         <div class="brverd ${verdict[1]}">${verdict[0]}</div>
       </div>`;}).join('');
     const c0=byId[g.ids[0]], base0=c0?brCells(c0).base:null;
     return `<div class="brgroup">
       <div class="brhead"><span class="brtitle">${esc(g.title)}</span>
         <span class="lbl">${base0!=null?`happens in ${(base0*100).toFixed(0)}% of fights overall`:''} · measured for ${esc(g.scope)}</span></div>
-      <div class="braxis"><span></span><span class="lbl">lowest quarter → highest</span><span></span></div>
       ${rows}</div>`;}).join('');
   const key=here&&bout
     ? `<span style="color:var(--red)">▲ ${esc(bout.a)}</span> · <span style="color:var(--blue)">▲ ${esc(bout.b)}</span> · <span style="color:var(--gold)">▲ this fight</span>`
@@ -569,12 +576,12 @@ function baseRatePanel(here,bout,inZone){
       :`<div class="seghd"><h2>What usually happens</h2><span class="lbl">${key}</span></div>`}
     <div class="brgrid">${groups}</div>
     <div class="note" style="margin-top:8px"><b style="color:var(--mute)">How to read this.</b>
-      Each row takes one measurement, sorts every past fight by it, and splits them into four equal
-      groups, lowest on the left. The bar is how often the outcome happened in that group; the dashed
-      line is how often it happens overall. <b style="color:var(--mute)">Coloured bars differ from the
-      overall rate by more than chance; dark bars do not</b>, however they look. Rows marked "no pattern"
-      are kept on purpose: showing only the strong ones would be indistinguishable from picking them.
-      <b style="color:var(--mute)">This is context, not an edge</b> — bookmakers price these base rates too.</div></div>`;
+      Each row sorts every past fight by one measurement and splits them into four equal groups. The
+      sentence gives the outcome rate in the lowest and the highest group, against the rate across all
+      fights; the four bars beside it show the shape in between, <b style="color:var(--mute)">coloured
+      only where the difference is bigger than chance</b>. Rows marked "no pattern" are kept on
+      purpose — showing only the strong ones would be indistinguishable from picking them. This is
+      context, not an edge: bookmakers price these rates too.</div></div>`;
 }
 
 /* A result is only interesting if you can see which parts of the forecast
@@ -636,7 +643,9 @@ function lastCard(){
         <span class="rc">${g.props_right}/${g.props_n} props</span>
         ${mk?`<span class="rc ${mk.model_closer?'ok':'no'}">${mk.model_closer?'beat':'lost to'} market</span>`:''}
       </div></button>`;}).join('');
-  return head+`<div class="grid" style="margin-top:10px">${tiles}</div>`;
+  return `<div class="totals"><div class="lbl tothd">card totals</div>${head}</div>
+    <div class="lbl tothd" style="margin:16px 0 6px">fight by fight</div>
+    <div class="grid">${tiles}</div>`;
 }
 
 function openPast(id){
