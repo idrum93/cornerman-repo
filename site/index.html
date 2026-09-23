@@ -207,7 +207,9 @@
   .brgroup{border:1px solid var(--line);border-radius:4px;background:var(--panel);padding:11px 12px 6px}
   .brhead{display:flex;flex-direction:column;gap:2px;margin-bottom:6px}
   .brtitle{font-size:13px;font-weight:800;letter-spacing:.01em}
-  .brrow{display:grid;grid-template-columns:1fr 104px 74px;gap:12px;align-items:center}
+  .brrow{display:grid;grid-template-columns:1fr 104px 82px 74px;gap:10px;align-items:center}
+  .brkind{font-size:8.5px;letter-spacing:.06em;text-transform:uppercase;text-align:right}
+  .k-direct{color:#4F5766} .k-indirect{color:var(--bluesoft);opacity:.8}
   .brsent{display:block;font-size:11px;color:var(--mute);margin-top:3px;line-height:1.5}
   .brsent b{color:var(--bone)}
   .brrow{padding:6px 0;border-top:1px solid var(--soft)}
@@ -377,7 +379,9 @@ function strip(){
   if(!w.length) return `<div class="note" style="padding:10px 0">No market prices in this
     build — add <span class="mono">ODDS_API_KEY</span> and the model-vs-market comparison appears here.</div>`;
   const top=w.slice(0,5);
-  return `<div class="strip">${top.map(b=>{
+  return `<div class="totals" style="border-color:rgba(255,90,54,.22);background:rgba(255,90,54,.04)">
+    <div class="lbl tothd">model vs market · widest disagreements on this card</div>
+    <div class="strip">${top.map(b=>{
     const e=Math.abs(b.edge), who=e>0?(b.edge>0?b.a:b.b):b.a;
     const mine=b.edge>0?b.p_a:b.p_b, theirs=b.edge>0?b.p_market:1-b.p_market;
     return `<button class="dcard ${e>=0.05?'':'calm'}" data-id="${esc(b.bout)}">
@@ -387,7 +391,7 @@ function strip(){
         <span class="nm" style="max-width:120px" title="${esc(who)}">${esc(surname(who))}</span></div>
       <div class="mono" style="font-size:10.5px;color:var(--mute)">
         ${P1(mine)}% vs <span style="color:var(--gold)">${P1(theirs)}%</span> market</div>
-    </button>`;}).join('')}</div>`;
+    </button>`;}).join('')}</div></div>`;
 }
 
 function propChips(b){
@@ -518,6 +522,12 @@ const BR_LABEL={
 // mechanism alone reads backwards. Reach is the case in point: a reach EDGE
 // goes with FEWER takedowns (47% down to 39%), because the shorter fighter is
 // usually the one closing distance and shooting.
+// Two of these rows measure the outcome itself, earlier: past takedowns landed
+// predicting a takedown landed, past knockdowns predicting a knockdown. Their
+// strong patterns are close to definitional, and a panel that presented them
+// beside the others as equal discoveries would be flattering itself. The
+// indirect rows are where anything is actually learned.
+const BR_DIRECT=new Set(['C1','C3']);
 const BR_WHY={C12:'volume taken does not predict a knockdown; clean shots taken does',
               C6:'shorter fighters land more — they are the ones closing distance',
               C2:'better defence in front of them, fewer landed'};
@@ -562,6 +572,9 @@ function baseRatePanel(here,bout,inZone){
           <span class="brsent">lowest quarter <b>${P0(lo.rate)}%</b> ·
             highest <b>${P0(hi.rate)}%</b> · <span style="color:var(--dim)">${P0(base)}% overall</span></span></div>
         <div class="brqs" title="${esc(BR_WHY[id]||c.why)}">${qs}</div>
+        <div class="brkind ${BR_DIRECT.has(id)?'k-direct':'k-indirect'}"
+          title="${BR_DIRECT.has(id)?'the same thing measured before the fight — a strong pattern here is close to definitional'
+            :'a different measurement from the outcome'}">${BR_DIRECT.has(id)?'same measure':'different measure'}</div>
         <div class="brverd ${verdict[1]}">${verdict[0]}</div>
       </div>`;}).join('');
     const c0=byId[g.ids[0]], base0=c0?brCells(c0).base:null;
@@ -579,7 +592,11 @@ function baseRatePanel(here,bout,inZone){
       Each row sorts every past fight by one measurement and splits them into four equal groups. The
       sentence gives the outcome rate in the lowest and the highest group, against the rate across all
       fights; the four bars beside it show the shape in between, <b style="color:var(--mute)">coloured
-      only where the difference is bigger than chance</b>. Rows marked "no pattern" are kept on
+      only where the difference is bigger than chance</b>. Rows marked <b style="color:var(--mute)">same
+      measure</b> are the outcome itself measured before the fight — past takedowns landed predicting a
+      takedown landed — so a strong pattern there is close to definitional; the
+      <b style="color:var(--bluesoft)">different measure</b> rows are where something is actually
+      learned. Rows marked "no pattern" are kept on
       purpose — showing only the strong ones would be indistinguishable from picking them. This is
       context, not an edge: bookmakers price these rates too.</div></div>`;
 }

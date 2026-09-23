@@ -250,6 +250,7 @@ REQUIRED_SITE_FEATURES = {
     "function openPast": "openable last-card results",
     "function surname": "surnames on tiles",
     "function divisionTable": "results by weight class",
+    "BR_DIRECT": "same-measure vs different-measure labels",
     "class=\"tipwrap\"": "the what-is-this tooltip on the wordmark",
     "class=\"g-a\"": "gauge arcs split at the probability",
     "g-bridge ${leansB": "market bridge coloured by the corner it favours",

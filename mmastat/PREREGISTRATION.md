@@ -1353,3 +1353,34 @@ in-fight UFC output, of wildly varying competition level, and mixing the two
 invites confusion for an expected-null gain. The collector
 (`mmastat/wiki_records.py`) is kept, tested but unscheduled. Its remaining
 possible use is props on thin-record bouts, if that is ever worth testing.
+
+## Addendum 10/14: a note on what the rows measure (2026-09-23)
+
+Prompted by a reader asking what "their takedown rate" counts. Verified in
+`state.py`:
+
+| row | what it is |
+|---|---|
+| C1 their takedown rate | takedowns **landed** per 15 min, opponent-adjusted |
+| C3 their knockdown rate | knockdowns **scored** per 15 min |
+| C11 opponent's knockdowns absorbed | times the opponent has **been dropped**, per 15 min — suffered, not prevented |
+| C2 opponent's takedown defence | share of attempts against him that were **stopped** |
+
+C1 and C3 are the outcome itself, measured before the fight. Their strong
+patterns are close to definitional and are now labelled **same measure** on the
+site, against **different measure** for the rest, so the panel does not present
+a tautology and a finding as equals.
+
+Checked at the same time, since attempts and landings are different claims:
+
+| predicting "lands a takedown" (base 44%) | quartiles | spread | AUC |
+|---|---|---|---|
+| takedowns landed per 15 | 24 37 51 63 | +.392 | .680 |
+| takedowns attempted per 15 | 23 36 52 64 | +.407 | .687 |
+| takedown accuracy | 43 37 44 51 | +.142 | .542 |
+
+Landed and attempted correlate at **0.945** and perform the same, so the choice
+between them does not matter and no row is added. Accuracy on its own is weak:
+what predicts landing a takedown is how often a fighter shoots, not how well he
+finishes the shot. The takedown model already sees both rate and accuracy, so
+attempts were never missing from it.
