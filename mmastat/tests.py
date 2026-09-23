@@ -252,6 +252,7 @@ REQUIRED_SITE_FEATURES = {
     "function divisionTable": "results by weight class",
     "class=\"tipwrap\"": "the what-is-this tooltip on the wordmark",
     "class=\"g-a\"": "gauge arcs split at the probability",
+    "g-bridge ${leansB": "market bridge coloured by the corner it favours",
     "divShort(b.weight_class)": "weight class on each tile",
     "class=\"zone ": "separated upcoming / results / history zones",
 }

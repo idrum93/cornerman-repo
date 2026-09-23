@@ -246,8 +246,8 @@
   .g-track{fill:none;stroke:var(--soft);stroke-width:10;stroke-linecap:round}
   .g-a{fill:none;stroke:var(--red);stroke-width:10}
   .g-b{fill:none;stroke:var(--blue);stroke-width:10}
-  .g-gap{fill:none;stroke:#5A6272;stroke-width:4;stroke-linecap:round;opacity:.8}
-  .g-gap.hot{stroke:var(--hot);opacity:1}
+  .g-bridge{fill:none;stroke-width:3.5;stroke-linecap:round}
+  .g-bridge.to-a{stroke:var(--redsoft)} .g-bridge.to-b{stroke:var(--bluesoft)}
   .g-edge{stroke:var(--ink);stroke-width:2.5}
   .g-mkt{stroke:var(--gold);stroke-width:2.5;stroke-linecap:round}
   .g-open{stroke:var(--gold);stroke-width:1.5;stroke-dasharray:2 2;opacity:.8}
@@ -255,10 +255,9 @@
   .n-a{fill:var(--redsoft)} .n-b{fill:var(--bluesoft)} .n-s{fill:var(--dim);font-size:13px}
   .gkey{display:flex;gap:10px;justify-content:center;font-size:9px;letter-spacing:.08em;
     text-transform:uppercase;color:var(--dim);margin-top:1px}
-  .gkey span{display:flex;align-items:center;gap:4px}
-  .gkey i{display:inline-block;width:10px;height:0}
-  .k-needle{border-top:2px solid var(--bone)} .k-mkt{border-top:2px solid var(--gold)}
-  .k-open{border-top:1.5px dashed var(--gold)}
+  .gkey span{white-space:nowrap}
+  .k-model{color:var(--mute)} .k-market{color:var(--gold)} .k-open-l{color:var(--dim)}
+  .k-lean-a{color:var(--redsoft)} .k-lean-b{color:var(--bluesoft)}
   .nm-a{color:var(--redsoft)} .nm-b{color:var(--bluesoft)}
   .nm.fav{font-weight:800}
   .nm:not(.fav){opacity:.72}
@@ -271,7 +270,7 @@
   @media (prefers-reduced-motion:no-preference){
     .g-a,.g-b{stroke-dasharray:220;animation:grow .7s cubic-bezier(.2,.8,.2,1) both}
     @keyframes grow{from{stroke-dashoffset:220}to{stroke-dashoffset:0}}
-    .g-gap{stroke-dasharray:400;stroke-dashoffset:400;animation:draw .8s .45s ease-out forwards}
+    .g-bridge{stroke-dasharray:400;stroke-dashoffset:400;animation:draw .8s .45s ease-out forwards}
     @keyframes draw{to{stroke-dashoffset:0}}
     .tile{animation:rise .45s ease both}
     @keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
@@ -418,29 +417,34 @@ function evChip(b,short){
    disagreement, shaded in the one saturated colour on the site so the eye
    goes straight to it. Reading left to right is the red corner's chance. */
 function gauge(b){
-  // Territory, not a pointer. The first version drew the two colours at fixed
-  // halves and moved only a needle, so a 90-10 fight and a 51-49 fight showed
-  // identical arcs — the dial said nothing the number did not. Now each
-  // fighter's colour spans his own share, the gold tick is where the market
-  // would put the boundary, and the bridge between them is the disagreement.
-  const W=148,H=88,cx=W/2,cy=80,R=58,RB=R+11;
+  // Two layers, deliberately different in kind.
+  //
+  //   MODEL  the thick arc itself. Each corner's colour spans his own share,
+  //          so the boundary between them IS the model's number.
+  //   MARKET a gold tick outside the dial, and a thin bridge from it to the
+  //          model's boundary, drawn in the colour of the corner the MARKET
+  //          favours relative to the model. The bridge used to be orange,
+  //          which read as red-corner territory and made every disagreement
+  //          look like it was about the red fighter.
+  const W=148,H=92,cx=W/2,cy=82,R=56,RB=R+12;
   const pt=(x,r)=>{const t=Math.PI*(1-x);return [cx+r*Math.cos(t),cy-r*Math.sin(t)];};
   const arc=(x1,x2,r)=>{const lo=Math.min(x1,x2),hi=Math.max(x1,x2);
     const[ax,ay]=pt(lo,r),[bx,by]=pt(hi,r);
     return `M${ax.toFixed(1)},${ay.toFixed(1)} A${r},${r} 0 0 1 ${bx.toFixed(1)},${by.toFixed(1)}`;};
-  const tick=(x,cls,over)=>{const[a1,b1]=pt(x,R+(over||6)),[a2,b2]=pt(x,R-(over||6));
+  const radial=(x,r1,r2,cls)=>{const[a1,b1]=pt(x,r1),[a2,b2]=pt(x,r2);
     return `<line class="${cls}" x1="${a1.toFixed(1)}" y1="${b1.toFixed(1)}" x2="${a2.toFixed(1)}" y2="${b2.toFixed(1)}"/>`;};
   const mk=b.p_market!=null, op=b.p_open!=null;
-  const hot=mk&&Math.abs(b.p_a-b.p_market)>=0.05;
+  const leansB = mk && b.p_market < b.p_a;      // the market gives blue more
+  const gap = mk ? Math.abs(b.p_a-b.p_market) : 0;
   return `<svg class="gauge-svg" viewBox="0 0 ${W} ${H}" role="img"
-      aria-label="${esc(b.a)} ${P0(b.p_a)} percent, ${esc(b.b)} ${P0(b.p_b)} percent${mk?', market '+P0(b.p_market):''}">
+      aria-label="model: ${esc(b.a)} ${P0(b.p_a)} percent, ${esc(b.b)} ${P0(b.p_b)} percent${mk?`; market has ${esc(b.a)} at ${P0(b.p_market)} percent`:''}">
     <path d="${arc(0,1,R)}" class="g-track"/>
     <path d="${arc(0,b.p_a,R)}" class="g-a"/>
     <path d="${arc(b.p_a,1,R)}" class="g-b"/>
-    ${mk&&Math.abs(b.p_a-b.p_market)>0.005?`<path d="${arc(b.p_a,b.p_market,RB)}" class="g-gap ${hot?'hot':''}"/>`:''}
-    ${tick(b.p_a,'g-edge',5)}
-    ${op?tick(b.p_open,'g-open',9):''}
-    ${mk?tick(b.p_market,'g-mkt',9):''}
+    ${radial(b.p_a,R-6,R+6,'g-edge')}
+    ${mk&&gap>0.005?`<path d="${arc(b.p_a,b.p_market,RB)}" class="g-bridge ${leansB?'to-b':'to-a'}"/>`:''}
+    ${op?radial(b.p_open,R+8,R+15,'g-open'):''}
+    ${mk?radial(b.p_market,R+7,R+17,'g-mkt'):''}
     <text x="${cx}" y="${cy-20}" class="g-num" text-anchor="middle">
       <tspan class="n-a">${P0(b.p_a)}</tspan><tspan class="n-s"> / </tspan><tspan class="n-b">${P0(b.p_b)}</tspan></text>
   </svg>`;
@@ -472,9 +476,10 @@ function tile(b){
       <div class="fcol r"><span class="nm nm-b ${b.p_a<.5?'fav':''}" title="${esc(b.b)}">${esc(surname(b.b))}</span></div>
     </div>
     <div class="gkey">
-      <span><i class="k-needle"></i>model</span>
-      ${mk?`<span><i class="k-mkt"></i>market ${P0(b.p_market)}</span>`:''}
-      ${b.p_open!=null?`<span><i class="k-open"></i>opened ${P0(b.p_open)}</span>`:''}
+      <span class="k-model">model ${P0(b.p_a)}/${P0(b.p_b)}</span>
+      ${mk?`<span class="k-market">market ${P0(b.p_market)}</span>`:''}
+      ${mk&&Math.abs(b.edge)>=0.02?`<span class="${b.edge>0?'k-lean-b':'k-lean-a'}">leans ${esc(surname(b.edge>0?b.b:b.a))} +${(Math.abs(b.edge)*100).toFixed(0)}</span>`:''}
+      ${b.p_open!=null?`<span class="k-open-l">opened ${P0(b.p_open)}</span>`:''}
     </div>
     ${b.thin?`<div class="props"><span class="pp" style="color:var(--warn);border-color:rgba(222,140,52,.4)">winner only · ${Math.min((b.evidence||{}).a??9,(b.evidence||{}).b??9)===0?'debut':'1 prior UFC fight'}</span></div>`:propChips(b)}
   </button>`;
