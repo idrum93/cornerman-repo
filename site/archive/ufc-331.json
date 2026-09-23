@@ -2,7 +2,7 @@
  "event": "UFC 331",
  "date": "2026-09-19",
  "venue": "Crypto.com Arena, Los Angeles",
- "generated_utc": "2026-09-21T06:53:03.994778+00:00",
+ "generated_utc": "2026-09-21T20:18:14.910379+00:00",
  "bouts": [
   {
    "bout": "Joshua Van vs. Alexandre Pantoja",
@@ -11,6 +11,7 @@
    "rounds": 5,
    "segment": "Main card",
    "weight_class": "Flyweight",
+   "thin": false,
    "p_a": 0.7127,
    "p_b": 0.2873,
    "stats": {
@@ -190,6 +191,7 @@
    "rounds": 3,
    "segment": "Main card",
    "weight_class": "Lightweight",
+   "thin": false,
    "p_a": 0.751,
    "p_b": 0.249,
    "stats": {
@@ -367,6 +369,7 @@
    "rounds": 3,
    "segment": "Main card",
    "weight_class": "Featherweight",
+   "thin": false,
    "p_a": 0.452,
    "p_b": 0.548,
    "stats": {
@@ -544,6 +547,7 @@
    "rounds": 3,
    "segment": "Main card",
    "weight_class": "Lightweight",
+   "thin": false,
    "p_a": 0.6717,
    "p_b": 0.3283,
    "stats": {
@@ -721,6 +725,7 @@
    "rounds": 3,
    "segment": "Main card",
    "weight_class": "Light Heavyweight",
+   "thin": false,
    "p_a": 0.6385,
    "p_b": 0.3615,
    "stats": {
@@ -892,12 +897,188 @@
    }
   },
   {
+   "bout": "Gable Steveson vs. Sean Sharaf",
+   "a": "Gable Steveson",
+   "b": "Sean Sharaf",
+   "rounds": 3,
+   "segment": "Prelims",
+   "weight_class": "Heavyweight",
+   "thin": true,
+   "p_a": 0.9048,
+   "p_b": 0.0952,
+   "stats": {
+    "a": {
+     "record": "1-0",
+     "n_fights": 1,
+     "age": 26.3,
+     "height": 70.0,
+     "reach": 71.7,
+     "stance": "Orthodox",
+     "elo": 1515,
+     "opp_elo": 1485,
+     "slpm": 4.77,
+     "sapm": 4.17,
+     "str_acc": 0.637,
+     "str_def": 0.582,
+     "td15": 1.38,
+     "td_def": 0.65,
+     "sub15": 0.55,
+     "ctrl": 0.164,
+     "kd15": 0.74,
+     "kd_against15": 0.27,
+     "ko_loss": 0.24
+    },
+    "b": {
+     "record": "0-2",
+     "n_fights": 2,
+     "age": 33.2,
+     "height": 75.0,
+     "reach": 77.0,
+     "stance": "Orthodox",
+     "elo": 1470,
+     "opp_elo": 1487,
+     "slpm": 5.42,
+     "sapm": 9.69,
+     "str_acc": 0.44,
+     "str_def": 0.433,
+     "td15": 1.38,
+     "td_def": 0.65,
+     "sub15": 0.39,
+     "ctrl": 0.112,
+     "kd15": 0.19,
+     "kd_against15": 0.19,
+     "ko_loss": 0.533
+    }
+   },
+   "evidence": {
+    "a": 1,
+    "b": 2,
+    "min": 1
+   },
+   "drivers": [
+    {
+     "label": "strikes absorbed",
+     "value": 1.0345,
+     "favours": "a",
+     "key": "d_sapm"
+    },
+    {
+     "label": "age",
+     "value": 0.5387,
+     "favours": "a",
+     "key": "d_age"
+    },
+    {
+     "label": "durability",
+     "value": 0.5331,
+     "favours": "a",
+     "key": "d_ko_loss_rate"
+    },
+    {
+     "label": "knockout threat",
+     "value": -0.3245,
+     "favours": "b",
+     "key": "ko_edge"
+    },
+    {
+     "label": "career quality",
+     "value": 0.277,
+     "favours": "a",
+     "key": "d_elo"
+    },
+    {
+     "label": "striking defence",
+     "value": 0.2125,
+     "favours": "a",
+     "key": "d_str_def"
+    }
+   ],
+   "p_market": 0.9136,
+   "books": 24.0,
+   "edge": -0.0088,
+   "p_finish_survival_raw": null,
+   "m_a_ko": null,
+   "m_b_ko": null,
+   "m_a_sub": null,
+   "m_b_sub": null,
+   "m_decision": null,
+   "p_finish": null,
+   "p_end_r1": null,
+   "p_end_r2": null,
+   "p_end_r3": null,
+   "p_end_r4": null,
+   "p_end_r5": null,
+   "totals": null,
+   "a_ctrl_lo": null,
+   "a_ctrl_mid": null,
+   "a_ctrl_hi": null,
+   "a_slpm_lo": null,
+   "a_slpm_mid": null,
+   "a_slpm_hi": null,
+   "a_p_takedown": null,
+   "a_p_knockdown": null,
+   "b_ctrl_lo": null,
+   "b_ctrl_mid": null,
+   "b_ctrl_hi": null,
+   "b_slpm_lo": null,
+   "b_slpm_mid": null,
+   "b_slpm_hi": null,
+   "b_p_takedown": null,
+   "b_p_knockdown": null,
+   "bands": {
+    "C1": {
+     "a": 2,
+     "b": 2
+    },
+    "C2": {
+     "a": 2,
+     "b": 2
+    },
+    "C3": {
+     "a": 4,
+     "b": 2
+    },
+    "C6": {
+     "a": 1,
+     "b": 4
+    },
+    "C10": {
+     "a": 3,
+     "b": 1
+    },
+    "C11": {
+     "a": 3,
+     "b": 3
+    },
+    "C12": {
+     "a": 4,
+     "b": 4
+    },
+    "C4": {
+     "fight": 3
+    },
+    "C5": {
+     "fight": 1
+    },
+    "C7": {
+     "fight": 4
+    },
+    "C8": {
+     "fight": 4
+    },
+    "C9": {
+     "fight": 2
+    }
+   }
+  },
+  {
    "bout": "Charles Jourdain vs. Marlon Vera",
    "a": "Charles Jourdain",
    "b": "Marlon Vera",
    "rounds": 3,
    "segment": "Prelims",
    "weight_class": "Bantamweight",
+   "thin": false,
    "p_a": 0.6059,
    "p_b": 0.3941,
    "stats": {
@@ -1075,6 +1256,7 @@
    "rounds": 3,
    "segment": "Prelims",
    "weight_class": "Heavyweight",
+   "thin": false,
    "p_a": 0.456,
    "p_b": 0.544,
    "stats": {
@@ -1246,12 +1428,188 @@
    }
   },
   {
+   "bout": "Ryan Gandra vs. Ozzy Diaz",
+   "a": "Ryan Gandra",
+   "b": "Ozzy Diaz",
+   "rounds": 3,
+   "segment": "Prelims",
+   "weight_class": "Middleweight",
+   "thin": true,
+   "p_a": 0.5918,
+   "p_b": 0.4082,
+   "stats": {
+    "a": {
+     "record": "1-0",
+     "n_fights": 1,
+     "age": 31.4,
+     "height": 73.0,
+     "reach": 74.0,
+     "stance": "Orthodox",
+     "elo": 1514,
+     "opp_elo": 1469,
+     "slpm": 3.8,
+     "sapm": 3.83,
+     "str_acc": 0.468,
+     "str_def": 0.598,
+     "td15": 1.29,
+     "td_def": 0.65,
+     "sub15": 0.59,
+     "ctrl": 0.172,
+     "kd15": 0.78,
+     "kd_against15": 0.29,
+     "ko_loss": 0.24
+    },
+    "b": {
+     "record": "1-2",
+     "n_fights": 3,
+     "age": 35.8,
+     "height": 76.0,
+     "reach": 79.0,
+     "stance": "Orthodox",
+     "elo": 1485,
+     "opp_elo": 1523,
+     "slpm": 5.33,
+     "sapm": 5.99,
+     "str_acc": 0.507,
+     "str_def": 0.625,
+     "td15": 0.86,
+     "td_def": 0.652,
+     "sub15": 0.34,
+     "ctrl": 0.097,
+     "kd15": 0.17,
+     "kd_against15": 0.73,
+     "ko_loss": 0.457
+    }
+   },
+   "evidence": {
+    "a": 1,
+    "b": 3,
+    "min": 1
+   },
+   "drivers": [
+    {
+     "label": "strength of schedule",
+     "value": -0.5068,
+     "favours": "b",
+     "key": "d_opp_elo"
+    },
+    {
+     "label": "strikes absorbed",
+     "value": 0.405,
+     "favours": "a",
+     "key": "d_sapm"
+    },
+    {
+     "label": "durability",
+     "value": 0.3947,
+     "favours": "a",
+     "key": "d_ko_loss_rate"
+    },
+    {
+     "label": "age",
+     "value": 0.3486,
+     "favours": "a",
+     "key": "d_age"
+    },
+    {
+     "label": "striking output",
+     "value": -0.2597,
+     "favours": "b",
+     "key": "d_adj_slpm"
+    },
+    {
+     "label": "career quality",
+     "value": 0.1784,
+     "favours": "a",
+     "key": "d_elo"
+    }
+   ],
+   "p_market": 0.8078,
+   "books": 20.0,
+   "edge": -0.216,
+   "p_finish_survival_raw": null,
+   "m_a_ko": null,
+   "m_b_ko": null,
+   "m_a_sub": null,
+   "m_b_sub": null,
+   "m_decision": null,
+   "p_finish": null,
+   "p_end_r1": null,
+   "p_end_r2": null,
+   "p_end_r3": null,
+   "p_end_r4": null,
+   "p_end_r5": null,
+   "totals": null,
+   "a_ctrl_lo": null,
+   "a_ctrl_mid": null,
+   "a_ctrl_hi": null,
+   "a_slpm_lo": null,
+   "a_slpm_mid": null,
+   "a_slpm_hi": null,
+   "a_p_takedown": null,
+   "a_p_knockdown": null,
+   "b_ctrl_lo": null,
+   "b_ctrl_mid": null,
+   "b_ctrl_hi": null,
+   "b_slpm_lo": null,
+   "b_slpm_mid": null,
+   "b_slpm_hi": null,
+   "b_p_takedown": null,
+   "b_p_knockdown": null,
+   "bands": {
+    "C1": {
+     "a": 2,
+     "b": 1
+    },
+    "C2": {
+     "a": 2,
+     "b": 2
+    },
+    "C3": {
+     "a": 4,
+     "b": 2
+    },
+    "C6": {
+     "a": 1,
+     "b": 4
+    },
+    "C10": {
+     "a": 2,
+     "b": 1
+    },
+    "C11": {
+     "a": 4,
+     "b": 3
+    },
+    "C12": {
+     "a": 4,
+     "b": 3
+    },
+    "C4": {
+     "fight": 3
+    },
+    "C5": {
+     "fight": 1
+    },
+    "C7": {
+     "fight": 4
+    },
+    "C8": {
+     "fight": 3
+    },
+    "C9": {
+     "fight": 2
+    }
+   }
+  },
+  {
    "bout": "Edmen Shahbazyan vs. Brunno Ferreira",
    "a": "Edmen Shahbazyan",
    "b": "Brunno Ferreira",
    "rounds": 3,
    "segment": "Early prelims",
    "weight_class": "Middleweight",
+   "thin": false,
    "p_a": 0.6688,
    "p_b": 0.3312,
    "stats": {
@@ -1429,6 +1787,7 @@
    "rounds": 3,
    "segment": "Early prelims",
    "weight_class": "Women's Flyweight",
+   "thin": false,
    "p_a": 0.6439,
    "p_b": 0.3561,
    "stats": {
@@ -1606,6 +1965,7 @@
    "rounds": 3,
    "segment": "Early prelims",
    "weight_class": "Featherweight",
+   "thin": false,
    "p_a": 0.3608,
    "p_b": 0.6392,
    "stats": {
@@ -1779,21 +2139,9 @@
  ],
  "no_read": [
   {
-   "a": "Gable Steveson",
-   "b": "Sean Sharaf",
-   "reason": "insufficient history (1 / 2 prior bouts)",
-   "segment": "Prelims"
-  },
-  {
    "a": "Michael Aswell Jr.",
    "b": "Joo Sang Yoo",
    "reason": "name not in UFCStats corpus",
-   "segment": "Prelims"
-  },
-  {
-   "a": "Ryan Gandra",
-   "b": "Ozzy Diaz",
-   "reason": "insufficient history (1 / 3 prior bouts)",
    "segment": "Prelims"
   }
  ],
