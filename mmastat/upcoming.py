@@ -390,11 +390,13 @@ def predict_card(path, fights, fighters, verbose=True):
             skipped.append((na, nb, "name not in UFCStats corpus", segment))
             continue
         A, B = states[ids[na]], states[ids[nb]]
-        if min(A.n_fights, B.n_fights) < MIN_PRIOR:
-            skipped.append((na, nb,
-                            f"insufficient history ({A.n_fights} / {B.n_fights} prior bouts)",
-                            segment))
-            continue
+        # PREREGISTRATION addendum 19: the win model holds up on bouts where a
+        # fighter has 0 or 1 prior UFC bouts (debuts: log loss .647, CI
+        # [.614, .683], calibration 1.02), so those bouts get a WIN
+        # probability. Method, round and props were never tested on records
+        # this thin, so they are withheld rather than shown on faith. The
+        # ledger's betting rule keeps its registered 2+ population.
+        thin = min(A.n_fights, B.n_fights) < MIN_PRIOR
         sa, sb = A.snapshot(as_of), B.snapshot(as_of)
         sa["elo"], sb["elo"] = elo_eff(A, as_of), elo_eff(B, as_of)
         _snap[na], _snap[nb] = sa, sb
@@ -412,7 +414,7 @@ def predict_card(path, fights, fighters, verbose=True):
         wc = clean_division((meta.get("weights") or {}).get((na, nb), "")) \
             or infer_division(fights, ids[na], ids[nb])
         r = dict(bout=f"{na} vs. {nb}", a=na, b=nb, rounds=n_rounds,
-                 segment=segment, weight_class=wc,
+                 segment=segment, weight_class=wc, thin=bool(thin),
                  p_a=round(p_a, 4), p_b=round(1 - p_a, 4))
         # Raw pre-fight numbers. Without these the drawer can say "age pushes
         # +0.90" and never that one man is 36 and the other 24 — the model
@@ -448,66 +450,67 @@ def predict_card(path, fights, fighters, verbose=True):
             r["books"] = nbooks
             r["edge"] = round(p_a - p_mkt, 4)
 
-        try:
-            dist, by_r, curve = method_round(sa, sb, n_rounds)
-            # Formula sets the LEVEL of finishing; the survival model's shape
-            # across method, round and time is kept and rescaled to it, so
-            # methods, rounds and totals all still sum to the same number.
-            p_sv = 1 - dist["decision"]
-            p_fm = float(fin_model.predict_proba(
-                pd.DataFrame([finish_row(sa, sb, n_rounds, wc)]))[0, 1])
-            k_fin = p_fm / p_sv if p_sv > 1e-6 else 1.0
-            for _m in ("a_ko", "b_ko", "a_sub", "b_sub"):
-                dist[_m] *= k_fin
-            dist["decision"] = 1 - p_fm
-            by_r = {rr: v * k_fin for rr, v in by_r.items()}
-            curve = [1 - k_fin * (1 - c) for c in curve]
-            r["p_finish_survival_raw"] = round(p_sv, 4)
-            r["m_a_ko"] = round(dist["a_ko"], 4)
-            r["m_b_ko"] = round(dist["b_ko"], 4)
-            r["m_a_sub"] = round(dist["a_sub"], 4)
-            r["m_b_sub"] = round(dist["b_sub"], 4)
-            r["m_decision"] = round(dist["decision"], 4)
-            r["p_finish"] = round(1 - dist["decision"], 4)
-            for rr in range(1, n_rounds + 1):
-                r[f"p_end_r{rr}"] = round(by_r.get(rr, 0.0), 4)
-            # Round totals, read straight off the survival curve. These are
-            # real prop markets and the hazard model prices them coherently:
-            # "over 1.5 rounds" is simply P(the fight is still going at 7:30).
-            # No free feed quotes MMA props, so there is nothing to compare
-            # them against — they are projections, labelled as such.
-            def surv_at(minutes):
-                i = int(minutes) - 1
-                if i < 0:
-                    return 1.0
-                if i >= len(curve):
-                    return curve[-1]
-                lo = curve[i]
-                if minutes == int(minutes):
-                    return lo
-                hi = curve[i + 1] if i + 1 < len(curve) else curve[-1]
-                return lo + (hi - lo) * (minutes - int(minutes))
-            r["totals"] = {}
-            for line in (1.5, 2.5, 3.5, 4.5):
-                if line > n_rounds:
-                    continue
-                r["totals"][f"over_{str(line).replace('.', '_')}"] = \
-                    round(float(surv_at(line * 5.0)), 4)
-        except Exception as e:
-            r["method_error"] = str(e)[:80]
-        for who, me, op in (("a", sa, sb), ("b", sb, sa)):
-            row = {f"own_{k}": me[k] for k in PANEL_OWN}
-            row.update({f"opp_{k}": op[k] for k in PANEL_OWN})
-            xx = pd.DataFrame([row])[PROJ_FEATS]
-            for t, (models, k) in rng_models.items():
-                lo, mid, hi = predict_range(models, k, xx, RANGE_TARGETS[t][4])
-                nm = "ctrl" if t == "y_ctrl_pm" else "slpm"
-                r[f"{who}_{nm}_lo"] = round(float(lo[0]), 2)
-                r[f"{who}_{nm}_mid"] = round(float(mid[0]), 2)
-                r[f"{who}_{nm}_hi"] = round(float(hi[0]), 2)
-            for t, (lab, _) in EVENT_TARGETS.items():
-                r[f"{who}_p_{lab}"] = round(
-                    float(evt_models[t].predict_proba(xx)[0, 1]), 3)
+        if not thin:
+            try:
+                dist, by_r, curve = method_round(sa, sb, n_rounds)
+                # Formula sets the LEVEL of finishing; the survival model's shape
+                # across method, round and time is kept and rescaled to it, so
+                # methods, rounds and totals all still sum to the same number.
+                p_sv = 1 - dist["decision"]
+                p_fm = float(fin_model.predict_proba(
+                    pd.DataFrame([finish_row(sa, sb, n_rounds, wc)]))[0, 1])
+                k_fin = p_fm / p_sv if p_sv > 1e-6 else 1.0
+                for _m in ("a_ko", "b_ko", "a_sub", "b_sub"):
+                    dist[_m] *= k_fin
+                dist["decision"] = 1 - p_fm
+                by_r = {rr: v * k_fin for rr, v in by_r.items()}
+                curve = [1 - k_fin * (1 - c) for c in curve]
+                r["p_finish_survival_raw"] = round(p_sv, 4)
+                r["m_a_ko"] = round(dist["a_ko"], 4)
+                r["m_b_ko"] = round(dist["b_ko"], 4)
+                r["m_a_sub"] = round(dist["a_sub"], 4)
+                r["m_b_sub"] = round(dist["b_sub"], 4)
+                r["m_decision"] = round(dist["decision"], 4)
+                r["p_finish"] = round(1 - dist["decision"], 4)
+                for rr in range(1, n_rounds + 1):
+                    r[f"p_end_r{rr}"] = round(by_r.get(rr, 0.0), 4)
+                # Round totals, read straight off the survival curve. These are
+                # real prop markets and the hazard model prices them coherently:
+                # "over 1.5 rounds" is simply P(the fight is still going at 7:30).
+                # No free feed quotes MMA props, so there is nothing to compare
+                # them against — they are projections, labelled as such.
+                def surv_at(minutes):
+                    i = int(minutes) - 1
+                    if i < 0:
+                        return 1.0
+                    if i >= len(curve):
+                        return curve[-1]
+                    lo = curve[i]
+                    if minutes == int(minutes):
+                        return lo
+                    hi = curve[i + 1] if i + 1 < len(curve) else curve[-1]
+                    return lo + (hi - lo) * (minutes - int(minutes))
+                r["totals"] = {}
+                for line in (1.5, 2.5, 3.5, 4.5):
+                    if line > n_rounds:
+                        continue
+                    r["totals"][f"over_{str(line).replace('.', '_')}"] = \
+                        round(float(surv_at(line * 5.0)), 4)
+            except Exception as e:
+                r["method_error"] = str(e)[:80]
+            for who, me, op in (("a", sa, sb), ("b", sb, sa)):
+                row = {f"own_{k}": me[k] for k in PANEL_OWN}
+                row.update({f"opp_{k}": op[k] for k in PANEL_OWN})
+                xx = pd.DataFrame([row])[PROJ_FEATS]
+                for t, (models, k) in rng_models.items():
+                    lo, mid, hi = predict_range(models, k, xx, RANGE_TARGETS[t][4])
+                    nm = "ctrl" if t == "y_ctrl_pm" else "slpm"
+                    r[f"{who}_{nm}_lo"] = round(float(lo[0]), 2)
+                    r[f"{who}_{nm}_mid"] = round(float(mid[0]), 2)
+                    r[f"{who}_{nm}_hi"] = round(float(hi[0]), 2)
+                for t, (lab, _) in EVENT_TARGETS.items():
+                    r[f"{who}_p_{lab}"] = round(
+                        float(evt_models[t].predict_proba(xx)[0, 1]), 3)
         rows.append(r)
 
     # Results, once the corpus has them. Not live: the UFCStats CSVs refresh

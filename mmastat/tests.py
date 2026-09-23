@@ -265,6 +265,31 @@ def test_site_features(_unused=None, path="site/index.html"):
                            else "MISSING: " + ", ".join(missing))
 
 
+def test_wiki_parser(_unused=None):
+    """The pre-UFC record parser (addendum 18) on a realistic page: both
+    Wikipedia cell layouts, a styled cell, footnotes, several date formats —
+    and the amateur and kickboxing tables that share its columns must be
+    excluded, or regional records would be inflated with fights that do not
+    count."""
+    from .wiki_records import parse_record, validate
+    import pandas as pd
+    page = ("==Mixed martial arts record==\n{| class=\"wikitable\"\n"
+            "! Res. !! Record !! Opponent !! Method !! Event !! Date\n"
+            "|-\n|Win||2-1||A||TKO (punches)||UFC 300||{{dts|2024|04|13}}\n"
+            "|-\n| style=\"background:#fbb\" |Loss\n|1-1\n|B\n|Submission\n|LFA 9\n|{{dts|May 5, 2021}}\n"
+            "|-\n|Win||1-0||C||Decision<ref>x</ref>||Fury 2||13 March 2020\n|}\n"
+            "==Amateur mixed martial arts record==\n{| class=\"wikitable\"\n"
+            "! Res. !! Record !! Opponent !! Method !! Event !! Date\n"
+            "|-\n|Win||1-0||D||KO||Am 1||{{dts|2018|1|1}}\n|}")
+    rows = parse_record(page) or []
+    right = validate(rows, [pd.Timestamp("2024-04-13")])
+    wrong = validate(rows, [pd.Timestamp("2016-01-01")])
+    ok = (len(rows) == 3 and [r[1] for r in rows] == ["W", "L", "W"]
+          and [r[2] for r in rows] == ["DEC", "SUB", "KO"] and right and wrong is False)
+    return ok, (f"{len(rows)} pro rows parsed, amateur excluded, identity check "
+                f"{'works' if right and wrong is False else 'BROKEN'}")
+
+
 def run_all(fights=None, fighters=None):
     if fights is None:
         fights, fighters, _ = make_corpus(n_fighters=520, n_events=320)
@@ -279,6 +304,7 @@ def run_all(fights=None, fighters=None):
         ("no resolved prices", test_no_resolved_prices()),
         ("opening marker survives", test_opening_marker_survives()),
         ("site features intact", test_site_features()),
+        ("wiki record parser", test_wiki_parser()),
     ]
     print(f"{'CHECK':<28} {'RESULT':<6}  DETAIL")
     print("-" * 78)

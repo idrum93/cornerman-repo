@@ -454,6 +454,20 @@ function mono(name,cls){
   return `<span class="mono-av ${cls}">${esc(i)}</span>`;
 }
 
+/* Bouts where a fighter has 0-1 prior UFC fights (PREREGISTRATION addendum 19).
+   The win model was tested on exactly these and holds up, so they get a win
+   probability. Nothing else was tested this thin, so nothing else is shown. */
+function thinNote(b){
+  const e=b.evidence||{}, n=Math.min(e.a??9,e.b??9);
+  return `<div class="card" style="border-left:3px solid var(--warn)">
+    <div class="ghead" style="background:none;border:none;padding:0 0 4px"><span class="gname" style="color:var(--warn)">
+      Winner only — ${n===0?'a UFC debut':'one prior UFC fight'}</span></div>
+    <div class="note">With this little UFC history the model leans on physical measurements and the
+      league average, which its shrinkage already does by design. Tested on ${n===0?'213 past debuts it called 59% of winners':'174 past bouts like this it called 66% of winners'}, well calibrated — so the
+      win probability is shown. Method, round and the props were never tested on records this thin, so
+      they are not shown. The market knows more here than usual: it has tape and scouting.</div></div>`;
+}
+
 function tile(b){
   const mk=b.p_market!=null, hot=mk&&Math.abs(b.edge)>=0.05;
   return `<button class="tile ${hot?'is-hot':''}" data-id="${esc(b.bout)}">
@@ -469,7 +483,7 @@ function tile(b){
       ${mk?`<span><i class="k-mkt"></i>market ${P0(b.p_market)}</span>`:''}
       ${b.p_open!=null?`<span><i class="k-open"></i>opened ${P0(b.p_open)}</span>`:''}
     </div>
-    ${propChips(b)}
+    ${b.thin?`<div class="props"><span class="pp" style="color:var(--warn);border-color:rgba(222,140,52,.4)">winner only · ${Math.min((b.evidence||{}).a??9,(b.evidence||{}).b??9)===0?'debut':'1 prior UFC fight'}</span></div>`:propChips(b)}
   </button>`;
 }
 
@@ -936,7 +950,13 @@ function open_(id){
             <i style="${red?'right:50%':'left:50%'};width:${w}%;background:${red?'var(--red)':'var(--blue)'}"></i></div>
           <div class="mono" style="width:52px;text-align:right;font-size:11px;color:var(--dim)">${d.value>0?'+':''}${d.value.toFixed(2)}</div></div>`;}).join('')}
       </div>`:''}
-    <div class="card"><div class="ghead" style="background:none;border:none;padding:0 0 8px">
+    ${b.thin?thinNote(b):''}
+    ${b.thin?`<div class="card"><div class="ghead" style="background:none;border:none;padding:0 0 8px">
+      <span class="gname">Winner</span><span class="lbl">probability · fair price</span></div>
+      ${group('Winner',mk?'market price shown':'no feed',[
+        propRow(`${b.a} wins`,b.p_a,'var(--red)',mk?b.p_market:null,mk?`market ${P1(b.p_market)}%`:null,'winner_a'),
+        propRow(`${b.b} wins`,b.p_b,'var(--blue)',mk?1-b.p_market:null,mk?`market ${P1(1-b.p_market)}%`:null)],mk)}
+    </div>`:`<div class="card"><div class="ghead" style="background:none;border:none;padding:0 0 8px">
       <span class="gname">All markets priced</span><span class="lbl">probability · fair price · track record</span></div>
       ${group('Winner',mk?'market price shown':'no feed',[
         propRow(`${b.a} wins`,b.p_a,'var(--red)',mk?b.p_market:null,mk?`market ${P1(b.p_market)}%`:null,'winner_a'),
@@ -957,12 +977,12 @@ function open_(id){
         propRow(`${b.a} scores a knockdown`,b.a_p_knockdown,'var(--red)',null,vsBase('C3','a',b.bands,b.a_p_knockdown),'knockdown_a'),
         propRow(`${b.b} scores a knockdown`,b.b_p_knockdown,'var(--blue)',null,vsBase('C3','b',b.bands,b.b_p_knockdown),'knockdown_b')])}
       ${formulaNote(b,'knockdown','knockdown','a three-input formula matched the 46-input model it replaced, so the one you can check won')}
-    </div>
+    </div>`}
     ${tale(b)}
     ${b.bands?`<div class="card"><div class="ghead" style="background:none;border:none;padding:0 0 8px">
       <span class="gname">Where this bout sits</span><span class="lbl">markers show each corner</span></div>
       ${baseRatePanel(b.bands,b)}</div>`:''}
-    <div class="card"><div class="ghead" style="background:none;border:none;padding:0 0 8px">
+    ${b.thin?'':`<div class="card"><div class="ghead" style="background:none;border:none;padding:0 0 8px">
       <span class="gname">Projected output</span><span class="lbl">80% range</span></div>
       ${rangeBlock('Significant strikes','per min',
           [[b.a,b.a_slpm_lo,b.a_slpm_mid,b.a_slpm_hi,'var(--red)'],
@@ -972,7 +992,7 @@ function open_(id){
            [b.b,b.b_ctrl_lo,b.b_ctrl_mid,b.b_ctrl_hi,'var(--blue)']])}
       <div class="note" style="margin-top:6px">A single fight's stat line is mostly noise, so these
         are ranges. The model explains ~11% of the variance but ranks fights better than a career average.</div>
-    </div>`;
+    </div>`}`;
   document.getElementById('xb').addEventListener('click',close_);
   document.getElementById('draw').classList.add('on');
   document.getElementById('draw').setAttribute('aria-hidden','false');

@@ -33,9 +33,14 @@ jobs:
         run: |
           git config user.name "cornerman-bot"
           git config user.email "bot@users.noreply.github.com"
-          git add data/upcoming.txt site/ || true
-          git diff --staged --quiet || git commit -m "refresh"
-          git push || echo "nothing to push"
+          git add data/upcoming.txt site/
+          if ! git diff --staged --quiet; then
+            git commit -m "refresh"
+            for attempt in 1 2 3; do
+              if git push; then break; fi
+              git pull --rebase --no-edit
+            done
+          fi
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

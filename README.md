@@ -465,6 +465,7 @@ Recorded because a negative result you can't find gets re-tried forever.
 | active vs stalling control (ground strikes per second of control, from IBJJF positional scoring) | null: -0.0004, CI [-0.0009, +0.0001] |
 | ten cross-field formulas (log-ratios, ape index, Sharpe consistency, volatility, method entropy, Gompertz age, sqrt experience, kinetic power, inverse-square reach) | **0 of 10**. Kinetic power had the smallest p-value AND a significantly negative effect — a "keep what's significant" search would have promoted a transform that hurts |
 | line drift beyond the closing price ("steam") | nothing beyond the close: +0.0006, CI [-0.013, +0.013] |
+| career stage: age x experience, Elo trajectory, career-stage cohort rate, distance from peak | age x experience **survived correction** on the analysis window (+0.0053, CI [+0.0015, +0.0091]) — the first new win-model input ever to — then **failed on the reserved holdout** (-0.0042). Not adopted. The holdout's one use |
 | historical-analog dispersion as a chaos signal | correlates with market error at +.172, but the trivial "is the line close to even" baseline correlates at +.468; AUC 0.548 alone vs 0.642 for the price, and adds nothing on top |
 
 The style features are kept in the codebase because they demonstrably help
@@ -494,6 +495,37 @@ that makes any of these numbers meaningful.
 Next ideas are pre-registered in [mmastat/PREREGISTRATION.md](mmastat/PREREGISTRATION.md)
 with predicted signs and a reserved holdout, so they can't be reported
 selectively after the fact.
+
+## Forward testing: the ledger
+
+Every retrospective result here can be argued with; a prediction written down
+before the fight cannot. `capture.yml` records the line and the model's number
+for every priced bout into an append-only ledger, `data/ledger/`, sharded by
+month. It pays for Odds API calls only when they add information — a new
+bout's opening price, fight-week movement, one daily baseline — and reads
+what is on the board for free first, using about 160 of the 500 monthly free
+credits. Polymarket is captured alongside as a separate venue, never pooled.
+The balance shows in the site header. Full design, including every bug the
+ledger has had: `data/ledger/README.md`.
+
+Two tests run on it: the market-residual betting rule (addendum 1, 300 bets)
+and the opening-line rule (addendum 13, CLV at the open, scored from the frozen
+`mmastat/win14_model.json`).
+
+## Results, and bouts with thin records
+
+Results are graded the morning after a card, not live: the stats feed updates a
+day or two after an event. Each card is archived before the site moves on, so
+none is lost to that delay, and every market it priced is graded — winner,
+method, round, finish, totals, takedowns, knockdowns — beside what guessing the
+usual outcome would have scored, and against the market.
+
+Bouts where a fighter has 0-1 prior UFC fights get a **winner-only** read. The
+win model was tested on exactly those bouts and holds up (debuts called 59%,
+calibration 1.02; addendum 19). Method, round and props were never tested that
+thin and are not shown for them. A collector for full pre-UFC records from
+Wikipedia exists (`mmastat/wiki_records.py`) but is parked, since the model's
+own shrinkage already did most of what it was for.
 
 ## How it's kept honest
 

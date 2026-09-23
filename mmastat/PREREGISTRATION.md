@@ -1138,3 +1138,218 @@ both O'Neill and Moura's were catchweights, so a women's flyweight fight was
 scored as a men's 155-lb bout: 38% to finish instead of 30%. Inference now
 skips catchweights and uses each fighter's most recent real division. The
 Wikipedia parser also now records the division directly from the card table.
+
+---
+
+# Addendum 17: career stage (2026-09-21)
+
+Registered before fitting. Already in the win model: age, UFC experience
+(log bouts), Elo, opposition Elo, layoff. Not available: any pre-UFC record —
+the corpus holds UFC bouts only.
+
+Measured first, as motivation: the model is weakest on bouts where both
+fighters are veterans — log loss .6272 with 10+ prior bouts, against .6205 for
+2-4 and .6176 for 5-9. Career averages hide decline, and age alone is a blunt
+proxy for it.
+
+| # | feature | form | predicted sign | mechanism |
+|---|---|---|---|---|
+| E1 | age x experience | (age - 30) x log(1 + UFC bouts), differenced | negative | an old, heavily-used fighter is worse than age or mileage alone implies |
+| E2 | Elo trajectory | Elo now minus Elo three bouts ago, differenced | positive | form of the record, not of the stats; recency weighting of stats was null (addendum 7), this is different |
+| E3 | career-stage cohort rate | historical win rate of fighters at the same bout-number band and age band, from EARLIER fights only, differenced | positive | the direct version of "how do fighters like this do at this stage" |
+| E4 | distance from peak | Elo now minus career-best Elo, differenced | positive (less negative is better) | a veteran well below his own peak is declining |
+
+Bands for E3, fixed: bouts 0-2 / 3-5 / 6-9 / 10-14 / 15+; age under 26 /
+26-29 / 30-33 / 34+. Rate smoothed as (wins + 1) / (bouts + 2).
+
+Each added individually to the frozen 14. Benjamini-Hochberg at FDR 0.10
+across the four. Supported only if it survives correction and improves log
+loss out of sample.
+
+**Pre-registered subgroup:** each is also reported on bouts where the thinner
+record is 10+, the band the model does worst on. This is reported, not used
+for the decision — a subgroup result alone would not justify adding a feature.
+
+Prior: low for E3, whose content age and experience mostly already carry.
+Highest for E4, which says something neither age nor career averages can.
+
+## Addendum 17: result on the analysis window, and the confirmation rule
+
+On 2012 to 2026-03-28: **E1 supported** (gain +0.0053, CI [+0.0015, +0.0091],
+p .0067 against BH .025, sign as predicted, veteran-subgroup gain +0.0063).
+E2, E3, E4 not supported (p .089, .227, .485).
+
+E1 would be the first input added to the win model to survive correction in
+the project's history. One family's result is not enough for that, so, written
+before looking:
+
+**Confirmation: a single look at the reserved holdout** — every bout after
+2026-03-28, never used by any test. Model trained on everything up to the
+cutoff, with and without E1. E1 is adopted if its log-loss gain on the holdout
+is POSITIVE. The holdout is too small for an interval to exclude zero, so the
+test is only whether the effect points the same way on data it has never seen.
+If it does not, E1 is recorded as not confirmed and stays out.
+
+## Addendum 17: CONFIRMATION RESULT (2026-09-21)
+
+**E1 not confirmed. It stays out of the model.**
+
+| | holdout accuracy | holdout log loss |
+|---|---|---|
+| frozen 14 | 60.23% | .6547 |
+| 14 + E1 | 59.06% | .6589 |
+
+171 bouts after 2026-03-28 (the reserved 252 less those without two prior
+bouts per corner). Gain **-0.0042**, and -0.0183 on the 32 veteran bouts. The
+rule required only that it point the same way on unseen data; it pointed the
+other way.
+
+This is the reserved holdout doing the one thing it exists for. E1 was the
+first new input in the project to survive correction on the analysis window,
+and it did not hold up on data no test had touched — most likely the window's
++0.0053 was noise that happened to clear the bar. The holdout has now been
+used once, for this, and that use is recorded.
+
+Separately noted: the model's holdout accuracy is 60.2%, against 67.5% on the
+analysis test block. With 171 bouts the standard error is about 3.7 points, so
+this is roughly two standard errors low — possibly noise, possibly a recent
+shift (2026's decision rate is also unusual, addendum 9). Worth watching as the
+scorecard fills in; not grounds for any change yet.
+
+## Addendum 13: correction — the win model it names was not frozen
+
+Addendum 13's opening-line rule uses "the frozen 14-feature win model", but the
+site refits its win model on every refresh, so no frozen version existed. Fixed
+2026-09-21: coefficients saved to `mmastat/win14_model.json`, trained on all
+data through 2026-09-12. Because the model's probabilities are a deterministic
+function of pre-fight statistics, every bout in the ledger — including those
+captured before the file existed — is scored from these coefficients at
+evaluation time. The ledger stores prices, not this model's output, so nothing
+already captured is lost.
+
+---
+
+# Addendum 18: pre-UFC records (2026-09-21)
+
+Registered before any pre-UFC data has been collected or seen.
+
+## Why
+
+34% of UFC bouts since 2020 (1,133 of 3,338) cannot be priced at all, because
+a fighter has fewer than two prior UFC bouts; 629 involve a debut. About four
+bouts per card show "no read". The corpus holds UFC bouts only, so for those
+fighters the model has nothing. A fighter's full professional record is the
+one career-history signal it cannot currently see.
+
+## Source and collection
+
+Wikipedia's MediaWiki API, already used for cards. For each fighter: locate
+the article, parse the "Mixed martial arts record" table into
+(date, result, method, event) rows. A row counts as a UFC bout if it matches a
+bout in the corpus for that fighter within 2 days; every other row before a
+given date is outside-UFC history. Collected by a GitHub Actions job, since
+this environment has no network; the resulting file is committed, then
+analysed.
+
+## Stop rule: coverage first
+
+Fighters without Wikipedia pages are disproportionately the low-profile ones —
+exactly the debutants this is for — so missing data is not random. **If fewer
+than 50% of debuting fighters since 2020 have a parseable record, the test
+stops there** and nothing is built on it, because a model fitted only to the
+well-known debutants would be biased toward them. Coverage is reported either
+way.
+
+## Inputs, fixed now
+
+    pre_w, pre_l     outside-UFC wins and losses before the bout
+    pre_fin          share of outside-UFC wins by KO/TKO or submission
+    pre_streak       current outside-UFC win streak entering the UFC
+    pre_n0           1 if no outside record was found (missingness, explicit)
+
+## Part A — pricing the bouts the site currently skips
+
+Bouts where a fighter has 0-1 prior UFC bouts, since 2012. A logistic model on
+the pre-UFC inputs plus age, reach and height differentials, and the
+experienced opponent's UFC-derived features where they exist.
+
+**Published on the site only if** held-out log loss beats a coin flip (0.6931)
+with a 95% interval excluding it, AND calibration slope is between 0.7 and 1.3.
+Where odds exist, compared against the market as well, and reported whatever
+the result. Such bouts would carry the "thin evidence" flag.
+
+## Part B — improving the bouts already priced
+
+The pre-UFC inputs added as differentials to the frozen 14, on bouts with 2+
+prior UFC bouts. Benjamini-Hochberg at FDR 0.10 over the five inputs.
+
+The reserved holdout was used once, for addendum 17, and is spent. So any
+Part B support is **provisional**: it enters the model only once the forward
+scorecard agrees, not on the window result alone.
+
+## Pre-stated expectation
+
+Part A: likely to beat a coin flip, unlikely to approach the market, which
+prices debutants with scouting information no record captures. Part B: small or
+null — for fighters with UFC history, UFC stats should dominate a regional
+record.
+
+---
+
+# Addendum 19: is the two-fight gate too cautious? (2026-09-21)
+
+Written before looking. Prompted by a fair objection to addendum 18: a
+regional record is a different kind of evidence from in-fight UFC output, and
+mixing them may confuse more than it helps. The cheaper question comes first —
+whether the existing model, which already shrinks thin records toward the
+league average, can price these bouts with no new data at all.
+
+The site prices a bout only when both fighters have 2+ prior UFC bouts. The
+standard win model (trained as usual, on 2+ bouts) is evaluated on held-out
+bouts where the thinner record is exactly 1, and exactly 0 (a debut).
+
+**The gate is lowered to k if**, on bouts with thinner record k, held-out log
+loss beats a coin flip (0.6931) with a 95% interval excluding it AND the
+calibration slope is between 0.7 and 1.3 — the same bar addendum 18 set for a
+record-based model. Compared against the market where odds exist, and
+reported whatever the result.
+
+If the existing model clears the bar, addendum 18's scraper is not needed for
+the win probability and its value falls to whatever it adds on top.
+
+## Addendum 19: RESULT (2026-09-21)
+
+**The gate is lowered to 0 for the win probability.** Both groups clear the bar.
+
+| thinner record | bouts | accuracy | log loss (95% CI) | calibration | market, same bouts |
+|---|---|---|---|---|---|
+| 2+ (priced before) | 829 | 67.3% | .6208 | — | .5794 |
+| exactly 1 | 174 | 66.1% | .6323 [.5853, .6762] | 1.09 | .5887 |
+| 0 (a debut) | 213 | 59.2% | .6474 [.6143, .6831] | 1.02 | .5758 |
+
+The model's shrinkage already did what addendum 18's scraper was for: with no
+UFC history it falls back on physical measurements and the league average,
+and the result is well calibrated. The market's lead widens on debuts (.072
+against .041 on priced bouts), as expected — it has tape and scouting.
+
+Scope, kept to what was tested:
+- **Win probability only** for bouts where a fighter has 0-1 prior UFC bouts.
+  Method, round, finish, totals and props are withheld on those bouts, because
+  none of them was evaluated on records this thin.
+- **The ledger's betting rule keeps its registered 2+ population.** Changing a
+  running test's population is the error addendum 13 prohibits.
+- Fighters absent from the stats feed entirely still get no read: there are no
+  measurements to fall back on.
+
+On the live card this moved coverage from 10 of 13 bouts to 12 of 13.
+
+## Addendum 18: DEFERRED (2026-09-21)
+
+Not run. Addendum 19 answered its main question — pricing the bouts the site
+skipped — with no new data. Part B (regional records added to the stat-based
+model for experienced fighters) is dropped outright, on the objection that
+prompted addendum 19: a regional record is a different kind of evidence from
+in-fight UFC output, of wildly varying competition level, and mixing the two
+invites confusion for an expected-null gain. The collector
+(`mmastat/wiki_records.py`) is kept, tested but unscheduled. Its remaining
+possible use is props on thin-record bouts, if that is ever worth testing.

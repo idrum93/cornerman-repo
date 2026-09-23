@@ -1,35 +1,33 @@
 # Workflow staging folder
 
-These are byte-identical copies of the three files in `.github/workflows/`.
-
-They live here because GitHub's web uploader silently drops files inside
-dotted folders, so `.github/` never survives a drag-and-drop — which forces
-copy-pasting into the web editor, and pasting rendered text from a browser
-introduces non-breaking spaces and smart quotes that break YAML. A single
-U+00A0 in the indentation makes a workflow fail to parse, and GitHub then
-shows its file path instead of its name.
+Byte-identical copies of the files in `.github/workflows/`. They live here
+because GitHub's web uploader drops dotted folders, which forces
+copy-pasting, and pasting rendered text from a browser can insert
+non-breaking spaces that break YAML.
 
 ## Getting them into place without pasting
 
-`workflows/` has no leading dot, so it uploads normally. Then rename each file
-into position, which moves the bytes exactly as they are:
+For each file: open `workflows/<name>.yml` -> pencil -> in the filename box
+replace the name with `../.github/workflows/<name>.yml` -> commit.
 
-1. Open `workflows/refresh.yml`
-2. Click the pencil
-3. In the filename box, replace the name with:
-   `../.github/workflows/refresh.yml`
-4. Commit
+**If a file already exists at the destination, delete it first**, or the
+rename fails. Pasting over an existing file is what once left two deploy steps
+in one job.
 
-Repeat for `capture.yml` and `tests.yml`. Typing `../` moves up a directory
-and typing `/` creates one, so GitHub relocates the file on commit.
+## Current round
 
-If a file already exists at the destination, **delete it first**. Overwriting
-by paste is what produced `The identifier 'deployment' may not be used more
-than once within the same scope` — the new content landed on top of the old
-instead of replacing it, leaving two deploy steps in one job.
+| file | action |
+|---|---|
+| `capture.yml` | **updated** — delete the old one first, then rename |
+| `refresh.yml` | **updated** — delete the old one first, then rename |
+| `tests.yml` | unchanged |
+
+Why capture and refresh changed: if a push lost a race with another job, the
+old capture step could exit "nothing to commit" without ever pushing the
+commit it had made — silently dropping ledger rows — and refresh swallowed a
+failed push entirely. Both now commit once and retry the push.
 
 ## Verifying
 
-In the Actions sidebar each workflow should appear as **refresh**, **capture**
-and **tests**. If one shows its file path instead, GitHub could not parse it:
-open it from the sidebar and the error names the line.
+The Actions sidebar should show **refresh**, **capture** and **tests**. A file path instead of a name means it did not parse; open it from
+the sidebar and the error names the line.
