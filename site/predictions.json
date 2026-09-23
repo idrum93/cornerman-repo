@@ -2,7 +2,7 @@
  "event": "UFC Fight Night: Rosas Jr. vs. Barcelos",
  "date": "2026-09-26",
  "venue": "Meta Apex, Enterprise, Nevada , United States",
- "generated_utc": "2026-09-22T15:16:00.009546+00:00",
+ "generated_utc": "2026-09-23T15:15:33.574762+00:00",
  "bouts": [
   {
    "bout": "Raul Rosas Jr vs. Raoni Barcelos",
@@ -100,9 +100,9 @@
      "key": "d_log_exp"
     }
    ],
-   "p_market": 0.6203,
-   "books": 19.0,
-   "edge": 0.1001,
+   "p_market": 0.6055,
+   "books": 20.0,
+   "edge": 0.1149,
    "p_finish_survival_raw": 0.5752,
    "m_a_ko": 0.1667,
    "m_b_ko": 0.1047,
@@ -280,9 +280,9 @@
      "key": "d_str_def"
     }
    ],
-   "p_market": 0.5714,
-   "books": 17.0,
-   "edge": -0.0542,
+   "p_market": 0.5867,
+   "books": 18.0,
+   "edge": -0.0695,
    "p_finish_survival_raw": 0.4496,
    "m_a_ko": 0.1381,
    "m_b_ko": 0.1389,
@@ -458,9 +458,9 @@
      "key": "d_opp_elo"
     }
    ],
-   "p_market": 0.2611,
-   "books": 18.0,
-   "edge": 0.2565,
+   "p_market": 0.2638,
+   "books": 19.0,
+   "edge": 0.2538,
    "p_finish_survival_raw": 0.5965,
    "m_a_ko": 0.0898,
    "m_b_ko": 0.0674,
@@ -719,184 +719,6 @@
    "p_open": 0.6265
   },
   {
-   "bout": "John Casta\u00f1eda vs. Alateng Heili",
-   "a": "John Casta\u00f1eda",
-   "b": "Alateng Heili",
-   "rounds": 3,
-   "segment": "Prelims",
-   "weight_class": "Bantamweight",
-   "p_a": 0.6538,
-   "p_b": 0.3462,
-   "stats": {
-    "a": {
-     "record": "4-4",
-     "n_fights": 9,
-     "age": 34.8,
-     "height": 66.0,
-     "reach": 71.0,
-     "stance": "Switch",
-     "elo": 1507,
-     "opp_elo": 1523,
-     "slpm": 5.72,
-     "sapm": 5.31,
-     "str_acc": 0.515,
-     "str_def": 0.53,
-     "td15": 1.68,
-     "td_def": 0.714,
-     "sub15": 0.23,
-     "ctrl": 0.165,
-     "kd15": 0.47,
-     "kd_against15": 0.37,
-     "ko_loss": 0.169
-    },
-    "b": {
-     "record": "5-3",
-     "n_fights": 9,
-     "age": 34.8,
-     "height": 65.0,
-     "reach": 66.0,
-     "stance": "Orthodox",
-     "elo": 1522,
-     "opp_elo": 1510,
-     "slpm": 2.81,
-     "sapm": 5.0,
-     "str_acc": 0.33,
-     "str_def": 0.572,
-     "td15": 1.51,
-     "td_def": 0.682,
-     "sub15": 0.12,
-     "ctrl": 0.146,
-     "kd15": 0.16,
-     "kd_against15": 0.06,
-     "ko_loss": 0.092
-    }
-   },
-   "evidence": {
-    "a": 9,
-    "b": 9,
-    "min": 9
-   },
-   "drivers": [
-    {
-     "label": "striking output",
-     "value": 0.5001,
-     "favours": "a",
-     "key": "d_adj_slpm"
-    },
-    {
-     "label": "striking accuracy",
-     "value": 0.1803,
-     "favours": "a",
-     "key": "d_str_acc"
-    },
-    {
-     "label": "reach",
-     "value": 0.1542,
-     "favours": "a",
-     "key": "d_reach"
-    },
-    {
-     "label": "durability",
-     "value": -0.1423,
-     "favours": "b",
-     "key": "d_ko_loss_rate"
-    },
-    {
-     "label": "strength of schedule",
-     "value": 0.1201,
-     "favours": "a",
-     "key": "d_opp_elo"
-    },
-    {
-     "label": "career quality",
-     "value": -0.0932,
-     "favours": "b",
-     "key": "d_elo"
-    }
-   ],
-   "p_market": null,
-   "books": null,
-   "edge": null,
-   "p_finish_survival_raw": 0.2153,
-   "m_a_ko": 0.158,
-   "m_b_ko": 0.1121,
-   "m_a_sub": 0.0345,
-   "m_b_sub": 0.0356,
-   "m_decision": 0.6598,
-   "p_finish": 0.3402,
-   "p_end_r1": 0.1322,
-   "p_end_r2": 0.112,
-   "p_end_r3": 0.096,
-   "p_end_r4": null,
-   "p_end_r5": null,
-   "totals": {
-    "over_1_5": 0.8142,
-    "over_2_5": 0.7083
-   },
-   "a_ctrl_lo": 0.0,
-   "a_ctrl_mid": 3.37,
-   "a_ctrl_hi": 15.94,
-   "a_slpm_lo": 2.08,
-   "a_slpm_mid": 4.9,
-   "a_slpm_hi": 9.94,
-   "a_p_takedown": 0.226,
-   "a_p_knockdown": 0.165,
-   "b_ctrl_lo": 0.0,
-   "b_ctrl_mid": 3.62,
-   "b_ctrl_hi": 18.68,
-   "b_slpm_lo": 1.74,
-   "b_slpm_mid": 3.56,
-   "b_slpm_hi": 5.65,
-   "b_p_takedown": 0.449,
-   "b_p_knockdown": 0.161,
-   "bands": {
-    "C1": {
-     "a": 3,
-     "b": 3
-    },
-    "C2": {
-     "a": 3,
-     "b": 4
-    },
-    "C3": {
-     "a": 3,
-     "b": 2
-    },
-    "C6": {
-     "a": 4,
-     "b": 1
-    },
-    "C10": {
-     "a": 1,
-     "b": 1
-    },
-    "C11": {
-     "a": 1,
-     "b": 4
-    },
-    "C12": {
-     "a": 4,
-     "b": 4
-    },
-    "C4": {
-     "fight": 2
-    },
-    "C5": {
-     "fight": 2
-    },
-    "C7": {
-     "fight": 3
-    },
-    "C8": {
-     "fight": 1
-    },
-    "C9": {
-     "fight": 1
-    }
-   },
-   "p_open": null
-  },
-  {
    "bout": "Norma Dumont vs. Ail\u00edn P\u00e9rez",
    "a": "Norma Dumont",
    "b": "Ail\u00edn P\u00e9rez",
@@ -1075,6 +897,362 @@
    "p_open": 0.4633
   },
   {
+   "bout": "John Casta\u00f1eda vs. Alateng Heili",
+   "a": "John Casta\u00f1eda",
+   "b": "Alateng Heili",
+   "rounds": 3,
+   "segment": "Prelims",
+   "weight_class": "Bantamweight",
+   "p_a": 0.6538,
+   "p_b": 0.3462,
+   "stats": {
+    "a": {
+     "record": "4-4",
+     "n_fights": 9,
+     "age": 34.8,
+     "height": 66.0,
+     "reach": 71.0,
+     "stance": "Switch",
+     "elo": 1507,
+     "opp_elo": 1523,
+     "slpm": 5.72,
+     "sapm": 5.31,
+     "str_acc": 0.515,
+     "str_def": 0.53,
+     "td15": 1.68,
+     "td_def": 0.714,
+     "sub15": 0.23,
+     "ctrl": 0.165,
+     "kd15": 0.47,
+     "kd_against15": 0.37,
+     "ko_loss": 0.169
+    },
+    "b": {
+     "record": "5-3",
+     "n_fights": 9,
+     "age": 34.8,
+     "height": 65.0,
+     "reach": 66.0,
+     "stance": "Orthodox",
+     "elo": 1522,
+     "opp_elo": 1510,
+     "slpm": 2.81,
+     "sapm": 5.0,
+     "str_acc": 0.33,
+     "str_def": 0.572,
+     "td15": 1.51,
+     "td_def": 0.682,
+     "sub15": 0.12,
+     "ctrl": 0.146,
+     "kd15": 0.16,
+     "kd_against15": 0.06,
+     "ko_loss": 0.092
+    }
+   },
+   "evidence": {
+    "a": 9,
+    "b": 9,
+    "min": 9
+   },
+   "drivers": [
+    {
+     "label": "striking output",
+     "value": 0.5001,
+     "favours": "a",
+     "key": "d_adj_slpm"
+    },
+    {
+     "label": "striking accuracy",
+     "value": 0.1803,
+     "favours": "a",
+     "key": "d_str_acc"
+    },
+    {
+     "label": "reach",
+     "value": 0.1542,
+     "favours": "a",
+     "key": "d_reach"
+    },
+    {
+     "label": "durability",
+     "value": -0.1423,
+     "favours": "b",
+     "key": "d_ko_loss_rate"
+    },
+    {
+     "label": "strength of schedule",
+     "value": 0.1201,
+     "favours": "a",
+     "key": "d_opp_elo"
+    },
+    {
+     "label": "career quality",
+     "value": -0.0932,
+     "favours": "b",
+     "key": "d_elo"
+    }
+   ],
+   "p_market": null,
+   "books": null,
+   "edge": null,
+   "p_finish_survival_raw": 0.2153,
+   "m_a_ko": 0.158,
+   "m_b_ko": 0.1121,
+   "m_a_sub": 0.0345,
+   "m_b_sub": 0.0356,
+   "m_decision": 0.6598,
+   "p_finish": 0.3402,
+   "p_end_r1": 0.1322,
+   "p_end_r2": 0.112,
+   "p_end_r3": 0.096,
+   "p_end_r4": null,
+   "p_end_r5": null,
+   "totals": {
+    "over_1_5": 0.8142,
+    "over_2_5": 0.7083
+   },
+   "a_ctrl_lo": 0.0,
+   "a_ctrl_mid": 3.37,
+   "a_ctrl_hi": 15.94,
+   "a_slpm_lo": 2.08,
+   "a_slpm_mid": 4.9,
+   "a_slpm_hi": 9.94,
+   "a_p_takedown": 0.226,
+   "a_p_knockdown": 0.165,
+   "b_ctrl_lo": 0.0,
+   "b_ctrl_mid": 3.62,
+   "b_ctrl_hi": 18.68,
+   "b_slpm_lo": 1.74,
+   "b_slpm_mid": 3.56,
+   "b_slpm_hi": 5.65,
+   "b_p_takedown": 0.449,
+   "b_p_knockdown": 0.161,
+   "bands": {
+    "C1": {
+     "a": 3,
+     "b": 3
+    },
+    "C2": {
+     "a": 3,
+     "b": 4
+    },
+    "C3": {
+     "a": 3,
+     "b": 2
+    },
+    "C6": {
+     "a": 4,
+     "b": 1
+    },
+    "C10": {
+     "a": 1,
+     "b": 1
+    },
+    "C11": {
+     "a": 1,
+     "b": 4
+    },
+    "C12": {
+     "a": 4,
+     "b": 4
+    },
+    "C4": {
+     "fight": 2
+    },
+    "C5": {
+     "fight": 2
+    },
+    "C7": {
+     "fight": 3
+    },
+    "C8": {
+     "fight": 1
+    },
+    "C9": {
+     "fight": 1
+    }
+   },
+   "p_open": null
+  },
+  {
+   "bout": "Mickey Gall vs. Sedriques Dumas",
+   "a": "Mickey Gall",
+   "b": "Sedriques Dumas",
+   "rounds": 3,
+   "segment": "Prelims",
+   "weight_class": "Middleweight",
+   "p_a": 0.424,
+   "p_b": 0.576,
+   "stats": {
+    "a": {
+     "record": "6-7",
+     "n_fights": 13,
+     "age": 34.7,
+     "height": 74.0,
+     "reach": 74.0,
+     "stance": "Switch",
+     "elo": 1487,
+     "opp_elo": 1507,
+     "slpm": 3.4,
+     "sapm": 4.63,
+     "str_acc": 0.494,
+     "str_def": 0.497,
+     "td15": 1.16,
+     "td_def": 0.543,
+     "sub15": 1.36,
+     "ctrl": 0.173,
+     "kd15": 0.29,
+     "kd_against15": 0.62,
+     "ko_loss": 0.247
+    },
+    "b": {
+     "record": "3-5",
+     "n_fights": 8,
+     "age": 31.1,
+     "height": 74.0,
+     "reach": 79.0,
+     "stance": "Orthodox",
+     "elo": 1458,
+     "opp_elo": 1490,
+     "slpm": 2.06,
+     "sapm": 2.9,
+     "str_acc": 0.448,
+     "str_def": 0.531,
+     "td15": 1.13,
+     "td_def": 0.517,
+     "sub15": 0.18,
+     "ctrl": 0.317,
+     "kd15": 0.09,
+     "kd_against15": 0.55,
+     "ko_loss": 0.267
+    }
+   },
+   "evidence": {
+    "a": 13,
+    "b": 8,
+    "min": 8
+   },
+   "drivers": [
+    {
+     "label": "strikes absorbed",
+     "value": -0.3239,
+     "favours": "b",
+     "key": "d_sapm"
+    },
+    {
+     "label": "age",
+     "value": -0.2764,
+     "favours": "b",
+     "key": "d_age"
+    },
+    {
+     "label": "striking output",
+     "value": 0.2293,
+     "favours": "a",
+     "key": "d_adj_slpm"
+    },
+    {
+     "label": "career quality",
+     "value": 0.1758,
+     "favours": "a",
+     "key": "d_elo"
+    },
+    {
+     "label": "strength of schedule",
+     "value": 0.1628,
+     "favours": "a",
+     "key": "d_opp_elo"
+    },
+    {
+     "label": "reach",
+     "value": -0.1542,
+     "favours": "b",
+     "key": "d_reach"
+    }
+   ],
+   "p_market": 0.5888,
+   "books": 16.0,
+   "edge": -0.1648,
+   "p_finish_survival_raw": 0.6828,
+   "m_a_ko": 0.0929,
+   "m_b_ko": 0.1715,
+   "m_a_sub": 0.1841,
+   "m_b_sub": 0.0533,
+   "m_decision": 0.4981,
+   "p_finish": 0.5019,
+   "p_end_r1": 0.2496,
+   "p_end_r2": 0.1829,
+   "p_end_r3": 0.0693,
+   "p_end_r4": null,
+   "p_end_r5": null,
+   "totals": {
+    "over_1_5": 0.658,
+    "over_2_5": 0.531
+   },
+   "a_ctrl_lo": 0.0,
+   "a_ctrl_mid": 7.09,
+   "a_ctrl_hi": 23.88,
+   "a_slpm_lo": 0.39,
+   "a_slpm_mid": 3.09,
+   "a_slpm_hi": 5.75,
+   "a_p_takedown": 0.45,
+   "a_p_knockdown": 0.222,
+   "b_ctrl_lo": 0.0,
+   "b_ctrl_mid": 13.15,
+   "b_ctrl_hi": 34.7,
+   "b_slpm_lo": 0.58,
+   "b_slpm_mid": 3.32,
+   "b_slpm_hi": 6.61,
+   "b_p_takedown": 0.641,
+   "b_p_knockdown": 0.193,
+   "bands": {
+    "C1": {
+     "a": 2,
+     "b": 2
+    },
+    "C2": {
+     "a": 1,
+     "b": 1
+    },
+    "C3": {
+     "a": 2,
+     "b": 1
+    },
+    "C6": {
+     "a": 1,
+     "b": 4
+    },
+    "C10": {
+     "a": 2,
+     "b": 2
+    },
+    "C11": {
+     "a": 4,
+     "b": 4
+    },
+    "C12": {
+     "a": 2,
+     "b": 4
+    },
+    "C4": {
+     "fight": 1
+    },
+    "C5": {
+     "fight": 3
+    },
+    "C7": {
+     "fight": 1
+    },
+    "C8": {
+     "fight": 2
+    },
+    "C9": {
+     "fight": 3
+    }
+   },
+   "p_open": 0.5965
+  },
+  {
    "bout": "Vanessa Demopoulos vs. Yazmin Jauregui",
    "a": "Vanessa Demopoulos",
    "b": "Yazmin Jauregui",
@@ -1171,7 +1349,7 @@
     }
    ],
    "p_market": 0.1358,
-   "books": 16.0,
+   "books": 17.0,
    "edge": 0.0401,
    "p_finish_survival_raw": 0.3521,
    "m_a_ko": 0.052,
@@ -1267,15 +1445,15 @@
    "segment": "Main card"
   },
   {
-   "a": "Josiah Harrell",
-   "b": "Elves Brener",
-   "reason": "insufficient history (1 / 6 prior bouts)",
-   "segment": "Main card"
-  },
-  {
    "a": "Rodolfo Bellato",
    "b": "Christian Edwards",
    "reason": "insufficient history (5 / 1 prior bouts)",
+   "segment": "Prelims"
+  },
+  {
+   "a": "Josiah Harrell",
+   "b": "Elves Brener",
+   "reason": "insufficient history (1 / 6 prior bouts)",
    "segment": "Prelims"
   }
  ],
@@ -1285,7 +1463,7 @@
   "Melissa Amaya",
   "Valesca Machado"
  ],
- "market_source": "ledger (latest capture, 55% of card)",
+ "market_source": "ledger (latest capture, 58% of card)",
  "track_record": {
   "winner": {
    "n_tested": 829,
