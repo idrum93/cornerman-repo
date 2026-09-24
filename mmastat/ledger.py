@@ -354,6 +354,162 @@ def event_date_et(commence):
     return ts.tz_convert("America/New_York").date().isoformat()
 
 
+# ---- prop markets (Polymarket only; no sportsbook feed quotes these) --------
+#
+# Kept in their own shards and their own claim space. A prop is a different
+# claim from a winner price, graded by a different rule, and mixing them into
+# the moneyline ledger would corrupt both the residual test and the
+# opening-line test, whose populations are registered as moneyline bouts.
+PROP_MODEL_FIELD = {"decision": "m_decision", "inside_distance": "p_finish",
+                    "ko_a": "m_a_ko", "ko_b": "m_b_ko",
+                    "sub_a": "m_a_sub", "sub_b": "m_b_sub"}
+
+
+def prop_month_file(when=None, directory=LEDGER_DIR):
+    ts = pd.Timestamp(when) if when is not None else pd.Timestamp.now(tz="UTC")
+    return os.path.join(directory, f"props-{ts.year:04d}-{ts.month:02d}.jsonl")
+
+
+def prop_files(directory=LEDGER_DIR):
+    import glob
+    return sorted(glob.glob(os.path.join(directory, "props-*.jsonl")))
+
+
+def _model_prob(bout_payload, market):
+    if market.startswith("end_r"):
+        return bout_payload.get("p_end_r" + market[-1])
+    f = PROP_MODEL_FIELD.get(market)
+    return bout_payload.get(f) if f else None
+
+
+def capture_props(card_path="data/upcoming.txt", payload_path="site/predictions.json",
+                  verbose=True):
+    """Log every prop Polymarket quotes for this card, beside the model's number.
+
+    This is what addendum 9's distance rule has been waiting for: no sportsbook
+    feed we can reach quotes method or round markets, and Polymarket may.
+    Whether it does is answered by running this, not by arguing about it.
+    """
+    from .polymarket import fetch_events, parse_events, map_props
+    from .upcoming import parse_card
+    meta, bouts = parse_card(card_path)
+    ev_date = pd.to_datetime(meta.get("date"), errors="coerce")
+    if pd.isna(ev_date) or pd.Timestamp.now(tz="UTC").normalize() > \
+            ev_date.tz_localize("UTC") + pd.Timedelta(days=1):
+        if verbose:
+            print("props: card already happened, nothing logged")
+        return 0
+    try:
+        payload = json.loads(Path(payload_path).read_text(encoding="utf-8"))
+    except Exception:
+        payload = {"bouts": []}
+    model = {b["bout"]: b for b in payload.get("bouts", [])}
+    try:
+        found = map_props(parse_events(fetch_events()), bouts)
+    except Exception as e:
+        if verbose:
+            print(f"props: polymarket unavailable ({e})")
+        return 0
+    ts = _now()
+    rows = []
+    for x in found:
+        mb = model.get(x["bout"])
+        pm_model = _model_prob(mb, x["market"]) if mb else None
+        rows.append(dict(captured_utc=ts, venue="polymarket", event=meta.get("event"),
+                         event_date=meta.get("date"), bout=x["bout"], a=x["a"], b=x["b"],
+                         market=x["market"], p_market=x["p_market"],
+                         p_model=pm_model,
+                         edge=(round(pm_model - x["p_market"], 5) if pm_model is not None else None),
+                         spread=x["meta"].get("spread"), depth_usd=x["meta"].get("depth_usd"),
+                         question=x["meta"].get("question"), settled=False))
+    if rows:
+        f = prop_month_file()
+        Path(f).parent.mkdir(parents=True, exist_ok=True)
+        have = set()
+        for fp in prop_files():
+            for line in open(fp, encoding="utf-8"):
+                if line.strip():
+                    r = json.loads(line)
+                    have.add((r.get("captured_utc"), r.get("bout"), r.get("market")))
+        rows = [r for r in rows if (r["captured_utc"], r["bout"], r["market"]) not in have]
+        with open(f, "a", encoding="utf-8") as fh:
+            for r in rows:
+                fh.write(json.dumps(r, sort_keys=True) + "\n")
+    if verbose:
+        got = sorted({x["market"] for x in found})
+        print(f"props: {len(found)} quoted by polymarket ({', '.join(got) if got else 'none'}), "
+              f"{len(rows)} new rows")
+    return len(rows)
+
+
+def settle_props(fights, verbose=True):
+    """Grade logged props with the same outcome rules the scorecard uses."""
+    from .scorecard import _outcome
+    from .upcoming import _key
+    parts = fights.bout.str.split(" vs. ", n=1, expand=True)
+    idx = {}
+    for i, (r_, b_) in enumerate(zip(parts[0], parts[1])):
+        idx.setdefault(frozenset((_key(r_), _key(b_))), []).append(i)
+    n = 0
+    for fp in prop_files():
+        rows = [json.loads(l) for l in open(fp, encoding="utf-8") if l.strip()]
+        out = []
+        for r in rows:
+            r = dict(r)
+            ev = pd.to_datetime(r.get("event_date"), errors="coerce")
+            best = None
+            for i in idx.get(frozenset((_key(r["a"]), _key(r["b"]))), []):
+                row = fights.iloc[i]
+                gap = abs((pd.Timestamp(row.date) - ev).days) if pd.notna(ev) else 99
+                if gap <= 4 and (best is None or gap < best[0]):
+                    best = (gap, row)
+            if best and best[1].winner in ("r", "b"):
+                red = _key(best[1].bout.split(" vs. ")[0])
+                hit = _outcome(r["market"], best[1], _key(r["a"]) == red)
+                if hit is not None:
+                    r["settled"], r["hit"] = True, bool(hit)
+                    n += 1
+            out.append(r)
+        Path(fp).write_text("\n".join(json.dumps(x, sort_keys=True) for x in out) + "\n",
+                            encoding="utf-8")
+    if verbose:
+        print(f"props: settled {n} rows")
+    return n
+
+
+def report_props():
+    """Per market: how the model scored against the price, once settled."""
+    rows = []
+    for fp in prop_files():
+        rows += [json.loads(l) for l in open(fp, encoding="utf-8") if l.strip()]
+    if not rows:
+        return {"status": "no prop prices captured yet"}
+    D = pd.DataFrame(rows)
+    D = D.sort_values("captured_utc").groupby(["event_date", "bout", "market"], as_index=False).last()
+    out = {"captured": int(len(D)), "markets": {}}
+    S = D[(D.get("settled") == True) & D.p_model.notna()]  # noqa: E712
+    for mk, g in S.groupby("market"):
+        y = g.hit.astype(float).values
+        out["markets"][mk] = {
+            "n": int(len(g)),
+            "model_brier": round(float(np.mean((g.p_model.values - y) ** 2)), 4),
+            "market_brier": round(float(np.mean((g.p_market.values - y) ** 2)), 4)}
+    return out
+
+
+def latest_prop_prices(event_date=None):
+    """The most recent price per bout and market, for the site to display."""
+    rows = []
+    for fp in prop_files():
+        rows += [json.loads(l) for l in open(fp, encoding="utf-8") if l.strip()]
+    out = {}
+    for r in sorted(rows, key=lambda x: x.get("captured_utc", "")):
+        if event_date and r.get("event_date") != event_date:
+            continue
+        out.setdefault(r["bout"], {})[r["market"]] = r["p_market"]
+    return out
+
+
 def gate(verbose=True, throttle_min=60, near_hours=48, baseline_hours=20):
     """Decide, for free, whether a paid odds call is worth its 3 credits.
 
@@ -622,6 +778,7 @@ if __name__ == "__main__":
             sweep(f, p)
         # Polymarket is free and keyed to the card, so it runs regardless.
         capture(f, p, venues_only=("polymarket",))
+        capture_props()
         from .odds_live import read_usage
         u = read_usage()
         if u.get("remaining") is not None:
@@ -630,6 +787,7 @@ if __name__ == "__main__":
     elif cmd == "settle":
         prune_resolved()
         settle(f)
+        settle_props(f)
     elif cmd == "prune":
         prune_resolved()
     for v in (None, "sportsbook", "polymarket"):

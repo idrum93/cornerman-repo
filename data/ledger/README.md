@@ -53,6 +53,28 @@ Bouts involving fighters with no UFC history — PFL, Bellator and the rest of
 the feed — are skipped naturally, since the model has nothing to price them
 with.
 
+## Prop markets
+
+`props-YYYY-MM.jsonl` holds method, round and distance prices from Polymarket,
+matched to the market keys `mmastat/scorecard.py` already grades, so
+settlement uses the same code path. No sportsbook feed we can reach quotes
+these: The Odds API covers MMA fight-winner odds only.
+
+Kept in separate shards from the moneyline ledger on purpose. A prop is a
+different claim, and the residual and opening-line tests have registered
+populations of moneyline bouts; mixing would corrupt both.
+
+A question names its fighters ("Will Tsarukyan win by submission?"), so the
+bout and side are recovered by matching them against the card. Anything that
+cannot be placed is skipped rather than guessed — a mis-assigned prop graded
+against the wrong claim is worse than no price. The same liquidity and
+resolved-price gates apply as for winners.
+
+`python -m mmastat.ledger settle` scores them; the report gives model Brier
+against market Brier per market. This is what addendum 9's distance rule has
+been waiting for, and whether Polymarket quotes these at all is answered by
+running it.
+
 ## Two venues, never pooled
 
 | venue | source | auth | cost of trading |

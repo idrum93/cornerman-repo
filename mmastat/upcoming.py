@@ -602,6 +602,18 @@ def predict_card(path, fights, fighters, verbose=True):
     except Exception as e:
         print(f"note: opening prices unavailable ({e})")
 
+    # Prop prices, where Polymarket quotes any. No sportsbook feed we can reach
+    # quotes method or round markets, so these are the only prices most of
+    # these projections will ever be compared against.
+    try:
+        from .ledger import latest_prop_prices
+        _pp = latest_prop_prices(meta.get("date"))
+        for r in rows:
+            if r["bout"] in _pp:
+                r["prop_market"] = _pp[r["bout"]]
+    except Exception as e:
+        print(f"note: prop prices unavailable ({e})")
+
     # Measured reliability, recomputed each run so the site quotes its own
     # current track record rather than a figure hard-coded months ago.
     try:

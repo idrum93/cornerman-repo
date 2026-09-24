@@ -190,6 +190,80 @@ def moneylines(rows, with_book=True, max_spread=0.06, min_depth=250.0,
     return out
 
 
+ROUND_RE = re.compile(r"\bround\s*([1-5])\b", re.I)
+DIST_YES = re.compile(r"go(es)? the distance|go to (a )?decision", re.I)
+DIST_NO = re.compile(r"inside the distance|end early|finish", re.I)
+
+
+def map_props(rows, bouts, min_depth=150.0, max_spread=0.10, with_book=True):
+    """Match Polymarket prop questions to the market keys the scorecard grades.
+
+    A question names the fighters ("Will Tsarukyan win by submission?"), so the
+    bout and the side are recovered by matching those names against the card.
+    Anything that cannot be matched to a bout AND a known market is skipped
+    rather than guessed at — a mis-assigned prop would be graded against the
+    wrong claim, which is worse than having no price.
+
+    Keys match mmastat.scorecard so settlement is the same code path:
+    decision, inside_distance, ko_a, ko_b, sub_a, sub_b, end_r1..end_r5.
+    """
+    byname = {}
+    for bt in bouts:
+        a, b = bt[0], bt[1]
+        byname[(_nm(a), _nm(b))] = (a, b)
+    out = []
+    for r in rows:
+        if r["kind"] == "winner" or len(r["outcomes"]) != 2 or len(r["prices"]) != 2:
+            continue
+        q = _nm(r["question"])
+        hit = None
+        for (ka, kb), (a, b) in byname.items():
+            la, lb = ka.split()[-1], kb.split()[-1]
+            if la in q and lb in q:
+                hit = (a, b, None); break
+            if la in q:
+                hit = (a, b, "a"); break
+            if lb in q:
+                hit = (a, b, "b"); break
+        if not hit:
+            continue
+        a, b, side = hit
+        key = None
+        m = ROUND_RE.search(r["question"])
+        if m:
+            key = f"end_r{m.group(1)}"
+        elif r["kind"] == "distance" or DIST_YES.search(r["question"]):
+            key = "decision" if DIST_YES.search(r["question"]) else "inside_distance"
+        elif r["kind"] == "ko" and side:
+            key = "ko_" + side
+        elif r["kind"] == "submission" and side:
+            key = "sub_" + side
+        if not key:
+            continue
+        yes = next((i for i, o in enumerate(r["outcomes"]) if _nm(o).startswith("yes")), None)
+        if yes is None:
+            continue
+        tot = sum(r["prices"])
+        if tot <= 0:
+            continue
+        p = r["prices"][yes] / tot
+        meta = {"slug": r["slug"], "question": r["question"], "liquidity": r["liquidity"]}
+        if with_book and r["token_ids"]:
+            bk = book_quality(r["token_ids"][yes])
+            meta.update(bk)
+            if bk.get("spread") is None or bk.get("depth_usd") is None:
+                continue                      # fail closed, as for winners
+            if bk["spread"] > max_spread or bk["depth_usd"] < min_depth:
+                continue
+            if bk.get("mid") and RESOLVED_EPS < bk["mid"] < 1 - RESOLVED_EPS:
+                p = bk["mid"]
+        if not (RESOLVED_EPS < p < 1 - RESOLVED_EPS):
+            continue                          # decided, not predicted
+        out.append({"bout": f"{a} vs. {b}", "a": a, "b": b, "market": key,
+                    "p_market": round(p, 5), "meta": meta})
+    return out
+
+
 def props(rows):
     """Non-winner markets, grouped by kind. Sportsbooks price MMA props at a
     22% overround; if Polymarket lists any at all they are worth far more as

@@ -258,6 +258,7 @@ REQUIRED_SITE_FEATURES = {
     "BR.market_bases": "prop chips ranked against market base rates",
     "function showRecord": "running model-vs-market record in the header",
     "function propRank": "one ranking shared by tile chips and panel marks",
+    "function pmk": "prop market prices shown beside the projections",
     "divShort(b.weight_class)": "weight class on each tile",
     "class=\"zone ": "separated upcoming / results / history zones",
 }

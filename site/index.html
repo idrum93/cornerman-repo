@@ -882,6 +882,12 @@ function marketRecord(mk){
   return {txt:`${m.n} graded · ${better?'beats':'below'} base rate`, cls:better?'good':'bad', n:m.n};
 }
 
+/* A prop price, where Polymarket quotes one. Most of these markets have no
+   price anywhere we can reach, so the diamond appears rarely — and that
+   absence is itself worth seeing. */
+function pmk(b,key){ return (b.prop_market||{})[key]; }
+function pnote(b,key){ const v=pmk(b,key); return v==null?null:`market ${P1(v)}%`; }
+
 function propRow(name,p,col,marker,note,mkey){
   const mk=marker==null?'':`<div style="position:absolute;left:calc(${marker*100}% - 4px);top:-3px;
     color:var(--gold);font-size:10px;line-height:1">◆</div>`;
@@ -1074,20 +1080,22 @@ function open_(id){
         propRow(`${b.a} wins`,b.p_a,'var(--red)',mk?b.p_market:null,mk?`market ${P1(b.p_market)}%`:null,'winner_a'),
         propRow(`${b.b} wins`,b.p_b,'var(--blue)',mk?1-b.p_market:null,mk?`market ${P1(1-b.p_market)}%`:null)],mk)}
     </div>`:`<div class="card"><div class="ghead" style="background:none;border:none;padding:0 0 8px">
-      <span class="gname">All markets priced</span><span class="lbl">probability · fair price · track record</span></div>
+      <span class="gname">All markets priced</span><span class="lbl">◆ = a market price exists</span></div>
       ${group('Winner',mk?'market price shown':'no feed',[
         propRow(`${b.a} wins`,b.p_a,'var(--red)',mk?b.p_market:null,mk?`market ${P1(b.p_market)}%`:null,'winner_a'),
         propRow(`${b.b} wins`,b.p_b,'var(--blue)',mk?1-b.p_market:null,mk?`market ${P1(1-b.p_market)}%`:null)],mk)}
       ${group('How long','from the survival curve',[
-        propRow('Goes the distance',b.m_decision,'var(--mute)',null,vsBase('C9','fight',b.bands,b.m_decision),'decision'),
-        propRow('Ends inside distance',b.p_finish,'var(--warn)',null,vsBase('C4','fight',b.bands,b.p_finish),'inside_distance')].concat(totals))}
+        propRow('Goes the distance',b.m_decision,'var(--mute)',pmk(b,'decision'),
+          pnote(b,'decision')||vsBase('C9','fight',b.bands,b.m_decision),'decision'),
+        propRow('Ends inside distance',b.p_finish,'var(--warn)',pmk(b,'inside_distance'),
+          pnote(b,'inside_distance')||vsBase('C4','fight',b.bands,b.p_finish),'inside_distance')].concat(totals))}
       ${formulaNote(b,'finish','finish','sets how likely a finish is; the method and round split below still comes from the survival model and sums to it')}
       ${group('Method','sums to 100% with decision',[
-        propRow(`${b.a} by KO/TKO`,b.m_a_ko,'var(--red)',null,null,'ko_a'),
-        propRow(`${b.a} by submission`,b.m_a_sub,'var(--red)',null,null,'sub_a'),
-        propRow(`${b.b} by KO/TKO`,b.m_b_ko,'var(--blue)',null,null,'ko_b'),
-        propRow(`${b.b} by submission`,b.m_b_sub,'var(--blue)',null,null,'sub_b')])}
-      ${group('Finish round','projection only',rr.map(([k,v])=>propRow(`Ends in round ${k}`,v,'var(--gold)',null,null,'end_r'+k)))}
+        propRow(`${b.a} by KO/TKO`,b.m_a_ko,'var(--red)',pmk(b,'ko_a'),pnote(b,'ko_a'),'ko_a'),
+        propRow(`${b.a} by submission`,b.m_a_sub,'var(--red)',pmk(b,'sub_a'),pnote(b,'sub_a'),'sub_a'),
+        propRow(`${b.b} by KO/TKO`,b.m_b_ko,'var(--blue)',pmk(b,'ko_b'),pnote(b,'ko_b'),'ko_b'),
+        propRow(`${b.b} by submission`,b.m_b_sub,'var(--blue)',pmk(b,'sub_b'),pnote(b,'sub_b'),'sub_b')])}
+      ${group('Finish round','projection only',rr.map(([k,v])=>propRow(`Ends in round ${k}`,v,'var(--gold)',pmk(b,'end_r'+k),pnote(b,'end_r'+k),'end_r'+k)))}
       ${group('Fight action',trackLine(),[
         propRow(`${b.a} lands a takedown`,b.a_p_takedown,'var(--red)',null,vsBase('C1','a',b.bands,b.a_p_takedown),'takedown_a'),
         propRow(`${b.b} lands a takedown`,b.b_p_takedown,'var(--blue)',null,vsBase('C1','b',b.bands,b.b_p_takedown),'takedown_b'),
