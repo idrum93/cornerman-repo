@@ -28,7 +28,7 @@ OUT = "data/wiki/bonuses.json"
 # are re-read automatically, so a fix reaches the data without anyone
 # remembering to pass a flag. Version 1 counted "Fight of the Night: None" as
 # a fighter, which put the award rate at 99% instead of about two thirds.
-PARSER_VERSION = 2
+PARSER_VERSION = 3
 POTN_ERA = pd.Timestamp("2014-02-01")
 HEADING = re.compile(r"bonus award", re.I)
 LABELS = {"fotn": re.compile(r"fight of the night", re.I),
@@ -58,6 +58,10 @@ def parse_bonuses(wikitext):
         if not which:
             continue
         tail = s.split(":", 1)[1] if ":" in s else s
+        # "Abel Trujillo ($75,000 each)" split on the comma into two "names".
+        # Drop parentheticals and money before any name extraction.
+        tail = re.sub(r"\([^)]*\)", " ", tail)
+        tail = re.sub(r"\$\s?[\d,]+", " ", tail)
         if re.search(r"\b(none|not awarded|no fight of the night|n/a)\b", tail, re.I):
             continue                       # an explicit "none", not a fighter
         names = re.findall(r"\[\[(?:[^\]|]*\|)?([^\]]*)\]\]", tail)
@@ -188,14 +192,26 @@ def validate(fights, store=None, path=OUT, verbose=True):
       identity  every name must be a fighter who actually fought on that card
       coverage  how many events were readable at all
     """
+    import unicodedata
     from .upcoming import _key
+
+    def norm(n):
+        """Match on spelling variants, not on luck. Wikipedia writes "Ovince
+        St. Preux" and "Antônio Rogério"; UFCStats writes "Ovince Saint Preux"
+        and "Antonio Rogerio". Neither is wrong, and a name check that counted
+        those as failures would understate the labels."""
+        n = unicodedata.normalize("NFKD", str(n))
+        n = "".join(c for c in n if not unicodedata.combining(c))
+        n = re.sub(r"\bst\.?\b", "saint", n, flags=re.I)
+        return _key(re.sub(r"[.\-']", " ", n))
+
     store = store or _load(path)
     ev = store.get("events", {})
     on_card = {}
     for r in fights.itertuples():
         parts = str(r.bout).split(" vs. ")
         if len(parts) == 2:
-            on_card.setdefault(r.event, set()).update(_key(x) for x in parts)
+            on_card.setdefault(r.event, set()).update(norm(x) for x in parts)
     ok = [(k, v) for k, v in ev.items() if v.get("status") == "ok"]
     fotn = [(k, v) for k, v in ok if v.get("fotn")]
     two = [1 for _, v in fotn if len(v["fotn"]) == 2]
@@ -206,13 +222,19 @@ def validate(fights, store=None, path=OUT, verbose=True):
             continue
         for n in v.get("fotn", []) + v.get("potn", []):
             checked += 1
-            if _key(n) in card:
+            if norm(n) in card or norm(n).replace(" ", "") in {c.replace(" ", "") for c in card}:
                 matched += 1
             elif len(bad_names) < 8:
                 bad_names.append((k, n))
     res = {"events_ok": len(ok), "with_fotn": len(fotn),
            "fotn_exactly_two": sum(two),
            "names_checked": checked, "names_on_card": matched}
+    by_year = {}
+    for k, v in ok:
+        y = str(v.get("date", ""))[:4]
+        if y:
+            a, b = by_year.get(y, (0, 0))
+            by_year[y] = (a + (1 if v.get("fotn") else 0), b + 1)
     if verbose:
         print("bonus labels, checked against the corpus")
         print(f"  readable events: {len(ok)}")
@@ -222,6 +244,9 @@ def validate(fights, store=None, path=OUT, verbose=True):
         if checked:
             print(f"  names that fought on that card: {matched} of {checked} "
                   f"({100*matched/checked:.0f}%)")
+        print("  Fight of the Night awarded, by year:")
+        line = "    " + "  ".join(f"{y} {100*a/b:.0f}%" for y, (a, b) in sorted(by_year.items()))
+        print(line)
         for k, n in bad_names:
             print(f"    not on the card: {k!r} -> {n!r}")
     return res

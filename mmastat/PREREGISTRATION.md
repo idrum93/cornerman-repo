@@ -1734,3 +1734,35 @@ checkable against a price.
 Expected top-1 FOTN accuracy is 20-30% against roughly 8% for random and
 perhaps 15% for always-main-event. Useful, not spectacular, and quite possibly
 null against B1.
+
+## Addendum 24: amendment — prior bonuses (2026-09-24)
+
+Added before any label is usable, prompted by the right question: should a
+fighter's bonus history count?
+
+It should, but not as an ordinary feature. Past bonuses predicting future
+bonuses is the outcome measured earlier — the "same measure" problem from
+addendum 10 — and it carries the main-event confound a second time, since
+bonus winners are disproportionately main-eventers. Left unmarked it would
+dominate the model and teach nothing about fights.
+
+## A third baseline, fixed now
+
+    B3  pick the bout containing the fighter with the most prior bonuses
+        (strictly prior, counted in the walk like every other accumulator)
+
+The pick is displayed only if it beats **B1, B2 and B3** on held-out cards.
+
+## And the model is reported both ways
+
+If prior-bonus counts are used as inputs, results are reported **with and
+without them**. The question worth answering is whether the fight-level
+signal — a close matchup, high combined output, likely to go long — adds
+anything beyond reputation. If the model only beats the baselines once bonus
+history is included, then what it has learned is which fighters the UFC
+favours, and that is what the site would say on the page.
+
+Coverage caveat, recorded now: labels exist for 421 of 530 events (80%), and
+the missing ones skew toward smaller cards. A prior-bonus count is therefore
+an undercount, unevenly. That biases B3 downward and the feature with it, so a
+narrow win over B3 is not evidence.
