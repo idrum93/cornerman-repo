@@ -1384,3 +1384,163 @@ between them does not matter and no row is added. Accuracy on its own is weak:
 what predicts landing a takedown is how often a fighter shoots, not how well he
 finishes the shot. The takedown model already sees both rate and accuracy, so
 attempts were never missing from it.
+
+---
+
+# Addendum 20: head strikes and knockdowns (2026-09-23)
+
+Registered before fitting.
+
+The knockdown formula (addendum 14) is `own_kd15`, `opp_kd_against15`,
+`opp_sapm`. The third measured flat as a panel row (C12) and its fitted weight
+came out at -0.01. The likely reason: `sapm` counts every significant strike
+absorbed, so a fighter who takes leg kicks all night looks as hittable as one
+who takes head shots. Knockdowns come from the head.
+
+| # | input | form | mechanism |
+|---|---|---|---|
+| H-OUT | own head strikes landed per minute | career, opponent-unadjusted | a knockdown needs head strikes thrown and landed |
+| H-ABS | opponent's head strikes absorbed per minute | career | the specific durability that matters, instead of total volume absorbed |
+
+Both are computed from the head/body/leg split already in the corpus, in the
+leakage-safe walk, exactly as the existing accumulators are.
+
+## Variants tested, against the adopted formula
+
+    A (current)  own_kd15, opp_kd_against15, opp_sapm
+    B            A + own head output
+    C            own_kd15, opp_kd_against15, opp head absorbed   (swaps sapm)
+    D            own_kd15, opp_kd_against15, own head output, opp head absorbed
+
+Same held-out split as addendum 14, Brier with a bootstrap interval.
+
+## Decision rule, fixed now
+
+A variant replaces the current formula only if its Brier improves with
+**P(better) >= 0.95** — the stricter bar from addendum 16, because each added
+input is another chance to fit noise. A swap that neither helps nor hurts keeps
+the incumbent.
+
+Also reported, whatever the outcome: both measures as base-rate panel rows
+against "scores a knockdown", under the addendum 10 display rules.
+
+## Pre-stated expectation
+
+Moderate for H-ABS, which is a sharper version of an input already present.
+Lower for H-OUT: `own_kd15` already counts the knockdowns a fighter's head
+strikes produced, so head volume may add nothing beyond it — the same
+near-duplication that makes C1 and C3 "same measure" rows.
+
+## Addendum 20: RESULT (2026-09-23)
+
+**No variant adopted.** All three improve slightly; none reaches P(better) 0.95.
+
+| variant | Brier | AUC | gain vs current | P(better) |
+|---|---|---|---|---|
+| A, current (`opp_sapm`) | .1432 | .6676 | — | — |
+| B, + own head output | .1430 | .6704 | +0.0002 | .774 |
+| C, swap `opp_sapm` for head absorbed | .1431 | .6699 | +0.0001 | .755 |
+| D, both head measures | .1429 | **.6734** | +0.0003 | .865 |
+
+As base-rate rows against "scores a knockdown" (base 19%):
+
+| measure | quartiles | spread |
+|---|---|---|
+| their head strikes landed /min | 17 19 19 22 | +.051 |
+| opponent's head strikes absorbed /min | 17 21 20 20 | +.041 |
+| opponent's ALL strikes absorbed /min (current input) | 18 21 19 20 | +.028 |
+
+So the reasoning holds in direction — head-specific measures are sharper than
+total volume absorbed, and D lifts AUC from .668 to .673 — but the gain is far
+inside the noise at this sample size. The formula is unchanged.
+
+Why the ceiling is so low: `own_kd15` already counts the knockdowns a
+fighter's head strikes produced, which is the outcome itself measured earlier.
+Head volume adds the part of that story the knockdown count already tells.
+
+**Deviation from the registration, stated plainly:** both measures were to be
+added to the site's base-rate panel whatever the result. They are not. Doing so
+would mean adding head-strike accumulators to `state.py` and a new panel column
+purely to display two near-flat rows on a panel already criticised as dense.
+The numbers are published here instead, which serves the same purpose — not
+hiding a null — at no cost to the reader.
+
+---
+
+# Addendum 21: a systematic screen for unconsidered patterns (2026-09-23)
+
+Registered before running. Prompted by a fair question: the panel's conditions
+were each chosen for a stated mechanism, so a real relationship nobody thought
+of — striking pace against knockdowns, say — would never be found.
+
+This crosses **every measurement the state already computes** against every
+outcome, rather than the ones someone guessed at.
+
+    measurements  the fighter's own and his opponent's levels of all 23
+                  tracked quantities, for the per-fighter outcomes; their
+                  sums for the whole-fight outcome
+    outcomes      lands a takedown, scores a knockdown (per fighter);
+                  ends inside the distance (per fight)
+
+About 115 tests. Screening on this scale is exactly how spurious findings are
+manufactured, so: **Benjamini-Hochberg at FDR 0.10 across the entire grid**,
+computed once, with every result reported including the failures.
+
+## Status of anything that survives
+
+A survivor is a **candidate, not a finding**, and does not enter a model or the
+panel on this result. The reserved holdout was spent in addendum 17, so the
+only honest confirmation left is forward: a candidate must hold up on cards
+collected after today before it is used for anything. That is recorded here so
+a future reader cannot mistake a screen hit for a tested result.
+
+## Pre-stated expectation
+
+The strongest survivors will be the ones already in the panel, because those
+were chosen for good reasons. Anything new is likely to be a near-duplicate of
+an existing measurement rather than a separate mechanism.
+
+## Addendum 21: RESULT (2026-09-23)
+
+**73 of 115 tests survive BH at FDR 0.10 — and that is the finding.** With
+~14,000 fighter-fights almost any real-but-tiny relationship reaches
+significance, so the correction does no useful filtering here. Effect size is
+the only screen worth applying, and the results below are ranked by the spread
+between the lowest and highest quarter, not by p.
+
+### Candidates not already in the panel
+
+| measurement | outcome | quartiles | spread |
+|---|---|---|---|
+| own control share | lands a takedown | — | +.385 |
+| own ground-strike share | lands a takedown | — | +.248 |
+| combined height | ends inside distance | 39 48 49 61 | +.220 |
+| combined reach | ends inside distance | — | +.217 |
+| **opponent's age** | **scores a knockdown** | **14 17 21 25** | **+.105** |
+| their striking pace | scores a knockdown | 16 20 19 22 | +.060 |
+| their striking accuracy | scores a knockdown | 17 17 20 23 | +.056 |
+
+For scale, the hand-picked panel rows span +.392 (own takedown rate) down to
++.028 (opponent's strikes absorbed, the flat one).
+
+### What survives scrutiny
+
+Most of the large ones are near-duplicates, as predicted. Control share and
+ground-strike share are largely downstream of takedowns — you hold control
+*because* you took someone down. Combined height and reach are substantially
+weight class: pooled the spread is +.220, but within lightweight it falls to
++.116 and within middleweight +.120, so roughly half is division and half is
+something else.
+
+**Two are genuinely new.** Opponent's age against knockdowns (+.105) is nearly
+as strong as the chin measure already in the formula and is not a restatement
+of it. Striking pace against knockdowns (+.060) beats `opp_sapm` (+.028),
+which is in the formula and flat — so the question asked about pace was a
+better instinct than the input it would replace.
+
+### Status: candidates, not findings
+
+Neither enters a model or the panel on this result. The holdout was spent in
+addendum 17, so confirmation has to be forward: they must hold on cards
+collected after today. Adopting a screen hit from 115 tests on the same data
+that produced it is precisely the error this project has avoided twelve times.

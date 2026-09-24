@@ -40,8 +40,9 @@
     padding:9px 12px;cursor:pointer;text-align:left;font:inherit;color:inherit}
   .dcard:hover{background:rgba(222,140,52,.16)}
   .dcard.calm{border-color:var(--line);background:var(--panel)}
-  .dgap{font-size:22px;font-weight:800;letter-spacing:-.03em;color:var(--warn)}
-  .dcard.calm .dgap{color:var(--mute)}
+  .dgap{font-size:22px;font-weight:800;letter-spacing:-.03em}
+  .dgap.to-a{color:var(--redsoft)} .dgap.to-b{color:var(--bluesoft)}
+  .dcard.calm .dgap{opacity:.7}
 
   .seg{margin-top:14px}
   .seghd{display:flex;align-items:baseline;gap:10px;margin-bottom:8px}
@@ -115,8 +116,9 @@
   .mrow b{font-size:11px;width:42px;text-align:right}
   .edgeTag{font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;padding:2px 6px;
     border-radius:3px;font-weight:700;white-space:nowrap;border:1px solid currentColor}
-  .edgeTag.agree{color:var(--dim)} .edgeTag.lean{color:var(--mute)}
-  .edgeTag.wide{color:var(--warn)} .edgeTag.hit{color:var(--good)} .edgeTag.miss{color:var(--red)}
+  .edgeTag.agree{color:var(--dim)}
+  .edgeTag.lean-a{color:var(--redsoft)} .edgeTag.lean-b{color:var(--bluesoft)}
+  .edgeTag.hit{color:var(--good)} .edgeTag.miss{color:var(--red)}
   .ubar{display:inline-block;width:46px;height:3px;background:var(--soft);border-radius:2px;overflow:hidden}
   .ubar i{display:block;height:100%}
   .tipwrap{position:relative;display:inline-flex;align-items:center;gap:6px}
@@ -270,7 +272,6 @@
   .tile.is-hot:hover{border-color:var(--hot)}
   .dcard{border-color:rgba(255,90,54,.6)!important}
   .dcard .dgap{color:var(--hot)!important}
-  .edgeTag.wide{color:var(--hot)!important;background:rgba(255,90,54,.10)}
   @media (prefers-reduced-motion:no-preference){
     .g-a,.g-b{stroke-dasharray:220;animation:grow .7s cubic-bezier(.2,.8,.2,1) both}
     @keyframes grow{from{stroke-dashoffset:220}to{stroke-dashoffset:0}}
@@ -362,11 +363,17 @@ function showUsage(){
 let DATA=null, HIST=null, BR=null, SC=null, USG=null, ONLY_GAPS=false;
 
 function gap(b){ return b.edge==null?null:Math.abs(b.edge); }
+/* One framing, one colour, everywhere: the MARKET leans toward a corner, shown
+   in that corner's colour. The badge used to name the fighter the MODEL liked
+   more and colour it by the size of the gap, so on the same tile the badge
+   named one fighter in orange while the dial's bridge named the other in his
+   own colour. Both were true and they pointed at opposite men. */
 function tag(b){
   if(b.edge==null) return '<span class="edgeTag agree">no line</span>';
-  const e=Math.abs(b.edge), who=surname(b.edge>0?b.a:b.b);
+  const e=Math.abs(b.edge);
   if(e<0.05) return '<span class="edgeTag agree">in line</span>';
-  return `<span class="edgeTag ${e>=0.12?'wide':'lean'}">${b.edge>0?'▲':'▼'} ${(e*100).toFixed(0)} ${esc(who)}</span>`;
+  const leansB=b.edge>0;                       // model higher on A means market leans B
+  return `<span class="edgeTag ${leansB?'lean-b':'lean-a'}">market +${(e*100).toFixed(0)} ${esc(surname(leansB?b.b:b.a))}</span>`;
 }
 
 /* the model-vs-market strip, first thing on the page */
@@ -382,15 +389,16 @@ function strip(){
   return `<div class="totals" style="border-color:rgba(255,90,54,.22);background:rgba(255,90,54,.04)">
     <div class="lbl tothd">model vs market · widest disagreements on this card</div>
     <div class="strip">${top.map(b=>{
-    const e=Math.abs(b.edge), who=e>0?(b.edge>0?b.a:b.b):b.a;
-    const mine=b.edge>0?b.p_a:b.p_b, theirs=b.edge>0?b.p_market:1-b.p_market;
+    const e=Math.abs(b.edge), leansB=b.edge>0;
+    const who=leansB?b.b:b.a;                 // the corner the market favours
+    const mine=leansB?b.p_b:b.p_a, theirs=leansB?1-b.p_market:b.p_market;
     return `<button class="dcard ${e>=0.05?'':'calm'}" data-id="${esc(b.bout)}">
-      <div class="lbl">model vs market</div>
+      <div class="lbl">market leans</div>
       <div style="display:flex;align-items:baseline;gap:8px;margin:3px 0 2px">
-        <span class="dgap mono">${b.edge>0?'+':'−'}${(e*100).toFixed(1)}</span>
-        <span class="nm" style="max-width:120px" title="${esc(who)}">${esc(surname(who))}</span></div>
+        <span class="dgap mono ${leansB?'to-b':'to-a'}">+${(e*100).toFixed(1)}</span>
+        <span class="nm ${leansB?'nm-b':'nm-a'} fav" style="max-width:120px" title="${esc(who)}">${esc(surname(who))}</span></div>
       <div class="mono" style="font-size:10.5px;color:var(--mute)">
-        ${P1(mine)}% vs <span style="color:var(--gold)">${P1(theirs)}%</span> market</div>
+        market <span style="color:var(--gold)">${P1(theirs)}%</span> · model ${P1(mine)}%</div>
     </button>`;}).join('')}</div></div>`;
 }
 
@@ -484,7 +492,7 @@ function tile(b){
     <div class="gkey">
       ${mk?`<span class="k-market">market ${P0(b.p_market)}/${P0(1-b.p_market)}</span>`:'<span class="k-open-l">no market line</span>'}
       ${b.p_open!=null?`<span class="k-open-l">opened ${P0(b.p_open)}/${P0(1-b.p_open)}</span>`:''}
-      ${mk&&Math.abs(b.edge)>=0.02?`<span class="${b.edge>0?'k-lean-b':'k-lean-a'}">leans ${esc(surname(b.edge>0?b.b:b.a))} +${(Math.abs(b.edge)*100).toFixed(0)}</span>`:''}
+      ${mk&&Math.abs(b.edge)>=0.02?`<span class="${b.edge>0?'k-lean-b':'k-lean-a'}">market leans ${esc(surname(b.edge>0?b.b:b.a))} +${(Math.abs(b.edge)*100).toFixed(0)}</span>`:''}
     </div>
     ${b.thin?`<div class="props"><span class="pp" style="color:var(--warn);border-color:rgba(222,140,52,.4)">winner only · ${Math.min((b.evidence||{}).a??9,(b.evidence||{}).b??9)===0?'debut':'1 prior UFC fight'}</span></div>`:propChips(b)}
   </button>`;
