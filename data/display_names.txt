@@ -1,0 +1,7 @@
+# Preferred spellings:  as the card writes it = how it should read
+#
+# UFCStats and Wikipedia sometimes split a single-word name into two, which
+# makes the surname shown on a tile wrong: "Alateng Heili" displays as
+# "Heili" when the fighter's name is Alatengheili. Fixed here rather than on
+# the tile, so the card file, the ledger and the site all agree.
+Alateng Heili = Alatengheili

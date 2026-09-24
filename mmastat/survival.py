@@ -3,11 +3,11 @@
 The props in `props.py` are independent binary classifiers. P(KO), P(decision)
 and P(over 2.5 rounds) are fitted separately, so nothing forces them to agree —
 they can imply a method distribution that does not sum to one, or a round line
-inconsistent with the finish probability. That is a modelling error even when
+inconsistent with the finish probability. That is a modeling error even when
 each individual number is fine.
 
 A fight ending is really a race between hazards: A can stop B, B can stop A,
-either can submit the other, and the clock runs out on all of it. Modelled as
+either can submit the other, and the clock runs out on all of it. Modeled as
 competing risks in discrete time, one fit produces a coherent joint
 distribution and everything else is arithmetic on it:
 
@@ -63,7 +63,7 @@ def expand(fights, fighters, min_prior=2, min_date="2012-01-01", full=False):
     """One row per fight per interval, both orientations.
 
     full=False (TRAINING): intervals up to when the fight actually ended, the
-    last one labelled with the terminal event. This is the likelihood.
+    last one labeled with the terminal event. This is the likelihood.
 
     full=True (PREDICTION): every SCHEDULED interval, unlabelled. This
     distinction is not cosmetic. Rolling the survival curve over a fight's

@@ -188,7 +188,7 @@ def evaluate(fights, fighters, min_date="2012-01-01", test_frac=0.20, verbose=Tr
         print("\nZERO-INFLATED COUNTS -> probability of at least one")
         print(E.round(3).to_string(index=False))
         print("\nbase_* is the fighter's own shrunk career rate: what a site would")
-        print("show with no modelling at all. coverage should be close to 0.80.")
+        print("show with no modeling at all. coverage should be close to 0.80.")
     return R, E, fitted, (tr, val, te)
 
 

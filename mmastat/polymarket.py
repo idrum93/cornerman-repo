@@ -264,7 +264,7 @@ def map_props(rows, bouts, min_depth=150.0, max_spread=0.10, with_book=True):
     return out
 
 
-EVENT_URL = "https://polymarket.com/event/"
+EVENT_URL = "https://polymarket.us/event/"   # the US-facing platform
 
 
 def unmatched(rows, bouts):
@@ -274,7 +274,7 @@ def unmatched(rows, bouts):
     market either carries a projection we can check or it carries nothing —
     but staying silent about markets that exist would hide what is on offer.
     """
-    # classify() defaults to "winner" for anything it does not recognise, so a
+    # classify() defaults to "winner" for anything it does not recognize, so a
     # market is only treated as placed if it actually matched — either a prop
     # we mapped, or a two-name market whose pair is on this card. Otherwise
     # event-level markets ("will there be a new champion") were silently

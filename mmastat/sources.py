@@ -145,7 +145,7 @@ def parse_card_prose(text):
     'A bantamweight bout between X and Y is scheduled'.
 
     Known weakness, and the reason this is a fallback rather than the primary:
-    the prose also discusses bouts that were CANCELLED or POSTPONED, so it can
+    the prose also discusses bouts that were CANCELED or POSTPONED, so it can
     inject fights that will not happen. The table only lists what is actually
     booked. refresh_upcoming() validates the result either way.
     """

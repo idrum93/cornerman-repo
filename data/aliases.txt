@@ -2,3 +2,4 @@
 # Needed where automatic matching is impossible or unsafe.
 Patricio Pitbull = Patricio Freire
 Michael Aswell Jr. = Michael Aswell
+Alatengheili = Alateng Heili

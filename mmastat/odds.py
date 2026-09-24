@@ -9,7 +9,7 @@ Two details that decide whether the comparison is honest:
 DEVIGGING. Raw American odds imply probabilities that sum to more than 1 — the
 bookmaker's margin. Comparing a model's calibrated probability against a vigged
 implied probability would flatter the model on log loss for no good reason, so
-both sides are normalised to sum to 1.
+both sides are normalized to sum to 1.
 
 ORIENTATION. The odds file and UFCStats don't agree on which fighter is the red
 corner, so fights are matched on the unordered pair of names plus the date, and

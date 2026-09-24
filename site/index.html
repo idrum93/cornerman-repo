@@ -11,7 +11,7 @@
     --soft:#1C222C; --bone:#ECE8E0; --mute:#8D95A6; --dim:#59616F;
     --red:#C8442F; --redsoft:#E87D68; --blue:#3E85B4; --bluesoft:#78B2D8;
     --gold:#CDA43A; --warn:#DE8C34; --good:#6FBF73;
-    /* corner colours carry direction; containers take their zone's colour;
+    /* corner colors carry direction; containers take their zone's color;
        gold means the market; the tile highlight is neutral bone. Nothing else
        is needed, so the old accent is retired. */
   }
@@ -417,18 +417,18 @@ function showUsage(){
 let DATA=null, HIST=null, BR=null, SC=null, USG=null, ONLY_GAPS=false;
 
 function gap(b){ return b.edge==null?null:Math.abs(b.edge); }
-/* One framing, one colour, everywhere: the MARKET leans toward a corner, shown
-   in that corner's colour. The badge used to name the fighter the MODEL liked
-   more and colour it by the size of the gap, so on the same tile the badge
+/* One framing, one color, everywhere: the MARKET leans toward a corner, shown
+   in that corner's color. The badge used to name the fighter the MODEL liked
+   more and color it by the size of the gap, so on the same tile the badge
    named one fighter in orange while the dial's bridge named the other in his
-   own colour. Both were true and they pointed at opposite men. */
+   own color. Both were true and they pointed at opposite men. */
 function tag(b){
   if(b.edge==null) return '<span class="edgeTag agree">no line</span>';
   const e=Math.abs(b.edge);
   if(e<0.05) return '<span class="edgeTag agree">in line</span>';
   // Model first: this site is the model's view, with the market as the
   // yardstick. The badge says how far the model sits from the line and on
-  // whom, in that fighter's colour, and the dial's bridge is the same claim
+  // whom, in that fighter's color, and the dial's bridge is the same claim
   // drawn — the territory the model gives him beyond the market.
   const toA=b.edge>0;
   return `<span class="edgeTag ${toA?'lean-a':'lean-b'}">model +${(e*100).toFixed(0)} ${esc(surname(toA?b.a:b.b))}</span>`;
@@ -509,16 +509,16 @@ function evChip(b,short){
 
 /* One dial per bout. Needle = the model, solid tick = the market now, hollow
    tick = where the line opened. The arc between model and market is the
-   disagreement, shaded in the one saturated colour on the site so the eye
+   disagreement, shaded in the one saturated color on the site so the eye
    goes straight to it. Reading left to right is the red corner's chance. */
 function gauge(b){
   // Two layers, deliberately different in kind.
   //
-  //   MODEL  the thick arc itself. Each corner's colour spans his own share,
+  //   MODEL  the thick arc itself. Each corner's color spans his own share,
   //          so the boundary between them IS the model's number.
   //   MARKET a gold tick outside the dial, and a thin bridge from it to the
-  //          model's boundary, drawn in the colour of the corner the MARKET
-  //          favours relative to the model. The bridge used to be orange,
+  //          model's boundary, drawn in the color of the corner the MARKET
+  //          favors relative to the model. The bridge used to be orange,
   //          which read as red-corner territory and made every disagreement
   //          look like it was about the red fighter.
   const W=148,H=92,cx=W/2,cy=82,R=56,RB=R+12;
@@ -530,9 +530,9 @@ function gauge(b){
     return `<line class="${cls}" x1="${a1.toFixed(1)}" y1="${b1.toFixed(1)}" x2="${a2.toFixed(1)}" y2="${b2.toFixed(1)}"/>`;};
   const mk=b.p_market!=null, op=b.p_open!=null;
   // The bridge sits directly over a stretch of arc the model has already
-  // painted. Repeating that colour says nothing; the useful fact is that the
+  // painted. Repeating that color says nothing; the useful fact is that the
   // market would give that same stretch to the OTHER corner. So the bridge
-  // takes the colour of whoever the market would hand it to, while the badge
+  // takes the color of whoever the market would hand it to, while the badge
   // stays model-first. Two different facts, no duplication.
   const marketWould = mk && (b.p_a > b.p_market ? 'to-b' : 'to-a');
   const gap = mk ? Math.abs(b.p_a-b.p_market) : 0;
@@ -606,7 +606,7 @@ const BR_GROUPS=[
   {title:'Ends inside the distance', scope:'the whole fight', ids:['C4','C5','C7','C8','C9']},
 ];
 const BR_LABEL={
-  C1:'Their takedown rate', C2:"Opponent's takedown defence",
+  C1:'Their takedown rate', C2:"Opponent's takedown defense",
   C6:'Their reach edge over the opponent', C10:'Their clinch & ground work',
   C3:'Their knockdown rate',
   C11:"Opponent's knockdowns absorbed", C12:"Opponent's strikes absorbed",
@@ -626,7 +626,7 @@ const BR_LABEL={
 const BR_DIRECT=new Set(['C1','C3']);
 const BR_WHY={C12:'volume taken does not predict a knockdown; clean shots taken does',
               C6:'shorter fighters land more — they are the ones closing distance',
-              C2:'better defence in front of them, fewer landed'};
+              C2:'better defense in front of them, fewer landed'};
 function brCells(c){
   const inv=c.outcome==='dec';           // show "goes the distance" as its complement
   const base=inv?1-c.base:c.base;
@@ -660,7 +660,7 @@ function baseRatePanel(here,bout,inZone){
           <div class="brmk">${hits.map(([col,nm])=>`<span style="color:${col}" title="${esc(nm)}">▲</span>`).join('')}</div>
         </div>`;}).join('');
       // A sentence first, the quartiles as a small shape beside it. Ten rows
-      // of four labelled bars with a dashed reference line was more chart than
+      // of four labeled bars with a dashed reference line was more chart than
       // the finding needed: what a reader wants is "lowest quarter 24%,
       // highest 63%, 44% overall".
       return `<div class="brrow ${nsig===0?'flat':''} ${BR_DIRECT.has(id)?'baseline':''}">
@@ -687,7 +687,7 @@ function baseRatePanel(here,bout,inZone){
     <div class="note" style="margin-top:8px"><b style="color:var(--mute)">How to read this.</b>
       Each row sorts every past fight by one measurement and splits them into four equal groups. The
       sentence gives the outcome rate in the lowest and the highest group, against the rate across all
-      fights; the four bars beside it show the shape in between, <b style="color:var(--mute)">coloured
+      fights; the four bars beside it show the shape in between, <b style="color:var(--mute)">colored
       only where the difference is bigger than chance</b>. Rows marked <b style="color:var(--mute)">same
       measure</b> are the outcome itself measured before the fight — past takedowns landed predicting a
       takedown landed — so a strong pattern there is close to definitional; the
@@ -809,7 +809,7 @@ function render(){
     `<span class="evname">${esc(d.event||'Upcoming card')}</span>
      <span class="chip mono" style="color:var(--gold);border-color:var(--gold)">${esc(d.date||'')}</span>
      <span class="chip">${esc(d.venue||'')}</span>
-     <span class="chip">${d.bouts.length} modelled</span>
+     <span class="chip">${d.bouts.length} modeled</span>
      ${d.market_source?`<span class="chip">market: ${esc(d.market_source)}</span>`:''}`;
   const pass=b=>!ONLY_GAPS||(b.edge!=null&&Math.abs(b.edge)>=0.05);
   const nGaps=d.bouts.filter(b=>b.edge!=null&&Math.abs(b.edge)>=0.05).length;
@@ -832,7 +832,7 @@ function render(){
   const nav=`<nav class="znav"><a href="#z-up">Upcoming</a><a href="#z-res">Last card</a><a href="#z-hist">What usually happens</a></nav>`;
   const lc=HIST&&HIST.cards&&HIST.cards[0];
   document.getElementById('app').innerHTML=nav+
-    zone('z-up','z-upcoming','Upcoming card',`${esc(d.event||'')} · ${d.bouts.length} bouts modelled`,
+    zone('z-up','z-upcoming','Upcoming card',`${esc(d.event||'')} · ${d.bouts.length} bouts modeled`,
       strip()+filt+segs+otherMarkets())+
     zone('z-res','z-results', lc?`Last card — ${esc(lc.event)}`:'Last card',
       'graded against what happened · click any fight', lastCard())+
@@ -893,7 +893,7 @@ function marketRecord(mk){
 /* A prop price, where Polymarket quotes one. Most of these markets have no
    price anywhere we can reach, so the diamond appears rarely — and that
    absence is itself worth seeing. */
-const POLY='https://polymarket.com/event/';
+const POLY='https://polymarket.us/event/';
 function pmk(b,key){ const v=(b.prop_market||{})[key]; return v==null?null:v.p; }
 function pslug(b,key){ const v=(b.prop_market||{})[key]; return v&&v.slug; }
 function pnote(b,key){
@@ -997,7 +997,7 @@ function trackLine(){
    cold; this says what the model thinks in the order a person would say it. */
 function verdictLine(b){
   const fav = b.p_a>=.5?b.a:b.b, pf=Math.max(b.p_a,b.p_b);
-  const strength = pf<.56?'barely favours':pf<.68?'favours':'strongly favours';
+  const strength = pf<.56?'barely favors':pf<.68?'favors':'strongly favors';
   let t = `The model ${strength} <b>${esc(fav)}</b> at ${P0(pf)}%`;
   if(b.edge!=null){
     const e=Math.abs(b.edge);
@@ -1024,9 +1024,9 @@ const STAT_ROWS=[
   ['elo','Career rating',v=>v],['opp_elo','Opposition faced',v=>v],
   ['slpm','Strikes landed /min',v=>v],['sapm','Strikes absorbed /min',v=>v],
   ['str_acc','Striking accuracy',v=>(v*100).toFixed(0)+'%'],
-  ['str_def','Striking defence',v=>(v*100).toFixed(0)+'%'],
+  ['str_def','Striking defense',v=>(v*100).toFixed(0)+'%'],
   ['td15','Takedowns /15min',v=>v],
-  ['td_def','Takedown defence',v=>(v*100).toFixed(0)+'%'],
+  ['td_def','Takedown defense',v=>(v*100).toFixed(0)+'%'],
   ['ctrl','Control share',v=>(v*100).toFixed(0)+'%'],
   ['sub15','Sub attempts /15min',v=>v],['kd15','Knockdowns /15min',v=>v],
   ['kd_against15','Knocked down /15min',v=>v],
@@ -1052,7 +1052,7 @@ function tale(b){
 }
 const DRV_STAT={'age':'age','career quality':'elo','strength of schedule':'opp_elo',
   'experience':'n_fights','striking output':'slpm','strikes absorbed':'sapm',
-  'striking accuracy':'str_acc','striking defence':'str_def','reach':'reach',
+  'striking accuracy':'str_acc','striking defense':'str_def','reach':'reach',
   'durability':'ko_loss','takedown threat':'td15','knockout threat':'kd15',
   'submission threat':'sub15'};
 function drvRaw(b,label){
@@ -1097,7 +1097,7 @@ function open_(id){
         often than we do. Treat a gap as an argument, not a tip.</div></div>`:''}
     ${drv.length?`<div class="card"><div class="ghead" style="background:none;border:none;padding:0 0 6px">
       <span class="gname">Why</span><span class="lbl">push on the log-odds</span></div>
-      ${drv.map(d=>{const w=Math.abs(d.value)/mx*50, red=d.favours==='a';
+      ${drv.map(d=>{const w=Math.abs(d.value)/mx*50, red=d.favors==='a';
         return `<div class="drv"><div style="width:148px;flex:none;font-size:11.5px;color:var(--mute)">${esc(d.label)}${drvRaw(b,d.label)}</div>
           <div class="dt"><div class="bg"></div><div class="zero"></div>
             <i style="${red?'right:50%':'left:50%'};width:${w}%;background:${red?'var(--red)':'var(--blue)'}"></i></div>

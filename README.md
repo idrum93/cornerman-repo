@@ -19,7 +19,7 @@ model output.
 | own knockdown rate | scores a knockdown | .114 | .294 | .180 |
 | combined knockdown rate | ends inside distance | .410 | .588 | .178 |
 | combined submission rate | goes the distance | .553 | .433 | .120 |
-| opponent's takedown defence | lands a takedown | .495 | .386 | .109 |
+| opponent's takedown defense | lands a takedown | .495 | .386 | .109 |
 | reach advantage | lands a takedown | .472 | .387 | .085 |
 | combined strike volume | ends inside distance | .505 | .471 | .041 |
 | age gap | ends inside distance | .495 | .510 | .041 |
@@ -80,7 +80,7 @@ the market panel is omitted rather than showing a stale price. A local
 **Props have no market feed at all.** The Odds API covers MMA fight winner odds
 only, and no free source quotes method, round or totals for MMA. So the site
 prices 17 markets per bout from its own models and puts a market marker on the
-moneyline alone. Everything else is labelled a projection, because a model
+moneyline alone. Everything else is labeled a projection, because a model
 number next to a market number is a comparison and a model number by itself
 is not.
 
@@ -167,7 +167,7 @@ with ~3,300 training fights and shouldn't be revisited until the corpus is much
 larger.
 
 The largest single factor is **age** (standardised weight −0.39), ahead of
-striking output and Elo. Aging is more punishing in MMA than the modelling
+striking output and Elo. Aging is more punishing in MMA than the modeling
 literature suggests.
 
 ### Projections
@@ -284,7 +284,7 @@ getting hit (−0.147), while over-valuing knockdown power (−0.123) and
 over-penalising veteran status (+0.098) and ring rust (+0.068).
 
 Flat-staking with real payouts was positive at every threshold; the best single
-cut was favourites with >2% edge, n=484, **+7.20%, t = +2.13**. That is one of
+cut was favorites with >2% edge, n=484, **+7.20%, t = +2.13**. That is one of
 ~12 cuts examined, so it does not survive multiple-comparison correction, and
 the reserved holdout has **no odds** (the Kaggle file stops 2026-03-28) so it
 cannot be tested there. The frozen rule and the forward-test protocol are in
@@ -333,7 +333,7 @@ analysis among many, and 209 bouts is small. The rule is frozen in
 PREREGISTRATION addendum 13 and the forward ledger is already recording the
 snapshots needed to test it honestly. Do not bet it.
 
-## Favourite-longshot bias: there is less chaos than the market prices
+## Favorite-longshot bias: there is less chaos than the market prices
 
 12,976 fighter-prices, 2010-2026, real payouts from raw American odds:
 
@@ -349,7 +349,7 @@ Underdogs at 30% or worse return **-20.4%, t = -5.31**. Bettors systematically
 overpay for upsets. So hunting for a "chaos signal" to find live underdogs is
 working into a 20% headwind on top of the vig.
 
-The other side is not free either: heavy favourites (>=70%) return **+0.03%,
+The other side is not free either: heavy favorites (>=70%) return **+0.03%,
 t = 0.03** — exactly break-even — and the effect has decayed by era (+1.87%,
 +0.26%, -1.17%, -0.93%).
 
@@ -480,7 +480,7 @@ most commentary.
 The `full_data_silver_plus` parquet on Kaggle carries `f_1_fighter_SlpM`,
 `f_1_fighter_Str_Def`, `f_1_fighter_TD_Def` and similar. Those are
 career-aggregate values scraped from each fighter's **current** UFCStats
-profile, so on a 2015 fight row they summarise a career running through 2026.
+profile, so on a 2015 fight row they summarize a career running through 2026.
 Used as features they are textbook temporal leakage, and nothing about them
 looks wrong. Several public UFC models are built on that shape of data, which
 is one reason published accuracy figures above ~75% should be treated as bugs

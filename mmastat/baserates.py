@@ -27,7 +27,7 @@ MIN_CELL = 200          # quartiles thinner than this are greyed, never dropped
 CONDITIONS = [
     ("C1", "Own takedown rate", "fighter", "own_adj_td15", "y_td",
      "the rate is the propensity"),
-    ("C2", "Opponent's takedown defence", "fighter", "opp_td_def", "y_td",
+    ("C2", "Opponent's takedown defense", "fighter", "opp_td_def", "y_td",
      "the thing standing in the way"),
     ("C3", "Own knockdown rate", "fighter", "own_kd15", "y_kd",
      "direct"),

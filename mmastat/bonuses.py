@@ -193,7 +193,15 @@ def validate(fights, store=None, path=OUT, verbose=True):
       coverage  how many events were readable at all
     """
     import unicodedata
-    from .upcoming import _key
+    from .upcoming import _key, load_aliases
+
+    # The same alias file the card resolver uses: UFCStats calls Ronaldo Souza
+    # "Jacare Souza" and Cris Cyborg "Cristiane Justino", so three of the
+    # remaining failures were one fighter under two names.
+    try:
+        alias = {_key(k): _key(v) for k, v in load_aliases().items()}
+    except Exception:
+        alias = {}
 
     def norm(n):
         """Match on spelling variants, not on luck. Wikipedia writes "Ovince
@@ -203,7 +211,8 @@ def validate(fights, store=None, path=OUT, verbose=True):
         n = unicodedata.normalize("NFKD", str(n))
         n = "".join(c for c in n if not unicodedata.combining(c))
         n = re.sub(r"\bst\.?\b", "saint", n, flags=re.I)
-        return _key(re.sub(r"[.\-']", " ", n))
+        k = _key(re.sub(r"[.\-']", " ", n))
+        return alias.get(k, k)
 
     store = store or _load(path)
     ev = store.get("events", {})
@@ -215,7 +224,10 @@ def validate(fights, store=None, path=OUT, verbose=True):
     ok = [(k, v) for k, v in ev.items() if v.get("status") == "ok"]
     fotn = [(k, v) for k, v in ok if v.get("fotn")]
     two = [1 for _, v in fotn if len(v["fotn"]) == 2]
-    bad_names, checked, matched = [], 0, 0
+    bad_names, checked, matched, odd = [], 0, 0, []
+    for k, v in fotn:
+        if len(v["fotn"]) != 2 and len(odd) < 5:
+            odd.append((k, v["fotn"]))
     for k, v in ok:
         card = on_card.get(k)
         if not card:
@@ -247,8 +259,10 @@ def validate(fights, store=None, path=OUT, verbose=True):
         print("  Fight of the Night awarded, by year:")
         line = "    " + "  ".join(f"{y} {100*a/b:.0f}%" for y, (a, b) in sorted(by_year.items()))
         print(line)
+        for k, n in odd:
+            print(f"    not two recipients: {k.strip()!r} -> {n}")
         for k, n in bad_names:
-            print(f"    not on the card: {k!r} -> {n!r}")
+            print(f"    not on the card: {k.strip()!r} -> {n!r}")
     return res
 
 

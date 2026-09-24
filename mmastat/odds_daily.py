@@ -15,7 +15,7 @@ REGIME A  source == "zewnetrzne", 2010-2024, 6,299 fights, one row each.
 REGIME B  37 live bookmakers, 2025-03-08 onward, 1,778 bouts, ~202k rows.
           Real repeated snapshots: 79% of bouts have 2+ and 41% have 5+, with a
           median of 7 books quoting each bout. No fight hash after 2025 (0% in
-          2026), so it joins by normalised name plus event date, which reaches
+          2026), so it joins by normalized name plus event date, which reaches
           64% of corpus fights.
 
 TIMING, which decides what this feed may be used for. The last snapshot before
@@ -107,7 +107,7 @@ def method_market(d, min_legs=6):
     The six legs are mutually exclusive and exhaustive, so they devig together.
     Note the overround: a median of 22.3% across the six, versus 3.7% on the
     moneyline. Method markets are roughly six times more expensive to bet, which
-    matters more than any modelling edge you are likely to find in them.
+    matters more than any modeling edge you are likely to find in them.
     """
     A = d[d.source == BACKFILL_SOURCE].dropna(subset=PROP_COLS).copy()
     A = A[(A[PROP_COLS] > 1.0).all(axis=1)]

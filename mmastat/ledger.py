@@ -86,7 +86,7 @@ def rule_probability(feat_row, p_market, rule):
 
 
 def fires(p_model, implied_with_vig, rule):
-    """Does the pre-registered bet trigger? Favourites only, edge over the
+    """Does the pre-registered bet trigger? Favorites only, edge over the
     price you would actually pay (vig included), not the devigged estimate."""
     r = rule["rule"]
     if r.get("favourites_only") and implied_with_vig < r["min_implied"]:
@@ -777,7 +777,7 @@ def report(path=LEDGER, vig=0.037, venue=None):
     move = close.p_market_devig.values - first.p_market_devig.values
 
     # CLV is only defined for the side you BACKED. Averaged over both corners
-    # it is identically zero: every point the favourite gains, the underdog
+    # it is identically zero: every point the favorite gains, the underdog
     # loses. The first version did exactly that and reported -0.0 on a card
     # where the lines had genuinely moved almost two points.
     betmask = close.bet.fillna(False).values.astype(bool)

@@ -54,6 +54,17 @@ def _key(s):
 SEGMENTS = ["Main card", "Prelims", "Early prelims"]
 
 
+_DISPLAY_CACHE = {}
+
+
+def display_name(n):
+    """Lazy, so this cannot depend on where the loader sits in the file — the
+    same ordering mistake has now bitten twice."""
+    if "map" not in _DISPLAY_CACHE:
+        _DISPLAY_CACHE["map"] = load_display_names()
+    return _DISPLAY_CACHE["map"].get(str(n).strip().lower(), n)
+
+
 def parse_card(path):
     """Returns (meta, [(name_a, name_b, rounds, segment)]).
 
@@ -87,6 +98,7 @@ def parse_card(path):
         m = re.split(r"\s+vs\.?\s+", line, maxsplit=1, flags=re.I)
         if len(m) == 2:
             a, b = m[0].strip(), m[1].strip()
+            a, b = display_name(a), display_name(b)
             bouts.append((a, b, rounds, segment))
             if wc:
                 meta.setdefault("weights", {})[(a, b)] = wc
@@ -152,6 +164,22 @@ def _alias_table(fighters):
     return table
 
 
+def load_display_names(path="data/display_names.txt"):
+    """Preferred spellings, applied as the card is read so that the name on a
+    tile, the name in the ledger and the name sent to the resolver are the
+    same string."""
+    out = {}
+    try:
+        for line in open(path, encoding="utf-8"):
+            line = line.split("#", 1)[0].strip()
+            if "=" in line:
+                a, b = line.split("=", 1)
+                out[a.strip().lower()] = b.strip()
+    except FileNotFoundError:
+        pass
+    return out
+
+
 def load_aliases(path="data/aliases.txt"):
     """Manual name overrides, one per line: `Card name = UFCStats name`.
 
@@ -160,7 +188,7 @@ def load_aliases(path="data/aliases.txt"):
     UFCStats stores "Patricio Freire", and his BROTHER "Patricky Freire" is the
     one actually carrying the nickname "Pitbull" in the details file. Fuzzy
     matching resolves that to the wrong man. Refusing and letting you state the
-    mapping is the safe behaviour.
+    mapping is the safe behavior.
     """
     out = {}
     try:
@@ -176,7 +204,7 @@ def load_aliases(path="data/aliases.txt"):
 
 
 def resolve(names, fighters, cutoff=0.88, alias_path="data/aliases.txt"):
-    """Map display names onto fighter_ids. Exact normalised match, then the
+    """Map display names onto fighter_ids. Exact normalized match, then the
     alias forms, then a close-match; anything below `cutoff` is returned as
     unresolved rather than guessed at."""
     table = _alias_table(fighters)
@@ -306,7 +334,7 @@ def predict_card(path, fights, fighters, verbose=True):
         "d_elo": "career quality", "d_opp_elo": "strength of schedule",
         "d_log_exp": "experience", "d_adj_slpm": "striking output",
         "d_sapm": "strikes absorbed", "d_str_acc": "striking accuracy",
-        "d_str_def": "striking defence", "d_reach": "reach",
+        "d_str_def": "striking defense", "d_reach": "reach",
         "d_age": "age", "d_log_layoff": "layoff",
         "d_ko_loss_rate": "durability", "grapple_edge": "takedown threat",
         "ko_edge": "knockout threat", "sub_edge": "submission threat",
@@ -441,7 +469,7 @@ def predict_card(path, fights, fighters, verbose=True):
                          "min": min(A.n_fights, B.n_fights)}
 
         r["drivers"] = [{"label": LABELS.get(k, k), "value": round(v, 4),
-                         "favours": "a" if v > 0 else "b", "key": k}
+                         "favors": "a" if v > 0 else "b", "key": k}
                         for k, v in contrib[:6] if abs(v) > 0.01]
         hit = market.get(frozenset((_key(na), _key(nb))))
         if hit:
@@ -479,7 +507,7 @@ def predict_card(path, fights, fighters, verbose=True):
                 # real prop markets and the hazard model prices them coherently:
                 # "over 1.5 rounds" is simply P(the fight is still going at 7:30).
                 # No free feed quotes MMA props, so there is nothing to compare
-                # them against — they are projections, labelled as such.
+                # them against — they are projections, labeled as such.
                 def surv_at(minutes):
                     i = int(minutes) - 1
                     if i < 0:
