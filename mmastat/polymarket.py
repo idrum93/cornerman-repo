@@ -279,6 +279,14 @@ def unmatched(rows, bouts):
     # we mapped, or a two-name market whose pair is on this card. Otherwise
     # event-level markets ("will there be a new champion") were silently
     # swallowed as winner markets and never listed.
+    # Scope to THIS card. Polymarket lists every UFC market it carries — past
+    # cards, future cards, season-long questions — and the first version
+    # returned all of them: one run wrote 958 rows for a card with no props at
+    # all. A market qualifies only if it names a fighter who is on this card.
+    # three letters, not four: "Van" is a surname on this very card, and the
+    # stricter cut silently dropped every market naming him
+    names = {w for bt in bouts for n in (bt[0], bt[1])
+             for w in [_nm(n).split()[-1]] if len(w) >= 3}
     pairs = {frozenset((_nm(bt[0]), _nm(bt[1]))) for bt in bouts}
     placed = {x["meta"].get("slug") for x in map_props(rows, bouts, with_book=False)}
     for r in rows:
@@ -288,6 +296,9 @@ def unmatched(rows, bouts):
     out = []
     for r in rows:
         if r["slug"] in placed or not r.get("question"):
+            continue
+        q = _nm(r["question"])
+        if not any(n in q for n in names):
             continue
         out.append({"question": r["question"], "slug": r["slug"],
                     "kind": r["kind"], "liquidity": r["liquidity"]})

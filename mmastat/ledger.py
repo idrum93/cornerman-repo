@@ -365,6 +365,9 @@ PROP_MODEL_FIELD = {"decision": "m_decision", "inside_distance": "p_finish",
                     "sub_a": "m_a_sub", "sub_b": "m_b_sub"}
 
 
+OTHER_FILE = os.path.join(LEDGER_DIR, "polymarket_other.json")
+
+
 def prop_month_file(when=None, directory=LEDGER_DIR):
     ts = pd.Timestamp(when) if when is not None else pd.Timestamp.now(tz="UTC")
     return os.path.join(directory, f"props-{ts.year:04d}-{ts.month:02d}.jsonl")
@@ -425,14 +428,13 @@ def capture_props(card_path="data/upcoming.txt", payload_path="site/predictions.
                          spread=x["meta"].get("spread"), depth_usd=x["meta"].get("depth_usd"),
                          slug=x["meta"].get("slug"),
                          question=x["meta"].get("question"), settled=False))
-    # markets on the board that the model does not price: recorded so the site
-    # can link them, never scored
-    for x in extra:
-        rows.append(dict(captured_utc=ts, venue="polymarket", event=meta.get("event"),
-                         event_date=meta.get("date"), bout=None, a=None, b=None,
-                         market=None, p_market=None, p_model=None, edge=None,
-                         slug=x["slug"], question=x["question"], kind=x["kind"],
-                         settled=False))
+    # Markets the model does not price are display-only and re-fetched every
+    # run, so they go to a file that is overwritten — never appended to the
+    # ledger, which exists for claims that get graded.
+    Path(OTHER_FILE).parent.mkdir(parents=True, exist_ok=True)
+    Path(OTHER_FILE).write_text(json.dumps(
+        {"event_date": meta.get("date"), "fetched_utc": ts, "markets": extra[:20]},
+        indent=1), encoding="utf-8")
     if rows:
         f = prop_month_file()
         Path(f).parent.mkdir(parents=True, exist_ok=True)
@@ -448,9 +450,28 @@ def capture_props(card_path="data/upcoming.txt", payload_path="site/predictions.
                 fh.write(json.dumps(r, sort_keys=True) + "\n")
     if verbose:
         got = sorted({x["market"] for x in found})
-        print(f"props: {len(found)} quoted by polymarket ({', '.join(got) if got else 'none'}), "
-              f"{len(rows)} new rows")
+        print(f"polymarket: {len(_rows)} markets on the board, {len(extra)} naming a "
+              f"fighter on this card")
+        print(f"props: {len(found)} quoted for this card "
+              f"({', '.join(got) if got else 'none'}), {len(rows)} new rows")
     return len(rows)
+
+
+def prune_props(verbose=True):
+    """Remove prop rows with no market key. The first version of the unmatched
+    list appended every UFC market Polymarket carries into the ledger; one run
+    wrote 958 of them. They were never graded and never will be."""
+    n = 0
+    for fp in prop_files():
+        rows = [json.loads(l) for l in open(fp, encoding="utf-8") if l.strip()]
+        keep = [r for r in rows if r.get("market")]
+        if len(keep) != len(rows):
+            n += len(rows) - len(keep)
+            Path(fp).write_text("\n".join(json.dumps(r, sort_keys=True) for r in keep) + "\n",
+                                encoding="utf-8")
+    if n and verbose:
+        print(f"props: pruned {n} rows that were never a gradeable claim")
+    return n
 
 
 def settle_props(fights, verbose=True):
@@ -524,21 +545,15 @@ def latest_prop_prices(event_date=None):
 
 
 def unpriced_markets(event_date=None, limit=12):
-    """Polymarket UFC markets with no model projection — for listing, not scoring."""
-    rows = []
-    for fp in prop_files():
-        rows += [json.loads(l) for l in open(fp, encoding="utf-8") if l.strip()]
-    seen, out = set(), []
-    for r in sorted(rows, key=lambda x: x.get("captured_utc", ""), reverse=True):
-        if r.get("market") or not r.get("question"):
-            continue
-        if event_date and r.get("event_date") != event_date:
-            continue
-        if r["question"] in seen:
-            continue
-        seen.add(r["question"])
-        out.append({"question": r["question"], "slug": r.get("slug"), "kind": r.get("kind")})
-    return out[:limit]
+    """Polymarket markets naming a fighter on this card that the model does not
+    price. Read from the overwritten file, not the ledger."""
+    try:
+        d = json.loads(Path(OTHER_FILE).read_text(encoding="utf-8"))
+    except Exception:
+        return []
+    if event_date and d.get("event_date") != event_date:
+        return []
+    return d.get("markets", [])[:limit]
 
 
 def gate(verbose=True, throttle_min=60, near_hours=48, baseline_hours=20):
@@ -817,6 +832,7 @@ if __name__ == "__main__":
                   f"({u['used']} used)")
     elif cmd == "settle":
         prune_resolved()
+        prune_props()
         settle(f)
         settle_props(f)
     elif cmd == "prune":
