@@ -2,7 +2,7 @@
  "event": "UFC Fight Night: Rosas Jr. vs. Barcelos",
  "date": "2026-09-26",
  "venue": "Meta Apex, Enterprise, Nevada , United States",
- "generated_utc": "2026-09-24T04:27:35.118372+00:00",
+ "generated_utc": "2026-09-24T04:32:29.834328+00:00",
  "bouts": [
   {
    "bout": "Raul Rosas Jr vs. Raoni Barcelos",
@@ -183,7 +183,8 @@
      "fight": 3
     }
    },
-   "p_open": 0.6188
+   "p_open": 0.6188,
+   "prop_market": null
   },
   {
    "bout": "Rodolfo Vieira vs. Robert Bryczek",
@@ -362,7 +363,8 @@
      "fight": 3
     }
    },
-   "p_open": 0.5366
+   "p_open": 0.5366,
+   "prop_market": null
   },
   {
    "bout": "Brady Hiestand vs. Rinya Nakamura",
@@ -541,7 +543,13 @@
      "fight": 4
     }
    },
-   "p_open": 0.2653
+   "p_open": 0.2653,
+   "prop_market": {
+    "ko_a": {
+     "p": 0.075,
+     "slug": "ufc-bra8-rin1-2026-09-26-hiestand-win-by-ko-tko"
+    }
+   }
   },
   {
    "bout": "Rodolfo Bellato vs. Christian Edwards",
@@ -717,7 +725,8 @@
      "fight": 1
     }
    },
-   "p_open": null
+   "p_open": null,
+   "prop_market": null
   },
   {
    "bout": "Josiah Harrell vs. Elves Brener",
@@ -893,7 +902,8 @@
      "fight": 1
     }
    },
-   "p_open": null
+   "p_open": null,
+   "prop_market": null
   },
   {
    "bout": "Montel Jackson vs. Ricky Sim\u00f3n",
@@ -1072,7 +1082,8 @@
      "fight": 1
     }
    },
-   "p_open": 0.6265
+   "p_open": 0.6265,
+   "prop_market": null
   },
   {
    "bout": "Norma Dumont vs. Ail\u00edn P\u00e9rez",
@@ -1251,7 +1262,8 @@
      "fight": 1
     }
    },
-   "p_open": 0.4633
+   "p_open": 0.4633,
+   "prop_market": null
   },
   {
    "bout": "John Casta\u00f1eda vs. Alateng Heili",
@@ -1430,7 +1442,8 @@
      "fight": 1
     }
    },
-   "p_open": null
+   "p_open": null,
+   "prop_market": null
   },
   {
    "bout": "Mickey Gall vs. Sedriques Dumas",
@@ -1609,7 +1622,8 @@
      "fight": 3
     }
    },
-   "p_open": 0.5965
+   "p_open": 0.5965,
+   "prop_market": null
   },
   {
    "bout": "Vanessa Demopoulos vs. Yazmin Jauregui",
@@ -1788,7 +1802,8 @@
      "fight": 1
     }
    },
-   "p_open": 0.1432
+   "p_open": 0.1432,
+   "prop_market": null
   }
  ],
  "no_read": [
@@ -1949,31 +1964,31 @@
    "question": "Will Ian Machado Garry become UFC champion in 2026?",
    "slug": "will-ian-machado-garry-become-ufc-champion-in-2026",
    "kind": "winner",
-   "liquidity": 621.35804
+   "liquidity": 641.24914
   },
   {
    "question": "Will Leon Edwards become UFC champion in 2026?",
    "slug": "will-leon-edwards-become-ufc-champion-in-2026",
    "kind": "winner",
-   "liquidity": 142.6009
+   "liquidity": 143.38454
   },
   {
    "question": "Will Ian Machado Garry be the UFC Welterweight Champion on December 31, 2026?",
    "slug": "will-ian-machado-garry-be-the-ufc-welterweight-champion-on-december-31-2026",
    "kind": "winner",
-   "liquidity": 1372.45971
+   "liquidity": 1372.63203
   },
   {
    "question": "Will Leon Edwards be the UFC Welterweight Champion on December 31, 2026?",
    "slug": "will-leon-edwards-be-the-ufc-welterweight-champion-on-december-31-2026",
    "kind": "winner",
-   "liquidity": 2337.00972
+   "liquidity": 2356.90462
   },
   {
    "question": "UFC Fight Night: Alatengheili vs. John Castaneda (Bantamweight, Prelims)",
    "slug": "ufc-ala1-joh9-2026-09-26",
    "kind": "winner",
-   "liquidity": 28521.8581
+   "liquidity": 24479.8658
   }
  ]
 }
