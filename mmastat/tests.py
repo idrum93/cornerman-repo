@@ -253,7 +253,8 @@ REQUIRED_SITE_FEATURES = {
     "BR_DIRECT": "same-measure vs different-measure labels",
     "class=\"tipwrap\"": "the what-is-this tooltip on the wordmark",
     "class=\"g-a\"": "gauge arcs split at the probability",
-    "g-bridge ${leansB": "market bridge coloured by the corner it favours",
+    "g-bridge ${modelToA": "dial bridge coloured for the corner the model backs",
+    "function nameSize": "long surnames shrink instead of truncating",
     "divShort(b.weight_class)": "weight class on each tile",
     "class=\"zone ": "separated upcoming / results / history zones",
 }

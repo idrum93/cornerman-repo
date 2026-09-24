@@ -58,7 +58,9 @@
   .tile.wide{border-color:rgba(222,140,52,.55)}
   .trow{display:flex;justify-content:space-between;align-items:center;gap:6px}
   .nm{font-size:13.5px;font-weight:700;text-transform:uppercase;letter-spacing:-.01em;
-    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+    white-space:nowrap;max-width:100%}
+  .nm.n1{font-size:13.5px} .nm.n2{font-size:12px} .nm.n3{font-size:10.5px}
+  .nm.n4{font-size:9px;letter-spacing:-.02em}
   .pnum{font-size:14px;font-weight:800}
 
   .gauge{position:relative;height:7px;border-radius:4px;background:var(--soft);
@@ -259,7 +261,7 @@
   .g-open{stroke:var(--gold);stroke-width:1.5;stroke-dasharray:2 2;opacity:.8}
   .g-num{font:800 19px ui-monospace,Menlo,monospace;letter-spacing:-.02em}
   .n-a{fill:var(--redsoft)} .n-b{fill:var(--bluesoft)} .n-s{fill:var(--dim);font-size:13px}
-  .gkey{display:flex;gap:10px;justify-content:center;font-size:9px;letter-spacing:.08em;
+  .gkey{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;font-size:8.5px;letter-spacing:.06em;
     text-transform:uppercase;color:var(--dim);margin-top:1px}
   .gkey span{white-space:nowrap}
   .k-model{color:var(--mute)} .k-market{color:var(--gold)} .k-open-l{color:var(--dim)}
@@ -331,6 +333,12 @@ const DIV_SHORT={'Flyweight':'Fly','Bantamweight':'Bantam','Featherweight':'Feat
   "Women's Flyweight":'W Fly',"Women's Bantamweight":'W Bantam',"Women's Featherweight":'W Feather'};
 const divShort=d=>DIV_SHORT[d]||d||'';
 function divRow(d){ return (BR&&BR.divisions||[]).find(x=>x.division===d); }
+/* Long surnames shrank to "BARCEL..." on the tiles. A name is not a detail to
+   truncate, so the type size steps down to fit instead. */
+function nameSize(n){
+  const L=String(n).length;
+  return L<=8?'n1':L<=11?'n2':L<=14?'n3':'n4';
+}
 function surname(n){
   const t=String(n||'').trim().split(/\s+/);
   while(t.length>1&&SUFFIX.has(t[t.length-1].toLowerCase())) t.pop();
@@ -372,8 +380,12 @@ function tag(b){
   if(b.edge==null) return '<span class="edgeTag agree">no line</span>';
   const e=Math.abs(b.edge);
   if(e<0.05) return '<span class="edgeTag agree">in line</span>';
-  const leansB=b.edge>0;                       // model higher on A means market leans B
-  return `<span class="edgeTag ${leansB?'lean-b':'lean-a'}">market +${(e*100).toFixed(0)} ${esc(surname(leansB?b.b:b.a))}</span>`;
+  // Model first: this site is the model's view, with the market as the
+  // yardstick. The badge says how far the model sits from the line and on
+  // whom, in that fighter's colour, and the dial's bridge is the same claim
+  // drawn — the territory the model gives him beyond the market.
+  const toA=b.edge>0;
+  return `<span class="edgeTag ${toA?'lean-a':'lean-b'}">model +${(e*100).toFixed(0)} ${esc(surname(toA?b.a:b.b))}</span>`;
 }
 
 /* the model-vs-market strip, first thing on the page */
@@ -389,16 +401,16 @@ function strip(){
   return `<div class="totals" style="border-color:rgba(255,90,54,.22);background:rgba(255,90,54,.04)">
     <div class="lbl tothd">model vs market · widest disagreements on this card</div>
     <div class="strip">${top.map(b=>{
-    const e=Math.abs(b.edge), leansB=b.edge>0;
-    const who=leansB?b.b:b.a;                 // the corner the market favours
-    const mine=leansB?b.p_b:b.p_a, theirs=leansB?1-b.p_market:b.p_market;
+    const e=Math.abs(b.edge), toA=b.edge>0;
+    const who=toA?b.a:b.b;                    // the fighter the model rates above the line
+    const mine=toA?b.p_a:b.p_b, theirs=toA?b.p_market:1-b.p_market;
     return `<button class="dcard ${e>=0.05?'':'calm'}" data-id="${esc(b.bout)}">
-      <div class="lbl">market leans</div>
+      <div class="lbl">model above the line on</div>
       <div style="display:flex;align-items:baseline;gap:8px;margin:3px 0 2px">
-        <span class="dgap mono ${leansB?'to-b':'to-a'}">+${(e*100).toFixed(1)}</span>
-        <span class="nm ${leansB?'nm-b':'nm-a'} fav" style="max-width:120px" title="${esc(who)}">${esc(surname(who))}</span></div>
+        <span class="dgap mono ${toA?'to-a':'to-b'}">+${(e*100).toFixed(1)}</span>
+        <span class="nm ${toA?'nm-a':'nm-b'} fav" style="max-width:130px" title="${esc(who)}">${esc(surname(who))}</span></div>
       <div class="mono" style="font-size:10.5px;color:var(--mute)">
-        market <span style="color:var(--gold)">${P1(theirs)}%</span> · model ${P1(mine)}%</div>
+        model ${P1(mine)}% · market <span style="color:var(--gold)">${P1(theirs)}%</span></div>
     </button>`;}).join('')}</div></div>`;
 }
 
@@ -448,7 +460,7 @@ function gauge(b){
   const radial=(x,r1,r2,cls)=>{const[a1,b1]=pt(x,r1),[a2,b2]=pt(x,r2);
     return `<line class="${cls}" x1="${a1.toFixed(1)}" y1="${b1.toFixed(1)}" x2="${a2.toFixed(1)}" y2="${b2.toFixed(1)}"/>`;};
   const mk=b.p_market!=null, op=b.p_open!=null;
-  const leansB = mk && b.p_market < b.p_a;      // the market gives blue more
+  const modelToA = mk && b.p_a > b.p_market;    // territory the model adds for red
   const gap = mk ? Math.abs(b.p_a-b.p_market) : 0;
   return `<svg class="gauge-svg" viewBox="0 0 ${W} ${H}" role="img"
       aria-label="model: ${esc(b.a)} ${P0(b.p_a)} percent, ${esc(b.b)} ${P0(b.p_b)} percent${mk?`; market has ${esc(b.a)} at ${P0(b.p_market)} percent`:''}">
@@ -456,7 +468,7 @@ function gauge(b){
     <path d="${arc(0,b.p_a,R)}" class="g-a"/>
     <path d="${arc(b.p_a,1,R)}" class="g-b"/>
     ${radial(b.p_a,R-6,R+6,'g-edge')}
-    ${mk&&gap>0.005?`<path d="${arc(b.p_a,b.p_market,RB)}" class="g-bridge ${leansB?'to-b':'to-a'}"/>`:''}
+    ${mk&&gap>0.005?`<path d="${arc(b.p_a,b.p_market,RB)}" class="g-bridge ${modelToA?'to-a':'to-b'}"/>`:''}
     ${op?radial(b.p_open,R+8,R+15,'g-open'):''}
     ${mk?radial(b.p_market,R+7,R+17,'g-mkt'):''}
     <text x="${cx}" y="${cy-20}" class="g-num" text-anchor="middle">
@@ -485,14 +497,13 @@ function tile(b){
     <div class="trow" style="margin-bottom:2px">
       <span class="lbl">${b.weight_class?`<b class="divc">${esc(divShort(b.weight_class))}</b> · `:''}${b.rounds===5?'5 rds':'3 rds'}${evChip(b,true)}</span>${tag(b)}</div>
     <div class="dialrow">
-      <div class="fcol"><span class="nm nm-a ${b.p_a>=.5?'fav':''}" title="${esc(b.a)}">${esc(surname(b.a))}</span></div>
+      <div class="fcol"><span class="nm nm-a ${nameSize(surname(b.a))} ${b.p_a>=.5?'fav':''}" title="${esc(b.a)}">${esc(surname(b.a))}</span></div>
       ${gauge(b)}
-      <div class="fcol r"><span class="nm nm-b ${b.p_a<.5?'fav':''}" title="${esc(b.b)}">${esc(surname(b.b))}</span></div>
+      <div class="fcol r"><span class="nm nm-b ${nameSize(surname(b.b))} ${b.p_a<.5?'fav':''}" title="${esc(b.b)}">${esc(surname(b.b))}</span></div>
     </div>
     <div class="gkey">
       ${mk?`<span class="k-market">market ${P0(b.p_market)}/${P0(1-b.p_market)}</span>`:'<span class="k-open-l">no market line</span>'}
       ${b.p_open!=null?`<span class="k-open-l">opened ${P0(b.p_open)}/${P0(1-b.p_open)}</span>`:''}
-      ${mk&&Math.abs(b.edge)>=0.02?`<span class="${b.edge>0?'k-lean-b':'k-lean-a'}">market leans ${esc(surname(b.edge>0?b.b:b.a))} +${(Math.abs(b.edge)*100).toFixed(0)}</span>`:''}
     </div>
     ${b.thin?`<div class="props"><span class="pp" style="color:var(--warn);border-color:rgba(222,140,52,.4)">winner only · ${Math.min((b.evidence||{}).a??9,(b.evidence||{}).b??9)===0?'debut':'1 prior UFC fight'}</span></div>`:propChips(b)}
   </button>`;
@@ -827,8 +838,8 @@ function rangeBlock(stat,unit,rows){
       <span class="lbl">${esc(unit)}</span></div>
     ${rows.map(([n,lo,mid,hi,c])=>`
       <div style="display:flex;align-items:center;gap:9px;padding:3px 0">
-        <span style="width:104px;flex:none;font-size:11.5px;color:var(--mute);
-          white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(n)}</span>
+        <span title="${esc(n)}" style="width:104px;flex:none;font-size:11.5px;color:var(--mute);
+          white-space:nowrap">${esc(surname(n))}</span>
         <div style="flex:1;position:relative;height:14px">
           <div style="position:absolute;top:5px;left:0;right:0;height:5px;
             background:var(--soft);border-radius:3px"></div>
