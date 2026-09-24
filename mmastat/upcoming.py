@@ -40,6 +40,7 @@ from .features import (PANEL_OWN, WIN_FEATURES, _init_states, build,
 from .projections import FEATS as PROJ_FEATS, RANGE_TARGETS, EVENT_TARGETS
 from .projections import FORMULAS, FormulaModel, fit_finish_formula, finish_row
 FORMULA_INFO = {}
+OTHER = {"list": []}
 
 MIN_PRIOR = 2
 
@@ -606,11 +607,12 @@ def predict_card(path, fights, fighters, verbose=True):
     # quotes method or round markets, so these are the only prices most of
     # these projections will ever be compared against.
     try:
-        from .ledger import latest_prop_prices
+        from .ledger import latest_prop_prices, unpriced_markets
         _pp = latest_prop_prices(meta.get("date"))
         for r in rows:
             if r["bout"] in _pp:
                 r["prop_market"] = _pp[r["bout"]]
+        OTHER["list"] = unpriced_markets(meta.get("date"))
     except Exception as e:
         print(f"note: prop prices unavailable ({e})")
 
@@ -926,6 +928,7 @@ def write_json(out, skipped, unresolved, path="site/predictions.json",
         "market_source": MARKET_SRC.get("src"),
         "track_record": TRACK.get("rec"),
         "formulas": FORMULA_INFO,
+        "polymarket_other": OTHER.get("list", []),
     }
     Path(path).parent.mkdir(parents=True, exist_ok=True)
     Path(path).write_text(json.dumps(clean(payload), indent=1, allow_nan=False),

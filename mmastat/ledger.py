@@ -390,7 +390,7 @@ def capture_props(card_path="data/upcoming.txt", payload_path="site/predictions.
     feed we can reach quotes method or round markets, and Polymarket may.
     Whether it does is answered by running this, not by arguing about it.
     """
-    from .polymarket import fetch_events, parse_events, map_props
+    from .polymarket import fetch_events, parse_events, map_props, unmatched
     from .upcoming import parse_card
     meta, bouts = parse_card(card_path)
     ev_date = pd.to_datetime(meta.get("date"), errors="coerce")
@@ -405,7 +405,9 @@ def capture_props(card_path="data/upcoming.txt", payload_path="site/predictions.
         payload = {"bouts": []}
     model = {b["bout"]: b for b in payload.get("bouts", [])}
     try:
-        found = map_props(parse_events(fetch_events()), bouts)
+        _rows = parse_events(fetch_events())
+        found = map_props(_rows, bouts)
+        extra = unmatched(_rows, bouts)
     except Exception as e:
         if verbose:
             print(f"props: polymarket unavailable ({e})")
@@ -421,17 +423,26 @@ def capture_props(card_path="data/upcoming.txt", payload_path="site/predictions.
                          p_model=pm_model,
                          edge=(round(pm_model - x["p_market"], 5) if pm_model is not None else None),
                          spread=x["meta"].get("spread"), depth_usd=x["meta"].get("depth_usd"),
+                         slug=x["meta"].get("slug"),
                          question=x["meta"].get("question"), settled=False))
+    # markets on the board that the model does not price: recorded so the site
+    # can link them, never scored
+    for x in extra:
+        rows.append(dict(captured_utc=ts, venue="polymarket", event=meta.get("event"),
+                         event_date=meta.get("date"), bout=None, a=None, b=None,
+                         market=None, p_market=None, p_model=None, edge=None,
+                         slug=x["slug"], question=x["question"], kind=x["kind"],
+                         settled=False))
     if rows:
         f = prop_month_file()
         Path(f).parent.mkdir(parents=True, exist_ok=True)
+        key = lambda r: (r.get("captured_utc"), r.get("bout"), r.get("market"), r.get("question"))
         have = set()
         for fp in prop_files():
             for line in open(fp, encoding="utf-8"):
                 if line.strip():
-                    r = json.loads(line)
-                    have.add((r.get("captured_utc"), r.get("bout"), r.get("market")))
-        rows = [r for r in rows if (r["captured_utc"], r["bout"], r["market"]) not in have]
+                    have.add(key(json.loads(line)))
+        rows = [r for r in rows if key(r) not in have]
         with open(f, "a", encoding="utf-8") as fh:
             for r in rows:
                 fh.write(json.dumps(r, sort_keys=True) + "\n")
@@ -506,8 +517,28 @@ def latest_prop_prices(event_date=None):
     for r in sorted(rows, key=lambda x: x.get("captured_utc", "")):
         if event_date and r.get("event_date") != event_date:
             continue
-        out.setdefault(r["bout"], {})[r["market"]] = r["p_market"]
+        if not r.get("bout") or not r.get("market"):
+            continue
+        out.setdefault(r["bout"], {})[r["market"]] = {"p": r["p_market"], "slug": r.get("slug")}
     return out
+
+
+def unpriced_markets(event_date=None, limit=12):
+    """Polymarket UFC markets with no model projection — for listing, not scoring."""
+    rows = []
+    for fp in prop_files():
+        rows += [json.loads(l) for l in open(fp, encoding="utf-8") if l.strip()]
+    seen, out = set(), []
+    for r in sorted(rows, key=lambda x: x.get("captured_utc", ""), reverse=True):
+        if r.get("market") or not r.get("question"):
+            continue
+        if event_date and r.get("event_date") != event_date:
+            continue
+        if r["question"] in seen:
+            continue
+        seen.add(r["question"])
+        out.append({"question": r["question"], "slug": r.get("slug"), "kind": r.get("kind")})
+    return out[:limit]
 
 
 def gate(verbose=True, throttle_min=60, near_hours=48, baseline_hours=20):

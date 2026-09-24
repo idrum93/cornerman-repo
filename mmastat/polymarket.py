@@ -264,6 +264,36 @@ def map_props(rows, bouts, min_depth=150.0, max_spread=0.10, with_book=True):
     return out
 
 
+EVENT_URL = "https://polymarket.com/event/"
+
+
+def unmatched(rows, bouts):
+    """UFC markets Polymarket quotes that the model does not price.
+
+    Listed, with links, and never given a number. The site's rule is that a
+    market either carries a projection we can check or it carries nothing —
+    but staying silent about markets that exist would hide what is on offer.
+    """
+    # classify() defaults to "winner" for anything it does not recognise, so a
+    # market is only treated as placed if it actually matched — either a prop
+    # we mapped, or a two-name market whose pair is on this card. Otherwise
+    # event-level markets ("will there be a new champion") were silently
+    # swallowed as winner markets and never listed.
+    pairs = {frozenset((_nm(bt[0]), _nm(bt[1]))) for bt in bouts}
+    placed = {x["meta"].get("slug") for x in map_props(rows, bouts, with_book=False)}
+    for r in rows:
+        o = [_nm(x) for x in r["outcomes"]]
+        if len(o) == 2 and frozenset(o) in pairs:
+            placed.add(r["slug"])
+    out = []
+    for r in rows:
+        if r["slug"] in placed or not r.get("question"):
+            continue
+        out.append({"question": r["question"], "slug": r["slug"],
+                    "kind": r["kind"], "liquidity": r["liquidity"]})
+    return out
+
+
 def props(rows):
     """Non-winner markets, grouped by kind. Sportsbooks price MMA props at a
     22% overround; if Polymarket lists any at all they are worth far more as

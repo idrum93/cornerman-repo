@@ -168,6 +168,14 @@
     padding:4px 11px;border-radius:999px;cursor:pointer}
   .fb:hover{border-color:#3B4557;color:var(--bone)}
   .fb.on{border-color:var(--gold);color:var(--gold)}
+  .plink{color:var(--gold);text-decoration:none;border-bottom:1px dotted rgba(205,164,58,.5)}
+  .plink:hover{color:var(--bone);border-bottom-color:var(--bone)}
+  .other{margin-top:14px;border:1px solid var(--line);border-radius:4px;background:var(--panel);padding:9px 12px}
+  .other summary{cursor:pointer;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute)}
+  .other summary:hover{color:var(--bone)}
+  .otherlist{display:flex;flex-direction:column;gap:5px;margin:9px 0 4px}
+  .otherlist a{color:var(--bluesoft);text-decoration:none;font-size:12px}
+  .otherlist a:hover{text-decoration:underline}
   .fnote{border:1px dashed var(--line);border-radius:4px;padding:8px 10px;margin:-2px 0 9px;font-size:11.5px;color:var(--mute)}
   .fnote .fx{display:inline-block;margin-right:10px;white-space:nowrap}
   .fnote .fx b{color:var(--gold);font-family:ui-monospace,Menlo,monospace}
@@ -825,7 +833,7 @@ function render(){
   const lc=HIST&&HIST.cards&&HIST.cards[0];
   document.getElementById('app').innerHTML=nav+
     zone('z-up','z-upcoming','Upcoming card',`${esc(d.event||'')} · ${d.bouts.length} bouts modelled`,
-      strip()+filt+segs)+
+      strip()+filt+segs+otherMarkets())+
     zone('z-res','z-results', lc?`Last card — ${esc(lc.event)}`:'Last card',
       'graded against what happened · click any fight', lastCard())+
     zone('z-hist','z-history','What usually happens','history of every fight since 2012, not predictions',
@@ -885,15 +893,38 @@ function marketRecord(mk){
 /* A prop price, where Polymarket quotes one. Most of these markets have no
    price anywhere we can reach, so the diamond appears rarely — and that
    absence is itself worth seeing. */
-function pmk(b,key){ return (b.prop_market||{})[key]; }
-function pnote(b,key){ const v=pmk(b,key); return v==null?null:`market ${P1(v)}%`; }
+const POLY='https://polymarket.com/event/';
+function pmk(b,key){ const v=(b.prop_market||{})[key]; return v==null?null:v.p; }
+function pslug(b,key){ const v=(b.prop_market||{})[key]; return v&&v.slug; }
+function pnote(b,key){
+  const v=pmk(b,key); if(v==null) return null;
+  const sl=pslug(b,key);
+  // link straight to the market, so a reader can check the price themselves
+  return sl?`market ${P1(v)}% · <a class="plink" href="${POLY}${esc(sl)}" target="_blank" rel="noopener">verify</a>`
+           :`market ${P1(v)}%`;
+}
+/* Markets Polymarket quotes that the model does not price. Listed with links
+   and never given a number: a market either carries a projection that can be
+   checked, or it carries nothing. Saying nothing at all would hide what is on
+   the board. */
+function otherMarkets(){
+  const L=(DATA.polymarket_other)||[];
+  if(!L.length) return '';
+  return `<details class="other"><summary>${L.length} more market${L.length===1?'':'s'} on
+    Polymarket the model does not price</summary>
+    <div class="otherlist">${L.map(x=>`<a href="${POLY}${esc(x.slug||'')}" target="_blank"
+      rel="noopener">${esc(x.question)}</a>`).join('')}</div>
+    <div class="note">No projection is shown for these: the model prices a fighter's chances and
+      how a fight ends, not event-level questions. Linked so you can see the board, not as a view.</div>
+  </details>`;
+}
 
 function propRow(name,p,col,marker,note,mkey){
   const mk=marker==null?'':`<div style="position:absolute;left:calc(${marker*100}% - 4px);top:-3px;
     color:var(--gold);font-size:10px;line-height:1">◆</div>`;
   return `<div class="prow ${mkey&&FEATURED.has(mkey)?'feat':''}">
     <div style="width:146px;flex:none;font-size:11.5px;color:var(--mute)">${esc(name)}
-      ${note?`<span class="lbl" style="display:block;margin-top:1px">${esc(note)}</span>`:''}</div>
+      ${note?`<span class="lbl" style="display:block;margin-top:1px">${note}</span>`:''}</div>
     <div style="flex:1;position:relative;height:8px">
       <div style="position:absolute;inset:0;background:var(--soft);border-radius:4px"></div>
       <div style="position:absolute;left:0;top:0;height:8px;border-radius:4px;
