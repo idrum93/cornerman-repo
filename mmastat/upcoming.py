@@ -943,6 +943,15 @@ if __name__ == "__main__":
     from .loaders import load
 
     f, p, _ = load(verbose=False)
+    # Prop prices are free (Polymarket, no key, no quota), so fetch them here
+    # too rather than waiting for the next capture run. Otherwise a price
+    # captured at 16:00 does not reach the site until 11:00 the next morning,
+    # and right after a deploy there is nothing on the site at all.
+    try:
+        from .ledger import capture_props
+        capture_props(verbose=True)
+    except Exception as e:
+        print(f"note: prop capture skipped ({e})")
     out, skipped, unresolved = predict_card("data/upcoming.txt", f, p)
     if "--json" in sys.argv:
         path = write_json(out, skipped, unresolved)
