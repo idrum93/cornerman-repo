@@ -64,8 +64,7 @@
    "date": "2014-02-01",
    "fotn": [
     "Jamie Varner",
-    "Abel Trujillo ($75",
-    "000 each)"
+    "Abel Trujillo"
    ],
    "none_awarded": false,
    "potn": [],
@@ -823,7 +822,7 @@
   "UFC 225: Whittaker vs. Romero 2 ": {
    "date": "2018-06-09",
    "fotn": [
-    "Robert Whittaker (Yoel Romero was unable to receive his share of the bonus money due to missing weight)"
+    "Robert Whittaker"
    ],
    "none_awarded": false,
    "potn": [
@@ -3243,9 +3242,7 @@
    "date": "2019-09-14",
    "fotn": [
     "Tristan Connelly",
-    "Michel Pereira (Michel Pereira was ineligible to receive any bonus money due to missing weight",
-    "therefore Tristan Connelly received a $100",
-    "000 bonus.)"
+    "Michel Pereira"
    ],
    "none_awarded": false,
    "potn": [
@@ -4216,7 +4213,7 @@
   "UFC Fight Night: Hunt vs. Oleinik ": {
    "date": "2018-09-15",
    "fotn": [
-    "Petr Yan (Jin Soo Son was unable to receive bonus money due to missing weight)"
+    "Petr Yan"
    ],
    "none_awarded": false,
    "potn": [
@@ -6416,7 +6413,7 @@
    "status": "missing"
   }
  },
- "parser": 2,
- "updated_utc": "2026-09-24T12:20:31+00:00",
+ "parser": 3,
+ "updated_utc": "2026-09-24T16:29:24+00:00",
  "version": 1
 }
