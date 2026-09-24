@@ -53,6 +53,8 @@ def parse_bonuses(wikitext):
         if not which:
             continue
         tail = s.split(":", 1)[1] if ":" in s else s
+        if re.search(r"\b(none|not awarded|no fight of the night|n/a)\b", tail, re.I):
+            continue                       # an explicit "none", not a fighter
         names = re.findall(r"\[\[(?:[^\]|]*\|)?([^\]]*)\]\]", tail)
         if not names:                      # some articles do not link the names
             # split on the separators, taking the period with "vs." — the
@@ -60,6 +62,8 @@ def parse_bonuses(wikitext):
             names = [x.strip(" .") for x in
                      re.split(r"\s+vs\.?\s+|,|\s+and\s+", clean_cell(tail))
                      if len(x.strip(" .")) > 3]
+            # a "name" with no space is usually a stray word, not a fighter
+            names = [n for n in names if " " in n]
         out[which] += [n.strip() for n in names if n.strip()]
     return out if (out["fotn"] or out["potn"]) else {"fotn": [], "potn": [], "none": True}
 
@@ -167,4 +171,60 @@ if __name__ == "__main__":
     if "--budget-min" in sys.argv:
         budget = float(sys.argv[sys.argv.index("--budget-min") + 1])
     f, _p, _ = load(verbose=False)
-    collect(f, budget_min=budget)
+    if "--check" in sys.argv:
+        validate(f)
+    else:
+        collect(f, budget_min=budget)
+        validate(f)
+
+
+# ---------------------------------------------------------------- validation
+def validate(fights, store=None, path=OUT, verbose=True):
+    """Check the labels against the corpus, because a parser that reads the
+    page is not the same as a parser that reads it correctly.
+
+    The first run reported a Fight of the Night at 99% of events against the
+    ~two thirds the award history implies, which is the shape of a parsing
+    artifact rather than a finding. Three checks catch it:
+
+      count     a Fight of the Night has exactly two recipients
+      identity  every name must be a fighter who actually fought on that card
+      coverage  how many events were readable at all
+    """
+    from .upcoming import _key
+    store = store or _load(path)
+    ev = store.get("events", {})
+    on_card = {}
+    for r in fights.itertuples():
+        parts = str(r.bout).split(" vs. ")
+        if len(parts) == 2:
+            on_card.setdefault(r.event, set()).update(_key(x) for x in parts)
+    ok = [(k, v) for k, v in ev.items() if v.get("status") == "ok"]
+    fotn = [(k, v) for k, v in ok if v.get("fotn")]
+    two = [1 for _, v in fotn if len(v["fotn"]) == 2]
+    bad_names, checked, matched = [], 0, 0
+    for k, v in ok:
+        card = on_card.get(k)
+        if not card:
+            continue
+        for n in v.get("fotn", []) + v.get("potn", []):
+            checked += 1
+            if _key(n) in card:
+                matched += 1
+            elif len(bad_names) < 8:
+                bad_names.append((k, n))
+    res = {"events_ok": len(ok), "with_fotn": len(fotn),
+           "fotn_exactly_two": sum(two),
+           "names_checked": checked, "names_on_card": matched}
+    if verbose:
+        print("bonus labels, checked against the corpus")
+        print(f"  readable events: {len(ok)}")
+        print(f"  with a Fight of the Night: {len(fotn)} ({100*len(fotn)/max(len(ok),1):.0f}%)")
+        print(f"  of those, exactly two recipients: {sum(two)} "
+              f"({100*sum(two)/max(len(fotn),1):.0f}%; anything else is a mis-parse)")
+        if checked:
+            print(f"  names that fought on that card: {matched} of {checked} "
+                  f"({100*matched/checked:.0f}%)")
+        for k, n in bad_names:
+            print(f"    not on the card: {k!r} -> {n!r}")
+    return res
