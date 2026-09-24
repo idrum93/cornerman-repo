@@ -300,6 +300,27 @@ def test_wiki_parser(_unused=None):
                 f"{'works' if right and wrong is False else 'BROKEN'}")
 
 
+def test_bonus_parser(_unused=None):
+    """The bonus-award parser (addendum 24). The distinction that matters: an
+    article with no Bonus awards section returns None, not an empty card.
+    Treating "we could not read it" as "no bonuses were given" would bias the
+    labels toward events that happen to be well written up."""
+    from .bonuses import parse_bonuses
+    b = "' ' '".replace(" ", "")
+    linked = ("==Bonus awards==\n* " + b + "Fight of the Night:" + b +
+              " [[A One]] vs. [[B Two]]\n* " + b + "Performance of the Night:" + b +
+              " [[C Three]] and [[D Four]]\n")
+    plain = ("==Bonus awards==\n* " + b + "Fight of the Night:" + b +
+             " Kevin Vieira vs. Jan Bryczek\n")
+    a = parse_bonuses(linked) or {}
+    c = parse_bonuses(plain) or {}
+    absent = parse_bonuses("==Results==\nnothing\n")
+    ok = (a.get("fotn") == ["A One", "B Two"] and len(a.get("potn", [])) == 2
+          and c.get("fotn") == ["Kevin Vieira", "Jan Bryczek"] and absent is None)
+    return ok, ("linked and plain names parsed, missing section returns None"
+                if ok else "BROKEN: %s / %s / %s" % (a, c, absent))
+
+
 def run_all(fights=None, fighters=None, data_only=False):
     if fights is None:
         fights, fighters, _ = make_corpus(n_fighters=520, n_events=320)
@@ -320,7 +341,8 @@ def run_all(fights=None, fighters=None, data_only=False):
     # deploying.
     if not data_only:
         checks += [("site features intact", test_site_features()),
-                   ("wiki record parser", test_wiki_parser())]
+                   ("wiki record parser", test_wiki_parser()),
+                   ("bonus award parser", test_bonus_parser())]
     print(f"{'CHECK':<28} {'RESULT':<6}  DETAIL")
     print("-" * 78)
     allok = True

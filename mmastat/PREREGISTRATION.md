@@ -1671,3 +1671,66 @@ Also recorded: the other two ideas raised alongside it are already closed.
 Later-round resilience is the fortitude cluster (0 of 6 supported, 5 of 6
 wrong sign, cluster harmful). Style-matchup success is the nine interactions
 of addendum 1 (0 of 9, smallest p .060 against a .011 threshold).
+
+---
+
+# Addendum 24: bonus picks — Fight and Performance of the Night (2026-09-23)
+
+Registered before any label has been collected.
+
+A new **output** rather than another search for inputs. The UFC awards Fight of
+the Night to both fighters in the best bout and Performance of the Night to the
+best individual displays, decided internally by UFC management. In 2023 that
+was 190 bonuses across 43 events, of which 58 went to 29 separate FOTN
+winners — so FOTN is not awarded at roughly a third of cards.
+
+## What the model already holds
+
+    FOTN ingredients   a close matchup (win probability near 50%), high
+                       combined projected output, and a fight likely to go
+                       long or end late — the survival curve
+    POTN ingredients   P(finish), the method split, the round distribution
+
+POTN is close to mechanical: it goes to finishes, mostly early ones, and the
+model already prices those. FOTN is the one combining quantities the site
+does not currently put together.
+
+## Labels
+
+Wikipedia event articles carry a "Bonus awards" section. Collected through the
+same MediaWiki plumbing as the parked record collector, from February 2014
+(when Performance of the Night replaced Knockout and Submission of the Night)
+to the present, into `data/wiki/bonuses.json`.
+
+## Scoring and evaluation
+
+A score per bout from existing outputs, ranked within each card. Evaluated on
+held-out cards:
+
+    FOTN   top-1 accuracy: how often the highest-ranked bout won it
+    POTN   top-2 accuracy over fighters
+
+## The baselines that matter, fixed now
+
+Random is not the bar. Main events win bonuses far more often than their share,
+for reasons that have nothing to do with the fight. So the model must beat
+**both**:
+
+    B1  always pick the main event
+    B2  always pick the bout with the highest P(finish)
+
+**Displayed only if it beats both on held-out cards**, and then only with its
+measured hit rate shown beside the pick, as every other number on the site is.
+If it beats random but not B1, it has learned "main events get bonuses", which
+the reader already knows.
+
+## Status and honest expectation
+
+This is entertainment and context, not an edge: the award is a subjective
+decision by executives, and no sportsbook we can reach quotes it. Polymarket
+may — the unpriced-markets list will show it — and if so the pick becomes
+checkable against a price.
+
+Expected top-1 FOTN accuracy is 20-30% against roughly 8% for random and
+perhaps 15% for always-main-event. Useful, not spectacular, and quite possibly
+null against B1.
