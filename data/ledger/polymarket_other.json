@@ -1,36 +1,36 @@
 {
  "event_date": "2026-09-26",
- "fetched_utc": "2026-09-24T14:32:06+00:00",
+ "fetched_utc": "2026-09-24T19:37:32+00:00",
  "markets": [
   {
    "question": "Will Ian Machado Garry become UFC champion in 2026?",
    "slug": "will-ian-machado-garry-become-ufc-champion-in-2026",
    "kind": "winner",
-   "liquidity": 589.18626
+   "liquidity": 592.1004
   },
   {
    "question": "Will Leon Edwards become UFC champion in 2026?",
    "slug": "will-leon-edwards-become-ufc-champion-in-2026",
    "kind": "winner",
-   "liquidity": 156.8373
+   "liquidity": 163.3113
   },
   {
    "question": "Will Ian Machado Garry be the UFC Welterweight Champion on December 31, 2026?",
    "slug": "will-ian-machado-garry-be-the-ufc-welterweight-champion-on-december-31-2026",
    "kind": "winner",
-   "liquidity": 1152.14898
+   "liquidity": 1153.71893
   },
   {
    "question": "Will Leon Edwards be the UFC Welterweight Champion on December 31, 2026?",
    "slug": "will-leon-edwards-be-the-ufc-welterweight-champion-on-december-31-2026",
    "kind": "winner",
-   "liquidity": 2423.34857
+   "liquidity": 2118.67968
   },
   {
    "question": "UFC Fight Night: Alatengheili vs. John Castaneda (Bantamweight, Prelims)",
    "slug": "ufc-ala1-joh9-2026-09-26",
    "kind": "winner",
-   "liquidity": 32919.9031
+   "liquidity": 73592.5142
   }
  ]
 }
