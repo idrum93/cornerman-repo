@@ -2,7 +2,7 @@
  "event": "UFC 331",
  "date": "2026-09-19",
  "venue": "Crypto.com Arena, Los Angeles",
- "generated_utc": "2026-09-24T01:38:32.166702+00:00",
+ "generated_utc": "2026-09-24T20:36:08.440369+00:00",
  "bouts": [
   {
    "bout": "Joshua Van vs. Alexandre Pantoja",
@@ -67,37 +67,37 @@
     {
      "label": "age",
      "value": 0.8982,
-     "favours": "a",
+     "favors": "a",
      "key": "d_age"
     },
     {
      "label": "striking output",
      "value": 0.4676,
-     "favours": "a",
+     "favors": "a",
      "key": "d_adj_slpm"
     },
     {
      "label": "strikes absorbed",
      "value": -0.3349,
-     "favours": "b",
+     "favors": "b",
      "key": "d_sapm"
     },
     {
      "label": "takedown threat",
      "value": -0.1387,
-     "favours": "b",
+     "favors": "b",
      "key": "grapple_edge"
     },
     {
-     "label": "striking defence",
+     "label": "striking defense",
      "value": 0.1288,
-     "favours": "a",
+     "favors": "a",
      "key": "d_str_def"
     },
     {
      "label": "career quality",
      "value": -0.1048,
-     "favours": "b",
+     "favors": "b",
      "key": "d_elo"
     }
    ],
@@ -247,37 +247,37 @@
     {
      "label": "strength of schedule",
      "value": 0.3973,
-     "favours": "a",
+     "favors": "a",
      "key": "d_opp_elo"
     },
     {
      "label": "career quality",
      "value": 0.3642,
-     "favours": "a",
+     "favors": "a",
      "key": "d_elo"
     },
     {
      "label": "strikes absorbed",
      "value": 0.339,
-     "favours": "a",
+     "favors": "a",
      "key": "d_sapm"
     },
     {
      "label": "takedown threat",
      "value": 0.2137,
-     "favours": "a",
+     "favors": "a",
      "key": "grapple_edge"
     },
     {
      "label": "experience",
      "value": -0.0961,
-     "favours": "b",
+     "favors": "b",
      "key": "d_log_exp"
     },
     {
      "label": "reach",
      "value": -0.0902,
-     "favours": "b",
+     "favors": "b",
      "key": "d_reach"
     }
    ],
@@ -425,37 +425,37 @@
     {
      "label": "strength of schedule",
      "value": 0.4407,
-     "favours": "a",
+     "favors": "a",
      "key": "d_opp_elo"
     },
     {
      "label": "striking output",
      "value": -0.3421,
-     "favours": "b",
+     "favors": "b",
      "key": "d_adj_slpm"
     },
     {
      "label": "age",
      "value": -0.294,
-     "favours": "b",
+     "favors": "b",
      "key": "d_age"
     },
     {
      "label": "career quality",
      "value": -0.2745,
-     "favours": "b",
+     "favors": "b",
      "key": "d_elo"
     },
     {
      "label": "experience",
      "value": 0.2016,
-     "favours": "a",
+     "favors": "a",
      "key": "d_log_exp"
     },
     {
      "label": "takedown threat",
      "value": 0.0923,
-     "favours": "a",
+     "favors": "a",
      "key": "grapple_edge"
     }
    ],
@@ -603,37 +603,37 @@
     {
      "label": "strikes absorbed",
      "value": 0.4911,
-     "favours": "a",
+     "favors": "a",
      "key": "d_sapm"
     },
     {
      "label": "strength of schedule",
      "value": -0.2315,
-     "favours": "b",
+     "favors": "b",
      "key": "d_opp_elo"
     },
     {
      "label": "career quality",
      "value": 0.1689,
-     "favours": "a",
+     "favors": "a",
      "key": "d_elo"
     },
     {
-     "label": "striking defence",
+     "label": "striking defense",
      "value": 0.1469,
-     "favours": "a",
+     "favors": "a",
      "key": "d_str_def"
     },
     {
      "label": "age",
      "value": -0.1372,
-     "favours": "b",
+     "favors": "b",
      "key": "d_age"
     },
     {
      "label": "takedown threat",
      "value": 0.1194,
-     "favours": "a",
+     "favors": "a",
      "key": "grapple_edge"
     }
    ],
@@ -781,37 +781,37 @@
     {
      "label": "age",
      "value": 0.8674,
-     "favours": "a",
+     "favors": "a",
      "key": "d_age"
     },
     {
      "label": "strength of schedule",
      "value": -0.4446,
-     "favours": "b",
+     "favors": "b",
      "key": "d_opp_elo"
     },
     {
      "label": "experience",
      "value": 0.2418,
-     "favours": "a",
+     "favors": "a",
      "key": "d_log_exp"
     },
     {
      "label": "striking output",
      "value": 0.214,
-     "favours": "a",
+     "favors": "a",
      "key": "d_adj_slpm"
     },
     {
      "label": "strikes absorbed",
      "value": -0.1859,
-     "favours": "b",
+     "favors": "b",
      "key": "d_sapm"
     },
     {
      "label": "knockout threat",
      "value": -0.1381,
-     "favours": "b",
+     "favors": "b",
      "key": "ko_edge"
     }
    ],
@@ -959,37 +959,37 @@
     {
      "label": "strikes absorbed",
      "value": 1.0345,
-     "favours": "a",
+     "favors": "a",
      "key": "d_sapm"
     },
     {
      "label": "age",
      "value": 0.5387,
-     "favours": "a",
+     "favors": "a",
      "key": "d_age"
     },
     {
      "label": "durability",
      "value": 0.5331,
-     "favours": "a",
+     "favors": "a",
      "key": "d_ko_loss_rate"
     },
     {
      "label": "knockout threat",
      "value": -0.3245,
-     "favours": "b",
+     "favors": "b",
      "key": "ko_edge"
     },
     {
      "label": "career quality",
      "value": 0.277,
-     "favours": "a",
+     "favors": "a",
      "key": "d_elo"
     },
     {
-     "label": "striking defence",
+     "label": "striking defense",
      "value": 0.2125,
-     "favours": "a",
+     "favors": "a",
      "key": "d_str_def"
     }
    ],
@@ -1134,37 +1134,37 @@
     {
      "label": "age",
      "value": 0.2334,
-     "favours": "a",
+     "favors": "a",
      "key": "d_age"
     },
     {
      "label": "strikes absorbed",
      "value": 0.2297,
-     "favours": "a",
+     "favors": "a",
      "key": "d_sapm"
     },
     {
      "label": "strength of schedule",
      "value": -0.1675,
-     "favours": "b",
+     "favors": "b",
      "key": "d_opp_elo"
     },
     {
-     "label": "striking defence",
+     "label": "striking defense",
      "value": 0.103,
-     "favours": "a",
+     "favors": "a",
      "key": "d_str_def"
     },
     {
      "label": "striking output",
      "value": 0.0956,
-     "favours": "a",
+     "favors": "a",
      "key": "d_adj_slpm"
     },
     {
      "label": "experience",
      "value": 0.0718,
-     "favours": "a",
+     "favors": "a",
      "key": "d_log_exp"
     }
    ],
@@ -1312,37 +1312,37 @@
     {
      "label": "strength of schedule",
      "value": 0.6132,
-     "favours": "a",
+     "favors": "a",
      "key": "d_opp_elo"
     },
     {
      "label": "age",
      "value": 0.3531,
-     "favours": "a",
+     "favors": "a",
      "key": "d_age"
     },
     {
      "label": "strikes absorbed",
      "value": -0.3269,
-     "favours": "b",
+     "favors": "b",
      "key": "d_sapm"
     },
     {
      "label": "experience",
      "value": -0.2864,
-     "favours": "b",
+     "favors": "b",
      "key": "d_log_exp"
     },
     {
      "label": "reach",
      "value": -0.2707,
-     "favours": "b",
+     "favors": "b",
      "key": "d_reach"
     },
     {
      "label": "striking accuracy",
      "value": -0.1255,
-     "favours": "b",
+     "favors": "b",
      "key": "d_str_acc"
     }
    ],
@@ -1490,37 +1490,37 @@
     {
      "label": "strength of schedule",
      "value": -0.5068,
-     "favours": "b",
+     "favors": "b",
      "key": "d_opp_elo"
     },
     {
      "label": "strikes absorbed",
      "value": 0.405,
-     "favours": "a",
+     "favors": "a",
      "key": "d_sapm"
     },
     {
      "label": "durability",
      "value": 0.3947,
-     "favours": "a",
+     "favors": "a",
      "key": "d_ko_loss_rate"
     },
     {
      "label": "age",
      "value": 0.3486,
-     "favours": "a",
+     "favors": "a",
      "key": "d_age"
     },
     {
      "label": "striking output",
      "value": -0.2597,
-     "favours": "b",
+     "favors": "b",
      "key": "d_adj_slpm"
     },
     {
      "label": "career quality",
      "value": 0.1784,
-     "favours": "a",
+     "favors": "a",
      "key": "d_elo"
     }
    ],
@@ -1665,37 +1665,37 @@
     {
      "label": "age",
      "value": 0.3944,
-     "favours": "a",
+     "favors": "a",
      "key": "d_age"
     },
     {
      "label": "striking output",
      "value": 0.1103,
-     "favours": "a",
+     "favors": "a",
      "key": "d_adj_slpm"
     },
     {
      "label": "career quality",
      "value": 0.0961,
-     "favours": "a",
+     "favors": "a",
      "key": "d_elo"
     },
     {
      "label": "reach",
      "value": 0.0902,
-     "favours": "a",
+     "favors": "a",
      "key": "d_reach"
     },
     {
      "label": "takedown threat",
      "value": 0.0796,
-     "favours": "a",
+     "favors": "a",
      "key": "grapple_edge"
     },
     {
      "label": "strength of schedule",
      "value": 0.0688,
-     "favours": "a",
+     "favors": "a",
      "key": "d_opp_elo"
     }
    ],
@@ -1843,37 +1843,37 @@
     {
      "label": "striking output",
      "value": 0.7857,
-     "favours": "a",
+     "favors": "a",
      "key": "d_adj_slpm"
     },
     {
      "label": "strikes absorbed",
      "value": -0.4517,
-     "favours": "b",
+     "favors": "b",
      "key": "d_sapm"
     },
     {
      "label": "age",
      "value": 0.282,
-     "favours": "a",
+     "favors": "a",
      "key": "d_age"
     },
     {
      "label": "career quality",
      "value": 0.216,
-     "favours": "a",
+     "favors": "a",
      "key": "d_elo"
     },
     {
      "label": "takedown threat",
      "value": -0.203,
-     "favours": "b",
+     "favors": "b",
      "key": "grapple_edge"
     },
     {
      "label": "knockout threat",
      "value": -0.1829,
-     "favours": "b",
+     "favors": "b",
      "key": "ko_edge"
     }
    ],
@@ -2021,37 +2021,37 @@
     {
      "label": "age",
      "value": -0.5055,
-     "favours": "b",
+     "favors": "b",
      "key": "d_age"
     },
     {
      "label": "striking output",
      "value": 0.2963,
-     "favours": "a",
+     "favors": "a",
      "key": "d_adj_slpm"
     },
     {
-     "label": "striking defence",
+     "label": "striking defense",
      "value": 0.2436,
-     "favours": "a",
+     "favors": "a",
      "key": "d_str_def"
     },
     {
      "label": "takedown threat",
      "value": -0.2406,
-     "favours": "b",
+     "favors": "b",
      "key": "grapple_edge"
     },
     {
      "label": "strikes absorbed",
      "value": -0.1775,
-     "favours": "b",
+     "favors": "b",
      "key": "d_sapm"
     },
     {
      "label": "career quality",
      "value": -0.1326,
-     "favours": "b",
+     "favors": "b",
      "key": "d_elo"
     }
    ],
@@ -2280,5 +2280,6 @@
    "intercept": -0.048,
    "note": "weights are per standard deviation of each input"
   }
- }
+ },
+ "polymarket_other": []
 }
