@@ -2,7 +2,7 @@
  "event": "UFC Fight Night: Rosas Jr. vs. Barcelos",
  "date": "2026-09-26",
  "venue": "Meta Apex, Enterprise, Nevada , United States",
- "generated_utc": "2026-09-24T12:04:37.434991+00:00",
+ "generated_utc": "2026-09-24T15:41:48.909243+00:00",
  "bouts": [
   {
    "bout": "Raul Rosas Jr vs. Raoni Barcelos",
@@ -184,7 +184,12 @@
     }
    },
    "p_open": 0.6188,
-   "prop_market": null
+   "prop_market": {
+    "ko_b": {
+     "p": 0.12,
+     "slug": "ufc-rao-rau2-2026-09-26-barcelos-win-by-ko-tko"
+    }
+   }
   },
   {
    "bout": "Rodolfo Vieira vs. Robert Bryczek",
@@ -283,9 +288,9 @@
      "key": "d_str_def"
     }
    ],
-   "p_market": 0.5846,
+   "p_market": 0.5867,
    "books": 18.0,
-   "edge": -0.0673,
+   "edge": -0.0695,
    "p_finish_survival_raw": 0.4496,
    "m_a_ko": 0.1381,
    "m_b_ko": 0.1389,
@@ -726,7 +731,12 @@
     }
    },
    "p_open": null,
-   "prop_market": null
+   "prop_market": {
+    "ko_b": {
+     "p": 0.16,
+     "slug": "ufc-cedwar-rod3-2026-09-26-edwards-win-by-ko-tko"
+    }
+   }
   },
   {
    "bout": "Josiah Harrell vs. Elves Brener",
@@ -1542,9 +1552,9 @@
      "key": "d_reach"
     }
    ],
-   "p_market": 0.5596,
+   "p_market": 0.5627,
    "books": 16.0,
-   "edge": -0.1356,
+   "edge": -0.1386,
    "p_finish_survival_raw": 0.6828,
    "m_a_ko": 0.0929,
    "m_b_ko": 0.1715,
@@ -1807,6 +1817,10 @@
     "ko_b": {
      "p": 0.26,
      "slug": "ufc-van1-yaz1-2026-09-26-jauregui-win-by-ko-tko"
+    },
+    "ko_a": {
+     "p": 0.065,
+     "slug": "ufc-van1-yaz1-2026-09-26-demopoulos-win-by-ko-tko"
     }
    }
   }
@@ -1969,31 +1983,31 @@
    "question": "Will Ian Machado Garry become UFC champion in 2026?",
    "slug": "will-ian-machado-garry-become-ufc-champion-in-2026",
    "kind": "winner",
-   "liquidity": 590.61809
+   "liquidity": 591.13633
   },
   {
    "question": "Will Leon Edwards become UFC champion in 2026?",
    "slug": "will-leon-edwards-become-ufc-champion-in-2026",
    "kind": "winner",
-   "liquidity": 141.23545
+   "liquidity": 151.27309
   },
   {
    "question": "Will Ian Machado Garry be the UFC Welterweight Champion on December 31, 2026?",
    "slug": "will-ian-machado-garry-be-the-ufc-welterweight-champion-on-december-31-2026",
    "kind": "winner",
-   "liquidity": 1053.37966
+   "liquidity": 1233.80063
   },
   {
    "question": "Will Leon Edwards be the UFC Welterweight Champion on December 31, 2026?",
    "slug": "will-leon-edwards-be-the-ufc-welterweight-champion-on-december-31-2026",
    "kind": "winner",
-   "liquidity": 2311.52857
+   "liquidity": 2454.96857
   },
   {
    "question": "UFC Fight Night: Alatengheili vs. John Castaneda (Bantamweight, Prelims)",
    "slug": "ufc-ala1-joh9-2026-09-26",
    "kind": "winner",
-   "liquidity": 31253.9905
+   "liquidity": 32648.7331
   }
  ]
 }
