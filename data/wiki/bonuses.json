@@ -1,0 +1,6473 @@
+{
+ "events": {
+  "Noche UFC: Grasso vs. Shevchenko 2 ": {
+   "date": "2023-09-16",
+   "status": "missing"
+  },
+  "Noche UFC: Lopes vs. Silva ": {
+   "date": "2025-09-13",
+   "status": "missing"
+  },
+  "Noche UFC: Silva vs. Delgado ": {
+   "date": "2026-09-12",
+   "status": "missing"
+  },
+  "The Ultimate Fighter: A Champion Will Be Crowned Finale ": {
+   "date": "2014-12-12",
+   "fotn": [],
+   "none_awarded": true,
+   "potn": [],
+   "status": "ok",
+   "title": "The Ultimate Fighter: A Champion Will Be Crowned"
+  },
+  "The Ultimate Fighter: A New World Champion Finale ": {
+   "date": "2017-12-01",
+   "status": "missing"
+  },
+  "The Ultimate Fighter: American Top Team vs. Blackzilians Finale ": {
+   "date": "2015-07-12",
+   "status": "missing"
+  },
+  "The Ultimate Fighter: Heavy Hitters Finale ": {
+   "date": "2018-11-30",
+   "status": "missing"
+  },
+  "The Ultimate Fighter: Redemption Finale ": {
+   "date": "2017-07-07",
+   "status": "missing"
+  },
+  "The Ultimate Fighter: Team Edgar vs. Team Penn Finale ": {
+   "date": "2014-07-06",
+   "fotn": [],
+   "none_awarded": true,
+   "potn": [],
+   "status": "ok",
+   "title": "The Ultimate Fighter: Team Edgar vs. Team Penn"
+  },
+  "The Ultimate Fighter: Team Joanna vs. Team Cl\u00e1udia Finale ": {
+   "date": "2016-07-08",
+   "status": "missing"
+  },
+  "The Ultimate Fighter: Team McGregor vs. Team Faber Finale ": {
+   "date": "2015-12-11",
+   "status": "missing"
+  },
+  "The Ultimate Fighter: Tournament of Champions Finale ": {
+   "date": "2016-12-03",
+   "status": "missing"
+  },
+  "The Ultimate Fighter: Undefeated Finale ": {
+   "date": "2018-07-06",
+   "status": "missing"
+  },
+  "UFC 169: Barao vs Faber 2 ": {
+   "date": "2014-02-01",
+   "fotn": [
+    "Jamie Varner",
+    "Abel Trujillo ($75",
+    "000 each)"
+   ],
+   "none_awarded": false,
+   "potn": [],
+   "status": "ok",
+   "title": "UFC 169"
+  },
+  "UFC 170: Rousey vs McMann ": {
+   "date": "2014-02-22",
+   "fotn": [
+    "Rory MacDonald",
+    "Demian Maia"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Ronda Rousey",
+    "Stephen Thompson"
+   ],
+   "status": "ok",
+   "title": "UFC 170"
+  },
+  "UFC 171: Hendricks vs Lawler ": {
+   "date": "2014-03-15",
+   "fotn": [
+    "Johny Hendricks",
+    "Robbie Lawler"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Ovince St. Preux",
+    "Dennis Bermudez"
+   ],
+   "status": "ok",
+   "title": "UFC 171"
+  },
+  "UFC 172: Jones vs Teixeira ": {
+   "date": "2014-04-26",
+   "fotn": [
+    "Takanori Gomi",
+    "Isaac Vallie-Flagg"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Joseph Benavidez",
+    "Chris Beal"
+   ],
+   "status": "ok",
+   "title": "UFC 172"
+  },
+  "UFC 173: Barao vs Dillashaw ": {
+   "date": "2014-05-24",
+   "fotn": [
+    "Renan Bar\u00e3o",
+    "T.J. Dillashaw"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "T.J. Dillashaw",
+    "Mitch Clarke"
+   ],
+   "status": "ok",
+   "title": "UFC 173"
+  },
+  "UFC 174: Johnson vs Bagautinov ": {
+   "date": "2014-06-14",
+   "fotn": [
+    "Tae Hyun Bang",
+    "Kajan Johnson"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Tae Hyun Bang",
+    "Kiichi Kunimoto"
+   ],
+   "status": "ok",
+   "title": "UFC 174"
+  },
+  "UFC 175: Weidman vs Machida ": {
+   "date": "2014-07-05",
+   "fotn": [
+    "Chris Weidman",
+    "Lyoto Machida"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Ronda Rousey",
+    "Rob Font"
+   ],
+   "status": "ok",
+   "title": "UFC 175"
+  },
+  "UFC 177: Dillashaw vs Soto ": {
+   "date": "2014-08-30",
+   "fotn": [
+    "Ramsey Nijem",
+    "Carlos Diego Ferreira"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "T.J. Dillashaw",
+    "Yancy Medeiros"
+   ],
+   "status": "ok",
+   "title": "UFC 177"
+  },
+  "UFC 178: Johnson vs Cariaso ": {
+   "date": "2014-09-27",
+   "fotn": [
+    "Yoel Romero",
+    "Tim Kennedy"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Dominick Cruz",
+    "Conor McGregor"
+   ],
+   "status": "ok",
+   "title": "UFC 178"
+  },
+  "UFC 179: Aldo vs Mendes 2 ": {
+   "date": "2014-10-25",
+   "fotn": [
+    "Jos\u00e9 Aldo",
+    "Chad Mendes"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "F\u00e1bio Maldonado",
+    "Gilbert Burns"
+   ],
+   "status": "ok",
+   "title": "UFC 179"
+  },
+  "UFC 180: Werdum vs Hunt ": {
+   "date": "2014-11-15",
+   "fotn": [
+    "Henry Briones",
+    "Guido Cannetti"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Fabr\u00edcio Werdum",
+    "Kelvin Gastelum"
+   ],
+   "status": "ok",
+   "title": "UFC 180"
+  },
+  "UFC 181: Hendricks vs Lawler II ": {
+   "date": "2014-12-06",
+   "fotn": [
+    "Sergio Pettis",
+    "Matt Hobar"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Anthony Pettis",
+    "Josh Samman"
+   ],
+   "status": "ok",
+   "title": "UFC 181"
+  },
+  "UFC 182: Jones vs Cormier ": {
+   "date": "2015-01-03",
+   "fotn": [
+    "Jon Jones",
+    "Daniel Cormier"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Paul Felder",
+    "Shawn Jordan"
+   ],
+   "status": "ok",
+   "title": "UFC 182"
+  },
+  "UFC 183: Silva vs Diaz ": {
+   "date": "2015-01-31",
+   "fotn": [
+    "Thales Leites",
+    "Tim Boetsch"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Thales Leites",
+    "Thiago Alves"
+   ],
+   "status": "ok",
+   "title": "UFC 183"
+  },
+  "UFC 184: Rousey vs Zingano ": {
+   "date": "2015-02-28",
+   "fotn": [
+    "None awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Ronda Rousey",
+    "Jake Ellenberger",
+    "Tony Ferguson",
+    "Tim Means"
+   ],
+   "status": "ok",
+   "title": "UFC 184"
+  },
+  "UFC 185: Pettis vs Dos Anjos ": {
+   "date": "2015-03-14",
+   "fotn": [
+    "None awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Rafael dos Anjos",
+    "Joanna J\u0119drzejczyk",
+    "Ross Pearson",
+    "Beneil Dariush"
+   ],
+   "status": "ok",
+   "title": "UFC 185"
+  },
+  "UFC 186: Johnson vs Horiguchi ": {
+   "date": "2015-04-25",
+   "fotn": [
+    "Chad Laprise",
+    "Bryan Barberena"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Demetrious Johnson",
+    "Thomas Almeida"
+   ],
+   "status": "ok",
+   "title": "UFC 186"
+  },
+  "UFC 187: Johnson vs Cormier ": {
+   "date": "2015-05-23",
+   "fotn": [
+    "Andrei Arlovski",
+    "Travis Browne"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Daniel Cormier",
+    "Chris Weidman"
+   ],
+   "status": "ok",
+   "title": "UFC 187"
+  },
+  "UFC 188: Velasquez vs Werdum ": {
+   "date": "2015-06-13",
+   "fotn": [
+    "Yair Rodr\u00edguez",
+    "Charles Rosa"
+   ],
+   "none_awarded": false,
+   "potn": [],
+   "status": "ok",
+   "title": "UFC 188"
+  },
+  "UFC 189: Mendes vs McGregor ": {
+   "date": "2015-07-11",
+   "fotn": [
+    "Robbie Lawler",
+    "Rory MacDonald"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Conor McGregor",
+    "Thomas Almeida"
+   ],
+   "status": "ok",
+   "title": "UFC 189"
+  },
+  "UFC 190: Rousey vs Correia ": {
+   "date": "2015-08-01",
+   "fotn": [
+    "Maur\u00edcio Rua",
+    "Ant\u00f4nio Rog\u00e9rio Nogueria"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Ronda Rousey",
+    "Demian Maia"
+   ],
+   "status": "ok",
+   "title": "UFC 190"
+  },
+  "UFC 191: Johnson vs Dodson 2 ": {
+   "date": "2015-09-05",
+   "fotn": [
+    "John Lineker",
+    "Francisco Rivera"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Anthony Johnson",
+    "Raquel Pennington"
+   ],
+   "status": "ok",
+   "title": "UFC 191"
+  },
+  "UFC 192: Cormier vs Gustafsson ": {
+   "date": "2015-10-03",
+   "fotn": [
+    "Daniel Cormier",
+    "Alexander Gustafsson"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Albert Tumenov",
+    "Adriano Martins"
+   ],
+   "status": "ok",
+   "title": "UFC 192"
+  },
+  "UFC 193: Rousey vs Holm ": {
+   "date": "2015-11-14",
+   "fotn": [
+    "Holly Holm",
+    "Ronda Rousey"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Holly Holm",
+    "Kyle Noke"
+   ],
+   "status": "ok",
+   "title": "UFC 193"
+  },
+  "UFC 194: Aldo vs McGregor ": {
+   "date": "2015-12-12",
+   "fotn": [
+    "Luke Rockhold",
+    "Chris Weidman"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Conor McGregor",
+    "Leonardo Santos"
+   ],
+   "status": "ok",
+   "title": "UFC 194"
+  },
+  "UFC 195: Lawler vs Condit ": {
+   "date": "2016-01-02",
+   "fotn": [
+    "Robbie Lawler",
+    "Carlos Condit"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Stipe Miocic",
+    "Michael McDonald"
+   ],
+   "status": "ok",
+   "title": "UFC 195"
+  },
+  "UFC 196: McGregor vs Diaz ": {
+   "date": "2016-03-05",
+   "fotn": [
+    "Conor McGregor",
+    "Nate Diaz"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Nate Diaz",
+    "Miesha Tate"
+   ],
+   "status": "ok",
+   "title": "UFC 196"
+  },
+  "UFC 197: Jones vs Saint Preux ": {
+   "date": "2016-04-23",
+   "fotn": [
+    "Danny Roberts",
+    "Dominique Steele"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Demetrious Johnson",
+    "Yair Rodr\u00edguez"
+   ],
+   "status": "ok",
+   "title": "UFC 197"
+  },
+  "UFC 198: Werdum vs Miocic ": {
+   "date": "2016-05-14",
+   "fotn": [
+    "Francisco Trinaldo",
+    "Yancy Medeiros"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Stipe Miocic",
+    "Ronaldo Souza"
+   ],
+   "status": "ok",
+   "title": "UFC 198"
+  },
+  "UFC 199: Rockhold vs. Bisping 2 ": {
+   "date": "2016-06-04",
+   "fotn": [
+    "Marco Polo Reyes",
+    "Dong Hyun Ma"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Michael Bisping",
+    "Dan Henderson"
+   ],
+   "status": "ok",
+   "title": "UFC 199"
+  },
+  "UFC 200: Tate vs Nunes ": {
+   "date": "2016-07-09",
+   "fotn": [
+    "Not awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Amanda Nunes",
+    "Cain Velasquez",
+    "Joe Lauzon",
+    "Gegard Mousasi"
+   ],
+   "status": "ok",
+   "title": "UFC 200"
+  },
+  "UFC 201: Lawler vs. Woodley ": {
+   "date": "2016-07-30",
+   "fotn": [
+    "Karolina Kowalkiewicz",
+    "Rose Namajunas"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Tyron Woodley",
+    "Jake Ellenberger"
+   ],
+   "status": "ok",
+   "title": "UFC 201"
+  },
+  "UFC 202: Diaz vs. McGregor 2 ": {
+   "date": "2016-08-20",
+   "fotn": [
+    "Conor McGregor",
+    "Nate Diaz"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Anthony Johnson",
+    "Donald Cerrone"
+   ],
+   "status": "ok",
+   "title": "UFC 202"
+  },
+  "UFC 203: Miocic vs. Overeem ": {
+   "date": "2016-09-10",
+   "fotn": [
+    "Stipe Miocic",
+    "Alistair Overeem"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "J\u00e9ssica Andrade",
+    "Yancy Medeiros"
+   ],
+   "status": "ok",
+   "title": "UFC 203"
+  },
+  "UFC 204: Bisping vs. Henderson ": {
+   "date": "2016-10-08",
+   "fotn": [
+    "Michael Bisping",
+    "Dan Henderson"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Jimi Manuwa",
+    "Iuri Alc\u00e2ntara"
+   ],
+   "status": "ok",
+   "title": "UFC 204"
+  },
+  "UFC 205: Alvarez vs McGregor ": {
+   "date": "2016-11-12",
+   "fotn": [
+    "Tyron Woodley",
+    "Stephen Thompson"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Conor McGregor",
+    "Yoel Romero"
+   ],
+   "status": "ok",
+   "title": "UFC 205"
+  },
+  "UFC 206: Holloway vs. Pettis ": {
+   "date": "2016-12-10",
+   "fotn": [
+    "Cub Swanson",
+    "Doo Ho Choi"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Max Holloway",
+    "Lando Vannata"
+   ],
+   "status": "ok",
+   "title": "UFC 206"
+  },
+  "UFC 207: Nunes vs. Rousey ": {
+   "date": "2016-12-30",
+   "fotn": [
+    "Dominick Cruz",
+    "Cody Garbrandt"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Amanda Nunes",
+    "Alex Garcia"
+   ],
+   "status": "ok",
+   "title": "UFC 207"
+  },
+  "UFC 208: Holm vs. De Randamie ": {
+   "date": "2017-02-11",
+   "fotn": [
+    "Dustin Poirier",
+    "Jim Miller"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Ronaldo Souza"
+   ],
+   "status": "ok",
+   "title": "UFC 208"
+  },
+  "UFC 209: Woodley vs. Thompson 2 ": {
+   "date": "2017-03-04",
+   "fotn": [
+    "David Teymur",
+    "Lando Vannata"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Darren Elkins",
+    "Iuri Alc\u00e2ntara"
+   ],
+   "status": "ok",
+   "title": "UFC 209"
+  },
+  "UFC 210: Cormier vs. Johnson 2 ": {
+   "date": "2017-04-08",
+   "fotn": [
+    "Shane Burgos",
+    "Charles Rosa"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Charles Oliveira",
+    "Gregor Gillespie"
+   ],
+   "status": "ok",
+   "title": "UFC 210"
+  },
+  "UFC 211: Miocic vs. Dos Santos ": {
+   "date": "2017-05-13",
+   "fotn": [
+    "Chase Sherman",
+    "Rashad Coulter"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Stipe Miocic",
+    "Jason Knight"
+   ],
+   "status": "ok",
+   "title": "UFC 211"
+  },
+  "UFC 212: Aldo vs. Holloway ": {
+   "date": "2017-06-03",
+   "fotn": [
+    "Max Holloway",
+    "Jos\u00e9 Aldo"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Cl\u00e1udia Gadelha",
+    "Brian Kelleher"
+   ],
+   "status": "ok",
+   "title": "UFC 212"
+  },
+  "UFC 213: Romero vs. Whittaker ": {
+   "date": "2017-07-08",
+   "fotn": [
+    "Robert Whittaker",
+    "Yoel Romero"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Rob Font",
+    "Chad Laprise"
+   ],
+   "status": "ok",
+   "title": "UFC 213"
+  },
+  "UFC 214: Cormier vs. Jones 2 ": {
+   "date": "2017-07-29",
+   "fotn": [
+    "Brian Ortega",
+    "Renato Moicano"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Jon Jones",
+    "Volkan Oezdemir"
+   ],
+   "status": "ok",
+   "title": "UFC 214"
+  },
+  "UFC 215: Nunes vs Shevchenko 2 ": {
+   "date": "2017-09-09",
+   "fotn": [
+    "Jeremy Stephens",
+    "Gilbert Melendez"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Rafael dos Anjos",
+    "Henry Cejudo"
+   ],
+   "status": "ok",
+   "title": "UFC 215"
+  },
+  "UFC 216: Ferguson vs. Lee ": {
+   "date": "2017-10-07",
+   "fotn": [
+    "Lando Vannata",
+    "Bobby Green"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Demetrious Johnson",
+    "John Moraga"
+   ],
+   "status": "ok",
+   "title": "UFC 216"
+  },
+  "UFC 217: Bisping vs. St-Pierre ": {
+   "date": "2017-11-04",
+   "fotn": [
+    "None awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Georges St-Pierre",
+    "T.J. Dillashaw",
+    "Rose Namajunas",
+    "Ovince Saint Preux",
+    "Ricardo Ramos"
+   ],
+   "status": "ok",
+   "title": "UFC 217"
+  },
+  "UFC 218: Holloway vs. Aldo 2 ": {
+   "date": "2017-12-02",
+   "fotn": [
+    "Eddie Alvarez",
+    "Justin Gaethje",
+    "Yancy Medeiros",
+    "Alex Oliveira"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "None awarded"
+   ],
+   "status": "ok",
+   "title": "UFC 218"
+  },
+  "UFC 219: Cyborg vs. Holm ": {
+   "date": "2017-12-30",
+   "fotn": [
+    "Cris Cyborg",
+    "Holly Holm"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Khabib Nurmagomedov",
+    "Tim Elliott"
+   ],
+   "status": "ok",
+   "title": "UFC 219"
+  },
+  "UFC 220: Miocic vs. Ngannou ": {
+   "date": "2018-01-20",
+   "fotn": [
+    "Calvin Kattar",
+    "Shane Burgos"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Daniel Cormier",
+    "Abdul Razak Alhassan"
+   ],
+   "status": "ok",
+   "title": "UFC 220"
+  },
+  "UFC 221: Romero vs. Rockhold ": {
+   "date": "2018-02-10",
+   "fotn": [
+    "Jake Matthews",
+    "Li Jingliang"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Israel Adesanya",
+    "Jussier Formiga"
+   ],
+   "status": "ok",
+   "title": "UFC 221"
+  },
+  "UFC 222: Cyborg vs. Kunitskaya ": {
+   "date": "2018-03-03",
+   "fotn": [
+    "Sean O'Malley",
+    "Andre Soukhamthath"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Brian Ortega",
+    "Alexander Hernandez"
+   ],
+   "status": "ok",
+   "title": "UFC 222"
+  },
+  "UFC 223: Khabib vs. Iaquinta ": {
+   "date": "2018-04-07",
+   "fotn": [
+    "Zabit Magomedsharipov",
+    "Kyle Bochniak"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Chris Gruetzemacher",
+    "Olivier Aubin-Mercier"
+   ],
+   "status": "ok",
+   "title": "UFC 223"
+  },
+  "UFC 224: Nunes vs. Pennington ": {
+   "date": "2018-05-12",
+   "fotn": [
+    "Kelvin Gastelum",
+    "Ronaldo Souza"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Lyoto Machida",
+    "Aleksei Oleinyk"
+   ],
+   "status": "ok",
+   "title": "UFC 224"
+  },
+  "UFC 225: Whittaker vs. Romero 2 ": {
+   "date": "2018-06-09",
+   "fotn": [
+    "Robert Whittaker (Yoel Romero was unable to receive his share of the bonus money due to missing weight)"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Curtis Blaydes",
+    "Charles Oliveira"
+   ],
+   "status": "ok",
+   "title": "UFC 225"
+  },
+  "UFC 226: Miocic vs. Cormier ": {
+   "date": "2018-07-07",
+   "fotn": [
+    "None awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Daniel Cormier",
+    "Anthony Pettis",
+    "Khalil Rountree Jr",
+    "Paulo Costa"
+   ],
+   "status": "ok",
+   "title": "UFC 226"
+  },
+  "UFC 227: Dillashaw vs. Garbrandt 2 ": {
+   "date": "2018-08-04",
+   "fotn": [
+    "Henry Cejudo",
+    "Demetrious Johnson"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "T.J. Dillashaw",
+    "Renato Moicano"
+   ],
+   "status": "ok",
+   "title": "UFC 227"
+  },
+  "UFC 228: Woodley vs. Till ": {
+   "date": "2018-09-08",
+   "fotn": [
+    "Irene Aldana",
+    "Lucie Pudilov\u00e1"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Tyron Woodley",
+    "J\u00e9ssica Andrade"
+   ],
+   "status": "ok",
+   "title": "UFC 228"
+  },
+  "UFC 229: Khabib vs. McGregor ": {
+   "date": "2018-10-06",
+   "fotn": [
+    "Tony Ferguson",
+    "Anthony Pettis"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Derrick Lewis",
+    "Aspen Ladd"
+   ],
+   "status": "ok",
+   "title": "UFC 229"
+  },
+  "UFC 230: Cormier vs. Lewis ": {
+   "date": "2018-11-03",
+   "fotn": [
+    "Ronaldo Souza",
+    "Chris Weidman"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Jared Cannonier",
+    "Israel Adesanya"
+   ],
+   "status": "ok",
+   "title": "UFC 230"
+  },
+  "UFC 231: Holloway vs. Ortega ": {
+   "date": "2018-12-08",
+   "fotn": [
+    "Max Holloway",
+    "Brian Ortega"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Max Holloway",
+    "Thiago Santos"
+   ],
+   "status": "ok",
+   "title": "UFC 231"
+  },
+  "UFC 232: Jones vs. Gustafsson 2 ": {
+   "date": "2018-12-29",
+   "fotn": [
+    "Chad Mendes",
+    "Alexander Volkanovski"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Amanda Nunes",
+    "Ryan Hall"
+   ],
+   "status": "ok",
+   "title": "UFC 232"
+  },
+  "UFC 234: Adesanya vs. Silva ": {
+   "date": "2019-02-09",
+   "fotn": [
+    "Israel Adesanya",
+    "Anderson Silva"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Montana De La Rosa",
+    "Devonte Smith"
+   ],
+   "status": "ok",
+   "title": "UFC 234"
+  },
+  "UFC 235: Jones vs. Smith ": {
+   "date": "2019-03-02",
+   "fotn": [
+    "Pedro Munhoz",
+    "Cody Garbrandt"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Johnny Walker",
+    "Diego Sanchez"
+   ],
+   "status": "ok",
+   "title": "UFC 235"
+  },
+  "UFC 236: Holloway vs. Poirier 2 ": {
+   "date": "2019-04-13",
+   "fotn": [
+    "Dustin Poirier",
+    "Max Holloway",
+    "Kelvin Gastelum",
+    "Israel Adesanya"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "No bonus awarded"
+   ],
+   "status": "ok",
+   "title": "UFC 236"
+  },
+  "UFC 237: Namajunas vs. Andrade ": {
+   "date": "2019-05-11",
+   "fotn": [
+    "J\u00e9ssica Andrade",
+    "Rose Namajunas"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "J\u00e9ssica Andrade",
+    "Warlley Alves"
+   ],
+   "status": "ok",
+   "title": "UFC 237"
+  },
+  "UFC 238: Cejudo vs. Moraes ": {
+   "date": "2019-06-08",
+   "fotn": [
+    "Tony Ferguson",
+    "Donald Cerrone"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Henry Cejudo",
+    "Valentina Shevchenko"
+   ],
+   "status": "ok",
+   "title": "UFC 238"
+  },
+  "UFC 239: Jones vs. Santos ": {
+   "date": "2019-07-06",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Amanda Nunes",
+    "Jorge Masvidal",
+    "Jan B\u0142achowicz",
+    "Yadong Song"
+   ],
+   "status": "ok",
+   "title": "UFC 239"
+  },
+  "UFC 240: Holloway vs. Edgar ": {
+   "date": "2019-07-27",
+   "fotn": [
+    "Deiveson Figueiredo",
+    "Alexandre Pantoja"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Geoff Neal",
+    "Hakeem Dawodu"
+   ],
+   "status": "ok",
+   "title": "UFC 240"
+  },
+  "UFC 241: Cormier vs. Miocic 2 ": {
+   "date": "2019-08-17",
+   "fotn": [
+    "Paulo Costa",
+    "Yoel Romero"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Stipe Miocic",
+    "Khama Worthy"
+   ],
+   "status": "ok",
+   "title": "UFC 241"
+  },
+  "UFC 242: Khabib vs. Poirier ": {
+   "date": "2019-09-07",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Khabib Nurmagomedov",
+    "Ottman Azaitar",
+    "Belal Muhammad",
+    "Muslim Salikhov"
+   ],
+   "status": "ok",
+   "title": "UFC 242"
+  },
+  "UFC 243: Whittaker vs. Adesanya ": {
+   "date": "2019-10-05",
+   "fotn": [
+    "Brad Riddell",
+    "Jamie Mullarkey"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Israel Adesanya",
+    "Yorgan de Castro"
+   ],
+   "status": "ok",
+   "title": "UFC 243"
+  },
+  "UFC 244: Masvidal vs. Diaz ": {
+   "date": "2019-11-02",
+   "fotn": [
+    "Stephen Thompson",
+    "Vicente Luque"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Kevin Lee",
+    "Corey Anderson"
+   ],
+   "status": "ok",
+   "title": "UFC 244"
+  },
+  "UFC 245: Usman vs. Covington ": {
+   "date": "2019-12-14",
+   "fotn": [
+    "Kamaru Usman",
+    "Colby Covington"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Petr Yan",
+    "Irene Aldana"
+   ],
+   "status": "ok",
+   "title": "UFC 245"
+  },
+  "UFC 246: McGregor vs. Cowboy ": {
+   "date": "2020-01-18",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Conor McGregor",
+    "Aleksei Oleinik",
+    "Brian Kelleher",
+    "Carlos Diego Ferreira",
+    "Drew Dober"
+   ],
+   "status": "ok",
+   "title": "UFC 246"
+  },
+  "UFC 247: Jones vs. Reyes ": {
+   "date": "2020-02-08",
+   "fotn": [
+    "Trevin Giles",
+    "James Krause"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Khaos Williams",
+    "Mario Bautista"
+   ],
+   "status": "ok",
+   "title": "UFC 247"
+  },
+  "UFC 248: Adesanya vs. Romero ": {
+   "date": "2020-03-07",
+   "fotn": [
+    "Zhang Weili",
+    "Joanna J\u0119drzejczyk"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Beneil Dariush",
+    "Sean O'Malley"
+   ],
+   "status": "ok",
+   "title": "UFC 248"
+  },
+  "UFC 249: Ferguson vs. Gaethje ": {
+   "date": "2020-05-09",
+   "fotn": [
+    "Tony Ferguson",
+    "Justin Gaethje"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Justin Gaethje",
+    "Francis Ngannou"
+   ],
+   "status": "ok",
+   "title": "UFC 249"
+  },
+  "UFC 250: Nunes vs. Spencer ": {
+   "date": "2020-06-06",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Cody Garbrandt",
+    "Aljamain Sterling",
+    "Sean O'Malley",
+    "Alex Perez"
+   ],
+   "status": "ok",
+   "title": "UFC 250"
+  },
+  "UFC 251: Usman vs. Masvidal ": {
+   "date": "2020-07-11",
+   "fotn": [
+    "Rose Namajunas",
+    "J\u00e9ssica Andrade"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Ji\u0159\u00ed Proch\u00e1zka",
+    "Davey Grant"
+   ],
+   "status": "ok",
+   "title": "UFC 251"
+  },
+  "UFC 252: Miocic vs. Cormier 3 ": {
+   "date": "2020-08-15",
+   "fotn": [
+    "Kai Kamaka III",
+    "Tony Kelley"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Daniel Pineda",
+    "Virna Jandiroba"
+   ],
+   "status": "ok",
+   "title": "UFC 252"
+  },
+  "UFC 253: Adesanya vs. Costa ": {
+   "date": "2020-09-26",
+   "fotn": [
+    "Brandon Royval",
+    "Kai Kara-France"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Israel Adesanya",
+    "Jan B\u0142achowicz"
+   ],
+   "status": "ok",
+   "title": "UFC 253"
+  },
+  "UFC 254: Khabib vs. Gaethje ": {
+   "date": "2020-10-24",
+   "fotn": [
+    "Casey Kenney",
+    "Nathaniel Wood"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Khabib Nurmagomedov",
+    "Magomed Ankalaev"
+   ],
+   "status": "ok",
+   "title": "UFC 254"
+  },
+  "UFC 255: Figueiredo vs. Perez ": {
+   "date": "2020-11-21",
+   "fotn": [
+    "Sasha Palatnikov",
+    "Louis Cosce"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Joaquin Buckley",
+    "Antonina Shevchenko"
+   ],
+   "status": "ok",
+   "title": "UFC 255"
+  },
+  "UFC 256: Figueiredo vs. Moreno ": {
+   "date": "2020-12-12",
+   "fotn": [
+    "Deiveson Figueiredo",
+    "Brandon Moreno"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Kevin Holland",
+    "Rafael Fiziev"
+   ],
+   "status": "ok",
+   "title": "UFC 256"
+  },
+  "UFC 257: Poirier vs. McGregor ": {
+   "date": "2021-01-23",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Dustin Poirier",
+    "Michael Chandler",
+    "Makhmud Muradov",
+    "Marina Rodriguez"
+   ],
+   "status": "ok",
+   "title": "UFC 257"
+  },
+  "UFC 258: Usman vs. Burns ": {
+   "date": "2021-02-13",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Kamaru Usman",
+    "Julian Marquez",
+    "Anthony Hernandez",
+    "Polyana Viana"
+   ],
+   "status": "ok",
+   "title": "UFC 258"
+  },
+  "UFC 259: Blachowicz vs. Adesanya ": {
+   "date": "2021-03-06",
+   "fotn": [
+    "Kennedy Nzechukwu",
+    "Carlos Ulberg"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Kai Kara-France",
+    "Uro\u0161 Medi\u0107"
+   ],
+   "status": "ok",
+   "title": "UFC 259"
+  },
+  "UFC 260: Miocic vs. Ngannou ": {
+   "date": "2021-03-27",
+   "fotn": [
+    "Vicente Luque",
+    "Tyron Woodley"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Francis Ngannou",
+    "Sean O'Malley"
+   ],
+   "status": "ok",
+   "title": "UFC 260"
+  },
+  "UFC 261: Usman vs. Masvidal 2 ": {
+   "date": "2021-04-24",
+   "fotn": [
+    "Jeff Molina",
+    "Aori Qileng"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Kamaru Usman",
+    "Rose Namajunas"
+   ],
+   "status": "ok",
+   "title": "UFC 261"
+  },
+  "UFC 262: Oliveira vs. Chandler ": {
+   "date": "2021-05-15",
+   "fotn": [
+    "Edson Barboza",
+    "Shane Burgos"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Charles Oliveira",
+    "Christos Giagos"
+   ],
+   "status": "ok",
+   "title": "UFC 262"
+  },
+  "UFC 263: Adesanya vs. Vettori 2 ": {
+   "date": "2021-06-12",
+   "fotn": [
+    "Brad Riddell",
+    "Drew Dober"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Brandon Moreno",
+    "Paul Craig"
+   ],
+   "status": "ok",
+   "title": "UFC 263"
+  },
+  "UFC 264: Poirier vs. McGregor 3 ": {
+   "date": "2021-07-10",
+   "fotn": [
+    "Sean O'Malley",
+    "Kris Moutinho"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Tai Tuivasa",
+    "Dricus du Plessis"
+   ],
+   "status": "ok",
+   "title": "UFC 264"
+  },
+  "UFC 265: Lewis vs. Gane ": {
+   "date": "2021-08-07",
+   "fotn": [
+    "Rafael Fiziev",
+    "Bobby Green"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Ciryl Gane",
+    "Vicente Luque",
+    "Jessica Penne",
+    "Miles Johns"
+   ],
+   "status": "ok",
+   "title": "UFC 265"
+  },
+  "UFC 266: Volkanovski vs. Ortega ": {
+   "date": "2021-09-25",
+   "fotn": [
+    "Alexander Volkanovski",
+    "Brian Ortega"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Merab Dvalishvili",
+    "Chris Daukaus"
+   ],
+   "status": "ok",
+   "title": "UFC 266"
+  },
+  "UFC 267: Blachowicz vs. Teixeira ": {
+   "date": "2021-10-30",
+   "fotn": [
+    "Petr Yan",
+    "Cory Sandhagen"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Glover Teixeira",
+    "Khamzat Chimaev"
+   ],
+   "status": "ok",
+   "title": "UFC 267"
+  },
+  "UFC 268: Usman vs. Covington 2 ": {
+   "date": "2021-11-06",
+   "fotn": [
+    "Justin Gaethje",
+    "Michael Chandler"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Marlon Vera",
+    "Alex Pereira",
+    "Bobby Green",
+    "Chris Barnett"
+   ],
+   "status": "ok",
+   "title": "UFC 268"
+  },
+  "UFC 269: Oliveira vs. Poirier ": {
+   "date": "2021-12-11",
+   "fotn": [
+    "Dominick Cruz",
+    "Pedro Munhoz"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Charles Oliveira",
+    "Julianna Pe\u00f1a",
+    "Kai Kara-France",
+    "Sean O'Malley",
+    "Tai Tuivasa",
+    "Bruno Silva"
+   ],
+   "status": "ok",
+   "title": "UFC 269"
+  },
+  "UFC 270: Ngannou vs. Gane ": {
+   "date": "2022-01-22",
+   "fotn": [
+    "Deiveson Figueiredo",
+    "Brandon Moreno"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Said Nurmagomedov",
+    "Vanessa Demopoulos"
+   ],
+   "status": "ok",
+   "title": "UFC 270"
+  },
+  "UFC 271: Adesanya vs. Whittaker 2 ": {
+   "date": "2022-02-12",
+   "fotn": [
+    "Douglas Silva de Andrade",
+    "Sergey Morozov"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Tai Tuivasa",
+    "Jared Cannonier"
+   ],
+   "status": "ok",
+   "title": "UFC 271"
+  },
+  "UFC 272: Covington vs. Masvidal ": {
+   "date": "2022-03-05",
+   "fotn": [
+    "Colby Covington",
+    "Jorge Masvidal"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Kevin Holland",
+    "Maryna Moroz"
+   ],
+   "status": "ok",
+   "title": "UFC 272"
+  },
+  "UFC 273: Volkanovski vs. The Korean Zombie ": {
+   "date": "2022-04-09",
+   "fotn": [
+    "Khamzat Chimaev",
+    "Gilbert Burns"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Alexander Volkanovski",
+    "Alexey Oleynik"
+   ],
+   "status": "ok",
+   "title": "UFC 273"
+  },
+  "UFC 274: Oliveira vs. Gaethje ": {
+   "date": "2022-05-07",
+   "fotn": [
+    "Brandon Royval",
+    "Matt Schnell"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Michael Chandler",
+    "Andr\u00e9 Fialho"
+   ],
+   "status": "ok",
+   "title": "UFC 274"
+  },
+  "UFC 275: Teixeira vs. Prochazka ": {
+   "date": "2022-06-11",
+   "fotn": [
+    "Ji\u0159\u00ed Proch\u00e1zka",
+    "Glover Teixeira"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Zhang Weili",
+    "Jake Matthews",
+    "Jack Della Maddalena",
+    "Hayisaer Maheshate",
+    "Silvana G\u00f3mez Ju\u00e1rez"
+   ],
+   "status": "ok",
+   "title": "UFC 275"
+  },
+  "UFC 276: Adesanya vs. Cannonier ": {
+   "date": "2022-07-02",
+   "fotn": [
+    "Bryan Barberena",
+    "Robbie Lawler"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Alex Pereira",
+    "Jalin Turner",
+    "Julija Stoliarenko"
+   ],
+   "status": "ok",
+   "title": "UFC 276"
+  },
+  "UFC 277: Pena vs. Nunes 2 ": {
+   "date": "2022-07-30",
+   "fotn": [
+    "Brandon Moreno",
+    "Kai Kara-France"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Alexandre Pantoja",
+    "Drew Dober"
+   ],
+   "status": "ok",
+   "title": "UFC 277"
+  },
+  "UFC 278: Usman vs. Edwards ": {
+   "date": "2022-08-20",
+   "fotn": [
+    "Paulo Costa",
+    "Luke Rockhold"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Leon Edwards",
+    "Victor Altamirano"
+   ],
+   "status": "ok",
+   "title": "UFC 278"
+  },
+  "UFC 279: Diaz vs. Ferguson ": {
+   "date": "2022-09-10",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Nate Diaz",
+    "Irene Aldana",
+    "Johnny Walker",
+    "Jailton Almeida"
+   ],
+   "status": "ok",
+   "title": "UFC 279"
+  },
+  "UFC 280: Oliveira vs. Makhachev ": {
+   "date": "2022-10-22",
+   "fotn": [
+    "Sean O'Malley",
+    "Petr Yan"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Islam Makhachev",
+    "Belal Muhammad"
+   ],
+   "status": "ok",
+   "title": "UFC 280"
+  },
+  "UFC 281: Adesanya vs. Pereira ": {
+   "date": "2022-11-12",
+   "fotn": [
+    "Dustin Poirier",
+    "Michael Chandler"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Alex Pereira",
+    "Zhang Weili"
+   ],
+   "status": "ok",
+   "title": "UFC 281"
+  },
+  "UFC 282: Blachowicz vs. Ankalaev ": {
+   "date": "2022-12-10",
+   "fotn": [
+    "Dricus du Plessis",
+    "Darren Till"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Santiago Ponzinibbio",
+    "Ilia Topuria",
+    "Ra\u00fal Rosas Jr",
+    "Jairzinho Rozenstruik",
+    "Edmen Shahbazyan",
+    "Chris Curtis",
+    "Billy Quarantillo",
+    "T.J. Brown",
+    "Cameron Saaiman"
+   ],
+   "status": "ok",
+   "title": "UFC 282"
+  },
+  "UFC 283: Teixeira vs. Hill ": {
+   "date": "2023-01-21",
+   "fotn": [
+    "Jamahal Hill",
+    "Glover Teixeira"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Jailton Almeida",
+    "Ismael Bonfim"
+   ],
+   "status": "ok",
+   "title": "UFC 283"
+  },
+  "UFC 284: Makhachev vs. Volkanovski ": {
+   "date": "2023-02-11",
+   "fotn": [
+    "Islam Makhachev",
+    "Alexander Volkanovski"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Yair Rodr\u00edguez",
+    "Jack Della Maddalena"
+   ],
+   "status": "ok",
+   "title": "UFC 284"
+  },
+  "UFC 285: Jones vs. Gane ": {
+   "date": "2023-03-04",
+   "fotn": [
+    "Shavkat Rakhmonov",
+    "Geoff Neal{{efn|Despite missing weight",
+    "Neal was still awarded his share of the bonus.}}"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Jon Jones",
+    "Alexa Grasso",
+    "Bo Nickal"
+   ],
+   "status": "ok",
+   "title": "UFC 285"
+  },
+  "UFC 286: Edwards vs. Usman 3 ": {
+   "date": "2023-03-18",
+   "fotn": [
+    "Justin Gaethje",
+    "Rafael Fiziev"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Gunnar Nelson",
+    "Jake Hadley"
+   ],
+   "status": "ok",
+   "title": "UFC 286"
+  },
+  "UFC 287: Pereira vs. Adesanya 2 ": {
+   "date": "2023-04-08",
+   "fotn": [
+    "Kelvin Gastelum",
+    "Chris Curtis"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Israel Adesanya",
+    "Rob Font"
+   ],
+   "status": "ok",
+   "title": "UFC 287"
+  },
+  "UFC 288: Sterling vs. Cejudo ": {
+   "date": "2023-05-06",
+   "fotn": [
+    "Movsar Evloev",
+    "Diego Lopes"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Yan Xiaonan",
+    "Matt Frevola"
+   ],
+   "status": "ok",
+   "title": "UFC 288"
+  },
+  "UFC 289: Nunes vs. Aldana ": {
+   "date": "2023-06-10",
+   "fotn": [
+    "Marc-Andr\u00e9 Barriault",
+    "Eryk Anders"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Charles Oliveira",
+    "Mike Malott",
+    "Steve Erceg"
+   ],
+   "status": "ok",
+   "title": "UFC 289"
+  },
+  "UFC 290: Volkanovski vs. Rodriguez ": {
+   "date": "2023-07-08",
+   "fotn": [
+    "Brandon Moreno",
+    "Alexandre Pantoja"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Dricus du Plessis",
+    "Denise Gomes"
+   ],
+   "status": "ok",
+   "title": "UFC 290"
+  },
+  "UFC 291: Poirier vs. Gaethje 2 ": {
+   "date": "2023-07-29",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Justin Gaethje",
+    "Derrick Lewis",
+    "Bobby Green",
+    "Kevin Holland"
+   ],
+   "status": "ok",
+   "title": "UFC 291"
+  },
+  "UFC 292: Sterling vs. O'Malley ": {
+   "date": "2023-08-19",
+   "fotn": [
+    "Brad Katona",
+    "Cody Gibson"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Sean O'Malley",
+    "Zhang Weili"
+   ],
+   "status": "ok",
+   "title": "UFC 292"
+  },
+  "UFC 293: Adesanya vs. Strickland ": {
+   "date": "2023-09-09",
+   "fotn": [
+    "Manel Kape",
+    "Felipe dos Santos"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Sean Strickland",
+    "Justin Tafa"
+   ],
+   "status": "ok",
+   "title": "UFC 293"
+  },
+  "UFC 294: Makhachev vs. Volkanovski 2 ": {
+   "date": "2023-10-21",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Islam Makhachev",
+    "Ikram Aliskerov",
+    "Said Nurmagomedov",
+    "Muhammad Mokaev"
+   ],
+   "status": "ok",
+   "title": "UFC 294"
+  },
+  "UFC 295: Prochazka vs. Pereira ": {
+   "date": "2023-11-11",
+   "fotn": [
+    "Viacheslav Borshchev",
+    "Nazim Sadykhov"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Alex Pereira",
+    "Tom Aspinall",
+    "J\u00e9ssica Andrade",
+    "Beno\u00eet Saint-Denis",
+    "Diego Lopes"
+   ],
+   "status": "ok",
+   "title": "UFC 295"
+  },
+  "UFC 296: Edwards vs. Covington ": {
+   "date": "2023-12-16",
+   "fotn": [
+    "Irene Aldana",
+    "Karol Rosa"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Josh Emmett",
+    "Ariane Lipski",
+    "Shamil Gaziev"
+   ],
+   "status": "ok",
+   "title": "UFC 296"
+  },
+  "UFC 297: Strickland vs. Du Plessis ": {
+   "date": "2024-01-20",
+   "fotn": [
+    "Dricus du Plessis",
+    "Sean Strickland"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Gillian Robertson",
+    "Jasmine Jasudavicius"
+   ],
+   "status": "ok",
+   "title": "UFC 297"
+  },
+  "UFC 298: Volkanovski vs. Topuria ": {
+   "date": "2024-02-17",
+   "fotn": [
+    "Amanda Lemos",
+    "Mackenzie Dern"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Ilia Topuria",
+    "Anthony Hernandez",
+    "Zhang Mingyang"
+   ],
+   "status": "ok",
+   "title": "UFC 298"
+  },
+  "UFC 299: O'Malley vs. Vera 2 ": {
+   "date": "2024-03-09",
+   "fotn": [
+    "Dustin Poirier",
+    "Beno\u00eet Saint Denis"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Sean O\u2019Malley",
+    "Jack Della Maddalena",
+    "Curtis Blaydes",
+    "Michel Pereira",
+    "Robelis Despaigne"
+   ],
+   "status": "ok",
+   "title": "UFC 299"
+  },
+  "UFC 300: Pereira vs. Hill ": {
+   "date": "2024-04-13",
+   "fotn": [
+    "Max Holloway",
+    "Justin Gaethje"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Max Holloway",
+    "Ji\u0159\u00ed Proch\u00e1zka"
+   ],
+   "status": "ok",
+   "title": "UFC 300"
+  },
+  "UFC 301: Pantoja vs. Erceg ": {
+   "date": "2024-05-04",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Michel Pereira",
+    "Caio Borralho",
+    "Maur\u00edcio Ruffy",
+    "Alessandro Costa"
+   ],
+   "status": "ok",
+   "title": "UFC 301"
+  },
+  "UFC 302: Makhachev vs. Poirier ": {
+   "date": "2024-06-01",
+   "fotn": [
+    "Islam Makhachev",
+    "Dustin Poirier"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Islam Makhachev",
+    "Kevin Holland"
+   ],
+   "status": "ok",
+   "title": "UFC 302"
+  },
+  "UFC 303: Pereira vs. Prochazka 2 ": {
+   "date": "2024-06-29",
+   "fotn": [
+    "Andre Fili",
+    "Cub Swanson"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Alex Pereira",
+    "Macy Chiasson",
+    "Joe Pyfer",
+    "Payton Talbott"
+   ],
+   "status": "ok",
+   "title": "UFC 303"
+  },
+  "UFC 304: Edwards vs. Muhammad 2 ": {
+   "date": "2024-07-27",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Paddy Pimblett",
+    "Tom Aspinall",
+    "Mick Parkin"
+   ],
+   "status": "ok",
+   "title": "UFC 304"
+  },
+  "UFC 305: Du Plessis vs. Adesanya ": {
+   "date": "2024-08-17",
+   "fotn": [
+    "Dan Hooker",
+    "Mateusz Gamrot"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Kai Kara-France",
+    "Carlos Prates"
+   ],
+   "status": "ok",
+   "title": "UFC 305"
+  },
+  "UFC 306: Riyadh Season Noche UFC ": {
+   "date": "2024-09-14",
+   "fotn": [
+    "Esteban Ribovics",
+    "Daniel Zellhuber"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Ignacio Bahamondes",
+    "Ketlen Souza"
+   ],
+   "status": "ok",
+   "title": "UFC 306"
+  },
+  "UFC 307: Pereira vs. Rountree Jr. ": {
+   "date": "2024-10-05",
+   "fotn": [
+    "Alex Pereira",
+    "Khalil Rountree Jr"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Joaquin Buckley",
+    "Ryan Spann"
+   ],
+   "status": "ok",
+   "title": "UFC 307"
+  },
+  "UFC 308: Topuria vs. Holloway ": {
+   "date": "2024-10-26",
+   "fotn": [
+    "Mateusz R\u0119becki",
+    "Myktybek Orolbai"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Ilia Topuria",
+    "Khamzat Chimaev",
+    "Sharabutdin Magomedov"
+   ],
+   "status": "ok",
+   "title": "UFC 308"
+  },
+  "UFC 309: Jones vs. Miocic ": {
+   "date": "2024-11-16",
+   "fotn": [
+    "Charles Oliveira",
+    "Michael Chandler"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Jon Jones",
+    "Ramiz Brahimaj",
+    "Oban Elliott"
+   ],
+   "status": "ok",
+   "title": "UFC 309"
+  },
+  "UFC 310: Pantoja vs. Asakura ": {
+   "date": "2024-12-07",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Alexandre Pantoja",
+    "Vicente Luque",
+    "Chase Hooper",
+    "Kennedy Nzechukwu"
+   ],
+   "status": "ok",
+   "title": "UFC 310"
+  },
+  "UFC 311: Makhachev vs. Moicano ": {
+   "date": "2025-01-18",
+   "fotn": [
+    "Merab Dvalishvili",
+    "Umar Nurmagomedov"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Ji\u0159\u00ed Proch\u00e1zka",
+    "Jailton Almeida"
+   ],
+   "status": "ok",
+   "title": "UFC 311"
+  },
+  "UFC 312: Du Plessis vs. Strickland 2 ": {
+   "date": "2025-02-08",
+   "fotn": [
+    "Rong Zhu",
+    "Kody Steele"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Tallison Teixeira",
+    "Quillan Salkilld"
+   ],
+   "status": "ok",
+   "title": "UFC 312"
+  },
+  "UFC 313: Pereira vs. Ankalaev ": {
+   "date": "2025-03-08",
+   "fotn": [
+    "Justin Gaethje",
+    "Rafael Fiziev"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Ignacio Bahamondes",
+    "Maur\u00edcio Ruffy"
+   ],
+   "status": "ok",
+   "title": "UFC 313"
+  },
+  "UFC 314: Volkanovski vs. Lopes ": {
+   "date": "2025-04-12",
+   "fotn": [
+    "Alexander Volkanovski",
+    "Diego Lopes"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Paddy Pimblett",
+    "Jean Silva"
+   ],
+   "status": "ok",
+   "title": "UFC 314"
+  },
+  "UFC 315: Muhammad vs. Della Maddalena ": {
+   "date": "2025-05-10",
+   "fotn": [
+    "Jack Della Maddalena",
+    "Belal Muhammad"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Jasmine Jasudavicius",
+    "Marc-Andr\u00e9 Barriault"
+   ],
+   "status": "ok",
+   "title": "UFC 315"
+  },
+  "UFC 316: Dvalishvili vs. O'Malley 2 ": {
+   "date": "2025-06-07",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Merab Dvalishvili",
+    "Kayla Harrison",
+    "Kevin Holland",
+    "Yoo Joo-sang"
+   ],
+   "status": "ok",
+   "title": "UFC 316"
+  },
+  "UFC 317: Topuria vs. Oliveira ": {
+   "date": "2025-06-28",
+   "fotn": [
+    "Joshua Van",
+    "Brandon Royval"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Ilia Topuria",
+    "Gregory Rodrigues"
+   ],
+   "status": "ok",
+   "title": "UFC 317"
+  },
+  "UFC 318: Holloway vs. Poirier 3 ": {
+   "date": "2025-07-19",
+   "fotn": [
+    "Brendan Allen",
+    "Marvin Vettori"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Ateba Gautier",
+    "Islam Dulatov",
+    "Carli Judice"
+   ],
+   "status": "ok",
+   "title": "UFC 318"
+  },
+  "UFC 319: Du Plessis vs. Chimaev ": {
+   "date": "2025-08-16",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Khamzat Chimaev",
+    "Lerone Murphy",
+    "Carlos Prates",
+    "Tim Elliott"
+   ],
+   "status": "ok",
+   "title": "UFC 319"
+  },
+  "UFC 320: Ankalaev vs. Pereira 2 ": {
+   "date": "2025-10-04",
+   "fotn": [
+    "Ji\u0159\u00ed Proch\u00e1zka",
+    "Khalil Rountree Jr"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Alex Pereira",
+    "Ji\u0159\u00ed Proch\u00e1zka",
+    "Joe Pyfer"
+   ],
+   "status": "ok",
+   "title": "UFC 320"
+  },
+  "UFC 321: Aspinall vs. Gane ": {
+   "date": "2025-10-25",
+   "fotn": [
+    "\u013dudov\u00edt Klein",
+    "Mateusz R\u0119becki"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Quillan Salkilld",
+    "Valter Walker"
+   ],
+   "status": "ok",
+   "title": "UFC 321"
+  },
+  "UFC 322: Della Maddalena vs. Makhachev ": {
+   "date": "2025-11-15",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Michael Morales",
+    "Carlos Prates",
+    "Beno\u00eet Saint Denis",
+    "Bo Nickal"
+   ],
+   "status": "ok",
+   "title": "UFC 322"
+  },
+  "UFC 323: Dvalishvili vs. Yan 2 ": {
+   "date": "2025-12-06",
+   "fotn": [
+    "Petr Yan",
+    "Merab Dvalishvili"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Manuel Torres",
+    "Iwo Baraniewski"
+   ],
+   "status": "ok",
+   "title": "UFC 323"
+  },
+  "UFC 324: Gaethje vs. Pimblett ": {
+   "date": "2026-01-24",
+   "fotn": [
+    "Justin Gaethje",
+    "Paddy Pimblett"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Josh Hokit",
+    "Ty Miller"
+   ],
+   "status": "ok",
+   "title": "UFC 324"
+  },
+  "UFC 325: Volkanovski vs. Lopes 2 ": {
+   "date": "2026-01-31",
+   "fotn": [
+    "Alexander Volkanovski",
+    "Diego Lopes"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Maur\u00edcio Ruffy",
+    "Quillan Salkilld"
+   ],
+   "status": "ok",
+   "title": "UFC 325"
+  },
+  "UFC 326: Holloway vs. Oliveira 2 ": {
+   "date": "2026-03-07",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Drew Dober",
+    "Gregory Rodrigues",
+    "Alberto Montes",
+    "Rodolfo Bellato"
+   ],
+   "status": "ok",
+   "title": "UFC 326"
+  },
+  "UFC 327: Prochazka vs. Ulberg ": {
+   "date": "2026-04-11",
+   "fotn": [
+    "Josh Hokit",
+    "Curtis Blaydes"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Carlos Ulberg",
+    "Josh Hokit"
+   ],
+   "status": "ok",
+   "title": "UFC 327"
+  },
+  "UFC 328: Chimaev vs. Strickland ": {
+   "date": "2026-05-09",
+   "fotn": [
+    "Joshua Van",
+    "Tatsuro Taira"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Yaroslav Amosov",
+    "Jim Miller"
+   ],
+   "status": "ok",
+   "title": "UFC 328"
+  },
+  "UFC 329: McGregor vs. Holloway 2 ": {
+   "date": "2026-07-11",
+   "fotn": [
+    "Brandon Royval",
+    "Lone'er Kavanagh"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Paddy Pimblett",
+    "King Green"
+   ],
+   "status": "ok",
+   "title": "UFC 329"
+  },
+  "UFC 330: Makhachev vs. Machado Garry ": {
+   "date": "2026-08-15",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Jalin Turner",
+    "Dustin Stoltzfus",
+    "Charles Johnson",
+    "Jeremiah Wells"
+   ],
+   "status": "ok",
+   "title": "UFC 330"
+  },
+  "UFC 331: Van vs. Pantoja 2 ": {
+   "date": "2026-09-19",
+   "fotn": [
+    "Joshua Van",
+    "Alexandre Pantoja"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Arman Tsarukyan",
+    "Casey O'Neill"
+   ],
+   "status": "ok",
+   "title": "UFC 331"
+  },
+  "UFC Fight Night 56: Shogun vs Saint Preux ": {
+   "date": "2014-11-08",
+   "fotn": [
+    "Thomas Almeida",
+    "Tim Gorman"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Ovince Saint Preux",
+    "Leandro Silva"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Shogun vs. Saint Preux"
+  },
+  "UFC Fight Night: Adesanya vs. Imavov ": {
+   "date": "2025-02-01",
+   "fotn": [
+    "Vinicius Oliveira",
+    "Said Nurmagomedov"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Nassourdine Imavov",
+    "Bogdan Grad"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Adesanya vs. Imavov"
+  },
+  "UFC Fight Night: Adesanya vs. Pyfer ": {
+   "date": "2026-03-28",
+   "fotn": [
+    "Tofiq Musayev",
+    "Ignacio Bahamondes"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Joe Pyfer",
+    "Alexa Grasso"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Adesanya vs. Pyfer"
+  },
+  "UFC Fight Night: Allen vs. Costa ": {
+   "date": "2026-05-16",
+   "fotn": [
+    "Choi Doo-ho",
+    "Daniel Santos"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Juan D\u00edaz",
+    "Alice Ardelean"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Allen vs. Costa"
+  },
+  "UFC Fight Night: Allen vs. Craig ": {
+   "date": "2023-11-18",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Brendan Allen",
+    "Amanda Ribas",
+    "Joanderson Brito",
+    "Jeka Saragih"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Allen vs. Craig"
+  },
+  "UFC Fight Night: Allen vs. Curtis 2 ": {
+   "date": "2024-04-06",
+   "fotn": [
+    "Jose Mariscal",
+    "Morgan Charri\u00e8re"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Ignacio Bahamondes",
+    "C\u00e9sar Almeida"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Allen vs. Curtis 2"
+  },
+  "UFC Fight Night: Almeida vs Garbrandt ": {
+   "date": "2016-05-29",
+   "fotn": [
+    "Jeremy Stephens",
+    "Renan Bar\u00e3o"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Cody Garbrandt",
+    "Jake Collier"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Almeida vs. Garbrandt"
+  },
+  "UFC Fight Night: Almeida vs. Lewis ": {
+   "date": "2023-11-04",
+   "fotn": [
+    "Nicolas Dalby",
+    "Gabriel Bonfim"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Elves Brener",
+    "Vitor Petrino"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Almeida vs. Lewis"
+  },
+  "UFC Fight Night: Alvarez vs. Poirier 2 ": {
+   "date": "2018-07-28",
+   "status": "missing"
+  },
+  "UFC Fight Night: Anderson vs. Blachowicz ": {
+   "date": "2020-02-15",
+   "status": "missing"
+  },
+  "UFC Fight Night: Andrade vs. Blanchfield ": {
+   "date": "2023-02-18",
+   "fotn": [
+    "Nazim Sadykhov",
+    "Evan Elder"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Erin Blanchfield",
+    "Mayra Bueno Silva"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Andrade vs. Blanchfield"
+  },
+  "UFC Fight Night: Andrade vs. Zhang ": {
+   "date": "2019-08-31",
+   "fotn": [
+    "Alateng Heili",
+    "Danaa Batgerel"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Zhang Weili",
+    "Li Jingliang"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Andrade vs. Zhang"
+  },
+  "UFC Fight Night: Ankalaev vs. Guskov ": {
+   "date": "2026-07-25",
+   "fotn": [
+    "Rizvan Kuniev",
+    "Tyrell Fortune"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Ramazan Temirov",
+    "Valter Walker"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Ankalaev vs. Guskov"
+  },
+  "UFC Fight Night: Ankalaev vs. Walker 2 ": {
+   "date": "2024-01-13",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Magomed Ankalaev",
+    "Jim Miller",
+    "Brunno Ferreira",
+    "Marcus McGhee"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Ankalaev vs. Walker 2"
+  },
+  "UFC Fight Night: Arlovski vs. Barnett ": {
+   "date": "2016-09-03",
+   "fotn": [
+    "Josh Barnett",
+    "Andrei Arlovski"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Josh Barnett",
+    "Ryan Bader"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Arlovski vs. Barnett"
+  },
+  "UFC Fight Night: Aspinall vs. Tybura ": {
+   "date": "2023-07-22",
+   "fotn": [
+    "Jonny Parsons",
+    "Danny Roberts"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Tom Aspinall",
+    "Paul Craig"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Aspinall vs. Tybura"
+  },
+  "UFC Fight Night: Assuncao vs. Moraes 2 ": {
+   "date": "2019-02-02",
+   "status": "missing"
+  },
+  "UFC Fight Night: Bader vs Saint Preux ": {
+   "date": "2014-08-16",
+   "fotn": [
+    "Alan Jouban",
+    "Seth Baczynski"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Thiago Tavares",
+    "Tim Boetsch"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Bader vs. Saint Preux"
+  },
+  "UFC Fight Night: Bader vs. Nogueira ": {
+   "date": "2016-11-19",
+   "status": "missing"
+  },
+  "UFC Fight Night: Barboza vs. Chikadze ": {
+   "date": "2021-08-28",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Giga Chikadze",
+    "Gerald Meerschaert",
+    "Abdul Razak Alhassan",
+    "Pat Sabatini"
+   ],
+   "status": "ok",
+   "title": "UFC on ESPN: Barboza vs. Chikadze"
+  },
+  "UFC Fight Night: Barboza vs. Gaethje ": {
+   "date": "2019-03-30",
+   "status": "missing"
+  },
+  "UFC Fight Night: Barboza vs. Lee ": {
+   "date": "2018-04-21",
+   "fotn": [
+    "Ricky Sim\u00f3n",
+    "Merab Dvalishvili"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "David Branch",
+    "Siyar Bahadurzada"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Barboza vs. Lee"
+  },
+  "UFC Fight Night: Barboza vs. Murphy ": {
+   "date": "2024-05-18",
+   "fotn": [
+    "Lerone Murphy",
+    "Edson Barboza"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Khaos Williams",
+    "Angela Hill"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Barboza vs. Murphy"
+  },
+  "UFC Fight Night: Barnett vs Nelson ": {
+   "date": "2015-09-26",
+   "fotn": [
+    "None awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Josh Barnett",
+    "Uriah Hall",
+    "Diego Brandao",
+    "Keita Nakamura"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Barnett vs. Nelson"
+  },
+  "UFC Fight Night: Bautista vs. Oliveira ": {
+   "date": "2026-02-07",
+   "fotn": [
+    "Micha\u0142 Oleksiejczuk",
+    "Marc-Andr\u00e9 Barriault"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Mario Bautista",
+    "Jakub Wik\u0142acz"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Bautista vs. Oliveira"
+  },
+  "UFC Fight Night: Belfort vs Henderson 3 ": {
+   "date": "2015-11-07",
+   "fotn": [
+    "None awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Vitor Belfort",
+    "Thomas Almeida",
+    "Alex Oliveira",
+    "Thiago Tavares"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Belfort vs. Henderson 3"
+  },
+  "UFC Fight Night: Belfort vs. Gastelum ": {
+   "date": "2017-03-11",
+   "fotn": [
+    "Not awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Kelvin Gastelum",
+    "Edson Barboza",
+    "Michel Prazeres",
+    "Paulo Costa"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Belfort vs. Gastelum"
+  },
+  "UFC Fight Night: Benavidez vs. Figueiredo ": {
+   "date": "2020-02-29",
+   "fotn": [
+    "Kyler Phillips",
+    "Gabriel Silva"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Megan Anderson",
+    "Jordan Griffin"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Benavidez vs. Figueiredo"
+  },
+  "UFC Fight Night: Bermudez vs. The Korean Zombie ": {
+   "date": "2017-02-04",
+   "fotn": [
+    "J\u00e9ssica Andrade",
+    "Angela Hill"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Chan Sung Jung",
+    "Marcel Fortuna"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Bermudez vs. The Korean Zombie"
+  },
+  "UFC Fight Night: Bigfoot vs Arlovski ": {
+   "date": "2014-09-13",
+   "fotn": [
+    "Gleison Tibau",
+    "Piotr Hallmann ^"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Andrei Arlovski",
+    "Godofredo Pepey"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Bigfoot vs. Arlovski"
+  },
+  "UFC Fight Night: Bigfoot vs Mir ": {
+   "date": "2015-02-22",
+   "fotn": [
+    "None awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Frank Mir",
+    "Sam Alvey",
+    "Marion Reneau",
+    "Matt Dwyer"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Bigfoot vs. Mir"
+  },
+  "UFC Fight Night: Bisping vs Kennedy ": {
+   "date": "2014-04-16",
+   "fotn": [],
+   "none_awarded": true,
+   "potn": [],
+   "status": "ok",
+   "title": "The Ultimate Fighter Nations: Canada vs. Australia"
+  },
+  "UFC Fight Night: Bisping vs Le ": {
+   "date": "2014-08-23",
+   "fotn": [
+    "None awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Michael Bisping",
+    "Tyron Woodley",
+    "Alberto Mina",
+    "Yuta Sasaki"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Bisping vs. Le"
+  },
+  "UFC Fight Night: Bisping vs Leites ": {
+   "date": "2015-07-18",
+   "fotn": [
+    "Joanne Calderwood",
+    "Cortney Casey"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Joseph Duffy",
+    "Stevie Ray"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Bisping vs. Leites"
+  },
+  "UFC Fight Night: Bisping vs. Gastelum ": {
+   "date": "2017-11-25",
+   "fotn": [
+    "None awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Kelvin Gastelum",
+    "Li Jingliang",
+    "Zabit Magomedsharipov",
+    "Song Kenan",
+    "Song Yadong"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Bisping vs. Gastelum"
+  },
+  "UFC Fight Night: Blachowicz vs. Jacare ": {
+   "date": "2019-11-16",
+   "status": "missing"
+  },
+  "UFC Fight Night: Blachowicz vs. Rakic ": {
+   "date": "2022-05-14",
+   "status": "missing"
+  },
+  "UFC Fight Night: Blachowicz vs. Santos ": {
+   "date": "2019-02-23",
+   "status": "missing"
+  },
+  "UFC Fight Night: Blanchfield vs. Barber ": {
+   "date": "2025-05-31",
+   "fotn": [
+    "Alice Ardelean",
+    "Rayanne dos Santos"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Ramiz Brahimaj",
+    "Jordan Leavitt"
+   ],
+   "status": "ok",
+   "title": "UFC on ESPN: Gamrot vs. Klein"
+  },
+  "UFC Fight Night: Blanchfield vs. Fiorot ": {
+   "date": "2024-03-30",
+   "fotn": [
+    "Ibo Aslan",
+    "Anton Turkalj"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Nate Landwehr",
+    "Dennis Buzukja"
+   ],
+   "status": "ok",
+   "title": "UFC on ESPN: Blanchfield vs. Fiorot"
+  },
+  "UFC Fight Night: Blaydes vs. Aspinall ": {
+   "date": "2022-07-23",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Paddy Pimblett",
+    "Nikita Krylov",
+    "Molly McCann",
+    "Jonathan Pearce"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Blaydes vs. Aspinall"
+  },
+  "UFC Fight Night: Blaydes vs. Daukaus ": {
+   "date": "2022-03-26",
+   "fotn": [
+    "Bryan Barberena",
+    "Matt Brown"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Curtis Blaydes",
+    "Chris Guti\u00e9rrez"
+   ],
+   "status": "ok",
+   "title": "UFC on ESPN: Blaydes vs. Daukaus"
+  },
+  "UFC Fight Night: Blaydes vs. Dos Santos ": {
+   "date": "2020-01-25",
+   "status": "missing"
+  },
+  "UFC Fight Night: Blaydes vs. Lewis ": {
+   "date": "2021-02-20",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Derrick Lewis",
+    "Chris Daukaus",
+    "Tom Aspinall",
+    "Aiemann Zahabi"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Blaydes vs. Lewis"
+  },
+  "UFC Fight Night: Blaydes vs. Ngannou 2 ": {
+   "date": "2018-11-24",
+   "fotn": [
+    "Alex Morono",
+    "Kenan Song"
+   ],
+   "none_awarded": false,
+   "potn": [],
+   "status": "ok",
+   "title": "UFC Fight Night: Blaydes vs. Ngannou 2"
+  },
+  "UFC Fight Night: Blaydes vs. Volkov ": {
+   "date": "2020-06-20",
+   "fotn": [
+    "Josh Emmett",
+    "Shane Burgos"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Jim Miller",
+    "Justin Jaynes"
+   ],
+   "status": "ok",
+   "title": "UFC on ESPN: Blaydes vs. Volkov"
+  },
+  "UFC Fight Night: Boetsch vs Henderson ": {
+   "date": "2015-06-06",
+   "fotn": [
+    "Brian Ortega",
+    "Thiago Tavares"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Dustin Poirier",
+    "Shawn Jordan"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Boetsch vs. Henderson"
+  },
+  "UFC Fight Night: Bonfim vs. Brown ": {
+   "date": "2025-11-08",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Gabriel Bonfim",
+    "Christian Leroy Duncan",
+    "Josh Hokit",
+    "Zachary Reese"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Bonfim vs. Brown"
+  },
+  "UFC Fight Night: Brown vs Silva ": {
+   "date": "2014-05-10",
+   "fotn": [
+    "Matt Brown",
+    "Erick Silva"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Matt Brown",
+    "Johnny Eduardo"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Brown vs. Silva"
+  },
+  "UFC Fight Night: Brunson vs. Holland ": {
+   "date": "2021-03-20",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Max Griffin",
+    "Adrian Ya\u00f1ez",
+    "Grant Dawson",
+    "Bruno Gustavo da Silva"
+   ],
+   "status": "ok",
+   "title": "UFC on ESPN: Brunson vs. Holland"
+  },
+  "UFC Fight Night: Brunson vs. Machida ": {
+   "date": "2017-10-28",
+   "fotn": [
+    "Elizeu Zaleski dos Santos",
+    "Max Griffin"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Derek Brunson",
+    "Pedro Munhoz"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Brunson vs. Machida"
+  },
+  "UFC Fight Night: Brunson vs. Shahbazyan ": {
+   "date": "2020-08-01",
+   "fotn": [
+    "Bobby Green",
+    "Lando Vannata"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Jennifer Maia",
+    "Vicente Luque"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Brunson vs. Shahbazyan"
+  },
+  "UFC Fight Night: Brunson vs. Till ": {
+   "date": "2021-09-04",
+   "fotn": [
+    "Molly McCann",
+    "Ji Yeon Kim"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Tom Aspinall",
+    "Paddy Pimblett"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Brunson vs. Till"
+  },
+  "UFC Fight Night: Burns vs. Brady ": {
+   "date": "2024-09-07",
+   "fotn": [
+    "Nat\u00e1lia Silva",
+    "J\u00e9ssica Andrade"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Steve Garcia",
+    "Cody Durden"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Burns vs. Brady"
+  },
+  "UFC Fight Night: Burns vs. Malott ": {
+   "date": "2026-04-18",
+   "fotn": [
+    "Charles Jourdain",
+    "Kyler Phillips"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Mike Malott",
+    "M\u00e1rcio Barbosa"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Burns vs. Malott"
+  },
+  "UFC Fight Night: Burns vs. Morales ": {
+   "date": "2025-05-17",
+   "fotn": [
+    "Melquizael Costa",
+    "Julian Erosa"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Michael Morales",
+    "Denise Gomes"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Burns vs. Morales"
+  },
+  "UFC Fight Night: Cannonier vs. Borralho ": {
+   "date": "2024-08-24",
+   "status": "missing"
+  },
+  "UFC Fight Night: Cannonier vs. Gastelum ": {
+   "date": "2021-08-21",
+   "status": "missing"
+  },
+  "UFC Fight Night: Cannonier vs. Imavov ": {
+   "date": "2024-06-08",
+   "status": "missing"
+  },
+  "UFC Fight Night: Cannonier vs. Rodrigues ": {
+   "date": "2025-02-15",
+   "fotn": [
+    "Jared Cannonier",
+    "Gregory Rodrigues"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Edmen Shahbazyan",
+    "Gabriel Bonfim"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Cannonier vs. Rodrigues"
+  },
+  "UFC Fight Night: Cannonier vs. Strickland ": {
+   "date": "2022-12-17",
+   "fotn": [
+    "Drew Dober",
+    "Bobby Green"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Alex Caceres",
+    "Micha\u0142 Oleksiejczuk"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Cannonier vs. Strickland"
+  },
+  "UFC Fight Night: Cejudo vs. Dillashaw ": {
+   "date": "2019-01-19",
+   "fotn": [
+    "Donald Cerrone",
+    "Alexander Hernandez"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Henry Cejudo",
+    "Donald Cerrone"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Cejudo vs. Dillashaw"
+  },
+  "UFC Fight Night: Cejudo vs. Song ": {
+   "date": "2025-02-22",
+   "fotn": [
+    "Alonzo Menifield",
+    "Julius Walker"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Jean Silva",
+    "Ricky Sim\u00f3n"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Cejudo vs. Song"
+  },
+  "UFC Fight Night: Cerrone vs. Medeiros ": {
+   "date": "2018-02-18",
+   "status": "missing"
+  },
+  "UFC Fight Night: Cerrone vs. Till ": {
+   "date": "2017-10-21",
+   "fotn": [
+    "Brian Kelleher",
+    "Damian Stasiak"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Darren Till",
+    "Jan B\u0142achowicz"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Cowboy vs. Till"
+  },
+  "UFC Fight Night: Chiesa vs. Lee ": {
+   "date": "2017-06-25",
+   "fotn": [
+    "None awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Kevin Lee",
+    "Tim Boetsch",
+    "Dominick Reyes",
+    "Jeremy Kimball"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Chiesa vs. Lee"
+  },
+  "UFC Fight Night: Chiesa vs. Magny ": {
+   "date": "2021-01-20",
+   "status": "missing"
+  },
+  "UFC Fight Night: Condit vs Alves ": {
+   "date": "2015-05-30",
+   "fotn": [
+    "Charles Oliveira",
+    "Nik Lentz"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Charles Oliveira",
+    "Rony Jason*"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Condit vs. Alves"
+  },
+  "UFC Fight Night: Costa vs. Vettori ": {
+   "date": "2021-10-23",
+   "fotn": [
+    "Gregory Rodrigues",
+    "Jun Yong Park"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Marvin Vettori",
+    "Alex Caceres"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Costa vs. Vettori"
+  },
+  "UFC Fight Night: Covington vs. Buckley ": {
+   "date": "2024-12-14",
+   "status": "missing"
+  },
+  "UFC Fight Night: Covington vs. Lawler ": {
+   "date": "2019-08-03",
+   "status": "missing"
+  },
+  "UFC Fight Night: Covington vs. Woodley ": {
+   "date": "2020-09-19",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Khamzat Chimaev",
+    "Mackenzie Dern",
+    "Damon Jackson",
+    "Randy Costa"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Covington vs. Woodley"
+  },
+  "UFC Fight Night: Cowboy vs Cowboy ": {
+   "date": "2016-02-21",
+   "fotn": [
+    "Lauren Murphy",
+    "Kelly Faszholz"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Donald Cerrone",
+    "Chris Camozzi"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Cowboy vs. Cowboy"
+  },
+  "UFC Fight Night: Cowboy vs Miller ": {
+   "date": "2014-07-16",
+   "fotn": [
+    "John Lineker",
+    "Alptekin \u00d6zk\u0131l\u0131\u00e7"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Donald Cerrone",
+    "Lucas Martins"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Cowboy vs. Miller"
+  },
+  "UFC Fight Night: Cowboy vs. Edwards ": {
+   "date": "2018-06-23",
+   "fotn": [
+    "Shane Young",
+    "Rolando Dy"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Ovince Saint Preux",
+    "Song Yadong"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Cowboy vs. Edwards"
+  },
+  "UFC Fight Night: Cowboy vs. Gaethje ": {
+   "date": "2019-09-14",
+   "fotn": [
+    "Tristan Connelly",
+    "Michel Pereira (Michel Pereira was ineligible to receive any bonus money due to missing weight",
+    "therefore Tristan Connelly received a $100",
+    "000 bonus.)"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Justin Gaethje",
+    "Misha Cirkunov"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Cowboy vs. Gaethje"
+  },
+  "UFC Fight Night: Cyborg vs. Lansberg ": {
+   "date": "2016-09-24",
+   "fotn": [
+    "Erick Silva",
+    "Luan Chagas"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Eric Spicely",
+    "Vicente Luque"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Cyborg vs. L\u00e4nsberg"
+  },
+  "UFC Fight Night: Dariush vs. Tsarukyan ": {
+   "date": "2023-12-02",
+   "fotn": [
+    "Rodolfo Bellato",
+    "Ihor Potieria"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Arman Tsarukyan",
+    "Jalin Turner",
+    "Sean Brady",
+    "Dustin Stoltzfus",
+    "Miesha Tate",
+    "Cody Brundage",
+    "Drakkar Klose",
+    "Jared Gooden"
+   ],
+   "status": "ok",
+   "title": "UFC on ESPN: Dariush vs. Tsarukyan"
+  },
+  "UFC Fight Night: Dawson vs. Green ": {
+   "date": "2023-10-07",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Bobby Green",
+    "Joe Pyfer",
+    "Drew Dober",
+    "Nate Maness"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Dawson vs. Green"
+  },
+  "UFC Fight Night: De Randamie vs. Ladd ": {
+   "date": "2019-07-13",
+   "status": "missing"
+  },
+  "UFC Fight Night: De Ridder vs. Allen ": {
+   "date": "2025-10-18",
+   "status": "missing"
+  },
+  "UFC Fight Night: Della Maddalena vs. Prates ": {
+   "date": "2026-05-02",
+   "fotn": [
+    "Brando Peri\u010di\u0107",
+    "Shamil Gaziev"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Carlos Prates",
+    "Quillan Salkilld"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Della Maddalena vs. Prates"
+  },
+  "UFC Fight Night: Dern vs. Hill ": {
+   "date": "2023-05-20",
+   "fotn": [
+    "Mackenzie Dern",
+    "Angela Hill"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Carlos Diego Ferreira",
+    "Viacheslav Borschev"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Dern vs. Hill"
+  },
+  "UFC Fight Night: Dern vs. Ribas 2 ": {
+   "date": "2025-01-11",
+   "fotn": [
+    "Roman Kopylov",
+    "Chris Curtis"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Mackenzie Dern",
+    "C\u00e9sar Almeida"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Dern vs. Ribas 2"
+  },
+  "UFC Fight Night: Dern vs. Rodriguez ": {
+   "date": "2021-10-09",
+   "fotn": [
+    "Marina Rodriguez",
+    "Mackenzie Dern"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Lupita Godinez",
+    "Mariya Agapova"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Dern vs. Rodriguez"
+  },
+  "UFC Fight Night: Dern vs. Yan ": {
+   "date": "2022-10-01",
+   "fotn": [
+    "Daniel Santos",
+    "John Casta\u00f1eda"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Joaquim Silva",
+    "Brendan Allen",
+    "Chelsea Chandler",
+    "Guido Cannetti"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Dern vs. Yan"
+  },
+  "UFC Fight Night: Dillashaw vs Cruz ": {
+   "date": "2016-01-17",
+   "fotn": [
+    "T.J. Dillashaw",
+    "Dominick Cruz"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Ed Herman",
+    "Luke Sanders"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Dillashaw vs. Cruz"
+  },
+  "UFC Fight Night: Dolidze vs. Hernandez ": {
+   "date": "2025-08-09",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Anthony Hernandez",
+    "Christian Leroy Duncan",
+    "Elijah Smith",
+    "Joselyne Edwards"
+   ],
+   "status": "ok",
+   "title": "UFC on ESPN: Dolidze vs. Hernandez"
+  },
+  "UFC Fight Night: Dolidze vs. Imavov ": {
+   "date": "2024-02-03",
+   "fotn": [
+    "Charles Johnson",
+    "Azat Maksum"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Randy Brown",
+    "Molly McCann"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Dolidze vs. Imavov"
+  },
+  "UFC Fight Night: Dos Anjos vs. Alvarez ": {
+   "date": "2016-07-07",
+   "status": "missing"
+  },
+  "UFC Fight Night: Dos Anjos vs. Edwards ": {
+   "date": "2019-07-20",
+   "status": "missing"
+  },
+  "UFC Fight Night: Dos Anjos vs. Ferguson ": {
+   "date": "2016-11-05",
+   "status": "missing"
+  },
+  "UFC Fight Night: Dos Anjos vs. Fiziev ": {
+   "date": "2022-07-09",
+   "status": "missing"
+  },
+  "UFC Fight Night: Dos Anjos vs. Lee ": {
+   "date": "2019-05-18",
+   "status": "missing"
+  },
+  "UFC Fight Night: Dos Santos vs. Ivanov ": {
+   "date": "2018-07-14",
+   "status": "missing"
+  },
+  "UFC Fight Night: Dos Santos vs. Tuivasa ": {
+   "date": "2018-12-01",
+   "fotn": [
+    "Kai Kara-France",
+    "Elias Garcia"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Maur\u00edcio Rua",
+    "Sodiq Yusuff"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: dos Santos vs. Tuivasa"
+  },
+  "UFC Fight Night: Du Plessis vs. Usman ": {
+   "date": "2026-07-18",
+   "fotn": [
+    "Dricus du Plessis",
+    "Kamaru Usman"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Tommy McMillen",
+    "Felipe Franco"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: du Plessis vs. Usman"
+  },
+  "UFC Fight Night: Edgar vs Faber ": {
+   "date": "2015-05-16",
+   "fotn": [
+    "Jon Delos Reyes",
+    "Roldan Sangcha-An"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Neil Magny",
+    "Jon Tuck"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Edgar vs. Faber"
+  },
+  "UFC Fight Night: Edgar vs Swanson ": {
+   "date": "2014-11-22",
+   "fotn": [
+    "Paige VanZant",
+    "Kailin Curran"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Frankie Edgar",
+    "Aleksei Oleinik"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Edgar vs. Swanson"
+  },
+  "UFC Fight Night: Edgar vs. The Korean Zombie ": {
+   "date": "2019-12-21",
+   "fotn": [
+    "Charles Jourdain",
+    "Doo Ho Choi"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Chan Sung Jung",
+    "Alexandre Pantoja"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Edgar vs. The Korean Zombie"
+  },
+  "UFC Fight Night: Edwards vs. Brady ": {
+   "date": "2025-03-22",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Sean Brady",
+    "Kevin Holland",
+    "Alexia Thainara",
+    "Shauna Bannon"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Edwards vs. Brady"
+  },
+  "UFC Fight Night: Edwards vs. Muhammad ": {
+   "date": "2021-03-13",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Ryan Spann",
+    "Dan Ige",
+    "Davey Grant",
+    "Matthew Semelsberger"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Edwards vs. Muhammad"
+  },
+  "UFC Fight Night: Emmett vs. Murphy ": {
+   "date": "2025-04-05",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Lee Chang-ho",
+    "Ode' Osbourne",
+    "Dione Barbosa",
+    "Rhys McKee"
+   ],
+   "status": "ok",
+   "title": "UFC on ESPN: Emmett vs. Murphy"
+  },
+  "UFC Fight Night: Emmett vs. Stephens ": {
+   "date": "2018-02-24",
+   "status": "missing"
+  },
+  "UFC Fight Night: Emmett vs. Topuria ": {
+   "date": "2023-06-24",
+   "status": "missing"
+  },
+  "UFC Fight Night: Emmett vs. Vallejos ": {
+   "date": "2026-03-14",
+   "fotn": [
+    "Marwan Rahiki",
+    "Harry Hardwick"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Kevin Vallejos",
+    "Manoel Sousa"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Emmett vs. Vallejos"
+  },
+  "UFC Fight Night: Evloev vs. Murphy ": {
+   "date": "2026-03-21",
+   "fotn": [
+    "Mason Jones",
+    "Axel Sola"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Iwo Baraniewski",
+    "Shanelle Dyer"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Evloev vs. Murphy"
+  },
+  "UFC Fight Night: Eye vs. Calvillo ": {
+   "date": "2020-06-13",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Marvin Vettori",
+    "Mariya Agapova",
+    "Tyson Nam",
+    "Christian Aguilera"
+   ],
+   "status": "ok",
+   "title": "UFC on ESPN: Eye vs. Calvillo"
+  },
+  "UFC Fight Night: Felder vs. Dos Anjos ": {
+   "date": "2020-11-14",
+   "status": "missing"
+  },
+  "UFC Fight Night: Felder vs. Hooker ": {
+   "date": "2020-02-22",
+   "fotn": [
+    "Dan Hooker",
+    "Paul Felder"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Jimmy Crute",
+    "Priscila Cachoeira"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Felder vs. Hooker"
+  },
+  "UFC Fight Night: Figueiredo vs. Benavidez 2 ": {
+   "date": "2020-07-18",
+   "fotn": [
+    "Rafael Fiziev",
+    "Marc Diakiese"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Deiveson Figueiredo",
+    "Ariane Lipski"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Figueiredo vs. Benavidez 2"
+  },
+  "UFC Fight Night: Fiziev vs. Gamrot ": {
+   "date": "2023-09-23",
+   "fotn": [
+    "Tim Means",
+    "Andr\u00e9 Fialho"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Marina Rodriguez",
+    "Charles Jourdain"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Fiziev vs. Gamrot"
+  },
+  "UFC Fight Night: Fiziev vs. Torres ": {
+   "date": "2026-06-27",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Rafael Fiziev",
+    "Asu Almabayev",
+    "Abdul-Rakhman Yakhyaev",
+    "Daniil Donchenko"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Fiziev vs. Torres"
+  },
+  "UFC Fight Night: Font vs. Aldo ": {
+   "date": "2021-12-04",
+   "fotn": [
+    "Cheyanne Vlismas",
+    "Mallory Martin"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Rafael Fiziev",
+    "Jamahal Hill",
+    "Clay Guida",
+    "Chris Curtis"
+   ],
+   "status": "ok",
+   "title": "UFC on ESPN: Font vs. Aldo"
+  },
+  "UFC Fight Night: Font vs. Garbrandt ": {
+   "date": "2021-05-22",
+   "fotn": [
+    "Jared Vanderaa",
+    "Justin Tafa"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Carla Esparza",
+    "Bruno Gustavo da Silva"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Font vs. Garbrandt"
+  },
+  "UFC Fight Night: Font vs. Vera ": {
+   "date": "2022-04-30",
+   "status": "missing"
+  },
+  "UFC Fight Night: Gaethje vs. Vick ": {
+   "date": "2018-08-25",
+   "fotn": [
+    "Cory Sandhagen",
+    "Iuri Alc\u00e2ntara"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Justin Gaethje",
+    "Eryk Anders"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Gaethje vs. Vick"
+  },
+  "UFC Fight Night: Gamrot vs. Salkilld ": {
+   "date": "2026-08-08",
+   "fotn": [
+    "Carlos Diego Ferreira",
+    "Billy Quarantillo"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Quillan Salkilld",
+    "Ty Miller"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Gamrot vs. Salkilld"
+  },
+  "UFC Fight Night: Gane vs. Spivac ": {
+   "date": "2023-09-02",
+   "fotn": [
+    "Beno\u00eet Saint Denis",
+    "Thiago Mois\u00e9s"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Ciryl Gane",
+    "Morgan Charri\u00e8re"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Gane vs. Spivac"
+  },
+  "UFC Fight Night: Gane vs. Tuivasa ": {
+   "date": "2022-09-03",
+   "fotn": [
+    "Ciryl Gane",
+    "Tai Tuivasa"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Abusupiyan Magomedov",
+    "Beno\u00eet Saint Denis"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Gane vs. Tuivasa"
+  },
+  "UFC Fight Night: Gane vs. Volkov ": {
+   "date": "2021-06-26",
+   "fotn": [
+    "Timur Valiev",
+    "Raoni Barcelos"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Kennedy Nzechukwu",
+    "Marcin Prachnio"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Gane vs. Volkov"
+  },
+  "UFC Fight Night: Garcia vs. Onama ": {
+   "date": "2025-11-01",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Steve Garcia",
+    "Waldo Cortes-Acosta",
+    "Allan Nascimento",
+    "Donte Johnson"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Garcia vs. Onama"
+  },
+  "UFC Fight Night: Gonzaga vs Cro Cop 2 ": {
+   "date": "2015-04-11",
+   "fotn": [
+    "Mirko Cro Cop",
+    "Gabriel Gonzaga"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Maryna Moroz",
+    "Leon Edwards"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Gonzaga vs. Cro Cop 2"
+  },
+  "UFC Fight Night: Grasso vs. Araujo ": {
+   "date": "2022-10-15",
+   "status": "missing"
+  },
+  "UFC Fight Night: Gustafsson vs Manuwa ": {
+   "date": "2014-03-08",
+   "fotn": [
+    "Alexander Gustafsson",
+    "Jimi Manuwa"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Alexander Gustafsson",
+    "Gunnar Nelson"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Gustafsson vs. Manuwa"
+  },
+  "UFC Fight Night: Gustafsson vs. Smith ": {
+   "date": "2019-06-01",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Anthony Smith",
+    "Aleksandar Raki\u0107",
+    "Makwan Amirkhani",
+    "Leonardo Santos"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Gustafsson vs. Smith"
+  },
+  "UFC Fight Night: Gustafsson vs. Teixeira ": {
+   "date": "2017-05-28",
+   "fotn": [
+    "Alexander Gustafsson",
+    "Glover Teixeira"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Bojan Veli\u010dkovi\u0107",
+    "Damir Had\u017eovi\u0107"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Gustafsson vs. Teixeira"
+  },
+  "UFC Fight Night: Hall vs. Silva ": {
+   "date": "2020-10-31",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Kevin Holland",
+    "Alexander Hernandez",
+    "Adrian Ya\u00f1ez",
+    "Miles Johns"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Hall vs. Silva"
+  },
+  "UFC Fight Night: Hall vs. Strickland ": {
+   "date": "2021-07-31",
+   "fotn": [
+    "Jason Witt",
+    "Bryan Barberena"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Cheyanne Buys",
+    "Melsik Baghdasaryan"
+   ],
+   "status": "ok",
+   "title": "UFC on ESPN: Hall vs. Strickland"
+  },
+  "UFC Fight Night: Henderson vs Dos Anjos ": {
+   "date": "2014-08-23",
+   "status": "missing"
+  },
+  "UFC Fight Night: Henderson vs Khabilov ": {
+   "date": "2014-06-07",
+   "fotn": [
+    "Scott Jorgensen",
+    "Danny Martinez"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Benson Henderson",
+    "Piotr Hallmann"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Henderson vs. Khabilov"
+  },
+  "UFC Fight Night: Henderson vs Masvidal ": {
+   "date": "2015-11-28",
+   "fotn": [
+    "Seo Hee Ham",
+    "Cortney Casey"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Doo Ho Choi",
+    "Dominique Steele"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Henderson vs. Masvidal"
+  },
+  "UFC Fight Night: Henderson vs Thatch ": {
+   "date": "2015-02-14",
+   "fotn": [
+    "Benson Henderson",
+    "Brandon Thatch"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Neil Magny",
+    "Ray Borg"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Henderson vs. Thatch"
+  },
+  "UFC Fight Night: Hendricks vs Thompson ": {
+   "date": "2016-02-06",
+   "fotn": [
+    "Mike Pyle",
+    "Sean Spencer"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Stephen Thompson",
+    "Diego Rivas"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Hendricks vs. Thompson"
+  },
+  "UFC Fight Night: Hermansson vs. Cannonier ": {
+   "date": "2019-09-28",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Jared Cannonier",
+    "Ovince Saint Preux",
+    "John Phillips",
+    "Jack Shore"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Hermansson vs. Cannonier"
+  },
+  "UFC Fight Night: Hermansson vs. Pyfer ": {
+   "date": "2024-02-10",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Dan Ige",
+    "Rodolfo Vieira",
+    "Carlos Prates",
+    "Bogdan Guskov"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Hermansson vs. Pyfer"
+  },
+  "UFC Fight Night: Hermansson vs. Strickland ": {
+   "date": "2022-02-05",
+   "fotn": [
+    "Julian Erosa",
+    "Steven Peterson{{ref|note1|1}}",
+    "{{note|note1}} {{small| 1. Peterson was disqualified for the Fight of the Night bonus due to missing weight. As a result",
+    "his award was given to Erosa.}}"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Shavkat Rakhmonov",
+    "Chidi Njokuani"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Hermansson vs. Strickland"
+  },
+  "UFC Fight Night: Hermansson vs. Vettori ": {
+   "date": "2020-12-05",
+   "status": "missing"
+  },
+  "UFC Fight Night: Hernandez vs. Pereira ": {
+   "date": "2024-10-19",
+   "fotn": [
+    "Darren Elkins",
+    "Daniel Pineda"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Anthony Hernandez"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Hernandez vs. Pereira"
+  },
+  "UFC Fight Night: Hernandez vs. Rodrigues ": {
+   "date": "2026-08-22",
+   "fotn": [
+    "Gregory Rodrigues",
+    "Anthony Hernandez"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "MarQuel Mederos",
+    "Carli Judice"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Hernandez vs. Rodrigues"
+  },
+  "UFC Fight Night: Hill vs. Rountree Jr. ": {
+   "date": "2025-06-21",
+   "fotn": [
+    "Nazim Sadykhov",
+    "Nikolas Motta"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Nazim Sadykhov",
+    "Nikolas Motta"
+   ],
+   "status": "ok",
+   "title": "UFC on ABC: Hill vs. Rountree Jr."
+  },
+  "UFC Fight Night: Holloway vs Oliveira ": {
+   "date": "2015-08-23",
+   "fotn": [
+    "Patrick C\u00f4t\u00e9",
+    "Josh Burkman"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Frankie Perez",
+    "Felipe Arantes"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Holloway vs. Oliveira"
+  },
+  "UFC Fight Night: Holloway vs. Allen ": {
+   "date": "2023-04-15",
+   "fotn": [
+    "Bill Algeo",
+    "T.J. Brown"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Edson Barboza",
+    "Brandon Royval",
+    "Gillian Robertson"
+   ],
+   "status": "ok",
+   "title": "UFC on ESPN: Holloway vs. Allen"
+  },
+  "UFC Fight Night: Holloway vs. Kattar ": {
+   "date": "2021-01-16",
+   "fotn": [
+    "Max Holloway",
+    "Calvin Kattar"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Li Jingliang",
+    "Alessio Di Chirico"
+   ],
+   "status": "ok",
+   "title": "UFC on ABC: Holloway vs. Kattar"
+  },
+  "UFC Fight Night: Holloway vs. Rodriguez ": {
+   "date": "2021-11-13",
+   "status": "missing"
+  },
+  "UFC Fight Night: Holloway vs. The Korean Zombie ": {
+   "date": "2023-08-26",
+   "fotn": [
+    "Max Holloway",
+    "Jung Chan-sung"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Junior Tafa",
+    "Micha\u0142 Oleksiejczuk"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Holloway vs. The Korean Zombie"
+  },
+  "UFC Fight Night: Holm vs. Aldana ": {
+   "date": "2020-10-03",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Germaine de Randamie",
+    "Kyler Phillips",
+    "Du\u0161ko Todorovi\u0107",
+    "Luigi Vendramini"
+   ],
+   "status": "ok",
+   "title": "UFC on ESPN: Holm vs. Aldana"
+  },
+  "UFC Fight Night: Holm vs. Bueno Silva ": {
+   "date": "2023-07-15",
+   "fotn": [
+    "Jack Della Maddalena",
+    "Bassil Hafez"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Mayra Bueno Silva",
+    "Francisco Prado"
+   ],
+   "status": "ok",
+   "title": "UFC on ESPN: Holm vs. Bueno Silva"
+  },
+  "UFC Fight Night: Holm vs. Correia ": {
+   "date": "2017-06-17",
+   "fotn": [
+    "Li Jingliang",
+    "Frank Camacho"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Holly Holm",
+    "Ulka Sasaki"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Holm vs. Correia"
+  },
+  "UFC Fight Night: Holm vs. Vieira ": {
+   "date": "2022-05-21",
+   "fotn": [
+    "Michel Pereira",
+    "Santiago Ponzinibbio"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Chidi Njokuani",
+    "Chase Hooper"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Holm vs. Vieira"
+  },
+  "UFC Fight Night: Holohan vs Smolka ": {
+   "date": "2015-10-24",
+   "fotn": [
+    "Darren Till",
+    "Nicolas Dalby"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Neil Seery",
+    "Tom Breese"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Holohan vs. Smolka"
+  },
+  "UFC Fight Night: Hooker vs. Parnasse ": {
+   "date": "2026-09-05",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Salahdine Parnasse",
+    "Axel Sola",
+    "Losene Keita",
+    "M\u00e1rio Pinto"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Hooker vs. Parnasse"
+  },
+  "UFC Fight Night: Hunt vs Mir ": {
+   "date": "2016-03-19",
+   "fotn": [
+    "Jake Matthews",
+    "Johnny Case"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Mark Hunt",
+    "Neil Magny"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Hunt vs. Mir"
+  },
+  "UFC Fight Night: Hunt vs Nelson ": {
+   "date": "2014-09-20",
+   "fotn": [
+    "Kyung Ho Kang",
+    "Michinori Tanaka"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Mark Hunt",
+    "Johnny Case"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Hunt vs. Nelson"
+  },
+  "UFC Fight Night: Hunt vs. Oleinik ": {
+   "date": "2018-09-15",
+   "fotn": [
+    "Petr Yan (Jin Soo Son was unable to receive bonus money due to missing weight)"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Aleksei Oleinik",
+    "Jan B\u0142achowicz",
+    "Magomed Ankalaev"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Hunt vs. Oleinik"
+  },
+  "UFC Fight Night: Iaquinta vs. Cowboy ": {
+   "date": "2019-05-04",
+   "fotn": [
+    "Donald Cerrone",
+    "Al Iaquinta"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Walt Harris",
+    "Macy Chiasson"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Iaquinta vs. Cowboy"
+  },
+  "UFC Fight Night: Imavov vs. Borralho ": {
+   "date": "2025-09-06",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Beno\u00eet Saint Denis",
+    "Mason Jones",
+    "Ante Delija",
+    "Kau\u00ea Fernandes"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Imavov vs. Borralho"
+  },
+  "UFC Fight Night: Jacare vs Mousasi ": {
+   "date": "2014-09-05",
+   "fotn": [
+    "Joe Lauzon",
+    "Michael Chiesa"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Ben Rothwell",
+    "Ronaldo Souza"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Jacar\u00e9 vs. Mousasi"
+  },
+  "UFC Fight Night: Jacare vs. Brunson 2 ": {
+   "date": "2018-01-27",
+   "status": "missing"
+  },
+  "UFC Fight Night: Jacare vs. Hermansson ": {
+   "date": "2019-04-27",
+   "status": "missing"
+  },
+  "UFC Fight Night: Jedrzejczyk vs Penne ": {
+   "date": "2015-06-20",
+   "fotn": [
+    "Joanna J\u0119drzejczyk",
+    "Jessica Penne"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Mairbek Taisumov",
+    "Arnold Allen"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: J\u0119drzejczyk vs. Penne"
+  },
+  "UFC Fight Night: Joanna vs. Waterson ": {
+   "date": "2019-10-12",
+   "fotn": [
+    "Cub Swanson",
+    "Kron Gracie"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Niko Price",
+    "Marlon Vera"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Joanna vs. Waterson"
+  },
+  "UFC Fight Night: Jung vs. Ige ": {
+   "date": "2021-06-19",
+   "status": "missing"
+  },
+  "UFC Fight Night: Kape vs. Almabayev ": {
+   "date": "2025-03-01",
+   "fotn": [
+    "Nasrat Haqparast",
+    "Esteban Ribovics"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Manel Kape",
+    "M\u00e1rio Pinto"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Kape vs. Almabayev"
+  },
+  "UFC Fight Night: Kape vs. Horiguchi ": {
+   "date": "2026-06-20",
+   "fotn": [
+    "Vinicius Oliveira",
+    "Andre Fili"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Manel Kape",
+    "Murtazali Magomedov"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Kape vs. Horiguchi"
+  },
+  "UFC Fight Night: Kara-France vs. Albazi ": {
+   "date": "2023-06-03",
+   "status": "missing"
+  },
+  "UFC Fight Night: Kattar vs. Allen ": {
+   "date": "2022-10-29",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Tresean Gore",
+    "Roman Dolidze",
+    "Steve Garcia",
+    "Christian Rodriguez"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Kattar vs. Allen"
+  },
+  "UFC Fight Night: Kattar vs. Chikadze ": {
+   "date": "2022-01-15",
+   "status": "missing"
+  },
+  "UFC Fight Night: Kattar vs. Emmett ": {
+   "date": "2022-06-18",
+   "fotn": [
+    "Josh Emmett",
+    "Calvin Kattar"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Kevin Holland",
+    "Joaquin Buckley",
+    "Gregory Rodrigues",
+    "Adrian Ya\u00f1ez",
+    "Jeremiah Wells",
+    "Ricardo Ramos",
+    "Cody Stamann",
+    "Phil Hawes",
+    "Roman Dolidze"
+   ],
+   "status": "ok",
+   "title": "UFC on ESPN: Kattar vs. Emmett"
+  },
+  "UFC Fight Night: Kattar vs. Ige ": {
+   "date": "2020-07-15",
+   "fotn": [
+    "Mounir Lazzez",
+    "Abdul Razak Alhassan{{ref|note1|1}}",
+    "Abdul Razak Alhassan"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Khamzat Chimaev",
+    "Lerone Murphy",
+    "Modestas Bukauskas"
+   ],
+   "status": "ok",
+   "title": "UFC on ESPN: Kattar vs. Ige"
+  },
+  "UFC Fight Night: Kim vs Hathaway ": {
+   "date": "2014-03-01",
+   "status": "missing"
+  },
+  "UFC Fight Night: Korean Zombie vs. Rodriguez ": {
+   "date": "2018-11-10",
+   "status": "missing"
+  },
+  "UFC Fight Night: Ladd vs. Dumont ": {
+   "date": "2021-10-16",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Jim Miller",
+    "Nate Landwehr",
+    "Bruno Silva",
+    "Danaa Batgerel"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Ladd vs. Dumont"
+  },
+  "UFC Fight Night: Lawler vs. Dos Anjos ": {
+   "date": "2017-12-16",
+   "status": "missing"
+  },
+  "UFC Fight Night: Lee vs. Iaquinta ": {
+   "date": "2018-12-15",
+   "status": "missing"
+  },
+  "UFC Fight Night: Lee vs. Oliveira ": {
+   "date": "2020-03-14",
+   "fotn": [
+    "Maryna Moroz",
+    "Mayra Bueno Silva"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Charles Oliveira",
+    "Gilbert Burns"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Lee vs. Oliveira"
+  },
+  "UFC Fight Night: Lemos vs. Andrade ": {
+   "date": "2022-04-23",
+   "fotn": [
+    "Sergey Khandozhko",
+    "Dwight Grant"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "J\u00e9ssica Andrade",
+    "Claudio Puelles"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Lemos vs. Andrade"
+  },
+  "UFC Fight Night: Lemos vs. Jandiroba ": {
+   "date": "2024-07-20",
+   "status": "missing"
+  },
+  "UFC Fight Night: Lewis vs. Abdurakhimov ": {
+   "date": "2016-12-09",
+   "fotn": [
+    "Gian Villante",
+    "Saparbek Safarov"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Francis Ngannou",
+    "Gerald Meerschaert"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Lewis vs. Abdurakhimov"
+  },
+  "UFC Fight Night: Lewis vs. Browne ": {
+   "date": "2017-02-19",
+   "fotn": [
+    "Derrick Lewis",
+    "Travis Browne"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Paul Felder",
+    "Thiago Santos"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Lewis vs. Browne"
+  },
+  "UFC Fight Night: Lewis vs. Daukaus ": {
+   "date": "2021-12-18",
+   "fotn": [
+    "Amanda Lemos",
+    "Angela Hill"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Cub Swanson",
+    "Melissa Gatto"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Lewis vs. Daukaus"
+  },
+  "UFC Fight Night: Lewis vs. Dos Santos ": {
+   "date": "2019-03-09",
+   "status": "missing"
+  },
+  "UFC Fight Night: Lewis vs. Hunt ": {
+   "date": "2017-06-10",
+   "fotn": [
+    "Mark Hunt",
+    "Derrick Lewis"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Dan Hooker",
+    "Ben Nguyen"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Lewis vs. Hunt"
+  },
+  "UFC Fight Night: Lewis vs. Nascimento ": {
+   "date": "2024-05-11",
+   "fotn": [
+    "Trey Waters",
+    "Billy Goff"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Carlos Ulberg",
+    "Carlos Diego Ferreira"
+   ],
+   "status": "ok",
+   "title": "UFC on ESPN: Lewis vs. Nascimento"
+  },
+  "UFC Fight Night: Lewis vs. Oleinik ": {
+   "date": "2020-08-08",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Darren Stewart",
+    "Kevin Holland",
+    "Andrew Sanchez",
+    "Gavin Tucker"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Lewis vs. Oleinik"
+  },
+  "UFC Fight Night: Lewis vs. Spivac ": {
+   "date": "2023-02-04",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Serghei Spivac",
+    "Anshul Jubli",
+    "Rinya Nakamura",
+    "Tatsuro Taira"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Lewis vs. Spivac"
+  },
+  "UFC Fight Night: Lewis vs. Teixeira ": {
+   "date": "2025-07-12",
+   "fotn": [
+    "Morgan Charri\u00e8re",
+    "Nate Landwehr"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Valter Walker",
+    "Fatima Kline"
+   ],
+   "status": "ok",
+   "title": "UFC on ESPN: Lewis vs. Teixeira"
+  },
+  "UFC Fight Night: Lineker vs. Dodson ": {
+   "date": "2016-10-01",
+   "fotn": [
+    "None awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Brandon Moreno",
+    "Luis Henrique da Silva",
+    "Nate Marquardt",
+    "Curtis Blaydes"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Lineker vs. Dodson"
+  },
+  "UFC Fight Night: Luque vs. Dos Anjos ": {
+   "date": "2023-08-12",
+   "status": "missing"
+  },
+  "UFC Fight Night: Luque vs. Muhammad ": {
+   "date": "2022-04-16",
+   "status": "missing"
+  },
+  "UFC Fight Night: MacDonald vs Saffiedine ": {
+   "date": "2014-10-04",
+   "fotn": [
+    "Patrick Holohan",
+    "Chris Kelades"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Rory MacDonald",
+    "Olivier Aubin-Mercier"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: MacDonald vs. Saffiedine"
+  },
+  "UFC Fight Night: MacDonald vs Thompson ": {
+   "date": "2016-06-18",
+   "fotn": [
+    "Steve Boss\u00e9",
+    "Sean O'Connell"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Donald Cerrone",
+    "Krzysztof Jotko"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: MacDonald vs. Thompson"
+  },
+  "UFC Fight Night: Machado Garry vs. Prates ": {
+   "date": "2025-04-26",
+   "status": "missing"
+  },
+  "UFC Fight Night: Machida vs Dollaway ": {
+   "date": "2014-12-20",
+   "fotn": [
+    "None awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Lyoto Machida",
+    "Renan Bar\u00e3o",
+    "Erick Silva",
+    "Vitor Miranda"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Machida vs. Dollaway"
+  },
+  "UFC Fight Night: Machida vs Mousasi ": {
+   "date": "2014-02-15",
+   "fotn": [
+    "Lyoto Machida",
+    "Gegard Mousasi"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Erick Silva",
+    "Charles Oliveira"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Machida vs. Mousasi"
+  },
+  "UFC Fight Night: Machida vs Romero ": {
+   "date": "2015-06-27",
+   "fotn": [
+    "Lorenz Larkin",
+    "Santiago Ponzinibbio"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Yoel Romero",
+    "Thiago Santos"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Machida vs. Romero"
+  },
+  "UFC Fight Night: Machida vs. Anders ": {
+   "date": "2018-02-03",
+   "fotn": [
+    "Thiago Santos",
+    "Anthony Smith"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Valentina Shevchenko",
+    "Iuri Alc\u00e2ntara"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Machida vs. Anders"
+  },
+  "UFC Fight Night: Magny vs Gastelum ": {
+   "date": "2015-11-21",
+   "status": "missing"
+  },
+  "UFC Fight Night: Magny vs. Ponzinibbio ": {
+   "date": "2018-11-17",
+   "fotn": [
+    "Laureano Staropoli",
+    "Hector Aldana"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Santiago Ponzinibbio",
+    "Johnny Walker"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Magny vs. Ponzinibbio"
+  },
+  "UFC Fight Night: Magny vs. Prates ": {
+   "date": "2024-11-09",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Carlos Prates",
+    "Mansur Abdul-Malik",
+    "Charles Radtke",
+    "Da'Mon Blackshear"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Magny vs. Prates"
+  },
+  "UFC Fight Night: Maia vs LaFlare ": {
+   "date": "2015-03-21",
+   "fotn": [
+    "None awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Gilbert Burns",
+    "Godofredo Pepey",
+    "Kevin Souza",
+    "Fredy Serrano"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Maia vs. LaFlare"
+  },
+  "UFC Fight Night: Maia vs. Askren ": {
+   "date": "2019-10-26",
+   "fotn": [
+    "Demian Maia",
+    "Ben Askren"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Beneil Dariush",
+    "Ciryl Gane"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Maia vs. Askren"
+  },
+  "UFC Fight Night: Maia vs. Usman ": {
+   "date": "2018-05-19",
+   "fotn": [
+    "Andrea Lee",
+    "Veronica Macedo"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Gabriel Ben\u00edtez",
+    "Claudio Puelles"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Maia vs. Usman"
+  },
+  "UFC Fight Night: Makhachev vs. Green ": {
+   "date": "2022-02-26",
+   "fotn": [
+    "Priscila Cachoeira",
+    "Ji Yeon Kim"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Wellington Turman",
+    "Arman Tsarukyan"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Makhachev vs. Green"
+  },
+  "UFC Fight Night: Makhachev vs. Moises ": {
+   "date": "2021-07-17",
+   "status": "missing"
+  },
+  "UFC Fight Night: Manuwa vs. Anderson ": {
+   "date": "2017-03-18",
+   "fotn": [
+    "Not awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Jimi Manuwa",
+    "Gunnar Nelson",
+    "Marlon Vera",
+    "Marc Diakiese"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Manuwa vs. Anderson"
+  },
+  "UFC Fight Night: Marreta vs. Anders ": {
+   "date": "2018-09-22",
+   "status": "missing"
+  },
+  "UFC Fight Night: McDonald vs. Lineker ": {
+   "date": "2016-07-13",
+   "fotn": [
+    "Tony Ferguson",
+    "Lando Vannata"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "John Lineker",
+    "Louis Smolka"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: McDonald vs. Lineker"
+  },
+  "UFC Fight Night: McGregor vs Brandao ": {
+   "date": "2014-07-19",
+   "fotn": [
+    "Cathal Pendred",
+    "Mike King ^"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Conor McGregor",
+    "Gunnar Nelson"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: McGregor vs. Brand\u00e3o"
+  },
+  "UFC Fight Night: McGregor vs Siver ": {
+   "date": "2015-01-18",
+   "fotn": [
+    "Sean O'Connell",
+    "Matt Van Buren"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Conor McGregor",
+    "Lorenz Larkin"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: McGregor vs. Siver"
+  },
+  "UFC Fight Night: Medic vs. Rodriguez ": {
+   "date": "2026-08-01",
+   "status": "missing"
+  },
+  "UFC Fight Night: Mendes vs Lamas ": {
+   "date": "2015-04-04",
+   "fotn": [
+    "None awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Chad Mendes",
+    "Julianna Pe\u00f1a",
+    "Dustin Poirier",
+    "Timothy Johnson"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Mendes vs. Lamas"
+  },
+  "UFC Fight Night: Minotauro vs Nelson ": {
+   "date": "2014-04-11",
+   "fotn": [
+    "Clay Guida",
+    "Tatsuya Kawajiri"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Roy Nelson",
+    "Ramsey Nijem"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Nogueira vs. Nelson"
+  },
+  "UFC Fight Night: Miocic vs Hunt ": {
+   "date": "2015-05-09",
+   "fotn": [
+    "None awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Robert Whittaker",
+    "James Vick",
+    "Dan Hooker",
+    "Alex Chambers"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Miocic vs. Hunt"
+  },
+  "UFC Fight Night: Miocic vs Maldonado ": {
+   "date": "2014-05-31",
+   "status": "missing"
+  },
+  "UFC Fight Night: Mir vs Duffee ": {
+   "date": "2015-07-15",
+   "fotn": [
+    "Alan Jouban",
+    "Matt Dwyer"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Frank Mir",
+    "Tony Ferguson"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Mir vs. Duffee"
+  },
+  "UFC Fight Night: Moicano vs. Duncan ": {
+   "date": "2026-04-04",
+   "fotn": [
+    "Tommy McMillen",
+    "Manolo Zecchini"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Alessandro Costa",
+    "Alice Pereira"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Moicano vs. Duncan"
+  },
+  "UFC Fight Night: Moicano vs. Saint Denis ": {
+   "date": "2024-09-28",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Bryan Battle",
+    "Morgan Charriere",
+    "Far\u00e8s Ziam",
+    "Chris Duncan"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Moicano vs. Saint Denis"
+  },
+  "UFC Fight Night: Moicano vs. The Korean Zombie ": {
+   "date": "2019-06-22",
+   "fotn": [
+    "Deron Winn",
+    "Eric Spicely"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Chan Sung Jung",
+    "Jairzinho Rozenstruik"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Moicano vs. The Korean Zombie"
+  },
+  "UFC Fight Night: Moraes vs. Sandhagen ": {
+   "date": "2020-10-10",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Cory Sandhagen",
+    "Tom Breese",
+    "Chris Daukaus",
+    "Joaquin Buckley"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Moraes vs. Sandhagen"
+  },
+  "UFC Fight Night: Moreno vs. Albazi ": {
+   "date": "2024-11-02",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Jasmine Jasudavicius",
+    "Dustin Stoltzfus",
+    "Charles Jourdain",
+    "Youssef Zalal"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Moreno vs. Albazi"
+  },
+  "UFC Fight Night: Moreno vs. Erceg ": {
+   "date": "2025-03-29",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Manuel Torres",
+    "\u00c9dgar Ch\u00e1irez",
+    "David Mart\u00ednez",
+    "Ateba Gautier"
+   ],
+   "status": "ok",
+   "title": "UFC on ESPN: Moreno vs. Erceg"
+  },
+  "UFC Fight Night: Moreno vs. Kavanagh ": {
+   "date": "2026-02-28",
+   "fotn": [
+    "Regina Tarin",
+    "Ernesta Kareckait\u0117"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Lone'er Kavanagh",
+    "Imanol Rodr\u00edguez"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Moreno vs. Kavanagh"
+  },
+  "UFC Fight Night: Moreno vs. Royval 2 ": {
+   "date": "2024-02-24",
+   "fotn": [
+    "Daniel Zellhuber",
+    "Francisco Prado"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Brian Ortega",
+    "Manuel Torres"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Moreno vs. Royval 2"
+  },
+  "UFC Fight Night: Mousasi vs. Hall 2 ": {
+   "date": "2016-11-19",
+   "fotn": [
+    "Not awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Jack Marshman",
+    "Kevin Lee",
+    "Justin Ledet",
+    "Abdul Razak Alhassan"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Mousasi vs. Hall 2"
+  },
+  "UFC Fight Night: Muhammad vs. Bonfim ": {
+   "date": "2026-06-06",
+   "fotn": [
+    "Brendan Allen",
+    "Edmen Shahbazyan"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Iwo Baraniewski",
+    "\u00c9dgar Ch\u00e1irez"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Muhammad vs. Bonfim"
+  },
+  "UFC Fight Night: Munhoz vs. Edgar ": {
+   "date": "2020-08-22",
+   "status": "missing"
+  },
+  "UFC Fight Night: Muniz vs. Allen ": {
+   "date": "2023-02-25",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Brendan Allen",
+    "Tatiana Suarez",
+    "Mike Malott",
+    "Trevor Peek",
+    "Jordan Leavitt",
+    "Joe Solecki"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Muniz vs. Allen"
+  },
+  "UFC Fight Night: Munoz vs Mousasi ": {
+   "date": "2014-05-31",
+   "fotn": [
+    "None awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Magnus Cedenblad",
+    "Niklas B\u00e4ckstr\u00f6m",
+    "C. B. Dollaway",
+    "Gegard Mousasi"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Mu\u00f1oz vs. Mousasi"
+  },
+  "UFC Fight Night: Namajunas vs. Cortez ": {
+   "date": "2024-07-13",
+   "status": "missing"
+  },
+  "UFC Fight Night: Namajunas vs. VanZant ": {
+   "date": "2015-12-10",
+   "fotn": [
+    "Jim Miller",
+    "Michael Chiesa"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Rose Namajunas",
+    "Tim Means"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Namajunas vs. VanZant"
+  },
+  "UFC Fight Night: Nelson vs Story ": {
+   "date": "2014-10-04",
+   "fotn": [
+    "Dennis Siver",
+    "Charles Rosa"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Mike Wilkinson",
+    "Max Holloway"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Nelson vs. Story"
+  },
+  "UFC Fight Night: Nelson vs. Ponzinibbio ": {
+   "date": "2017-07-16",
+   "fotn": [
+    "Danny Henry",
+    "Daniel Teymur"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Santiago Ponzinibbio",
+    "Paul Felder"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Nelson vs. Ponzinibbio"
+  },
+  "UFC Fight Night: Ngannou vs. Dos Santos ": {
+   "date": "2019-06-29",
+   "status": "missing"
+  },
+  "UFC Fight Night: Ngannou vs. Velasquez ": {
+   "date": "2019-02-17",
+   "status": "missing"
+  },
+  "UFC Fight Night: Nicolau vs. Perez ": {
+   "date": "2024-04-27",
+   "status": "missing"
+  },
+  "UFC Fight Night: Nurmagomedov vs. Song ": {
+   "date": "2026-08-29",
+   "fotn": [
+    "Liu Ce",
+    "Levi Rodrigues Jr"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Song Yadong",
+    "Bilal Hasan"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Nurmagomedov vs. Song"
+  },
+  "UFC Fight Night: Nzechukwu vs. Cutelaba ": {
+   "date": "2022-11-19",
+   "status": "missing"
+  },
+  "UFC Fight Night: Oezdemir vs. Smith ": {
+   "date": "2018-10-27",
+   "status": "missing"
+  },
+  "UFC Fight Night: Oliveira vs. Gamrot ": {
+   "date": "2025-10-11",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Charles Oliveira",
+    "Vitor Petrino",
+    "Beatriz Mesquita",
+    "Julia Polastri"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Oliveira vs. Gamrot"
+  },
+  "UFC Fight Night: Ortega vs. Rodriguez ": {
+   "date": "2022-07-16",
+   "status": "missing"
+  },
+  "UFC Fight Night: Ortega vs. The Korean Zombie ": {
+   "date": "2020-10-17",
+   "fotn": [
+    "Guram Kutateladze",
+    "Mateusz Gamrot"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "J\u00e9ssica Andrade",
+    "Jimmy Crute"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Ortega vs. The Korean Zombie"
+  },
+  "UFC Fight Night: Overeem vs Arlovski ": {
+   "date": "2016-05-08",
+   "fotn": [
+    "None awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Alistair Overeem",
+    "Stefan Struve",
+    "Gunnar Nelson",
+    "Germaine de Randamie"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Overeem vs. Arlovski"
+  },
+  "UFC Fight Night: Overeem vs. Harris ": {
+   "date": "2020-05-16",
+   "status": "no_section"
+  },
+  "UFC Fight Night: Overeem vs. Oleinik ": {
+   "date": "2019-04-20",
+   "fotn": [
+    "Islam Makhachev",
+    "Arman Tsarukyan"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Sergei Pavlovich",
+    "Magomed Mustafaev"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Overeem vs. Oleinik"
+  },
+  "UFC Fight Night: Overeem vs. Rozenstruik ": {
+   "date": "2019-12-07",
+   "status": "missing"
+  },
+  "UFC Fight Night: Overeem vs. Sakai ": {
+   "date": "2020-09-05",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Ovince Saint Preux",
+    "Michel Pereira",
+    "Andr\u00e9 Muniz",
+    "Brian Kelleher"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Overeem vs. Sakai"
+  },
+  "UFC Fight Night: Overeem vs. Volkov ": {
+   "date": "2021-02-06",
+   "fotn": [
+    "Beneil Dariush",
+    "Carlos Diego Ferreira"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Alexander Volkov",
+    "Cory Sandhagen"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Overeem vs. Volkov"
+  },
+  "UFC Fight Night: Pavlovich vs. Blaydes ": {
+   "date": "2023-04-22",
+   "fotn": [
+    "Not awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Sergei Pavlovich",
+    "Bruno Silva",
+    "Christos Giagos",
+    "Montel Jackson"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Pavlovich vs. Blaydes"
+  },
+  "UFC Fight Night: Perez vs. Taira ": {
+   "date": "2024-06-15",
+   "fotn": [
+    "Gabriella Fernandes",
+    "Carli Judice"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Tatsuro Taira",
+    "Brady Hiestand"
+   ],
+   "status": "ok",
+   "title": "UFC on ESPN: Perez vs. Taira"
+  },
+  "UFC Fight Night: Pettis vs. Moreno ": {
+   "date": "2017-08-05",
+   "fotn": [
+    "None awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Niko Price",
+    "Humberto Bandenay",
+    "Dustin Ortiz",
+    "Joseph Morales"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Pettis vs. Moreno"
+  },
+  "UFC Fight Night: Poirier vs. Gaethje ": {
+   "date": "2018-04-14",
+   "status": "missing"
+  },
+  "UFC Fight Night: Poirier vs. Hooker ": {
+   "date": "2020-06-27",
+   "status": "missing"
+  },
+  "UFC Fight Night: Poirier vs. Johnson ": {
+   "date": "2016-09-17",
+   "fotn": [
+    "Evan Dunham",
+    "Rick Glenn"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Michael Johnson",
+    "Chas Skelly"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Poirier vs. Johnson"
+  },
+  "UFC Fight Night: Poirier vs. Pettis ": {
+   "date": "2017-11-11",
+   "fotn": [
+    "Dustin Poirier",
+    "Anthony Pettis"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Matt Brown",
+    "Raphael Assun\u00e7\u00e3o"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Poirier vs. Pettis"
+  },
+  "UFC Fight Night: Reyes vs. Prochazka ": {
+   "date": "2021-05-01",
+   "fotn": [
+    "Ji\u0159\u00ed Proch\u00e1zka",
+    "Dominick Reyes"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Ji\u0159\u00ed Proch\u00e1zka",
+    "Giga Chikadze"
+   ],
+   "status": "ok",
+   "title": "UFC on ESPN: Reyes vs. Proch\u00e1zka"
+  },
+  "UFC Fight Night: Reyes vs. Weidman ": {
+   "date": "2019-10-18",
+   "status": "missing"
+  },
+  "UFC Fight Night: Ribas vs. Namajunas ": {
+   "date": "2024-03-23",
+   "fotn": [
+    "Jarno Errens",
+    "Steven Nguyen"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Payton Talbott",
+    "Fernando Padilla"
+   ],
+   "status": "ok",
+   "title": "UFC on ESPN: Ribas vs. Namajunas"
+  },
+  "UFC Fight Night: Rivera vs. Moraes ": {
+   "date": "2018-06-01",
+   "fotn": [
+    "None awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Marlon Moraes",
+    "Gregor Gillespie",
+    "Ben Saunders",
+    "Nathaniel Wood"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Rivera vs. Moraes"
+  },
+  "UFC Fight Night: Rockhold vs Bisping ": {
+   "date": "2014-11-07",
+   "fotn": [
+    "Robert Whittaker",
+    "Clint Hester"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Luke Rockhold",
+    "Louis Smolka"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Rockhold vs. Bisping"
+  },
+  "UFC Fight Night: Rockhold vs. Branch ": {
+   "date": "2017-09-16",
+   "fotn": [
+    "Gregor Gillespie",
+    "Jason Gonzalez"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Mike Perry",
+    "Uriah Hall"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Rockhold vs. Branch"
+  },
+  "UFC Fight Night: Rodriguez vs. Caceres ": {
+   "date": "2016-08-06",
+   "status": "missing"
+  },
+  "UFC Fight Night: Rodriguez vs. Lemos ": {
+   "date": "2022-11-05",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Neil Magny",
+    "Mario Bautista",
+    "Polyana Viana",
+    "Tamires Vidal"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Rodriguez vs. Lemos"
+  },
+  "UFC Fight Night: Rodriguez vs. Penn ": {
+   "date": "2017-01-15",
+   "status": "missing"
+  },
+  "UFC Fight Night: Rodriguez vs. Stephens ": {
+   "date": "2019-09-21",
+   "fotn": [
+    "Carla Esparza",
+    "Alexa Grasso"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Steven Peterson",
+    "Paul Craig"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Rodr\u00edguez vs. Stephens"
+  },
+  "UFC Fight Night: Rodriguez vs. Waterson ": {
+   "date": "2021-05-08",
+   "status": "missing"
+  },
+  "UFC Fight Night: Rothwell vs Dos Santos ": {
+   "date": "2016-04-10",
+   "status": "missing"
+  },
+  "UFC Fight Night: Royval vs. Kape ": {
+   "date": "2025-12-13",
+   "fotn": [
+    "Steven Asplund",
+    "Sean Sharaf"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Manel Kape",
+    "Kevin Vallejos"
+   ],
+   "status": "ok",
+   "title": "UFC on ESPN: Royval vs. Kape"
+  },
+  "UFC Fight Night: Royval vs. Taira ": {
+   "date": "2024-10-12",
+   "fotn": [
+    "Brandon Royval",
+    "Tatsuro Taira"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Ramazan Temirov",
+    "Clayton Carpenter"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Royval vs. Taira"
+  },
+  "UFC Fight Night: Rozenstruik vs. Almeida ": {
+   "date": "2023-05-13",
+   "status": "missing"
+  },
+  "UFC Fight Night: Rozenstruik vs. Gane ": {
+   "date": "2021-02-27",
+   "fotn": [
+    "Pedro Munhoz",
+    "Jimmie Rivera"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Ronnie Lawrence"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Rozenstruik vs. Gane"
+  },
+  "UFC Fight Night: Rozenstruik vs. Gaziev ": {
+   "date": "2024-03-02",
+   "fotn": [
+    "Vinicius Oliveira",
+    "Bernardo Sopaj"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Steve Erceg",
+    "Vinicius Oliveira"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Rozenstruik vs. Gaziev"
+  },
+  "UFC Fight Night: Rozenstruik vs. Sakai ": {
+   "date": "2021-06-05",
+   "fotn": [
+    "Santiago Ponzinibbio",
+    "Miguel Baeza"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Jairzinho Rozenstruik",
+    "Marcin Tybura"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Rozenstruik vs. Sakai"
+  },
+  "UFC Fight Night: Saint Preux vs. Okami ": {
+   "date": "2017-09-22",
+   "fotn": [
+    "J\u00e9ssica Andrade",
+    "Cl\u00e1udia Gadelha"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Ovince Saint Preux",
+    "G\u00f6khan Saki"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Saint Preux vs. Okami"
+  },
+  "UFC Fight Night: Sandhagen vs. Dillashaw ": {
+   "date": "2021-07-24",
+   "fotn": [
+    "Raulian Paiva",
+    "Kyler Phillips"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Darren Elkins",
+    "Adrian Ya\u00f1ez"
+   ],
+   "status": "ok",
+   "title": "UFC on ESPN: Sandhagen vs. Dillashaw"
+  },
+  "UFC Fight Night: Sandhagen vs. Figueiredo ": {
+   "date": "2025-05-03",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Cory Sandhagen",
+    "Reinier de Ridder",
+    "Azamat Bekoev",
+    "Quang Le"
+   ],
+   "status": "ok",
+   "title": "UFC on ESPN: Sandhagen vs. Figueiredo"
+  },
+  "UFC Fight Night: Sandhagen vs. Font ": {
+   "date": "2023-08-05",
+   "status": "missing"
+  },
+  "UFC Fight Night: Sandhagen vs. Nurmagomedov ": {
+   "date": "2024-08-03",
+   "fotn": [
+    "Sharabutdin Magomedov",
+    "Micha\u0142 Oleksiejczuk"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Joel \u00c1lvarez",
+    "Azamat Murzakanov"
+   ],
+   "status": "ok",
+   "title": "UFC on ABC: Sandhagen vs. Nurmagomedov"
+  },
+  "UFC Fight Night: Sandhagen vs. Song ": {
+   "date": "2022-09-17",
+   "fotn": [
+    "Gregory Rodrigues",
+    "Chidi Njokuani"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Joe Pyfer",
+    "Damon Jackson"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Sandhagen vs. Song"
+  },
+  "UFC Fight Night: Santos vs. Ankalaev ": {
+   "date": "2022-03-12",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Song Yadong",
+    "Khalil Rountree Jr",
+    "Cody Brundage",
+    "Azamat Murzakanov"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Santos vs. Ankalaev"
+  },
+  "UFC Fight Night: Santos vs. Hill ": {
+   "date": "2022-08-06",
+   "fotn": [
+    "Jamahal Hill",
+    "Thiago Santos"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Geoff Neal",
+    "Mohammed Usman",
+    "Bryan Battle"
+   ],
+   "status": "ok",
+   "title": "UFC on ESPN: Santos vs. Hill"
+  },
+  "UFC Fight Night: Santos vs. Teixeira ": {
+   "date": "2020-11-07",
+   "fotn": [
+    "Raoni Barcelos",
+    "Khalid Taha"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Giga Chikadze",
+    "Alexandr Romanov"
+   ],
+   "status": "ok",
+   "title": "UFC on ESPN: Santos vs. Teixeira"
+  },
+  "UFC Fight Night: Santos vs. Walker ": {
+   "date": "2021-10-02",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Casey O'Neill",
+    "Jamie Mullarkey",
+    "Douglas Silva de Andrade",
+    "Alejandro P\u00e9rez"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Santos vs. Walker"
+  },
+  "UFC Fight Night: Shevchenko vs. Carmouche 2 ": {
+   "date": "2019-08-10",
+   "fotn": [
+    "Vicente Luque",
+    "Mike Perry"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Volkan Oezdemir",
+    "Veronica Macedo"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Shevchenko vs. Carmouche 2"
+  },
+  "UFC Fight Night: Shogun vs Henderson 2 ": {
+   "date": "2014-03-23",
+   "fotn": [
+    "Maur\u00edcio Rua",
+    "Dan Henderson"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Dan Henderson",
+    "Godofredo Pepey"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Shogun vs. Henderson 2"
+  },
+  "UFC Fight Night: Shogun vs. Smith ": {
+   "date": "2018-07-22",
+   "fotn": [
+    "Danny Roberts",
+    "David Zawada"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Anthony Smith",
+    "Manny Bermudez"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Shogun vs. Smith"
+  },
+  "UFC Fight Night: Silva vs Bisping ": {
+   "date": "2016-02-27",
+   "fotn": [
+    "Michael Bisping",
+    "Anderson Silva"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Scott Askham",
+    "Teemu Packal\u00e9n"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Silva vs. Bisping"
+  },
+  "UFC Fight Night: Smith vs. Clark ": {
+   "date": "2020-11-28",
+   "status": "missing"
+  },
+  "UFC Fight Night: Smith vs. Rakic ": {
+   "date": "2020-08-29",
+   "status": "missing"
+  },
+  "UFC Fight Night: Smith vs. Spann ": {
+   "date": "2021-09-18",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Anthony Smith",
+    "Arman Tsarukyan",
+    "Nate Maness",
+    "Joaquin Buckley"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Smith vs. Spann"
+  },
+  "UFC Fight Night: Smith vs. Teixeira ": {
+   "date": "2020-05-13",
+   "fotn": [
+    "Brian Kelleher",
+    "Hunter Azure"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Glover Teixeira",
+    "Drew Dober"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Smith vs. Teixeira"
+  },
+  "UFC Fight Night: Song vs. Figueiredo ": {
+   "date": "2026-05-30",
+   "fotn": [
+    "Alonzo Menifield",
+    "Zhang Mingyang"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Song Yadong",
+    "Kai Asakura"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Song vs. Figueiredo"
+  },
+  "UFC Fight Night: Song vs. Gutierrez ": {
+   "date": "2023-12-09",
+   "status": "missing"
+  },
+  "UFC Fight Night: Song vs. Simon ": {
+   "date": "2023-04-29",
+   "status": "missing"
+  },
+  "UFC Fight Night: Stephens vs. Choi ": {
+   "date": "2018-01-14",
+   "fotn": [
+    "Jeremy Stephens",
+    "Doo Ho Choi"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Darren Elkins",
+    "Polo Reyes"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Stephens vs. Choi"
+  },
+  "UFC Fight Night: Sterling vs. Zalal ": {
+   "date": "2026-04-25",
+   "fotn": [
+    "Davey Grant",
+    "Adri\u00e1n Luna Martinetti"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Ryan Spann",
+    "Jackson McVey"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Sterling vs. Zalal"
+  },
+  "UFC Fight Night: Strickland vs. Hernandez ": {
+   "date": "2026-02-21",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Sean Strickland",
+    "Uro\u0161 Medi\u0107",
+    "Melquizael Costa",
+    "Jacobe Smith"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Strickland vs. Hernandez"
+  },
+  "UFC Fight Night: Strickland vs. Imavov ": {
+   "date": "2023-01-14",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Dan Ige",
+    "Roman Kopylov",
+    "Umar Nurmagomedov",
+    "Allan Nascimento"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Strickland vs. Imavov"
+  },
+  "UFC Fight Night: Strickland vs. Magomedov ": {
+   "date": "2023-07-01",
+   "status": "missing"
+  },
+  "UFC Fight Night: Swanson vs Stephens ": {
+   "date": "2014-06-28",
+   "fotn": [
+    "Cub Swanson",
+    "Jeremy Stephens"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Ray Borg",
+    "Carlos Diego Ferreira"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Swanson vs. Stephens"
+  },
+  "UFC Fight Night: Swanson vs. Lobov ": {
+   "date": "2017-04-22",
+   "fotn": [
+    "Cub Swanson",
+    "Artem Lobov"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Mike Perry",
+    "Brandon Moreno"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Swanson vs. Lobov"
+  },
+  "UFC Fight Night: Swanson vs. Ortega ": {
+   "date": "2017-12-09",
+   "fotn": [
+    "Brian Ortega",
+    "Cub Swanson"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Brian Ortega",
+    "Marlon Moraes"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Swanson vs. Ortega"
+  },
+  "UFC Fight Night: Taira vs. Park ": {
+   "date": "2025-08-02",
+   "status": "missing"
+  },
+  "UFC Fight Night: Te Huna vs Marquardt ": {
+   "date": "2014-06-28",
+   "fotn": [
+    "Gian Villante",
+    "Sean O'Connell"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Nate Marquardt",
+    "Charles Oliveira"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Te Huna vs. Marquardt"
+  },
+  "UFC Fight Night: Teixeira vs Saint Preux ": {
+   "date": "2015-08-08",
+   "fotn": [
+    "Glover Teixeira",
+    "Ovince Saint Preux"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Amanda Nunes",
+    "Marlon Vera"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Teixeira vs. Saint Preux"
+  },
+  "UFC Fight Night: Thompson vs. Holland ": {
+   "date": "2022-12-03",
+   "status": "missing"
+  },
+  "UFC Fight Night: Thompson vs. Neal ": {
+   "date": "2020-12-19",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Stephen Thompson",
+    "Rob Font",
+    "Marcin Tybura",
+    "Jimmy Flick"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Thompson vs. Neal"
+  },
+  "UFC Fight Night: Thompson vs. Pettis ": {
+   "date": "2019-03-23",
+   "fotn": [
+    "Bryce Mitchell",
+    "Bobby Moffett"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Anthony Pettis",
+    "Randa Markos"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Thompson vs. Pettis"
+  },
+  "UFC Fight Night: Thompson vs. Till ": {
+   "date": "2018-05-27",
+   "fotn": [
+    "None awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Arnold Allen",
+    "Cl\u00e1udio Silva",
+    "Darren Stewart",
+    "Tom Breese"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Thompson vs. Till"
+  },
+  "UFC Fight Night: Till vs. Masvidal ": {
+   "date": "2019-03-16",
+   "fotn": [
+    "Jorge Masvidal",
+    "Darren Till"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Jorge Masvidal",
+    "Dan Ige"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Till vs. Masvidal"
+  },
+  "UFC Fight Night: Tsarukyan vs. Gamrot ": {
+   "date": "2022-06-25",
+   "fotn": [
+    "Mateusz Gamrot",
+    "Arman Tsarukyan"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Shavkat Rakhmonov",
+    "Josh Parisian",
+    "Thiago Mois\u00e9s"
+   ],
+   "status": "ok",
+   "title": "UFC on ESPN: Tsarukyan vs. Gamrot"
+  },
+  "UFC Fight Night: Tsarukyan vs. Hooker ": {
+   "date": "2025-11-22",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Arman Tsarukyan",
+    "Waldo Cortes-Acosta",
+    "Kyoji Horiguchi",
+    "Luke Riley"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Tsarukyan vs. Hooker"
+  },
+  "UFC Fight Night: Tuivasa vs. Tybura ": {
+   "date": "2024-03-16",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Marcin Tybura",
+    "Macy Chiasson",
+    "Jafel Filho",
+    "Jaqueline Amorim"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Tuivasa vs. Tybura"
+  },
+  "UFC Fight Night: Tybura vs. Spivac 2 ": {
+   "date": "2024-08-10",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Serghei Spivac",
+    "Toshiomi Kazama",
+    "Youssef Zalal"
+   ],
+   "status": "ok",
+   "title": "UFC on ESPN: Tybura vs. Spivac 2"
+  },
+  "UFC Fight Night: Ulberg vs. Reyes ": {
+   "date": "2025-09-27",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Carlos Ulberg",
+    "Jimmy Crute",
+    "Tom Nolan",
+    "Brando Peri\u010di\u0107"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Ulberg vs. Reyes"
+  },
+  "UFC Fight Night: Usman vs. Buckley ": {
+   "date": "2025-06-14",
+   "status": "missing"
+  },
+  "UFC Fight Night: Vera vs. Cruz ": {
+   "date": "2022-08-13",
+   "status": "missing"
+  },
+  "UFC Fight Night: Vera vs. Sandhagen ": {
+   "date": "2023-03-25",
+   "fotn": [
+    "Nazim Sadykhov",
+    "Evan Elder"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Erin Blanchfield",
+    "Mayra Bueno Silva"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Andrade vs. Blanchfield"
+  },
+  "UFC Fight Night: Vettori vs. Cannonier ": {
+   "date": "2023-06-17",
+   "status": "missing"
+  },
+  "UFC Fight Night: Vettori vs. Dolidze 2 ": {
+   "date": "2025-03-15",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Carlos Vera",
+    "Andr\u00e9 Lima",
+    "Priscila Cachoeira",
+    "Carli Judice"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Vettori vs. Dolidze 2"
+  },
+  "UFC Fight Night: Vettori vs. Holland ": {
+   "date": "2021-04-10",
+   "status": "missing"
+  },
+  "UFC Fight Night: Vieira vs. Tate ": {
+   "date": "2021-11-20",
+   "fotn": [
+    "Adrian Ya\u00f1ez",
+    "Davey Grant"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Taila Santos"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Vieira vs. Tate"
+  },
+  "UFC Fight Night: Volkov vs. Aspinall ": {
+   "date": "2022-03-19",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Tom Aspinall",
+    "Arnold Allen",
+    "Paddy Pimblett",
+    "Molly McCann",
+    "Ilia Topuria",
+    "Makwan Amirkhani",
+    "Sergei Pavlovich",
+    "Paul Craig",
+    "Muhammad Mokaev"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Volkov vs. Aspinall"
+  },
+  "UFC Fight Night: Volkov vs. Rozenstruik ": {
+   "date": "2022-06-04",
+   "fotn": [
+    "Michael Trizano"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Karine Silva",
+    "Ode' Osbourne"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Volkov vs. Rozenstruik"
+  },
+  "UFC Fight Night: Volkov vs. Struve ": {
+   "date": "2017-09-02",
+   "fotn": [
+    "Alexander Volkov",
+    "Stefan Struve"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Mairbek Taisumov",
+    "Zabit Magomedsharipov"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Volkov vs. Struve"
+  },
+  "UFC Fight Night: Walker vs. Hill ": {
+   "date": "2022-02-19",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Jamahal Hill",
+    "Kyle Daukaus",
+    "David Onama",
+    "Stephanie Egger"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Walker vs. Hill"
+  },
+  "UFC Fight Night: Walker vs. Zhang ": {
+   "date": "2025-08-23",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Johnny Walker",
+    "Charles Johnson",
+    "Kyle Daukaus",
+    "Uran Satybaldiev"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Walker vs. Zhang"
+  },
+  "UFC Fight Night: Waterson vs. Hill ": {
+   "date": "2020-09-12",
+   "fotn": [
+    "Michelle Waterson",
+    "Angela Hill"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Ottman Azaitar",
+    "Kevin Croom"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Waterson vs. Hill"
+  },
+  "UFC Fight Night: Weidman vs. Gastelum ": {
+   "date": "2017-07-22",
+   "status": "missing"
+  },
+  "UFC Fight Night: Werdum vs. Tybura ": {
+   "date": "2017-11-18",
+   "fotn": [
+    "Frank Camacho",
+    "Damien Brown"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Nik Lentz",
+    "Tai Tuivasa"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Werdum vs. Tybura"
+  },
+  "UFC Fight Night: Werdum vs. Volkov ": {
+   "date": "2018-03-17",
+   "fotn": [
+    "Jan B\u0142achowicz",
+    "Jimi Manuwa"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Alexander Volkov",
+    "Paul Craig"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Werdum vs. Volkov"
+  },
+  "UFC Fight Night: Whittaker vs. Aliskerov ": {
+   "date": "2024-06-22",
+   "status": "missing"
+  },
+  "UFC Fight Night: Whittaker vs. Brunson ": {
+   "date": "2016-11-26",
+   "fotn": [
+    "Robert Whittaker",
+    "Derek Brunson"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Robert Whittaker",
+    "Tyson Pedro"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Whittaker vs. Brunson"
+  },
+  "UFC Fight Night: Whittaker vs. De Ridder ": {
+   "date": "2025-07-26",
+   "status": "missing"
+  },
+  "UFC Fight Night: Whittaker vs. Gastelum ": {
+   "date": "2021-04-17",
+   "fotn": [
+    "Robert Whittaker",
+    "Kelvin Gastelum"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Gerald Meerschaert",
+    "Tony Gravely"
+   ],
+   "status": "ok",
+   "title": "UFC on ESPN: Whittaker vs. Gastelum"
+  },
+  "UFC Fight Night: Whittaker vs. Till ": {
+   "date": "2020-07-25",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Fabr\u00edcio Werdum",
+    "Paul Craig",
+    "Khamzat Chimaev",
+    "Jesse Ronson",
+    "Tom Aspinall",
+    "Tanner Boser"
+   ],
+   "status": "ok",
+   "title": "UFC on ESPN: Whittaker vs. Till"
+  },
+  "UFC Fight Night: Woodley vs. Burns ": {
+   "date": "2020-05-30",
+   "fotn": [
+    "Brandon Royval",
+    "Tim Elliott"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Gilbert Burns",
+    "Mackenzie Dern"
+   ],
+   "status": "ok",
+   "title": "UFC on ESPN: Woodley vs. Burns"
+  },
+  "UFC Fight Night: Yan vs. Dvalishvili ": {
+   "date": "2023-03-11",
+   "fotn": [
+    "Vitor Petrino",
+    "Anton Turkalj"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Davey Grant",
+    "Bruno Gustavo da Silva"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Yan vs. Dvalishvili"
+  },
+  "UFC Fight Night: Yan vs. Figueiredo ": {
+   "date": "2024-11-23",
+   "fotn": [
+    "No bonus awarded"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Muslim Salikhov",
+    "Gabriella Fernandes",
+    "Zhang Mingyang",
+    "Shi Ming"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Yan vs. Figueiredo"
+  },
+  "UFC Fight Night: Yusuff vs. Barboza ": {
+   "date": "2023-10-14",
+   "fotn": [
+    "Edson Barboza",
+    "Sodiq Yusuff"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Jonathan Martinez",
+    "Michel Pereira"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Yusuff vs. Barboza"
+  },
+  "UFC Fight Night: Zabit vs. Kattar ": {
+   "date": "2019-11-09",
+   "fotn": [
+    "Zabit Magomedsharipov",
+    "Calvin Kattar"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Magomed Ankalaev",
+    "David Zawada"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Magomedsharipov vs. Kattar"
+  },
+  "UFC Freedom 250 ": {
+   "date": "2026-06-14",
+   "fotn": [
+    "Justin Gaethje",
+    "Ilia Topuria"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Justin Gaethje",
+    "Ciryl Gane"
+   ],
+   "status": "ok",
+   "title": "UFC Freedom 250"
+  },
+  "UFC on FOX: Dillashaw vs. Barao II ": {
+   "date": "2015-07-25",
+   "status": "missing"
+  },
+  "UFC on FOX: Dos Anjos vs. Cowboy 2 ": {
+   "date": "2015-12-19",
+   "status": "missing"
+  },
+  "UFC on FOX: Dos Santos vs Miocic ": {
+   "date": "2014-12-13",
+   "status": "missing"
+  },
+  "UFC on FOX: Gustafsson vs Johnson ": {
+   "date": "2015-01-24",
+   "status": "missing"
+  },
+  "UFC on FOX: Holm vs. Shevchenko ": {
+   "date": "2016-07-23",
+   "status": "missing"
+  },
+  "UFC on FOX: Johnson vs. Bader ": {
+   "date": "2016-01-30",
+   "status": "missing"
+  },
+  "UFC on FOX: Johnson vs. Reis ": {
+   "date": "2017-04-15",
+   "status": "missing"
+  },
+  "UFC on FOX: Lawler vs Brown ": {
+   "date": "2014-07-26",
+   "status": "missing"
+  },
+  "UFC on FOX: Machida vs Rockhold ": {
+   "date": "2015-04-18",
+   "status": "missing"
+  },
+  "UFC on FOX: Maia vs. Condit ": {
+   "date": "2016-08-27",
+   "status": "missing"
+  },
+  "UFC on FOX: Shevchenko vs. Pena ": {
+   "date": "2017-01-28",
+   "status": "missing"
+  },
+  "UFC on FOX: Teixeira vs Evans ": {
+   "date": "2016-04-16",
+   "status": "missing"
+  },
+  "UFC on FOX: VanZant vs. Waterson ": {
+   "date": "2016-12-17",
+   "status": "missing"
+  },
+  "UFC on FOX: Werdum vs Browne ": {
+   "date": "2014-04-19",
+   "status": "missing"
+  }
+ },
+ "updated_utc": "2026-09-24T04:48:25+00:00",
+ "version": 1
+}
