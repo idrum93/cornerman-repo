@@ -24,6 +24,11 @@ import pandas as pd
 from .wiki_records import _get, clean_cell, fetch_pages, search_title
 
 OUT = "data/wiki/bonuses.json"
+# Bump when the parser changes: stored labels were produced by the old one and
+# are re-read automatically, so a fix reaches the data without anyone
+# remembering to pass a flag. Version 1 counted "Fight of the Night: None" as
+# a fighter, which put the award rate at 99% instead of about two thirds.
+PARSER_VERSION = 2
 POTN_ERA = pd.Timestamp("2014-02-01")
 HEADING = re.compile(r"bonus award", re.I)
 LABELS = {"fotn": re.compile(r"fight of the night", re.I),
@@ -105,6 +110,12 @@ def event_titles(name):
 def collect(fights, budget_min=20, path=OUT, verbose=True):
     t0 = time.time()
     store = _load(path)
+    if store.get("parser") != PARSER_VERSION:
+        n = len(store.get("events", {}))
+        store = {"version": 1, "parser": PARSER_VERSION, "events": {}}
+        if verbose and n:
+            print(f"bonuses: parser updated, re-reading all {n} stored events")
+    store["parser"] = PARSER_VERSION
     ev = store["events"]
     events = (fights[fights.date >= POTN_ERA][["event", "date"]]
               .drop_duplicates("event").sort_values("date", ascending=False))
@@ -164,20 +175,6 @@ def report(store, remaining=0, elapsed=0):
         print(f"  {pot} Performance of the Night awards recorded")
 
 
-if __name__ == "__main__":
-    import sys
-    from .loaders import load
-    budget = 20
-    if "--budget-min" in sys.argv:
-        budget = float(sys.argv[sys.argv.index("--budget-min") + 1])
-    f, _p, _ = load(verbose=False)
-    if "--check" in sys.argv:
-        validate(f)
-    else:
-        collect(f, budget_min=budget)
-        validate(f)
-
-
 # ---------------------------------------------------------------- validation
 def validate(fights, store=None, path=OUT, verbose=True):
     """Check the labels against the corpus, because a parser that reads the
@@ -228,3 +225,21 @@ def validate(fights, store=None, path=OUT, verbose=True):
         for k, n in bad_names:
             print(f"    not on the card: {k!r} -> {n!r}")
     return res
+
+
+if __name__ == "__main__":
+    import sys
+    from .loaders import load
+    budget = 20
+    if "--budget-min" in sys.argv:
+        budget = float(sys.argv[sys.argv.index("--budget-min") + 1])
+    f, _p, _ = load(verbose=False)
+    if "--check" in sys.argv:
+        validate(f)
+        raise SystemExit(0)
+    if "--recollect" in sys.argv:
+        # the parser changed, so stored labels are stale: start over
+        _save({"version": 1, "events": {}})
+        print("bonuses: cleared stored labels, re-reading every event")
+    collect(f, budget_min=budget)
+    validate(f)
