@@ -11,8 +11,9 @@
     --soft:#1C222C; --bone:#ECE8E0; --mute:#8D95A6; --dim:#59616F;
     --red:#C8442F; --redsoft:#E87D68; --blue:#3E85B4; --bluesoft:#78B2D8;
     --gold:#CDA43A; --warn:#DE8C34; --good:#6FBF73;
-    /* reserved for exactly one meaning: model and market disagree by 5+ pts */
-    --hot:#FF5A36;
+    /* corner colours carry direction; containers take their zone's colour;
+       gold means the market; the tile highlight is neutral bone. Nothing else
+       is needed, so the old accent is retired. */
   }
   *{box-sizing:border-box}
   body{margin:0;background:var(--ink);color:var(--bone);
@@ -35,7 +36,7 @@
 
   /* divergence strip: the loudest thing on the page */
   .strip{display:flex;gap:10px;overflow-x:auto;padding:12px 0 4px;margin-bottom:6px}
-  .dcard{flex:0 0 auto;min-width:214px;border:1px solid var(--warn);border-radius:4px;
+  .dcard{flex:0 0 auto;min-width:214px;border:1px solid var(--line);border-radius:4px;
     background:linear-gradient(180deg,rgba(222,140,52,.10),rgba(222,140,52,.02));
     padding:9px 12px;cursor:pointer;text-align:left;font:inherit;color:inherit}
   .dcard:hover{background:rgba(222,140,52,.16)}
@@ -75,8 +76,10 @@
   .pp{font-size:9.5px;letter-spacing:.04em;padding:2px 6px;border-radius:3px;
     border:1px solid var(--line);color:var(--mute);white-space:nowrap}
   .pp b{color:var(--bone);font-weight:700}
-  .pp.hot{border-color:rgba(205,164,58,.6);color:var(--gold)}
-  .pp.hot b{color:var(--gold)}
+  .pp-a{color:var(--redsoft);border-color:rgba(200,68,47,.32)}
+  .pp-b{color:var(--bluesoft);border-color:rgba(62,133,180,.32)}
+  .pp-n.strong{color:var(--gold);border-color:rgba(205,164,58,.45)}
+  .pp.strong b{font-weight:800}
 
   .noread{border:1px dashed var(--line);border-radius:4px;padding:9px 11px;
     font-size:11.5px;color:var(--dim)}
@@ -103,6 +106,8 @@
   .pgroup.priced .gname{color:var(--gold)}
   .prow{display:flex;align-items:center;gap:9px;padding:6px 11px}
   .prow+.prow{border-top:1px solid var(--soft)}
+  .prow.feat{background:rgba(236,232,224,.045);box-shadow:inset 2px 0 0 rgba(236,232,224,.4)}
+  .featdot{color:var(--bone);font-size:7px;opacity:.7;width:10px;text-align:center}
   .fo{width:52px;text-align:right;font-size:11px;color:var(--gold)}
   .rec{width:132px;text-align:right;font-size:9px;letter-spacing:.06em;text-transform:uppercase}
   .rec.none{color:#454D5B} .rec.good{color:var(--good)} .rec.bad{color:var(--warn)}
@@ -186,6 +191,7 @@
   .rbig{font-size:22px;font-weight:800;letter-spacing:-.02em}
   .rsub{font-size:10.5px;color:var(--mute);margin-top:2px}
   .rsub b.up{color:var(--good)} .rsub b.dn{color:var(--red)}
+  .rsub b.vs{color:var(--gold)} .rsub .nomk{color:#454D5B}
   .rtile .rname{font-size:15px;font-weight:800;text-transform:uppercase;letter-spacing:-.01em;margin:2px 0 6px}
   .rtile .rname .lbl{display:block;text-transform:none;letter-spacing:.06em;font-weight:400;margin-top:2px}
   .rchips{display:flex;gap:5px;flex-wrap:wrap}
@@ -269,11 +275,11 @@
   .nm-a{color:var(--redsoft)} .nm-b{color:var(--bluesoft)}
   .nm.fav{font-weight:800}
   .nm:not(.fav){opacity:.72}
-  .tile.is-hot{border-color:rgba(255,90,54,.55);
-    box-shadow:0 0 0 1px rgba(255,90,54,.18),0 6px 22px -12px rgba(255,90,54,.55)}
-  .tile.is-hot:hover{border-color:var(--hot)}
-  .dcard{border-color:rgba(255,90,54,.6)!important}
-  .dcard .dgap{color:var(--hot)!important}
+  /* "Look here" only. Orange read as the red corner, and gold already means
+     the market everywhere else, so the tile highlight is neutral. */
+  .tile.is-hot{border-color:rgba(236,232,224,.34);
+    box-shadow:0 0 0 1px rgba(236,232,224,.10),0 6px 22px -14px rgba(236,232,224,.45)}
+  .tile.is-hot:hover{border-color:rgba(236,232,224,.6)}
   @media (prefers-reduced-motion:no-preference){
     .g-a,.g-b{stroke-dasharray:220;animation:grow .7s cubic-bezier(.2,.8,.2,1) both}
     @keyframes grow{from{stroke-dashoffset:220}to{stroke-dashoffset:0}}
@@ -306,6 +312,7 @@
     <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px">
       <div class="mono" id="stamp" style="font-size:10.5px;color:var(--mute);white-space:nowrap"></div>
       <div class="mono" id="usage" style="font-size:9.5px;display:flex;align-items:center;gap:6px"></div>
+      <div class="mono" id="record" style="font-size:9.5px"></div>
     </div>
   </header>
   <div id="app" style="padding:4px 0 0"><div class="lbl">Loading…</div></div>
@@ -361,6 +368,36 @@ function fmtET(iso){
    already receives — checking it costs nothing. Amber under 100 credits, red
    under 30: a 429 in fight week would lose closing prices, the unrecoverable
    half of every CLV measurement. */
+/* The running model-vs-market record, from every card graded so far.
+   Deliberately shows n and refuses to call a winner early: the retrospective
+   gap is 3.2 points (67.1% against 70.3%), and separating that needs roughly
+   800 graded bouts — about 60 cards. At ten cards the interval is +/-12
+   points, so a scoreboard read as a trend before then is reading noise. */
+const RECORD_N_NEEDED=800;
+function liveRecord(){
+  if(!HIST||!HIST.cards||!HIST.cards.length) return null;
+  let n=0,mr=0,kn=0,kr=0,pm=0,pk=0;
+  HIST.cards.forEach(c=>c.bouts.forEach(g=>{
+    n++; mr+=g.model_right?1:0; pm+=g.p_winner_model||0;
+    if(g.market){ kn++; kr+=g.market.market_right?1:0; pk+=g.p_winner_market||0; }
+  }));
+  if(!n) return null;
+  return {n,mr,kn,kr,pm:pm/n,pk:kn?pk/kn:null};
+}
+function showRecord(){
+  const el=document.getElementById('record'); if(!el) return;
+  const r=liveRecord();
+  if(!r){ el.innerHTML='<span style="color:var(--dim)">live record starts with the first graded card</span>'; return; }
+  const enough=r.n>=RECORD_N_NEEDED;
+  el.innerHTML=`<span style="color:var(--mute)">live record</span>
+    <b style="color:var(--bone)">model ${r.mr}/${r.n}</b>
+    ${r.kn?`<span style="color:var(--gold)">market ${r.kr}/${r.kn}</span>`:''}
+    <span style="color:${enough?'var(--mute)':'var(--dim)'}" title="${enough?
+      'enough graded bouts to compare':'the retrospective gap is about 3 points; separating that needs roughly '
+      +RECORD_N_NEEDED+' graded bouts. Mean probability given to the actual winner so far: model '
+      +P0(r.pm)+'%'+(r.pk!=null?', market '+P0(r.pk)+'%':'')}">
+      ${enough?'':`too early to separate · ${r.n} of ~${RECORD_N_NEEDED}`}</span>`;
+}
 function showUsage(){
   const el=document.getElementById('usage'); if(!el||!USG||USG.remaining==null) return;
   const r=USG.remaining, tot=r+(USG.used||0), pct=tot?r/tot:0;
@@ -398,7 +435,7 @@ function strip(){
   if(!w.length) return `<div class="note" style="padding:10px 0">No market prices in this
     build — add <span class="mono">ODDS_API_KEY</span> and the model-vs-market comparison appears here.</div>`;
   const top=w.slice(0,5);
-  return `<div class="totals" style="border-color:rgba(255,90,54,.22);background:rgba(255,90,54,.04)">
+  return `<div class="totals" style="border-color:rgba(205,164,58,.24);background:rgba(205,164,58,.04)">
     <div class="lbl tothd">model vs market · widest disagreements on this card</div>
     <div class="strip">${top.map(b=>{
     const e=Math.abs(b.edge), toA=b.edge>0;
@@ -414,16 +451,38 @@ function strip(){
     </button>`;}).join('')}</div></div>`;
 }
 
+let FEATURED=new Set();
+/* The four markets a tile chose to show, by their scorecard keys, so the panel
+   can mark the same rows. A reader who clicked a tile because of a chip should
+   not have to hunt for that row among seventeen. */
+function propRank(b){
+  const MB=(BR&&BR.market_bases)||{};
+  const T=(MB.totals||{})[b.rounds===5?'5':'3']||{};
+  const C=[];
+  const push=(key,txt,p,base,cls,tip)=>{
+    if(p==null||base==null) return;
+    C.push({key,txt,p,base,cls,tip,dev:Math.abs(p-base)});
+  };
+  push('inside_distance',`ITD <b>${P0(b.p_finish)}%</b>`,b.p_finish,MB.itd,'pp-n',
+       `the fight ends inside the distance — normally ${P0(MB.itd)}% of fights do`);
+  Object.keys(b.totals||{}).forEach(k=>{
+    const line=k.replace('over_','').replace('_','.');
+    push('total_'+k,`O${line} <b>${P0(b.totals[k])}%</b>`,b.totals[k],T[line],'pp-n',
+         `the fight lasts past ${line} rounds — normally ${P0(T[line])}%`);
+  });
+  [['a',b.a,b.a_p_takedown,b.a_p_knockdown],['b',b.b,b.b_p_takedown,b.b_p_knockdown]].forEach(([side,nm,td,kd])=>{
+    push('takedown_'+side,`TD ${esc(surname(nm))} <b>${P0(td)}%</b>`,td,MB.td,'pp-'+side,
+         `${nm} lands at least one takedown — normally ${P0(MB.td)}%`);
+    push('knockdown_'+side,`KD ${esc(surname(nm))} <b>${P0(kd)}%</b>`,kd,MB.kd,'pp-'+side,
+         `${nm} scores at least one knockdown — normally ${P0(MB.kd)}%`);
+  });
+  return C.sort((x,y)=>y.dev-x.dev);
+}
+
 function propChips(b){
-  const c=[];
-  if(b.p_finish!=null) c.push(`<span class="pp ${b.p_finish>=.6?'hot':''}">ITD <b>${P0(b.p_finish)}%</b></span>`);
-  const td=Math.max(b.a_p_takedown||0,b.b_p_takedown||0);
-  const who=(b.a_p_takedown||0)>=(b.b_p_takedown||0)?b.a:b.b;
-  if(td) c.push(`<span class="pp ${td>=.7?'hot':''}">TD ${esc(surname(who))} <b>${P0(td)}%</b></span>`);
-  if(b.totals&&b.totals.over_2_5!=null) c.push(`<span class="pp">O2.5 <b>${P0(b.totals.over_2_5)}%</b></span>`);
-  const kd=Math.max(b.a_p_knockdown||0,b.b_p_knockdown||0);
-  if(kd>=.3) c.push(`<span class="pp ${kd>=.45?'hot':''}">KD <b>${P0(kd)}%</b></span>`);
-  return `<div class="props">${c.join('')}</div>`;
+  return `<div class="props">${propRank(b).slice(0,4).map(c=>
+    `<span class="pp ${c.cls} ${c.dev>=0.12?'strong':''}" title="${esc(c.tip)} · ${
+      c.dev>=0.12?'well away from normal':'close to normal'}">${c.txt}</span>`).join('')}</div>`;
 }
 
 /* Two fighters with three UFC bouts between them get the same confident
@@ -504,6 +563,9 @@ function tile(b){
     <div class="gkey">
       ${mk?`<span class="k-market">market ${P0(b.p_market)}/${P0(1-b.p_market)}</span>`:'<span class="k-open-l">no market line</span>'}
       ${b.p_open!=null?`<span class="k-open-l">opened ${P0(b.p_open)}/${P0(1-b.p_open)}</span>`:''}
+      ${mk&&b.p_open!=null&&Math.abs(b.p_market-b.p_open)>=0.005?`<span
+        class="${b.p_market>b.p_open?'k-lean-a':'k-lean-b'}">moved +${(Math.abs(b.p_market-b.p_open)*100).toFixed(0)}
+        ${esc(surname(b.p_market>b.p_open?b.a:b.b))}</span>`:''}
     </div>
     ${b.thin?`<div class="props"><span class="pp" style="color:var(--warn);border-color:rgba(222,140,52,.4)">winner only · ${Math.min((b.evidence||{}).a??9,(b.evidence||{}).b??9)===0?'debut':'1 prior UFC fight'}</span></div>`:propChips(b)}
   </button>`;
@@ -657,9 +719,12 @@ function lastCard(){
     <div class="lbl">${small}</div>${sub?`<div class="rsub">${sub}</div>`:''}</div>`;
   const edgeProps=c.props_right-c.props_base_right;
   const head=`<div class="rstats">
-    ${stat(`${c.right}/${c.n}`,'winners called',pct(c.right,c.n))}
-    ${stat(`${c.method_right}/${c.method_n}`,'method — top pick',pct(c.method_right,c.method_n))}
-    ${c.round_n?stat(`${c.round_right}/${c.round_n}`,'finish round — top pick',pct(c.round_right,c.round_n)):''}
+    ${stat(`${c.right}/${c.n}`,'winners called',
+      c.market_n?`${pct(c.right,c.n)} · <b class="vs">market ${c.market_right}/${c.market_n}</b>`:pct(c.right,c.n))}
+    ${stat(`${c.method_right}/${c.method_n}`,'method — top pick',
+      `${pct(c.method_right,c.method_n)} · <span class="nomk">no market line</span>`)}
+    ${c.round_n?stat(`${c.round_right}/${c.round_n}`,'finish round — top pick',
+      `${pct(c.round_right,c.round_n)} · <span class="nomk">no market line</span>`):''}
     ${stat(`${c.props_right}/${c.props_n}`,'props on the right side',
       `usual outcome alone: ${c.props_base_right}/${c.props_base_n} · <b class="${edgeProps>0?'up':edgeProps<0?'dn':''}">${edgeProps>0?'+':''}${edgeProps}</b>`)}
     ${c.market_n?stat(`${c.model_closer}/${c.market_n}`,'closer than the market',
@@ -813,7 +878,7 @@ function marketRecord(mk){
 function propRow(name,p,col,marker,note,mkey){
   const mk=marker==null?'':`<div style="position:absolute;left:calc(${marker*100}% - 4px);top:-3px;
     color:var(--gold);font-size:10px;line-height:1">◆</div>`;
-  return `<div class="prow">
+  return `<div class="prow ${mkey&&FEATURED.has(mkey)?'feat':''}">
     <div style="width:146px;flex:none;font-size:11.5px;color:var(--mute)">${esc(name)}
       ${note?`<span class="lbl" style="display:block;margin-top:1px">${esc(note)}</span>`:''}</div>
     <div style="flex:1;position:relative;height:8px">
@@ -822,6 +887,7 @@ function propRow(name,p,col,marker,note,mkey){
         width:${Math.max(0,Math.min(100,p*100))}%;background:${col}"></div>${mk}</div>
     <div class="mono" style="width:48px;text-align:right;font-size:12px;font-weight:600">${P1(p)}%</div>
     <div class="mono fo" title="fair price implied by this probability">${fairOdds(p).us}</div>
+    ${mkey&&FEATURED.has(mkey)?'<span class="featdot" title="shown on this fight\'s tile">●</span>':''}
     ${mkey?(()=>{const r=marketRecord(mkey);
       return `<span class="rec ${r.cls}" title="${r.n} graded claims for this market">${esc(r.txt)}</span>`;})():'<span class="rec none"></span>'}
     </div>`;
@@ -954,6 +1020,7 @@ function drvRaw(b,label){
 
 function open_(id){
   const b=DATA.bouts.find(x=>x.bout===id); if(!b) return;
+  FEATURED=new Set(propRank(b).slice(0,4).map(c=>c.key));
   const mk=b.p_market!=null;
   const drv=(b.drivers||[]);
   const mx=drv.length?Math.max(...drv.map(d=>Math.abs(d.value))):1;
@@ -992,6 +1059,7 @@ function open_(id){
             <i style="${red?'right:50%':'left:50%'};width:${w}%;background:${red?'var(--red)':'var(--blue)'}"></i></div>
           <div class="mono" style="width:52px;text-align:right;font-size:11px;color:var(--dim)">${d.value>0?'+':''}${d.value.toFixed(2)}</div></div>`;}).join('')}
       </div>`:''}
+    ${tale(b)}
     ${b.thin?thinNote(b):''}
     ${b.thin?`<div class="card"><div class="ghead" style="background:none;border:none;padding:0 0 8px">
       <span class="gname">Winner</span><span class="lbl">probability · fair price</span></div>
@@ -1020,7 +1088,6 @@ function open_(id){
         propRow(`${b.b} scores a knockdown`,b.b_p_knockdown,'var(--blue)',null,vsBase('C3','b',b.bands,b.b_p_knockdown),'knockdown_b')])}
       ${formulaNote(b,'knockdown','knockdown','a three-input formula matched the 46-input model it replaced, so the one you can check won')}
     </div>`}
-    ${tale(b)}
     ${b.bands?`<div class="card"><div class="ghead" style="background:none;border:none;padding:0 0 8px">
       <span class="gname">Where this bout sits</span><span class="lbl">markers show each corner</span></div>
       ${baseRatePanel(b.bands,b)}</div>`:''}
@@ -1056,7 +1123,7 @@ Promise.all([
   fetch('usage.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null)
 ]).then(([j,h,br,sc,us])=>{
   DATA=j; HIST=h; BR=br; SC=sc; USG=us;
-  showUsage();
+  showUsage(); showRecord();
   document.getElementById('stamp').textContent=fmtET(j.generated_utc);
   render();
 }).catch(e=>{

@@ -255,6 +255,9 @@ REQUIRED_SITE_FEATURES = {
     "class=\"g-a\"": "gauge arcs split at the probability",
     "g-bridge ${modelToA": "dial bridge coloured for the corner the model backs",
     "function nameSize": "long surnames shrink instead of truncating",
+    "BR.market_bases": "prop chips ranked against market base rates",
+    "function showRecord": "running model-vs-market record in the header",
+    "function propRank": "one ranking shared by tile chips and panel marks",
     "divShort(b.weight_class)": "weight class on each tile",
     "class=\"zone ": "separated upcoming / results / history zones",
 }

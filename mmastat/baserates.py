@@ -161,6 +161,28 @@ def divisions(fights, min_date="2012-01-01"):
     return out
 
 
+def market_bases(fights, min_date="2012-01-01"):
+    """How often each market comes in, across all fights. The site ranks which
+    props to surface by how far a projection sits from these — a prop is worth
+    showing because it is unusual, not because the number is large. "Over 1.5
+    rounds" is near-certain in every fight; saying so on every tile is noise."""
+    F = fights[(fights.date >= pd.Timestamp(min_date))
+               & fights.method.isin(["KO/TKO", "SUB", "DEC"])]
+    out = {"td": float(np.r_[(F.r_td_landed > 0).values, (F.b_td_landed > 0).values].mean()),
+           "kd": float(np.r_[(F.r_kd > 0).values, (F.b_kd > 0).values].mean()),
+           "itd": float((F.method != "DEC").mean()),
+           "dec": float((F.method == "DEC").mean()), "totals": {}}
+    for sched, nr in ((900, 3), (1500, 5)):
+        G = F[F.sched_sec == sched]
+        if len(G) < 100:
+            continue
+        out["totals"][str(nr)] = {f"{line:g}": float((G.total_sec > line * 300).mean())
+                                  for line in (1.5, 2.5, 3.5, 4.5) if line < nr}
+    return {k: (round(v, 4) if isinstance(v, float) else
+                {a: {b: round(c, 4) for b, c in d.items()} for a, d in v.items()})
+            for k, v in out.items()}
+
+
 def write_json(fights, fighters, path="site/baserates.json", verbose=True):
     import json
     from pathlib import Path
@@ -169,7 +191,8 @@ def write_json(fights, fighters, path="site/baserates.json", verbose=True):
     Path(path).write_text(json.dumps(
         {"built_utc": pd.Timestamp.now(tz="UTC").isoformat(timespec="seconds"),
          "min_cell": MIN_CELL, "conditions": tbl,
-         "divisions": divisions(fights)}, indent=1), encoding="utf-8")
+         "divisions": divisions(fights),
+         "market_bases": market_bases(fights)}, indent=1), encoding="utf-8")
     if verbose:
         flat = sum(1 for t in tbl if t["spread"] < 0.03)
         print(f"base rates: {len(tbl)} conditions written to {path} "
