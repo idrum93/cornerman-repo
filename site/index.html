@@ -220,6 +220,7 @@
   .brrow{display:grid;grid-template-columns:1fr 104px 82px 74px;gap:10px;align-items:center}
   .brkind{font-size:8.5px;letter-spacing:.06em;text-transform:uppercase;text-align:right}
   .k-direct{color:#4F5766} .k-indirect{color:var(--bluesoft);opacity:.8}
+  .brrow.baseline{opacity:.6}
   .brsent{display:block;font-size:11px;color:var(--mute);margin-top:3px;line-height:1.5}
   .brsent b{color:var(--bone)}
   .brrow{padding:6px 0;border-top:1px solid var(--soft)}
@@ -447,7 +448,8 @@ function strip(){
         <span class="dgap mono ${toA?'to-a':'to-b'}">+${(e*100).toFixed(1)}</span>
         <span class="nm ${toA?'nm-a':'nm-b'} fav" style="max-width:130px" title="${esc(who)}">${esc(surname(who))}</span></div>
       <div class="mono" style="font-size:10.5px;color:var(--mute)">
-        model ${P1(mine)}% · market <span style="color:var(--gold)">${P1(theirs)}%</span></div>
+        model <b style="color:var(--bone)">${P1(mine)}%</b> ·
+        market <span style="color:var(--gold)">${P1(theirs)}%</span></div>
     </button>`;}).join('')}</div></div>`;
 }
 
@@ -519,7 +521,12 @@ function gauge(b){
   const radial=(x,r1,r2,cls)=>{const[a1,b1]=pt(x,r1),[a2,b2]=pt(x,r2);
     return `<line class="${cls}" x1="${a1.toFixed(1)}" y1="${b1.toFixed(1)}" x2="${a2.toFixed(1)}" y2="${b2.toFixed(1)}"/>`;};
   const mk=b.p_market!=null, op=b.p_open!=null;
-  const modelToA = mk && b.p_a > b.p_market;    // territory the model adds for red
+  // The bridge sits directly over a stretch of arc the model has already
+  // painted. Repeating that colour says nothing; the useful fact is that the
+  // market would give that same stretch to the OTHER corner. So the bridge
+  // takes the colour of whoever the market would hand it to, while the badge
+  // stays model-first. Two different facts, no duplication.
+  const marketWould = mk && (b.p_a > b.p_market ? 'to-b' : 'to-a');
   const gap = mk ? Math.abs(b.p_a-b.p_market) : 0;
   return `<svg class="gauge-svg" viewBox="0 0 ${W} ${H}" role="img"
       aria-label="model: ${esc(b.a)} ${P0(b.p_a)} percent, ${esc(b.b)} ${P0(b.p_b)} percent${mk?`; market has ${esc(b.a)} at ${P0(b.p_market)} percent`:''}">
@@ -527,7 +534,7 @@ function gauge(b){
     <path d="${arc(0,b.p_a,R)}" class="g-a"/>
     <path d="${arc(b.p_a,1,R)}" class="g-b"/>
     ${radial(b.p_a,R-6,R+6,'g-edge')}
-    ${mk&&gap>0.005?`<path d="${arc(b.p_a,b.p_market,RB)}" class="g-bridge ${modelToA?'to-a':'to-b'}"/>`:''}
+    ${mk&&gap>0.005?`<path d="${arc(b.p_a,b.p_market,RB)}" class="g-bridge ${marketWould}"/>`:''}
     ${op?radial(b.p_open,R+8,R+15,'g-open'):''}
     ${mk?radial(b.p_market,R+7,R+17,'g-mkt'):''}
     <text x="${cx}" y="${cy-20}" class="g-num" text-anchor="middle">
@@ -562,7 +569,7 @@ function tile(b){
     </div>
     <div class="gkey">
       ${mk?`<span class="k-market">market ${P0(b.p_market)}/${P0(1-b.p_market)}</span>`:'<span class="k-open-l">no market line</span>'}
-      ${b.p_open!=null?`<span class="k-open-l">opened ${P0(b.p_open)}/${P0(1-b.p_open)}</span>`:''}
+      ${b.p_open!=null?`<span class="k-open-l" title="the first market price the ledger captured for this bout">line opened ${P0(b.p_open)}/${P0(1-b.p_open)}</span>`:''}
       ${mk&&b.p_open!=null&&Math.abs(b.p_market-b.p_open)>=0.005?`<span
         class="${b.p_market>b.p_open?'k-lean-a':'k-lean-b'}">moved +${(Math.abs(b.p_market-b.p_open)*100).toFixed(0)}
         ${esc(surname(b.p_market>b.p_open?b.a:b.b))}</span>`:''}
@@ -648,14 +655,14 @@ function baseRatePanel(here,bout,inZone){
       // of four labelled bars with a dashed reference line was more chart than
       // the finding needed: what a reader wants is "lowest quarter 24%,
       // highest 63%, 44% overall".
-      return `<div class="brrow ${nsig===0?'flat':''}">
+      return `<div class="brrow ${nsig===0?'flat':''} ${BR_DIRECT.has(id)?'baseline':''}">
         <div class="brlab">${esc(BR_LABEL[id])}
           <span class="brsent">lowest quarter <b>${P0(lo.rate)}%</b> ·
             highest <b>${P0(hi.rate)}%</b> · <span style="color:var(--dim)">${P0(base)}% overall</span></span></div>
         <div class="brqs" title="${esc(BR_WHY[id]||c.why)}">${qs}</div>
         <div class="brkind ${BR_DIRECT.has(id)?'k-direct':'k-indirect'}"
           title="${BR_DIRECT.has(id)?'the same thing measured before the fight — a strong pattern here is close to definitional'
-            :'a different measurement from the outcome'}">${BR_DIRECT.has(id)?'same measure':'different measure'}</div>
+            :'a different measurement from the outcome'}">${BR_DIRECT.has(id)?'baseline':'different measure'}</div>
         <div class="brverd ${verdict[1]}">${verdict[0]}</div>
       </div>`;}).join('');
     const c0=byId[g.ids[0]], base0=c0?brCells(c0).base:null;

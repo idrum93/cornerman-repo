@@ -1544,3 +1544,130 @@ Neither enters a model or the panel on this result. The holdout was spent in
 addendum 17, so confirmation has to be forward: they must hold on cards
 collected after today. Adopting a screen hit from 115 tests on the same data
 that produced it is precisely the error this project has avoided twelve times.
+
+---
+
+# Addendum 22: within-fight volatility (2026-09-23)
+
+Registered before computing anything.
+
+Addendum 12 tested volatility BETWEEN fights (the spread of a fighter's
+per-fight output) and found nothing. This is a different quantity: how much a
+fighter's output swings **from round to round inside a fight**, averaged over
+his career. The corpus holds 41,906 round rows, so it is computable, and the
+market has no obvious way to price it.
+
+| # | measure | form |
+|---|---|---|
+| W1 | pace volatility | coefficient of variation of his significant strikes across the rounds of a fight, averaged over prior fights |
+| W2 | output trend | slope of significant strikes across rounds, normalised by his mean — does he climb or fade |
+| W3 | disruption | the same CV computed on his OPPONENTS' round-by-round output — does he make fights erratic |
+| W4 | grappling volatility | CV of control time across rounds |
+
+All built in the leakage-safe walk from prior fights only, as every other
+accumulator is.
+
+## Targets
+
+    (a) win model      added to the frozen 14, log loss out of sample
+    (b) finish formula added to the adopted inputs (addenda 15, 16)
+    (c) market residual added to the offset model — the only one of the three
+        that speaks to an edge, since it asks whether the measure adds
+        anything the closing price does not already contain
+
+Benjamini-Hochberg at FDR 0.10 across all twelve tests.
+
+## The honest prior: low, and here is the arithmetic
+
+A variance needs at least two rounds, so only fights that pass the first round
+contribute. A fighter has ~6.5 recorded bouts, of which perhaps four go past
+round one, giving roughly a dozen round observations to estimate a spread
+from. The estimate is mostly noise before the sport is even involved. That is
+the same constraint that has closed every previous family, and it applies
+harder to second moments than to means.
+
+If anything survives, it is a candidate requiring forward confirmation, not a
+finding — the holdout was spent in addendum 17.
+
+## Addendum 22: RESULT (2026-09-23)
+
+**Zero of eight supported.** Every gain is within ±0.0005 of nothing; the two
+smallest p-values belong to measures that made predictions *worse*.
+
+| target | measure | gain | p |
+|---|---|---|---|
+| market residual | grappling volatility | **-0.0003** | .022 |
+| win model | grappling volatility | **-0.0005** | .072 |
+| market residual | pace volatility | -0.0002 | .667 |
+| market residual | output trend | +0.0001 | .702 |
+| win model | disruption | -0.0001 | .768 |
+| win model | output trend | -0.0001 | .770 |
+| win model | pace volatility | +0.0001 | .813 |
+| market residual | disruption | +0.0000 | .848 |
+
+The finish-formula arm was dropped when the win and residual arms came back
+this flat; it is recorded as not run rather than quietly omitted.
+
+The market-residual arm is the one that mattered, since it asks whether the
+measure adds anything the closing price does not already hold. On 1,112
+held-out bouts with odds, nothing did.
+
+### Why, in the data rather than in theory
+
+A within-fight spread needs a fight to pass round one, and the fighters who
+generate the most rounds are the ones who go to decisions. Of 17,753
+fighter-fights, 12,740 yield a spread at all, and the **median fighter has
+three** such fights in his history — a variance estimated from about a dozen
+round observations, most of which are three-round fights where a "trend" is a
+line through three points.
+
+This is the same constraint that closed the previous twelve families, and it
+bites harder here: a second moment needs far more data than a mean, and this
+corpus does not have enough for a first moment.
+
+---
+
+# Addendum 23: is individual adaptability measurable? (2026-09-23)
+
+A feasibility check, not a hypothesis test. Its only output is a decision
+about whether to build the feature at all.
+
+Proposed idea: a fighter who adjusts to his opponent — shooting more against a
+weak takedown defender, for instance — and profits by it. The population-level
+version of this is already in the model: `grapple_edge` is takedown rate
+multiplied by the opponent's takedown defence, and it is one of the stronger
+of the fourteen features. What is unproven is whether **individual fighters
+differ** in how much they do it, which is what a new per-fighter feature would
+have to capture.
+
+## Method
+
+For each fighter with 4+ recorded fights, the slope of his output in a fight
+against the weakness he faced. If fighters genuinely differ, the spread of
+those slopes must exceed what chance produces — measured by shuffling each
+fighter's opponents among his own fights, 200 times.
+
+| slope | real spread | chance | ratio |
+|---|---|---|---|
+| takedowns vs opponent's takedown defence | 22.57 | 21.02 | 1.07 |
+| striking vs opponent's striking defence | 24.18 | 24.73 | 0.98 |
+| control time vs opponent's takedown defence | 93.58 | 96.75 | 0.97 |
+
+793 fighters qualify in each.
+
+## Decision: not built
+
+The spread of per-fighter slopes is what shuffling alone produces, and two of
+the three fall below chance. With a median of five or six fights per athlete,
+a per-fighter slope is estimated from a handful of points; there is no
+variation left to attribute to the fighter once noise is accounted for.
+
+This does not say adaptation is absent from the sport. It says the corpus
+cannot distinguish an adaptable fighter from a lucky one, so a feature built
+on it would be fitting noise with extra steps. Running the full test would
+have produced a null with more ceremony.
+
+Also recorded: the other two ideas raised alongside it are already closed.
+Later-round resilience is the fortitude cluster (0 of 6 supported, 5 of 6
+wrong sign, cluster harmful). Style-matchup success is the nine interactions
+of addendum 1 (0 of 9, smallest p .060 against a .011 threshold).

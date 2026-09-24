@@ -253,7 +253,7 @@ REQUIRED_SITE_FEATURES = {
     "BR_DIRECT": "same-measure vs different-measure labels",
     "class=\"tipwrap\"": "the what-is-this tooltip on the wordmark",
     "class=\"g-a\"": "gauge arcs split at the probability",
-    "g-bridge ${modelToA": "dial bridge coloured for the corner the model backs",
+    "g-bridge ${marketWould": "dial bridge shows the corner the market would give the contested stretch",
     "function nameSize": "long surnames shrink instead of truncating",
     "BR.market_bases": "prop chips ranked against market base rates",
     "function showRecord": "running model-vs-market record in the header",
