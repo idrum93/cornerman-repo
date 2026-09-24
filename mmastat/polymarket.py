@@ -187,6 +187,27 @@ def moneylines(rows, with_book=True, max_spread=0.06, min_depth=250.0,
                     continue
                 pa, pb, tot = q["mid"], 1 - q["mid"], 1.0
         out[frozenset((a, b))] = (a, pa / tot, meta)
+    return _with_surname_keys(out)
+
+
+def _with_surname_keys(out):
+    """Add a surname-pair key for each bout, so a market still matches when the
+    two sources spell a name differently — "Ian Machado Garry" against "Ian
+    Garry", "Alatengheili" against "Alateng Heili". A surname pair shared by
+    more than one bout on the board is dropped rather than guessed at.
+    """
+    from collections import Counter  # noqa: F401
+    def variants(k):
+        yield frozenset(n.split()[-1] for n in k if n.split())          # surnames
+        yield frozenset(n.replace(" ", "") for n in k)                  # spacing
+    extra = {}
+    for k in list(out):
+        for v in variants(k):
+            if len(v) == 2:
+                extra.setdefault(v, []).append(k)
+    for v, ks in extra.items():
+        if len(ks) == 1 and v not in out:          # ambiguous keys are dropped
+            out[v] = out[ks[0]]
     return out
 
 
@@ -264,7 +285,23 @@ def map_props(rows, bouts, min_depth=150.0, max_spread=0.10, with_book=True):
     return out
 
 
-EVENT_URL = "https://polymarket.us/event/"   # the US-facing platform
+# Links point at the GLOBAL site, because that is where our slugs come from.
+# Polymarket US is a separate CFTC-regulated exchange with its own slugs for
+# the same bout — ufc-ala1-joh9-2026-09-26 there is ufc-johcas-alaten-2026-09-26
+# here — so a US link built from a global slug 404s. It is also a separate
+# order book, so the price captured is the global one, which is what the
+# ledger records and what any test is run against.
+SITE = "https://polymarket.com"
+
+
+def market_url(slug):
+    slug = str(slug or "")
+    if slug.startswith("ufc-"):
+        return f"{SITE}/sports/ufc/{slug}"
+    return f"{SITE}/event/{slug}"
+
+
+EVENT_URL = SITE + "/event/"      # kept for callers that build their own path
 
 
 def unmatched(rows, bouts):

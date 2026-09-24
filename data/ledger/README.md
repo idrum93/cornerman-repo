@@ -75,6 +75,22 @@ against market Brier per market. This is what addendum 9's distance rule has
 been waiting for, and whether Polymarket quotes these at all is answered by
 running it.
 
+## Which Polymarket
+
+Prices come from the global platform through the public Gamma API. **Polymarket
+US is a separate CFTC-regulated exchange with its own order book**, and it
+slugs the same bout differently — `ufc-ala1-joh9-2026-09-26` globally is
+`ufc-johcas-alaten-2026-09-26` there. So:
+
+- links on the site point at the global market, where our slugs resolve
+- the captured price is the global one, and that is what any test is scored
+  against
+- a US reader looking at the same fight may see a different number
+
+If the US platform ever exposes an API, capturing it as a third venue would be
+the honest fix — kept separate, as sportsbook and Polymarket already are,
+rather than pooled.
+
 ## Two venues, never pooled
 
 | venue | source | auth | cost of trading |

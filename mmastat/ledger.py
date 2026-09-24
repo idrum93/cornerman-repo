@@ -261,6 +261,19 @@ def capture(fights, fighters, card_path="data/upcoming.txt", path=None,
             venues["polymarket"] = pm
     except Exception as e:
         print(f"note: polymarket unavailable ({e})")
+    try:
+        # The CFTC-regulated US exchange: a third venue, never pooled with the
+        # global book. It slugs the same bout differently and has its own
+        # order book, so a US reader and a global reader see different prices.
+        from . import polymarket_us as pus
+        rows_us = pus.parse(pus.fetch_events())
+        if verbose:
+            print(f"polymarket us: {pus.describe(rows_us)}")
+        us = pus.moneylines(rows_us)
+        if us:
+            venues["polymarket_us"] = us
+    except Exception as e:
+        print(f"note: polymarket us unavailable ({e})")
     if venues_only:
         venues = {k: v for k, v in venues.items() if k in venues_only}
     if not venues:
@@ -292,7 +305,16 @@ def capture(fights, fighters, card_path="data/upcoming.txt", path=None,
     rows, ts = [], _now()
     for venue, vbook in venues.items():
         for na, nb, n_rounds, _segment in bouts:
+            # full names first, then surnames: Polymarket and UFCStats often
+            # differ on middle names and spacing, and an unmatched bout is a
+            # price we never record
             hit = vbook.get(frozenset((_key(na), _key(nb))))
+            if hit is None:
+                for v in (frozenset(x.split()[-1] for x in (_key(na), _key(nb)) if x.split()),
+                          frozenset(x.replace(" ", "") for x in (_key(na), _key(nb)))):
+                    if len(v) == 2 and vbook.get(v) is not None:
+                        hit = vbook[v]
+                        break
             if hit is None or na not in ids or nb not in ids:
                 continue
             A, B = states[ids[na]], states[ids[nb]]
@@ -411,6 +433,15 @@ def capture_props(card_path="data/upcoming.txt", payload_path="site/predictions.
         _rows = parse_events(fetch_events())
         found = map_props(_rows, bouts)
         extra = unmatched(_rows, bouts)
+        try:
+            from . import polymarket_us as pus
+            us_rows = pus.parse(pus.fetch_events())
+            if verbose:
+                print(f"polymarket us props: {pus.describe(us_rows)}")
+            found += pus.map_props(us_rows, bouts)
+        except Exception as e:
+            if verbose:
+                print(f"props: polymarket us unavailable ({e})")
     except Exception as e:
         if verbose:
             print(f"props: polymarket unavailable ({e})")
@@ -420,7 +451,8 @@ def capture_props(card_path="data/upcoming.txt", payload_path="site/predictions.
     for x in found:
         mb = model.get(x["bout"])
         pm_model = _model_prob(mb, x["market"]) if mb else None
-        rows.append(dict(captured_utc=ts, venue="polymarket", event=meta.get("event"),
+        rows.append(dict(captured_utc=ts, venue=x["meta"].get("venue", "polymarket"),
+                         event=meta.get("event"),
                          event_date=meta.get("date"), bout=x["bout"], a=x["a"], b=x["b"],
                          market=x["market"], p_market=x["p_market"],
                          p_model=pm_model,
@@ -540,7 +572,13 @@ def latest_prop_prices(event_date=None):
             continue
         if not r.get("bout") or not r.get("market"):
             continue
-        out.setdefault(r["bout"], {})[r["market"]] = {"p": r["p_market"], "slug": r.get("slug")}
+        # a US price is the one a US reader can actually trade, so it wins
+        # when both venues quote the same market
+        cur = out.setdefault(r["bout"], {}).get(r["market"])
+        if cur and cur.get("venue") == "polymarket_us" and r.get("venue") != "polymarket_us":
+            continue
+        out[r["bout"]][r["market"]] = {"p": r["p_market"], "slug": r.get("slug"),
+                                       "venue": r.get("venue", "polymarket")}
     return out
 
 

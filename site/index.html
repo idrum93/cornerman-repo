@@ -893,14 +893,24 @@ function marketRecord(mk){
 /* A prop price, where Polymarket quotes one. Most of these markets have no
    price anywhere we can reach, so the diamond appears rarely — and that
    absence is itself worth seeing. */
-const POLY='https://polymarket.us/event/';
+// The global site, because that is where these slugs resolve. Polymarket US
+// is a separate exchange that slugs the same bout differently, so a .us link
+// built from our data would 404.
+// Two venues, two link hosts: the US exchange slugs the same bout differently,
+// so a link must follow the venue the price came from.
+const POLY_SITE='https://polymarket.com';
+const POLY_US='https://polymarket.us';
+const polyURL=(s,venue)=>{const h=venue==='polymarket_us'?POLY_US:POLY_SITE;
+  return String(s||'').startsWith('ufc-')?`${h}/sports/ufc/${s}`:`${h}/event/${s}`;};
 function pmk(b,key){ const v=(b.prop_market||{})[key]; return v==null?null:v.p; }
 function pslug(b,key){ const v=(b.prop_market||{})[key]; return v&&v.slug; }
+function pvenue(b,key){ const v=(b.prop_market||{})[key]; return v&&v.venue; }
 function pnote(b,key){
   const v=pmk(b,key); if(v==null) return null;
   const sl=pslug(b,key);
   // link straight to the market, so a reader can check the price themselves
-  return sl?`market ${P1(v)}% · <a class="plink" href="${POLY}${esc(sl)}" target="_blank" rel="noopener">verify</a>`
+  return sl?`market ${P1(v)}% · <a class="plink" href="${esc(polyURL(sl,pvenue(b,key)))}" target="_blank"
+      rel="noopener" title="${pvenue(b,key)==='polymarket_us'?'Polymarket US, the CFTC-regulated exchange':'global Polymarket; the US exchange is a separate book'}">verify</a>`
            :`market ${P1(v)}%`;
 }
 /* Markets Polymarket quotes that the model does not price. Listed with links
@@ -912,7 +922,7 @@ function otherMarkets(){
   if(!L.length) return '';
   return `<details class="other"><summary>${L.length} more market${L.length===1?'':'s'} on
     Polymarket the model does not price</summary>
-    <div class="otherlist">${L.map(x=>`<a href="${POLY}${esc(x.slug||'')}" target="_blank"
+    <div class="otherlist">${L.map(x=>`<a href="${esc(polyURL(x.slug||''))}" target="_blank"
       rel="noopener">${esc(x.question)}</a>`).join('')}</div>
     <div class="note">No projection is shown for these: the model prices a fighter's chances and
       how a fight ends, not event-level questions. Linked so you can see the board, not as a view.</div>
