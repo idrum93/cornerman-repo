@@ -1,48 +1,48 @@
 {
  "event_date": "2026-09-26",
- "fetched_utc": "2026-09-25T14:52:22+00:00",
+ "fetched_utc": "2026-09-25T19:43:01+00:00",
  "markets": [
   {
    "question": "Will Ian Machado Garry become UFC champion in 2026?",
    "slug": "will-ian-machado-garry-become-ufc-champion-in-2026",
    "kind": "winner",
-   "liquidity": 594.83213
+   "liquidity": 650.3794
   },
   {
    "question": "Will Leon Edwards become UFC champion in 2026?",
    "slug": "will-leon-edwards-become-ufc-champion-in-2026",
    "kind": "winner",
-   "liquidity": 166.44122
+   "liquidity": 156.29362
   },
   {
    "question": "Will Ian Machado Garry be the UFC Welterweight Champion on December 31, 2026?",
    "slug": "will-ian-machado-garry-be-the-ufc-welterweight-champion-on-december-31-2026",
    "kind": "winner",
-   "liquidity": 1105.71989
+   "liquidity": 710.84602
   },
   {
    "question": "Will Leon Edwards be the UFC Welterweight Champion on December 31, 2026?",
    "slug": "will-leon-edwards-be-the-ufc-welterweight-champion-on-december-31-2026",
    "kind": "winner",
-   "liquidity": 2582.75712
+   "liquidity": 2108.48674
   },
   {
    "question": "Will Anthony Hernandez be the UFC Middleweight Champion on December 31, 2026?",
    "slug": "will-anthony-hernandez-be-the-ufc-middleweight-champion-on-december-31-2026",
    "kind": "winner",
-   "liquidity": 2226.66421
+   "liquidity": 2085.65352
   },
   {
    "question": "Will Anthony Hernandez fight Joe Pyfer next?",
    "slug": "will-anthony-hernandez-fight-joe-pyfer-next",
    "kind": "winner",
-   "liquidity": 496.70415
+   "liquidity": 317.60646
   },
   {
    "question": "UFC 332: Rafael Dos Anjos vs. Alexander Hernandez (Lightweight, Early Prelims)",
    "slug": "ufc-raf1-ale-2026-10-03",
    "kind": "winner",
-   "liquidity": 1932.3756
+   "liquidity": 2143.7149
   }
  ]
 }
