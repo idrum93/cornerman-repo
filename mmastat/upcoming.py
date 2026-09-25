@@ -398,7 +398,7 @@ def predict_card(path, fights, fighters, verbose=True):
         H /= H.sum(axis=1, keepdims=True)
         surv = 1.0
         out = {k: 0.0 for k in CLASSES[1:]}
-        by_r = {}
+        by_r, joint = {}, {}
         curve = []
         for i in range(len(H)):
             r = int(grid.rnd.iloc[i])
@@ -407,11 +407,16 @@ def predict_card(path, fights, fighters, verbose=True):
                 v = surv * H[i, j]
                 out[k] += v
                 stop += v
+                # The joint was already being computed and then thrown away:
+                # the hazard for each fighter and each route is per minute, so
+                # "Rosas by KO in round 2" needs no new model, only that the
+                # accumulation keep the round alongside the route.
+                joint[(k, r)] = joint.get((k, r), 0.0) + v
             by_r[r] = by_r.get(r, 0.0) + stop
             surv *= H[i, 0]
             curve.append(surv)          # P(still going after minute i+1)
         out["decision"] = surv
-        return out, by_r, curve
+        return out, by_r, curve, joint
 
     rows, skipped, _snap = [], [], {}
     for na, nb, n_rounds, segment in bouts:
@@ -481,7 +486,7 @@ def predict_card(path, fights, fighters, verbose=True):
 
         if not thin:
             try:
-                dist, by_r, curve = method_round(sa, sb, n_rounds)
+                dist, by_r, curve, joint = method_round(sa, sb, n_rounds)
                 # Formula sets the LEVEL of finishing; the survival model's shape
                 # across method, round and time is kept and rescaled to it, so
                 # methods, rounds and totals all still sum to the same number.
@@ -493,6 +498,9 @@ def predict_card(path, fights, fighters, verbose=True):
                     dist[_m] *= k_fin
                 dist["decision"] = 1 - p_fm
                 by_r = {rr: v * k_fin for rr, v in by_r.items()}
+                # the joint is part of the same shape, so it takes the same
+                # rescaling — otherwise it no longer sums to the marginals
+                joint = {kk: v * k_fin for kk, v in joint.items()}
                 curve = [1 - k_fin * (1 - c) for c in curve]
                 r["p_finish_survival_raw"] = round(p_sv, 4)
                 r["m_a_ko"] = round(dist["a_ko"], 4)
@@ -512,8 +520,38 @@ def predict_card(path, fights, fighters, verbose=True):
                 # Cumulative round contracts, the shape Polymarket US quotes:
                 # "fight ends before round N begins" is every finish below N.
                 for n in range(2, n_rounds + 1):
-                    r[f"p_ends_before_r{n}"] = round(
-                        sum(by_r.get(k, 0.0) for k in range(1, n)), 4)
+                    cum = sum(by_r.get(k, 0.0) for k in range(1, n))
+                    r[f"p_ends_before_r{n}"] = round(cum, 4)
+                    # DraftKings sells the complement as "To Start Round X"
+                    r[f"p_starts_r{n}"] = round(1 - cum, 4)
+                # Conditional moneylines, which DraftKings quotes as
+                # "Moneyline - Finish Only" and "- Decision Only". Both are
+                # exact restatements of the method split, not new models:
+                # given the fight ends that way, who wins?
+                fin_p = dist["a_ko"] + dist["a_sub"] + dist["b_ko"] + dist["b_sub"]
+                if fin_p > 1e-6:
+                    r["p_a_given_finish"] = round((dist["a_ko"] + dist["a_sub"]) / fin_p, 4)
+                    r["p_b_given_finish"] = round(1 - r["p_a_given_finish"], 4)
+                if dist["decision"] > 1e-6:
+                    r["p_a_given_decision"] = round(r["m_a_dec"] / dist["decision"], 4)
+                    r["p_b_given_decision"] = round(1 - r["p_a_given_decision"], 4)
+                # Expected fight length, so a per-minute rate can be turned into
+                # a total. A finish in round r is taken at the midpoint of that
+                # round; a decision runs the full distance.
+                mins = 0.0
+                for k in range(1, n_rounds + 1):
+                    mins += by_r.get(k, 0.0) * ((k - 1) * 5 + 2.5)
+                mins += dist["decision"] * n_rounds * 5
+                r["exp_minutes"] = round(mins, 2)
+                # Round of victory: fighter x route x round, the contract the
+                # book sells as "Rosas Jr. to Win by KO/TKO in Round 2".
+                rov = {}
+                for (k, rr2), v in joint.items():
+                    if v >= 0.0005:
+                        rov[f"{k}_r{rr2}"] = round(v, 4)
+                r["round_of_victory"] = rov
+                r["m_a_finish"] = round(dist["a_ko"] + dist["a_sub"], 4)
+                r["m_b_finish"] = round(dist["b_ko"] + dist["b_sub"], 4)
                 # Round totals, read straight off the survival curve. These are
                 # real prop markets and the hazard model prices them coherently:
                 # "over 1.5 rounds" is simply P(the fight is still going at 7:30).
@@ -759,15 +797,20 @@ def _base_rates(fights, min_date="2012-01-01"):
     so always saying no is right four times in five."""
     F = fights[fights.date >= pd.Timestamp(min_date)]
     dec = F[F.method.isin(["KO/TKO", "SUB", "DEC"])]
-    over = {}
+    over, ends_before = {}, {}
     for sched, nr in ((900, 3), (1500, 5)):
         G = F[F.sched_sec == sched]
         for line in (1.5, 2.5, 3.5, 4.5):
             if line < nr and len(G):
                 over[(nr, line)] = float((G.total_sec > line * 300).mean())
+        fin = G[G.method != "DEC"]
+        for n in range(2, nr + 1):
+            if len(G):
+                ends_before[(nr, n)] = float((fin.total_sec <= (n - 1) * 300).sum() / len(G))
     return {"td": float(np.r_[(F.r_td_landed > 0).values, (F.b_td_landed > 0).values].mean()),
             "kd": float(np.r_[(F.r_kd > 0).values, (F.b_kd > 0).values].mean()),
-            "itd": float((dec.method != "DEC").mean()), "over": over}
+            "itd": float((dec.method != "DEC").mean()), "over": over,
+            "ends_before": ends_before}
 
 
 def _grade_bout(b, row, a_is_red, base):
@@ -820,11 +863,23 @@ def _grade_bout(b, row, a_is_red, base):
                         "said": round(rp[rnd], 3), "top": f"round {modal}",
                         "top_p": round(rp[modal], 3), "right": rnd == modal})
 
-    binrow("Ends inside the distance", b.get("p_finish"), finish, base["itd"])
+    # Graded the way the market quotes it. "Over 1.5 rounds" meant past 7:30 of
+    # round two, which read as though a fight that went to a decision had also
+    # "ended in 1.5 rounds". The cumulative contract says what it means.
+    binrow("Go the distance", b.get("m_decision"), not finish, 1 - base["itd"])
+    # DraftKings quotes over/under rounds; Polymarket US quotes "ends before
+    # round N". Both are graded, with each book's own wording, because they are
+    # different claims: over 1.5 rounds means past 7:30 of round two.
     for k, v in (b.get("totals") or {}).items():
         line = float(k.replace("over_", "").replace("_", "."))
         binrow(f"Over {line:g} rounds", v, row.total_sec > line * 300,
                base["over"].get((n_rounds, line)))
+    for n in range(2, n_rounds + 1):
+        v = b.get(f"p_ends_before_r{n}")
+        if v is None:
+            continue
+        binrow(f"Ends before round {n}", v, bool(finish and rnd < n),
+               base.get("ends_before", {}).get((n_rounds, n)))
     binrow(f"{a} lands a takedown", b.get("a_p_takedown"), a_td, base["td"])
     binrow(f"{bb} lands a takedown", b.get("b_p_takedown"), b_td, base["td"])
     binrow(f"{a} scores a knockdown", b.get("a_p_knockdown"), a_kd, base["kd"])

@@ -178,7 +178,10 @@ def moneylines(rows, max_spread=0.06, min_volume=200.0, require_book=True):
             p = bk["mid"]
         if not (RESOLVED_EPS < p < 1 - RESOLVED_EPS):
             continue
-        meta = {"slug": r["slug"], "venue": "polymarket_us", "volume": r["volume"],
+        # link to the EVENT page: it carries every market for the bout, and a
+        # market-level slug need not resolve on its own
+        meta = {"slug": r["event_slug"] or r["slug"], "venue": "polymarket_us",
+                "volume": r["volume"],
                 "weight_class": r["weight_class"], "segment": r["segment"], **bk}
         out[frozenset((a, b))] = (a, round(p, 5), meta)
     return _with_variants(out)
@@ -319,7 +322,7 @@ def map_props(rows, bouts, max_spread=0.10, min_volume=100.0):
             continue
         out.append({"bout": f"{a} vs. {b}", "a": a, "b": b, "market": key,
                     "p_market": round(p, 5),
-                    "meta": {"slug": r["slug"], "question": r["question"],
+                    "meta": {"slug": r["event_slug"] or r["slug"], "question": r["question"],
                              "venue": "polymarket_us", "volume": r["volume"], **bk}})
     return out
 
@@ -334,3 +337,27 @@ def describe(rows):
             "kinds": dict(Counter(r["kind"] for r in rows)),
             "shapes": dict(Counter(r["shape"] for r in rows)),
             "with_book": sum(1 for r in rows if r["book"])}
+
+
+def unmatched(rows, bouts):
+    """US markets naming a fighter on this card that the model does not price.
+
+    Listed with links, never given a number. Sourced here rather than from the
+    global feed so every link on the site resolves on the same exchange.
+    """
+    placed = {x["meta"]["slug"] for x in map_props(rows, bouts)}
+    for r in rows:
+        if r["kind"] == "winner":
+            placed.add(r["slug"])
+    names = {w for bt in bouts for n in (bt[0], bt[1]) for w in [_surname(n)] if len(w) >= 3}
+    out, seen = [], set()
+    for r in rows:
+        if r["slug"] in placed or r["slug"] in seen or not r["question"]:
+            continue
+        q = _nm(r["question"])
+        if not any(n in q for n in names):
+            continue
+        seen.add(r["slug"])
+        out.append({"question": r["question"], "slug": r["event_slug"] or r["slug"],
+                    "kind": r["kind"]})
+    return out

@@ -1849,3 +1849,66 @@ this corpus at any price, and nothing derived from UFCStats will ever supply
 them. That is the boundary: fourteen families have now been tested, and the
 constraint has never been the search. It is that roughly seven recorded fights
 per athlete, summarised as per-round totals, is all there is.
+
+---
+
+# Addendum 26: volume markets (2026-09-25)
+
+Registered before building. DraftKings quotes markets the model has never
+priced, and they are the ones this corpus is best equipped for — the data is
+per-round counts of exactly these quantities.
+
+| market | shape |
+|---|---|
+| Total significant strikes landed | per fighter, a ladder: 55+, 60+, 65+, 70+ |
+| Significant strikes over/under | per fighter and combined |
+| Round 1 significant strikes | per fighter, first round only |
+| Most significant strikes | which fighter lands more |
+| Total takedowns landed | per fighter, a ladder: 3+, 4+, 5+ |
+| Most takedowns | which fighter lands more |
+
+## Why these, and why they are different from everything tested so far
+
+Every previous family tried to predict an outcome — who wins, how it ends.
+These ask how much of something happens, which is what the feed actually
+records. The model already projects strike and control rates with 80% ranges;
+what is missing is a **count distribution**, not a new input.
+
+## Method, fixed now
+
+For each fighter: a strike rate per minute (already modelled) combined with the
+fight-duration distribution from the survival curve, giving a distribution over
+total strikes rather than a point estimate. Counts are modelled as negative
+binomial, with the dispersion fitted on held-out fights, because strike counts
+are over-dispersed relative to Poisson — a fighter who gets taken down in round
+one and a fighter who stands and bangs are not the same process.
+
+    P(60 or more strikes) = sum over fight lengths of
+                            P(that length) x P(60+ strikes | that length)
+
+"Most significant strikes" follows from the same two distributions.
+
+## Evaluation and the bar
+
+Graded on held-out fights against two baselines:
+
+    C1  the fighter's own career average rate x the median fight length
+    C2  the league average for that division and scheduled length
+
+Reported as Brier for the ladder thresholds and calibration of the implied
+distribution. **Published only if it beats both**, and calibration slope falls
+between 0.8 and 1.2 — a count model that is sharp but miscalibrated is worse
+than useless on a ladder market, where every rung is priced off the tail.
+
+Against the market: compared with DraftKings' lines where captured. No feed we
+can reach quotes these, so that comparison depends on manual capture, and the
+model is published on the baseline test alone, with the market comparison
+reported separately if and when it exists.
+
+## Pre-stated expectation
+
+Moderate, and higher than any family since the opening-line finding. Volume is
+the quantity this data measures most directly, and a count distribution is a
+modelling gap rather than an information gap — which is the opposite of every
+null recorded above. The risk is not that the signal is absent but that the
+tails are wrong, which is exactly what the calibration bar is there to catch.

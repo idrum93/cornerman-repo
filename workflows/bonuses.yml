@@ -21,6 +21,7 @@ jobs:
       - run: pip install -r requirements.txt
       - run: python -m mmastat.sources --corpus --no-upcoming
       - run: python -m mmastat.bonuses --budget-min 20
+      - run: python -m mmastat.bonus_model
       - name: commit
         run: |
           git config user.name "cornerman-bot"

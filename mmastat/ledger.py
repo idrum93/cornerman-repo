@@ -460,6 +460,11 @@ def capture_props(card_path="data/upcoming.txt", payload_path="site/predictions.
             if verbose:
                 print(f"polymarket us props: {pus.describe(us_rows)}")
             found += pus.map_props(us_rows, bouts)
+            # the unpriced list comes from the US exchange too, so every link
+            # on the site resolves on the same site the prices came from
+            us_extra = pus.unmatched(us_rows, bouts)
+            if us_extra:
+                extra = us_extra
         except Exception as e:
             if verbose:
                 print(f"props: polymarket us unavailable ({e})")
@@ -593,11 +598,13 @@ def latest_prop_prices(event_date=None):
             continue
         if not r.get("bout") or not r.get("market"):
             continue
-        # a US price is the one a US reader can actually trade, so it wins
-        # when both venues quote the same market
-        cur = out.setdefault(r["bout"], {}).get(r["market"])
-        if cur and cur.get("venue") == "polymarket_us" and r.get("venue") != "polymarket_us":
+        # Display only what a US reader can actually trade. Global Polymarket
+        # prices are still captured and still scored — they are just not shown,
+        # because its slugs do not resolve on the US site and a link that 404s
+        # is worse than no link.
+        if r.get("venue") != "polymarket_us":
             continue
+        out.setdefault(r["bout"], {})
         out[r["bout"]][r["market"]] = {"p": r["p_market"], "slug": r.get("slug"),
                                        "venue": r.get("venue", "polymarket")}
         # the exchange prices "Decision" where the site has a "goes the
