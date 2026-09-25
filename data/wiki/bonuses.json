@@ -822,7 +822,8 @@
   "UFC 225: Whittaker vs. Romero 2 ": {
    "date": "2018-06-09",
    "fotn": [
-    "Robert Whittaker"
+    "Robert Whittaker",
+    "Yoel Romero"
    ],
    "none_awarded": false,
    "potn": [
@@ -1659,8 +1660,7 @@
    "date": "2023-03-04",
    "fotn": [
     "Shavkat Rakhmonov",
-    "Geoff Neal{{efn|Despite missing weight",
-    "Neal was still awarded his share of the bonus.}}"
+    "Geoff Neal"
    ],
    "none_awarded": false,
    "potn": [
@@ -3902,9 +3902,7 @@
    "date": "2022-02-05",
    "fotn": [
     "Julian Erosa",
-    "Steven Peterson{{ref|note1|1}}",
-    "{{note|note1}} {{small| 1. Peterson was disqualified for the Fight of the Night bonus due to missing weight. As a result",
-    "his award was given to Erosa.}}"
+    "Steven Peterson"
    ],
    "none_awarded": false,
    "potn": [
@@ -4133,7 +4131,8 @@
   "UFC Fight Night: Hunt vs. Oleinik ": {
    "date": "2018-09-15",
    "fotn": [
-    "Petr Yan"
+    "Petr Yan",
+    "Jin Soo Son"
    ],
    "none_awarded": false,
    "potn": [
@@ -4299,7 +4298,6 @@
    "date": "2020-07-15",
    "fotn": [
     "Mounir Lazzez",
-    "Abdul Razak Alhassan{{ref|note1|1}}",
     "Abdul Razak Alhassan"
    ],
    "none_awarded": false,
@@ -5984,7 +5982,8 @@
   "UFC Fight Night: Volkov vs. Rozenstruik ": {
    "date": "2022-06-04",
    "fotn": [
-    "Michael Trizano"
+    "Michael Trizano",
+    "Lucas Almeida"
    ],
    "none_awarded": false,
    "potn": [
@@ -6271,7 +6270,7 @@
    "status": "missing"
   }
  },
- "parser": 4,
- "updated_utc": "2026-09-25T03:05:50+00:00",
+ "parser": 5,
+ "updated_utc": "2026-09-25T12:22:57+00:00",
  "version": 1
 }
