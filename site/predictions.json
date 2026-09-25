@@ -2,7 +2,7 @@
  "event": "UFC Fight Night: Rosas Jr. vs. Barcelos",
  "date": "2026-09-26",
  "venue": "Meta Apex, Enterprise, Nevada , United States",
- "generated_utc": "2026-09-25T12:08:32.080119+00:00",
+ "generated_utc": "2026-09-25T15:44:32.202948+00:00",
  "bouts": [
   {
    "bout": "Raul Rosas Jr vs. Raoni Barcelos",
@@ -192,12 +192,12 @@
    "p_open": 0.6188,
    "prop_market": {
     "ko_b": {
-     "p": 0.14,
+     "p": 0.135,
      "slug": "ufc-rao-rau2-2026-09-26-barcelos-win-by-ko-tko",
      "venue": "polymarket"
     },
     "ko_a": {
-     "p": 0.11,
+     "p": 0.105,
      "slug": "ufc-rao-rau2-2026-09-26-rosas-jr-win-by-ko-tko",
      "venue": "polymarket"
     }
@@ -389,12 +389,12 @@
    "p_open": 0.4633,
    "prop_market": {
     "ko_a": {
-     "p": 0.08,
+     "p": 0.075,
      "slug": "ufc-nor1-ail1-2026-09-26-dumont-win-by-ko-tko",
      "venue": "polymarket"
     },
     "ko_b": {
-     "p": 0.065,
+     "p": 0.07,
      "slug": "ufc-nor1-ail1-2026-09-26-perez-win-by-ko-tko",
      "venue": "polymarket"
     }
@@ -498,7 +498,7 @@
     }
    ],
    "p_market": 0.2442,
-   "books": 18.0,
+   "books": 17.0,
    "edge": 0.2735,
    "p_finish_survival_raw": 0.5965,
    "m_a_ko": 0.0898,
@@ -586,7 +586,7 @@
    "p_open": 0.2653,
    "prop_market": {
     "ko_b": {
-     "p": 0.355,
+     "p": 0.345,
      "slug": "ufc-bra8-rin1-2026-09-26-nakamura-win-by-ko-tko",
      "venue": "polymarket"
     }
@@ -689,9 +689,9 @@
      "key": "d_str_def"
     }
    ],
-   "p_market": 0.5867,
-   "books": 17.0,
-   "edge": -0.0695,
+   "p_market": 0.5878,
+   "books": 16.0,
+   "edge": -0.0705,
    "p_finish_survival_raw": 0.4496,
    "m_a_ko": 0.1381,
    "m_b_ko": 0.1389,
@@ -778,7 +778,7 @@
    "p_open": 0.5366,
    "prop_market": {
     "ko_a": {
-     "p": 0.09,
+     "p": 0.095,
      "slug": "ufc-rob17-rod1-2026-09-26-vieira-win-by-ko-tko",
      "venue": "polymarket"
     },
@@ -1166,12 +1166,12 @@
    "p_open": null,
    "prop_market": {
     "ko_a": {
-     "p": 0.14,
+     "p": 0.145,
      "slug": "ufc-elv-jos50-2026-09-26-brener-win-by-ko-tko",
      "venue": "polymarket"
     },
     "ko_b": {
-     "p": 0.155,
+     "p": 0.15,
      "slug": "ufc-elv-jos50-2026-09-26-harrell-win-by-ko-tko",
      "venue": "polymarket"
     }
@@ -1652,9 +1652,9 @@
      "key": "ko_edge"
     }
    ],
-   "p_market": 0.1369,
+   "p_market": 0.1358,
    "books": 17.0,
-   "edge": 0.039,
+   "edge": 0.0401,
    "p_finish_survival_raw": 0.3521,
    "m_a_ko": 0.052,
    "m_b_ko": 0.089,
@@ -1741,7 +1741,7 @@
    "p_open": 0.1432,
    "prop_market": {
     "ko_b": {
-     "p": 0.26,
+     "p": 0.265,
      "slug": "ufc-van1-yaz1-2026-09-26-jauregui-win-by-ko-tko",
      "venue": "polymarket"
     },
@@ -1918,43 +1918,43 @@
    "question": "Will Ian Machado Garry become UFC champion in 2026?",
    "slug": "will-ian-machado-garry-become-ufc-champion-in-2026",
    "kind": "winner",
-   "liquidity": 572.06942
+   "liquidity": 597.83626
   },
   {
    "question": "Will Leon Edwards become UFC champion in 2026?",
    "slug": "will-leon-edwards-become-ufc-champion-in-2026",
    "kind": "winner",
-   "liquidity": 151.66339
+   "liquidity": 167.19202
   },
   {
    "question": "Will Ian Machado Garry be the UFC Welterweight Champion on December 31, 2026?",
    "slug": "will-ian-machado-garry-be-the-ufc-welterweight-champion-on-december-31-2026",
    "kind": "winner",
-   "liquidity": 1260.35302
+   "liquidity": 1137.05489
   },
   {
    "question": "Will Leon Edwards be the UFC Welterweight Champion on December 31, 2026?",
    "slug": "will-leon-edwards-be-the-ufc-welterweight-champion-on-december-31-2026",
    "kind": "winner",
-   "liquidity": 2583.95757
+   "liquidity": 2318.43728
   },
   {
    "question": "Will Anthony Hernandez be the UFC Middleweight Champion on December 31, 2026?",
    "slug": "will-anthony-hernandez-be-the-ufc-middleweight-champion-on-december-31-2026",
    "kind": "winner",
-   "liquidity": 2340.8684
+   "liquidity": 2237.04281
   },
   {
    "question": "Will Anthony Hernandez fight Joe Pyfer next?",
    "slug": "will-anthony-hernandez-fight-joe-pyfer-next",
    "kind": "winner",
-   "liquidity": 429.39562
+   "liquidity": 607.61528
   },
   {
    "question": "UFC 332: Rafael Dos Anjos vs. Alexander Hernandez (Lightweight, Early Prelims)",
    "slug": "ufc-raf1-ale-2026-10-03",
    "kind": "winner",
-   "liquidity": 1771.1493
+   "liquidity": 1868.8673
   }
  ]
 }
