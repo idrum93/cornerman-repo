@@ -3,3 +3,9 @@
 Patricio Pitbull = Patricio Freire
 Michael Aswell Jr. = Michael Aswell
 Alatengheili = Alateng Heili
+# Bonus-award names: Wikipedia and UFCStats differ on these fighters
+Ronaldo Souza = Jacare Souza
+Cris Cyborg = Cristiane Justino
+Bobby Green = King Green
+Carlos Diego Ferreira = Diego Ferreira
+Antonio Rogerio Nogueira = Rogerio Nogueira

@@ -28,7 +28,7 @@ OUT = "data/wiki/bonuses.json"
 # are re-read automatically, so a fix reaches the data without anyone
 # remembering to pass a flag. Version 1 counted "Fight of the Night: None" as
 # a fighter, which put the award rate at 99% instead of about two thirds.
-PARSER_VERSION = 3
+PARSER_VERSION = 4
 POTN_ERA = pd.Timestamp("2014-02-01")
 HEADING = re.compile(r"bonus award", re.I)
 LABELS = {"fotn": re.compile(r"fight of the night", re.I),
@@ -62,7 +62,8 @@ def parse_bonuses(wikitext):
         # Drop parentheticals and money before any name extraction.
         tail = re.sub(r"\([^)]*\)", " ", tail)
         tail = re.sub(r"\$\s?[\d,]+", " ", tail)
-        if re.search(r"\b(none|not awarded|no fight of the night|n/a)\b", tail, re.I):
+        if re.search(r"\b(none|not awarded|no bonus(es)? (was |were )?awarded|"
+                     r"no fight of the night|n/a)\b", tail, re.I):
             continue                       # an explicit "none", not a fighter
         names = re.findall(r"\[\[(?:[^\]|]*\|)?([^\]]*)\]\]", tail)
         if not names:                      # some articles do not link the names
@@ -223,10 +224,10 @@ def validate(fights, store=None, path=OUT, verbose=True):
             on_card.setdefault(r.event, set()).update(norm(x) for x in parts)
     ok = [(k, v) for k, v in ev.items() if v.get("status") == "ok"]
     fotn = [(k, v) for k, v in ok if v.get("fotn")]
-    two = [1 for _, v in fotn if len(v["fotn"]) == 2]
+    paired = [1 for _, v in fotn if len(v["fotn"]) % 2 == 0]
     bad_names, checked, matched, odd = [], 0, 0, []
     for k, v in fotn:
-        if len(v["fotn"]) != 2 and len(odd) < 5:
+        if len(v["fotn"]) % 2 and len(odd) < 5:
             odd.append((k, v["fotn"]))
     for k, v in ok:
         card = on_card.get(k)
@@ -239,7 +240,7 @@ def validate(fights, store=None, path=OUT, verbose=True):
             elif len(bad_names) < 8:
                 bad_names.append((k, n))
     res = {"events_ok": len(ok), "with_fotn": len(fotn),
-           "fotn_exactly_two": sum(two),
+           "fotn_paired": sum(paired),
            "names_checked": checked, "names_on_card": matched}
     by_year = {}
     for k, v in ok:
@@ -251,8 +252,10 @@ def validate(fights, store=None, path=OUT, verbose=True):
         print("bonus labels, checked against the corpus")
         print(f"  readable events: {len(ok)}")
         print(f"  with a Fight of the Night: {len(fotn)} ({100*len(fotn)/max(len(ok),1):.0f}%)")
-        print(f"  of those, exactly two recipients: {sum(two)} "
-              f"({100*sum(two)/max(len(fotn),1):.0f}%; anything else is a mis-parse)")
+        print(f"  with an even number of recipients: {sum(paired)} "
+              f"({100*sum(paired)/max(len(fotn),1):.0f}%; some cards award two "
+              f"Fight of the Night bonuses, so four names is two fights — an ODD "
+              f"count is the mis-parse)")
         if checked:
             print(f"  names that fought on that card: {matched} of {checked} "
                   f"({100*matched/checked:.0f}%)")
@@ -260,7 +263,7 @@ def validate(fights, store=None, path=OUT, verbose=True):
         line = "    " + "  ".join(f"{y} {100*a/b:.0f}%" for y, (a, b) in sorted(by_year.items()))
         print(line)
         for k, n in odd:
-            print(f"    not two recipients: {k.strip()!r} -> {n}")
+            print(f"    odd number of recipients: {k.strip()!r} -> {n}")
         for k, n in bad_names:
             print(f"    not on the card: {k.strip()!r} -> {n!r}")
     return res
