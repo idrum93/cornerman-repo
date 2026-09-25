@@ -28,7 +28,7 @@ OUT = "data/wiki/bonuses.json"
 # are re-read automatically, so a fix reaches the data without anyone
 # remembering to pass a flag. Version 1 counted "Fight of the Night: None" as
 # a fighter, which put the award rate at 99% instead of about two thirds.
-PARSER_VERSION = 4
+PARSER_VERSION = 5
 POTN_ERA = pd.Timestamp("2014-02-01")
 HEADING = re.compile(r"bonus award", re.I)
 LABELS = {"fotn": re.compile(r"fight of the night", re.I),
@@ -60,12 +60,17 @@ def parse_bonuses(wikitext):
         tail = s.split(":", 1)[1] if ":" in s else s
         # "Abel Trujillo ($75,000 each)" split on the comma into two "names".
         # Drop parentheticals and money before any name extraction.
+        # "Geoff Neal{{efn|Despite missing weight, Neal was still awarded...}}"
+        # — a footnote template rides along with the name and then splits on
+        # the comma inside it. Strip templates before anything else.
+        tail = re.sub(r"\{\{[^{}]*\}\}", " ", tail)
+        tail = re.sub(r"\{\{.*", " ", tail)          # unbalanced, mid-cell
         tail = re.sub(r"\([^)]*\)", " ", tail)
         tail = re.sub(r"\$\s?[\d,]+", " ", tail)
         if re.search(r"\b(none|not awarded|no bonus(es)? (was |were )?awarded|"
                      r"no fight of the night|n/a)\b", tail, re.I):
             continue                       # an explicit "none", not a fighter
-        names = re.findall(r"\[\[(?:[^\]|]*\|)?([^\]]*)\]\]", tail)
+        names = [re.sub(r"\{\{.*", "", n).strip() for n in re.findall(r"\[\[(?:[^\]|]*\|)?([^\]]*)\]\]", tail)]
         if not names:                      # some articles do not link the names
             # split on the separators, taking the period with "vs." — the
             # naive \bvs\.?\b left a stray "." glued to the second name
@@ -180,6 +185,45 @@ def report(store, remaining=0, elapsed=0):
         print(f"  {pot} Performance of the Night awards recorded")
 
 
+def repair(fights, store=None, path=OUT, verbose=True):
+    """Complete one-sided Fight of the Night entries from the corpus.
+
+    Some articles name only one fighter on that line. The partner is not a
+    guess: a Fight of the Night is a bout, and the corpus knows which bout that
+    fighter had on that card. Anything ambiguous is left alone and stays
+    visible as an odd count.
+    """
+    from .upcoming import _key
+    store = store or _load(path)
+    card = {}
+    for r in fights.itertuples():
+        parts = str(r.bout).split(" vs. ")
+        if len(parts) == 2:
+            card.setdefault(r.event, []).append((parts[0].strip(), parts[1].strip()))
+    fixed = 0
+    for ev, v in store.get("events", {}).items():
+        names = v.get("fotn") or []
+        if v.get("status") != "ok" or not names or len(names) % 2 == 0:
+            continue
+        bouts = card.get(ev) or []
+        out = []
+        for n in names:
+            out.append(n)
+            hits = [bt for bt in bouts if _key(n) in (_key(bt[0]), _key(bt[1]))]
+            if len(hits) == 1:
+                other = hits[0][1] if _key(n) == _key(hits[0][0]) else hits[0][0]
+                if _key(other) not in {_key(x) for x in names}:
+                    out.append(other)
+        if len(out) != len(names) and len(out) % 2 == 0:
+            v["fotn"] = out
+            fixed += 1
+    if fixed:
+        _save(store, path)
+        if verbose:
+            print(f"bonuses: completed {fixed} one-sided Fight of the Night entries from the corpus")
+    return fixed
+
+
 # ---------------------------------------------------------------- validation
 def validate(fights, store=None, path=OUT, verbose=True):
     """Check the labels against the corpus, because a parser that reads the
@@ -193,6 +237,7 @@ def validate(fights, store=None, path=OUT, verbose=True):
       identity  every name must be a fighter who actually fought on that card
       coverage  how many events were readable at all
     """
+    import difflib
     import unicodedata
     from .upcoming import _key, load_aliases
 
@@ -204,13 +249,19 @@ def validate(fights, store=None, path=OUT, verbose=True):
     except Exception:
         alias = {}
 
+    HARD = str.maketrans({"\u0142": "l", "\u0111": "d", "\u00f8": "o", "\u0131": "i",
+                          "\u00e6": "ae", "\u0153": "oe", "\u00df": "ss"})
+
     def norm(n):
         """Match on spelling variants, not on luck. Wikipedia writes "Ovince
         St. Preux" and "Antônio Rogério"; UFCStats writes "Ovince Saint Preux"
         and "Antonio Rogerio". Neither is wrong, and a name check that counted
         those as failures would understate the labels."""
-        n = unicodedata.normalize("NFKD", str(n))
+        # NFKD leaves l-stroke and friends alone, so "Jan Blachowicz" never
+        # matched "Jan B\u0142achowicz"
+        n = unicodedata.normalize("NFKD", str(n).translate(HARD))
         n = "".join(c for c in n if not unicodedata.combining(c))
+        n = re.sub(r"\b(jr|sr|ii|iii|iv)\b", " ", n, flags=re.I)
         n = re.sub(r"\bst\.?\b", "saint", n, flags=re.I)
         k = _key(re.sub(r"[.\-']", " ", n))
         return alias.get(k, k)
@@ -235,7 +286,17 @@ def validate(fights, store=None, path=OUT, verbose=True):
             continue
         for n in v.get("fotn", []) + v.get("potn", []):
             checked += 1
-            if norm(n) in card or norm(n).replace(" ", "") in {c.replace(" ", "") for c in card}:
+            nn = norm(n)
+            flat = {c.replace(" ", "") for c in card}
+            swapped = " ".join(reversed(nn.split()))      # "Yadong Song" / "Song Yadong"
+            # transliteration differs more in the given name than the
+            # surname ("Aleksei Oleinyk" / "Alexey Oleynik"), so the surname
+            # gets its own, tighter fuzzy pass against this card only
+            close = (difflib.get_close_matches(nn, list(card), n=1, cutoff=0.85)
+                     or difflib.get_close_matches(nn.split()[-1] if nn.split() else nn,
+                                                  [c.split()[-1] for c in card if c.split()],
+                                                  n=1, cutoff=0.85))
+            if nn in card or nn.replace(" ", "") in flat or swapped in card or close:
                 matched += 1
             elif len(bad_names) < 8:
                 bad_names.append((k, n))
@@ -277,6 +338,7 @@ if __name__ == "__main__":
         budget = float(sys.argv[sys.argv.index("--budget-min") + 1])
     f, _p, _ = load(verbose=False)
     if "--check" in sys.argv:
+        repair(f)
         validate(f)
         raise SystemExit(0)
     if "--recollect" in sys.argv:
@@ -284,4 +346,5 @@ if __name__ == "__main__":
         _save({"version": 1, "events": {}})
         print("bonuses: cleared stored labels, re-reading every event")
     collect(f, budget_min=budget)
+    repair(f)
     validate(f)
