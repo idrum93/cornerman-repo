@@ -382,7 +382,8 @@ def event_date_et(commence):
 # claim from a winner price, graded by a different rule, and mixing them into
 # the moneyline ledger would corrupt both the residual test and the
 # opening-line test, whose populations are registered as moneyline bouts.
-PROP_MODEL_FIELD = {"decision": "m_decision", "inside_distance": "p_finish",
+PROP_MODEL_FIELD = {"decision": "m_decision", "method_dec": "m_decision",
+                    "inside_distance": "p_finish",
                     "ko_a": "m_a_ko", "ko_b": "m_b_ko",
                     "sub_a": "m_a_sub", "sub_b": "m_b_sub"}
 
@@ -401,10 +402,30 @@ def prop_files(directory=LEDGER_DIR):
 
 
 def _model_prob(bout_payload, market):
+    """The model's number for a market, including the families Polymarket US
+    quotes that the payload does not name directly.
+
+    "Fight ends before Round 4 begins" is the sum of the per-round finish
+    probabilities below that round; "Method of Finish: KO/TKO/DQ" is both
+    fighters' KO probabilities added. Per-fighter decision is not modelled
+    separately, so those markets are captured with no model number rather than
+    given a fabricated one.
+    """
+    g = bout_payload.get
+    if market.startswith("ends_before_r"):
+        n = int(market[-1])
+        parts = [g(f"p_end_r{k}") for k in range(1, n)]
+        return sum(x for x in parts if x is not None) if any(x is not None for x in parts) else None
     if market.startswith("end_r"):
-        return bout_payload.get("p_end_r" + market[-1])
+        return g("p_end_r" + market[-1])
+    if market == "method_ko":
+        a, b = g("m_a_ko"), g("m_b_ko")
+        return (a + b) if a is not None and b is not None else None
+    if market == "method_sub":
+        a, b = g("m_a_sub"), g("m_b_sub")
+        return (a + b) if a is not None and b is not None else None
     f = PROP_MODEL_FIELD.get(market)
-    return bout_payload.get(f) if f else None
+    return g(f) if f else None
 
 
 def capture_props(card_path="data/upcoming.txt", payload_path="site/predictions.json",
@@ -579,6 +600,10 @@ def latest_prop_prices(event_date=None):
             continue
         out[r["bout"]][r["market"]] = {"p": r["p_market"], "slug": r.get("slug"),
                                        "venue": r.get("venue", "polymarket")}
+        # the exchange prices "Decision" where the site has a "goes the
+        # distance" row: the same claim under two names
+        if r["market"] == "method_dec":
+            out[r["bout"]].setdefault("decision", out[r["bout"]]["method_dec"])
     return out
 
 

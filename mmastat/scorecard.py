@@ -135,6 +135,18 @@ def _outcome(market, f, a_is_red):
     }
     for k in range(1, 6):
         table[f"end_r{k}"] = (not dec) and rnd == k
+        # Polymarket US quotes cumulative round markets — "Fight ends before
+        # Round 4 begins" — rather than a per-round split, so they are graded
+        # directly instead of being reconstructed from the per-round rows.
+        if k > 1:
+            table[f"ends_before_r{k}"] = (not dec) and rnd < k
+    # and method at fight level, which is how its "Method of Finish" group is
+    # priced: KO/TKO/DQ is one contract, not two
+    table["method_ko"] = f.method == "KO/TKO"
+    table["method_sub"] = f.method == "SUB"
+    table["method_dec"] = dec
+    table["dec_a"] = a_won and dec
+    table["dec_b"] = (not a_won) and dec
     return table.get(market)
 
 

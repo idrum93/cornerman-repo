@@ -43,10 +43,21 @@ def market_url(slug):
     return f"{SITE}/sports/ufc/{slug}" if slug.startswith("ufc-") else f"{SITE}/event/{slug}"
 
 
+SUFFIX = re.compile(r"\b(jr|sr|ii|iii|iv)\b", re.I)
+
+
 def _nm(s):
     s = unicodedata.normalize("NFKD", str(s))
     s = "".join(c for c in s if not unicodedata.combining(c))
-    return re.sub(r"[^a-z ]", "", s.lower()).strip()
+    s = re.sub(r"[^a-z ]", " ", s.lower())
+    s = SUFFIX.sub(" ", s)                 # "R. Rosas Jr." -> "r rosas"
+    return re.sub(r"\s+", " ", s).strip()
+
+
+def _surname(n):
+    """Last real token: initials and suffixes are not surnames."""
+    toks = [t for t in _nm(n).split() if len(t) > 1]
+    return toks[-1] if toks else ""
 
 
 def _get(path, params=None, tries=3):
@@ -189,7 +200,8 @@ def _with_variants(out):
 
 
 ROUND_RE = re.compile(r"\bround\s*([1-5])\b", re.I)
-DIST_RE = re.compile(r"go(es)? the distance|go to (a )?decision", re.I)
+DIST_RE = re.compile(r"go(es)? the distance|go to (a )?decision|by decision|"
+                     r"decision\b.*\bwin|fight to go the distance", re.I)
 ITD_RE = re.compile(r"inside the distance", re.I)
 KO_RE = re.compile(r"\bko\b|knockout|tko", re.I)
 SUB_RE = re.compile(r"submission|tap", re.I)
@@ -214,11 +226,13 @@ def map_props(rows, bouts, max_spread=0.10, min_volume=100.0):
     for r in rows:
         if r["kind"] != "winner" or len(r["sides"]) != 2:
             continue
-        pair = frozenset(_nm(n) for n, _ in r["sides"])
+        variants = [frozenset(_nm(n) for n, _ in r["sides"]),
+                    frozenset(_surname(n) for n, _ in r["sides"]),
+                    frozenset(_nm(n).replace(" ", "") for n, _ in r["sides"])]
         for (ka, kb), (a, b) in byname.items():
-            if pair == frozenset((ka, kb)) or \
-               pair == frozenset((ka.split()[-1], kb.split()[-1])) or \
-               pair == frozenset((ka.replace(" ", ""), kb.replace(" ", ""))):
+            cand = [frozenset((ka, kb)), frozenset((_surname(ka), _surname(kb))),
+                    frozenset((ka.replace(" ", ""), kb.replace(" ", "")))]
+            if any(v == c for v in variants for c in cand):
                 by_event[r["event_slug"]] = (a, b)
                 break
     out = []
@@ -229,11 +243,11 @@ def map_props(rows, bouts, max_spread=0.10, min_volume=100.0):
         hit = None
         if r.get("event_slug") in by_event:
             a0, b0 = by_event[r["event_slug"]]
-            la, lb = _nm(a0).split()[-1], _nm(b0).split()[-1]
+            la, lb = _surname(a0), _surname(b0)
             hit = (a0, b0, "a" if (la in q and lb not in q) else
                    ("b" if (lb in q and la not in q) else None))
         for (ka, kb), (a, b) in byname.items():
-            la, lb = ka.split()[-1], kb.split()[-1]
+            la, lb = _surname(ka), _surname(kb)
             if la in q and lb in q:
                 hit = (a, b, None); break
             if la in q:
@@ -244,20 +258,52 @@ def map_props(rows, bouts, max_spread=0.10, min_volume=100.0):
             continue
         a, b, side = hit
         key = None
-        m = ROUND_RE.search(r["question"])
-        if m:
-            key = f"end_r{m.group(1)}"
-        elif DIST_RE.search(r["question"]):
-            key = "decision"
-        elif ITD_RE.search(r["question"]):
-            key = "inside_distance"
-        elif KO_RE.search(r["question"]) and side:
-            key = "ko_" + side
-        elif SUB_RE.search(r["question"]) and side:
-            key = "sub_" + side
+        # "Fight ends before Round 4 begins" — a cumulative round contract
+        mb = re.search(r"ends? before round\s*([2-5])", r["question"], re.I)
+        if mb:
+            key = f"ends_before_r{mb.group(1)}"
+        # "Method of Finish": one contract per method, no fighter named
+        elif side is None and re.fullmatch(r"\s*decision\s*", r["question"], re.I):
+            key = "method_dec"
+        elif side is None and KO_RE.search(r["question"]) and not re.search(r"\bby\b", r["question"], re.I):
+            key = "method_ko"
+        elif side is None and SUB_RE.search(r["question"]) and not re.search(r"\bby\b", r["question"], re.I):
+            key = "method_sub"
+        # "R. Rosas Jr. by Submission" — fighter and method together
+        elif side and re.search(r"\bby\b", r["question"], re.I):
+            if SUB_RE.search(r["question"]):
+                key = "sub_" + side
+            elif KO_RE.search(r["question"]):
+                key = "ko_" + side
+            elif re.search(r"decision", r["question"], re.I):
+                key = "dec_" + side
+        if not key and r["kind"] == "total" and r.get("line") is not None:
+            # "Over 1.5 rounds" arrives as a TOTAL with line=1.5, not as text
+            key = "total_over_" + str(r["line"]).replace(".", "_").rstrip("_0") \
+                if float(r["line"]) % 1 else None
+            if key:
+                yes_is_over = any("over" in _nm(n) for n, _ in r["sides"])
+                if not yes_is_over:
+                    key = None
+        if not key:
+            # older phrasings, only reached when nothing above matched — this
+            # chain used to run unguarded and overwrite every key set above,
+            # turning "Rosas by Decision" into the fight-level decision market
+            m = ROUND_RE.search(r["question"])
+            if m:
+                key = f"end_r{m.group(1)}"
+            elif DIST_RE.search(r["question"]):
+                key = "decision"
+            elif ITD_RE.search(r["question"]):
+                key = "inside_distance"
+            elif KO_RE.search(r["question"]) and side:
+                key = "ko_" + side
+            elif SUB_RE.search(r["question"]) and side:
+                key = "sub_" + side
         if not key:
             continue
-        yes = next((i for i, (n, _) in enumerate(r["sides"]) if _nm(n).startswith("yes")), 0)
+        yes = next((i for i, (n, _) in enumerate(r["sides"])
+                    if _nm(n).startswith("yes") or _nm(n).startswith("over")), 0)
         tot = sum(p for _, p in r["sides"])
         if tot <= 0:
             continue
@@ -282,7 +328,9 @@ def describe(rows):
     """What the gateway actually returned — printed on the first live run,
     because the price shape and the market mix are the two things the docs
     cannot tell us."""
-    return {"markets": len(rows),
+    per_event = Counter(r["event_slug"] for r in rows)
+    return {"markets": len(rows), "events": len(per_event),
+            "markets_per_event_max": max(per_event.values()) if per_event else 0,
             "kinds": dict(Counter(r["kind"] for r in rows)),
             "shapes": dict(Counter(r["shape"] for r in rows)),
             "with_book": sum(1 for r in rows if r["book"])}

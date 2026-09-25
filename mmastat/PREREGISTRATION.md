@@ -1766,3 +1766,86 @@ Coverage caveat, recorded now: labels exist for 421 of 530 events (80%), and
 the missing ones skew toward smaller cards. A prior-bonus count is therefore
 an undercount, unevenly. That biases B3 downward and the feature with it, so a
 narrow win over B3 is not evidence.
+
+---
+
+# Addendum 25: the unused columns (2026-09-25)
+
+Registered before computing anything. Prompted by asking what a genuinely new
+measurement would look like.
+
+Checked first, and recorded because it bounds everything else: the round-level
+feed has **no timestamps** and **no positional labels**. Strike-by-strike
+timing and grappling position (guard, mount, back) do not exist in this corpus
+and cannot be tested at any price. What does exist and has never been used:
+
+| # | measure | why it might carry something |
+|---|---|---|
+| G1 | reversals per 15 min | the `REV.` column is in every round row and appears nowhere in `state.py` — a grappler who reverses position is escaping bad spots, which no current input sees |
+| G2 | opponent's reversals conceded per 15 | the same signal from the other side: a fighter whose control gets reversed is losing position he had won |
+| G3 | ground-strike accuracy | landed over attempted from the ground. The model has ground SHARE but not how well those strikes land |
+| G4 | submission attempts per minute of control | threat density while controlling, as against `sub15`, which is per fight minute and so mostly measures how often he gets on top at all |
+| G5 | clinch-strike accuracy | the same idea as G3 in the clinch |
+
+All built in the leakage-safe walk from prior fights only.
+
+## Targets and correction
+
+    (a) win model       added to the frozen 14, log loss out of sample
+    (b) market residual added to the offset model — the only arm that speaks
+        to an edge
+
+Benjamini-Hochberg at FDR 0.10 across all ten tests. Anything supported is a
+candidate needing forward confirmation, not a finding: the holdout was spent in
+addendum 17.
+
+## Pre-stated expectation
+
+Low but not negligible, and higher than addendum 22's. These are unused
+*measurements* rather than re-weightings of used ones, which is the one kind of
+addition this corpus could still support. Against that: reversals are rare, so
+the per-fighter rate is estimated from very few events, and G3 to G5 are
+ratios whose denominators are small for fighters who rarely grapple.
+
+## Addendum 25: RESULT (2026-09-25)
+
+**Zero of ten supported.** The only test to clear its BH threshold did so by
+making predictions *worse*.
+
+| target | measure | gain | p | |
+|---|---|---|---|---|
+| market residual | ground accuracy | **-0.0018** | .002 | survives correction, wrong direction |
+| win model | sub attempts per control min | -0.0008 | .157 | |
+| win model | ground accuracy | -0.0005 | .163 | |
+| market residual | reversals | +0.0007 | .190 | |
+| market residual | sub attempts per control min | -0.0004 | .217 | |
+| win model | clinch accuracy | +0.0004 | .268 | |
+| market residual | reversals conceded | -0.0005 | .305 | |
+| win model | reversals | +0.0006 | .460 | |
+| win model | reversals conceded | +0.0002 | .715 | |
+| market residual | clinch accuracy | -0.0001 | .742 | |
+
+Ground accuracy is worth a note: added to the market-residual model it is the
+most statistically reliable result in the family, and it **hurts**, reliably.
+A feature that is significantly bad is still a feature that does not go in,
+and it is a useful reminder of what a small p-value does and does not mean.
+
+### Why, in the data
+
+Reversals barely exist: **11% of fighter-fights record one at all**, mean 0.13
+per fight. Over a median career of five or six recorded bouts, a fighter's
+reversal rate rests on well under one event. The shrinkage that keeps it stable
+also removes what little variation there was.
+
+The ratios have the same problem from the other end: ground accuracy is
+undefined for the 41% of fighter-fights with no ground strikes attempted, and
+rests on a median of six attempts when it exists.
+
+### What was checked and does not exist
+
+The round feed carries no timestamps and no positional labels. Strike-by-strike
+timing and grappling position — guard, half guard, mount, back — are not in
+this corpus at any price, and nothing derived from UFCStats will ever supply
+them. That is the boundary: fourteen families have now been tested, and the
+constraint has never been the search. It is that roughly seven recorded fights
+per athlete, summarised as per-round totals, is all there is.

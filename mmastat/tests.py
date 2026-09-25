@@ -259,6 +259,7 @@ REQUIRED_SITE_FEATURES = {
     "function showRecord": "running model-vs-market record in the header",
     "function propRank": "one ranking shared by tile chips and panel marks",
     "function pmk": "prop market prices shown beside the projections",
+    "function topCall": "most likely outcome, with market agreement",
     "function otherMarkets": "links to Polymarket markets the model does not price",
     "divShort(b.weight_class)": "weight class on each tile",
     "class=\"zone ": "separated upcoming / results / history zones",

@@ -500,9 +500,20 @@ def predict_card(path, fights, fighters, verbose=True):
                 r["m_a_sub"] = round(dist["a_sub"], 4)
                 r["m_b_sub"] = round(dist["b_sub"], 4)
                 r["m_decision"] = round(dist["decision"], 4)
+                # Per-fighter decision, which the exchange prices and the
+                # method model implies exactly: a win probability less the two
+                # finish routes. Verified to reconcile with the fight-level
+                # decision number on every bout.
+                r["m_a_dec"] = round(max(0.0, r["p_a"] - dist["a_ko"] - dist["a_sub"]), 4)
+                r["m_b_dec"] = round(max(0.0, r["p_b"] - dist["b_ko"] - dist["b_sub"]), 4)
                 r["p_finish"] = round(1 - dist["decision"], 4)
                 for rr in range(1, n_rounds + 1):
                     r[f"p_end_r{rr}"] = round(by_r.get(rr, 0.0), 4)
+                # Cumulative round contracts, the shape Polymarket US quotes:
+                # "fight ends before round N begins" is every finish below N.
+                for n in range(2, n_rounds + 1):
+                    r[f"p_ends_before_r{n}"] = round(
+                        sum(by_r.get(k, 0.0) for k in range(1, n)), 4)
                 # Round totals, read straight off the survival curve. These are
                 # real prop markets and the hazard model prices them coherently:
                 # "over 1.5 rounds" is simply P(the fight is still going at 7:30).

@@ -72,6 +72,15 @@
   .gaplink{position:relative;height:4px;margin:1px 0}
   .gaplink i{position:absolute;top:1px;height:2px;background:var(--warn);border-radius:1px}
 
+  .callbox{border:1px solid var(--line);border-left:3px solid var(--mute);border-radius:4px;
+    background:var(--panel);padding:9px 12px;margin-bottom:10px}
+  .callmain{font-size:15px;font-weight:700;margin:2px 0 3px}
+  .callchip{font-size:11px;font-weight:700;margin:7px 0 1px;display:flex;align-items:center;gap:7px}
+  .callchip.ca{color:var(--redsoft)} .callchip.cb{color:var(--bluesoft)}
+  .callchip b{color:var(--bone)}
+  .cagree,.cdis{font-size:8.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;
+    padding:1px 5px;border-radius:2px;border:1px solid var(--line)}
+  .cagree{color:var(--good)} .cdis{color:var(--gold)}
   .props{display:flex;gap:5px;margin-top:7px;flex-wrap:wrap}
   .pp{font-size:9.5px;letter-spacing:.04em;padding:2px 6px;border-radius:3px;
     border:1px solid var(--line);color:var(--mute);white-space:nowrap}
@@ -465,6 +474,43 @@ let FEATURED=new Set();
 /* The four markets a tile chose to show, by their scorecard keys, so the panel
    can mark the same rows. A reader who clicked a tile because of a chip should
    not have to hunt for that row among seventeen. */
+/* The most likely single outcome, taken over the exchange's Method of Victory
+   family so that the call names a contract that exists. Reported only when it
+   is clear of the next one — a 27% top pick against a 26% second is not a
+   call, it is a coin flip with extra steps. */
+const MOV=b=>[['dec_a',b.m_a_dec,`${surname(b.a)} by decision`],
+              ['ko_a',b.m_a_ko,`${surname(b.a)} by KO/TKO`],
+              ['sub_a',b.m_a_sub,`${surname(b.a)} by submission`],
+              ['dec_b',b.m_b_dec,`${surname(b.b)} by decision`],
+              ['ko_b',b.m_b_ko,`${surname(b.b)} by KO/TKO`],
+              ['sub_b',b.m_b_sub,`${surname(b.b)} by submission`]]
+             .filter(x=>x[1]!=null).sort((x,y)=>y[1]-x[1]);
+const movLabel=(b,key)=>(MOV(b).find(x=>x[0]===key)||[,,key])[2];
+function topCall(b){
+  const m=MOV(b); if(m.length<2) return null;
+  const [k,p,label]=m[0], gap=p-m[1][1];
+  if(gap<0.05) return null;                      // no clear call
+  const side=k.endsWith('_a')?'a':'b';
+  // Round, only when the call is a finish. The round distribution is for the
+  // fight, not conditioned on who wins — the model does not price per-fighter
+  // hazards — so it is stated as a share of finishes and labelled that way.
+  let round=null;
+  if(!k.startsWith('dec_') && b.p_finish>0.02){
+    const rs=Object.keys(b).filter(x=>/^p_end_r\d$/.test(x)&&b[x]!=null)
+      .map(x=>[x.slice(-1),b[x]/b.p_finish]).sort((x,y)=>y[1]-x[1]);
+    if(rs.length>1 && rs[0][1]-rs[1][1]>=0.08) round={n:rs[0][0],share:rs[0][1]};
+  }
+  // does the market call the same one? compare argmax over the same family
+  const mk=m.map(([key])=>[key,pmk(b,key)]).filter(x=>x[1]!=null);
+  let verdict=null;
+  if(mk.length>=2){
+    mk.sort((x,y)=>y[1]-x[1]);
+    verdict={agrees:mk[0][0]===k, theirs:mk[0][0], theirP:mk[0][1],
+             ours:pmk(b,k)};
+  }
+  return {key:k,p,label,gap,side,verdict,round};
+}
+
 function propRank(b){
   const MB=(BR&&BR.market_bases)||{};
   const T=(MB.totals||{})[b.rounds===5?'5':'3']||{};
@@ -473,12 +519,13 @@ function propRank(b){
     if(p==null||base==null) return;
     C.push({key,txt,p,base,cls,tip,dev:Math.abs(p-base)});
   };
-  push('inside_distance',`ITD <b>${P0(b.p_finish)}%</b>`,b.p_finish,MB.itd,'pp-n',
-       `the fight ends inside the distance — normally ${P0(MB.itd)}% of fights do`);
-  Object.keys(b.totals||{}).forEach(k=>{
-    const line=k.replace('over_','').replace('_','.');
-    push('total_'+k,`O${line} <b>${P0(b.totals[k])}%</b>`,b.totals[k],T[line],'pp-n',
-         `the fight lasts past ${line} rounds — normally ${P0(T[line])}%`);
+  push('decision',`Distance <b>${P0(b.m_decision)}%</b>`,b.m_decision,MB.dec,'pp-n',
+       `the fight goes the distance — normally ${P0(MB.dec)}% of fights do`);
+  const EB=(MB.ends_before||{})[b.rounds===5?'5':'3']||{};
+  Object.keys(b).filter(k=>k.startsWith('p_ends_before_r')&&b[k]!=null).forEach(k=>{
+    const n=k.slice(-1);
+    push('ends_before_r'+n,`<b>${P0(b[k])}%</b> before R${n}`,b[k],EB[n],'pp-n',
+         `the fight ends before round ${n} begins — normally ${P0(EB[n])}%`);
   });
   [['a',b.a,b.a_p_takedown,b.a_p_knockdown],['b',b.b,b.b_p_takedown,b.b_p_knockdown]].forEach(([side,nm,td,kd])=>{
     push('takedown_'+side,`TD ${esc(surname(nm))} <b>${P0(td)}%</b>`,td,MB.td,'pp-'+side,
@@ -582,6 +629,11 @@ function tile(b){
         class="${b.p_market>b.p_open?'k-lean-a':'k-lean-b'}">moved +${(Math.abs(b.p_market-b.p_open)*100).toFixed(0)}
         ${esc(surname(b.p_market>b.p_open?b.a:b.b))}</span>`:''}
     </div>
+    ${(()=>{const c=b.thin?null:topCall(b); if(!c) return '';
+      const v=c.verdict;
+      return `<div class="callchip ${c.side==='a'?'ca':'cb'}">${esc(c.label)}${
+        c.round?` <span style="color:var(--gold)">R${c.round.n}</span>`:''} <b>${P0(c.p)}%</b>${
+        v?`<span class="${v.agrees?'cagree':'cdis'}">${v.agrees?'market agrees':'market differs'}</span>`:''}</div>`;})()}
     ${b.thin?`<div class="props"><span class="pp" style="color:var(--warn);border-color:rgba(222,140,52,.4)">winner only · ${Math.min((b.evidence||{}).a??9,(b.evidence||{}).b??9)===0?'debut':'1 prior UFC fight'}</span></div>`:propChips(b)}
   </button>`;
 }
@@ -1079,8 +1131,7 @@ function open_(id){
   const drv=(b.drivers||[]);
   const mx=drv.length?Math.max(...drv.map(d=>Math.abs(d.value))):1;
   const rr=[1,2,3,4,5].map(k=>[k,b['p_end_r'+k]]).filter(x=>x[1]!=null);
-  const totals=b.totals?Object.keys(b.totals).map(k=>
-    propRow(`Over ${k.replace('over_','').replace('_','.')} rounds`,b.totals[k],'var(--gold)',null,null,'total_'+k)):[];
+  const totals=[];   // replaced by the cumulative "ends before round" family
   document.getElementById('drawin').innerHTML=`
     <button class="xbtn" id="xb">close ✕</button>
     <div class="lbl">${esc(b.segment||'')}${b.weight_class?' · '+esc(b.weight_class):''} · ${b.rounds===5?'5 rounds':'3 rounds'}</div>
@@ -1114,6 +1165,22 @@ function open_(id){
           <div class="mono" style="width:52px;text-align:right;font-size:11px;color:var(--dim)">${d.value>0?'+':''}${d.value.toFixed(2)}</div></div>`;}).join('')}
       </div>`:''}
     ${tale(b)}
+    ${(()=>{const c=topCall(b); if(!c) return '';
+      const col=c.side==='a'?'var(--redsoft)':'var(--bluesoft)';
+      const v=c.verdict;
+      const line=v?(v.agrees
+        ?`the market's most likely outcome is the same one, at ${P1(v.theirP)}%`
+        :`the market's most likely outcome is different: ${esc(movLabel(b,v.theirs))} at ${P1(v.theirP)}%`)
+        :'no market prices this family, so there is nothing to compare it against';
+      return `<div class="callbox" style="border-left-color:${col}">
+        <span class="lbl">most likely outcome</span>
+        <div class="callmain" style="color:${col}">${esc(c.label)} <b>${P0(c.p)}%</b>${
+          c.round?` <span style="color:var(--gold)">· round ${c.round.n}</span>`:''}</div>
+        <div class="note">Clear of the next outcome by ${(c.gap*100).toFixed(0)} points. ${line}.${
+          c.round?` Round ${c.round.n} is the likeliest finishing round at ${P0(c.round.share)}% of finishes —
+          that is for the fight, not for a particular fighter, since the model does not price per-fighter rounds.`
+          :(c.key.startsWith('dec_')?' A decision call is by definition the fight going the distance.':'')}</div>
+      </div>`;})()}
     ${b.thin?thinNote(b):''}
     ${b.thin?`<div class="card"><div class="ghead" style="background:none;border:none;padding:0 0 8px">
       <span class="gname">Winner</span><span class="lbl">probability · fair price</span></div>
@@ -1125,11 +1192,20 @@ function open_(id){
       ${group('Winner',mk?'market price shown':'no feed',[
         propRow(`${b.a} wins`,b.p_a,'var(--red)',mk?b.p_market:null,mk?`market ${P1(b.p_market)}%`:null,'winner_a'),
         propRow(`${b.b} wins`,b.p_b,'var(--blue)',mk?1-b.p_market:null,mk?`market ${P1(1-b.p_market)}%`:null)],mk)}
+      ${(()=>{// null for rounds a three-round bout does not have, so filter on the value
+        const ks=Object.keys(b).filter(k=>k.startsWith('p_ends_before_r')&&b[k]!=null).sort();
+        if(!ks.length) return '';
+        // The cumulative round contracts the exchange actually quotes. Our own
+        // per-round split sits below; this group exists because it is the
+        // shape a market price can be compared against.
+        return group('Ends before round',
+          ks.some(k=>pmk(b,k.replace('p_',''))!=null)?'market priced':'no market line',
+          ks.map(k=>{const mk2=k.replace('p_','');
+            return propRow(`Ends before round ${k.slice(-1)}`,b[k],'var(--gold)',
+              pmk(b,mk2),pnote(b,mk2),mk2);}));})()}
       ${group('How long','from the survival curve',[
-        propRow('Goes the distance',b.m_decision,'var(--mute)',pmk(b,'decision'),
-          pnote(b,'decision')||vsBase('C9','fight',b.bands,b.m_decision),'decision'),
-        propRow('Ends inside distance',b.p_finish,'var(--warn)',pmk(b,'inside_distance'),
-          pnote(b,'inside_distance')||vsBase('C4','fight',b.bands,b.p_finish),'inside_distance')].concat(totals))}
+        propRow('Go the distance',b.m_decision,'var(--mute)',pmk(b,'decision'),
+          pnote(b,'decision')||vsBase('C9','fight',b.bands,b.m_decision),'decision')].concat(totals))}
       ${formulaNote(b,'finish','finish','sets how likely a finish is; the method and round split below still comes from the survival model and sums to it')}
       ${group('Method','sums to 100% with decision',[
         propRow(`${b.a} by KO/TKO`,b.m_a_ko,'var(--red)',pmk(b,'ko_a'),pnote(b,'ko_a'),'ko_a'),

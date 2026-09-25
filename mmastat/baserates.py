@@ -171,13 +171,19 @@ def market_bases(fights, min_date="2012-01-01"):
     out = {"td": float(np.r_[(F.r_td_landed > 0).values, (F.b_td_landed > 0).values].mean()),
            "kd": float(np.r_[(F.r_kd > 0).values, (F.b_kd > 0).values].mean()),
            "itd": float((F.method != "DEC").mean()),
-           "dec": float((F.method == "DEC").mean()), "totals": {}}
+           "dec": float((F.method == "DEC").mean()), "totals": {}, "ends_before": {}}
     for sched, nr in ((900, 3), (1500, 5)):
         G = F[F.sched_sec == sched]
         if len(G) < 100:
             continue
         out["totals"][str(nr)] = {f"{line:g}": float((G.total_sec > line * 300).mean())
                                   for line in (1.5, 2.5, 3.5, 4.5) if line < nr}
+        # The cumulative round contract the exchange actually quotes: a finish
+        # before round n begins, i.e. inside the first n-1 rounds.
+        fin = G[G.method != "DEC"]
+        out["ends_before"][str(nr)] = {
+            str(n): float((fin.total_sec <= (n - 1) * 300).sum() / len(G))
+            for n in range(2, nr + 1)}
     return {k: (round(v, 4) if isinstance(v, float) else
                 {a: {b: round(c, 4) for b, c in d.items()} for a, d in v.items()})
             for k, v in out.items()}
