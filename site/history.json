@@ -10,10 +10,10 @@
    "method_right": 3,
    "round_n": 4,
    "round_right": 2,
-   "props_n": 58,
-   "props_right": 27,
-   "props_base_n": 58,
-   "props_base_right": 33,
+   "props_n": 76,
+   "props_right": 37,
+   "props_base_n": 76,
+   "props_base_right": 44,
    "market_n": 10,
    "market_right": 7,
    "model_closer": 6,
@@ -46,11 +46,11 @@
       },
       {
        "kind": "prop",
-       "label": "Ends inside the distance",
-       "said": 0.489,
-       "happened": false,
+       "label": "Go the distance",
+       "said": 0.511,
+       "happened": true,
        "right": true,
-       "base": 0.495,
+       "base": 0.505,
        "base_right": true
       },
       {
@@ -91,6 +91,42 @@
       },
       {
        "kind": "prop",
+       "label": "Ends before round 2",
+       "said": 0.107,
+       "happened": false,
+       "right": true,
+       "base": 0.216,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Ends before round 3",
+       "said": 0.231,
+       "happened": false,
+       "right": true,
+       "base": 0.376,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Ends before round 4",
+       "said": 0.325,
+       "happened": false,
+       "right": true,
+       "base": 0.479,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Ends before round 5",
+       "said": 0.41,
+       "happened": false,
+       "right": true,
+       "base": 0.538,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
        "label": "Joshua Van lands a takedown",
        "said": 0.173,
        "happened": false,
@@ -126,10 +162,10 @@
        "base_right": true
       }
      ],
-     "props_n": 9,
-     "props_right": 8,
-     "props_base_n": 9,
-     "props_base_right": 5,
+     "props_n": 13,
+     "props_right": 12,
+     "props_base_n": 13,
+     "props_base_right": 8,
      "market": {
       "p_market": 0.5483,
       "p_winner_market": 0.548,
@@ -174,11 +210,11 @@
       },
       {
        "kind": "prop",
-       "label": "Ends inside the distance",
-       "said": 0.487,
-       "happened": true,
+       "label": "Go the distance",
+       "said": 0.513,
+       "happened": false,
        "right": false,
-       "base": 0.495,
+       "base": 0.505,
        "base_right": false
       },
       {
@@ -197,6 +233,24 @@
        "happened": false,
        "right": false,
        "base": 0.545,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Ends before round 2",
+       "said": 0.212,
+       "happened": true,
+       "right": false,
+       "base": 0.254,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Ends before round 3",
+       "said": 0.376,
+       "happened": true,
+       "right": false,
+       "base": 0.408,
        "base_right": false
       },
       {
@@ -236,9 +290,9 @@
        "base_right": true
       }
      ],
-     "props_n": 7,
+     "props_n": 9,
      "props_right": 3,
-     "props_base_n": 7,
+     "props_base_n": 9,
      "props_base_right": 2,
      "market": {
       "p_market": 0.7277,
@@ -275,11 +329,11 @@
       },
       {
        "kind": "prop",
-       "label": "Ends inside the distance",
-       "said": 0.725,
-       "happened": false,
+       "label": "Go the distance",
+       "said": 0.275,
+       "happened": true,
        "right": false,
-       "base": 0.495,
+       "base": 0.505,
        "base_right": true
       },
       {
@@ -298,6 +352,24 @@
        "happened": true,
        "right": false,
        "base": 0.545,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Ends before round 2",
+       "said": 0.384,
+       "happened": false,
+       "right": true,
+       "base": 0.254,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Ends before round 3",
+       "said": 0.638,
+       "happened": false,
+       "right": false,
+       "base": 0.408,
        "base_right": true
       },
       {
@@ -337,10 +409,10 @@
        "base_right": true
       }
      ],
-     "props_n": 7,
-     "props_right": 1,
-     "props_base_n": 7,
-     "props_base_right": 5,
+     "props_n": 9,
+     "props_right": 2,
+     "props_base_n": 9,
+     "props_base_right": 7,
      "market": {
       "p_market": 0.6811,
       "p_winner_market": 0.319,
@@ -413,11 +485,11 @@
       },
       {
        "kind": "prop",
-       "label": "Ends inside the distance",
-       "said": 0.478,
-       "happened": true,
+       "label": "Go the distance",
+       "said": 0.522,
+       "happened": false,
        "right": false,
-       "base": 0.495,
+       "base": 0.505,
        "base_right": false
       },
       {
@@ -437,6 +509,24 @@
        "right": false,
        "base": 0.545,
        "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Ends before round 2",
+       "said": 0.162,
+       "happened": false,
+       "right": true,
+       "base": 0.254,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Ends before round 3",
+       "said": 0.35,
+       "happened": false,
+       "right": true,
+       "base": 0.408,
+       "base_right": true
       },
       {
        "kind": "prop",
@@ -475,10 +565,10 @@
        "base_right": false
       }
      ],
-     "props_n": 7,
-     "props_right": 3,
-     "props_base_n": 7,
-     "props_base_right": 3,
+     "props_n": 9,
+     "props_right": 5,
+     "props_base_n": 9,
+     "props_base_right": 5,
      "market": {
       "p_market": 0.6548,
       "p_winner_market": 0.345,
@@ -514,11 +604,11 @@
       },
       {
        "kind": "prop",
-       "label": "Ends inside the distance",
-       "said": 0.639,
-       "happened": false,
+       "label": "Go the distance",
+       "said": 0.361,
+       "happened": true,
        "right": false,
-       "base": 0.495,
+       "base": 0.505,
        "base_right": true
       },
       {
@@ -537,6 +627,24 @@
        "happened": true,
        "right": false,
        "base": 0.545,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Ends before round 2",
+       "said": 0.269,
+       "happened": false,
+       "right": true,
+       "base": 0.254,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Ends before round 3",
+       "said": 0.524,
+       "happened": false,
+       "right": false,
+       "base": 0.408,
        "base_right": true
       },
       {
@@ -576,10 +684,10 @@
        "base_right": true
       }
      ],
-     "props_n": 7,
-     "props_right": 3,
-     "props_base_n": 7,
-     "props_base_right": 5,
+     "props_n": 9,
+     "props_right": 4,
+     "props_base_n": 9,
+     "props_base_right": 7,
      "market": {
       "p_market": 0.1796,
       "p_winner_market": 0.82,
@@ -643,11 +751,11 @@
       },
       {
        "kind": "prop",
-       "label": "Ends inside the distance",
-       "said": 0.559,
-       "happened": false,
+       "label": "Go the distance",
+       "said": 0.441,
+       "happened": true,
        "right": false,
-       "base": 0.495,
+       "base": 0.505,
        "base_right": true
       },
       {
@@ -666,6 +774,24 @@
        "happened": true,
        "right": false,
        "base": 0.545,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Ends before round 2",
+       "said": 0.24,
+       "happened": false,
+       "right": true,
+       "base": 0.254,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Ends before round 3",
+       "said": 0.458,
+       "happened": false,
+       "right": true,
+       "base": 0.408,
        "base_right": true
       },
       {
@@ -705,10 +831,10 @@
        "base_right": true
       }
      ],
-     "props_n": 7,
-     "props_right": 3,
-     "props_base_n": 7,
-     "props_base_right": 5,
+     "props_n": 9,
+     "props_right": 5,
+     "props_base_n": 9,
+     "props_base_right": 7,
      "market": {
       "p_market": 0.611,
       "p_winner_market": 0.611,
@@ -753,11 +879,11 @@
       },
       {
        "kind": "prop",
-       "label": "Ends inside the distance",
-       "said": 0.305,
-       "happened": true,
+       "label": "Go the distance",
+       "said": 0.695,
+       "happened": false,
        "right": false,
-       "base": 0.495,
+       "base": 0.505,
        "base_right": false
       },
       {
@@ -776,6 +902,24 @@
        "happened": false,
        "right": false,
        "base": 0.545,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Ends before round 2",
+       "said": 0.112,
+       "happened": true,
+       "right": false,
+       "base": 0.254,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Ends before round 3",
+       "said": 0.214,
+       "happened": true,
+       "right": false,
+       "base": 0.408,
        "base_right": false
       },
       {
@@ -815,9 +959,9 @@
        "base_right": true
       }
      ],
-     "props_n": 7,
+     "props_n": 9,
      "props_right": 3,
-     "props_base_n": 7,
+     "props_base_n": 9,
      "props_base_right": 4,
      "market": {
       "p_market": 0.6678,
@@ -863,11 +1007,11 @@
       },
       {
        "kind": "prop",
-       "label": "Ends inside the distance",
-       "said": 0.476,
-       "happened": true,
+       "label": "Go the distance",
+       "said": 0.524,
+       "happened": false,
        "right": false,
-       "base": 0.495,
+       "base": 0.505,
        "base_right": false
       },
       {
@@ -886,6 +1030,24 @@
        "happened": false,
        "right": false,
        "base": 0.545,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Ends before round 2",
+       "said": 0.181,
+       "happened": true,
+       "right": false,
+       "base": 0.254,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Ends before round 3",
+       "said": 0.373,
+       "happened": true,
+       "right": false,
+       "base": 0.408,
        "base_right": false
       },
       {
@@ -925,9 +1087,9 @@
        "base_right": true
       }
      ],
-     "props_n": 7,
+     "props_n": 9,
      "props_right": 3,
-     "props_base_n": 7,
+     "props_base_n": 9,
      "props_base_right": 4,
      "market": {
       "p_market": 0.2322,
