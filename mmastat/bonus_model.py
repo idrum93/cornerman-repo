@@ -77,6 +77,12 @@ def features(fights, fighters, labels, min_date=POTN_ERA):
                          sub_sum=sa["sub15"] + sb["sub15"],
                          prior_bonus=pri, prior_bonus_rate=pri / n_f,
                          y=int(ka in labels[ev]["fotn"] or kb in labels[ev]["fotn"]),
+                         potn_keys=tuple(labels[ev]["potn"]),
+                         prior_a=won.get(ka, 0), prior_b=won.get(kb, 0),
+                         # per-fighter finishing threat, for the POTN baseline:
+                         # his own knockdown and submission rates, not half the
+                         # fight-level finish probability, which was a placeholder
+                         fin_a=sa["kd15"] + sa["sub15"], fin_b=sb["kd15"] + sb["sub15"],
                          **{k: v for k, v in fr.items()}))
         # accumulate after the bout, never before
         for k in (ka, kb):
@@ -95,6 +101,67 @@ def _top1(df, score_col):
         pick = g.sort_values(score_col, ascending=False).iloc[0]
         hit += int(pick.y == 1)
     return hit / max(len(cards), 1), len(cards)
+
+
+def _top_k(df, score_col, k):
+    """Share of a card's actual winners caught by its top k picks."""
+    hit = tot = 0
+    for _, g in df.groupby("event"):
+        if g.y_potn.sum() == 0:
+            continue
+        picks = set(g.sort_values(score_col, ascending=False).head(k).idx)
+        actual = set(g[g.y_potn == 1].idx)
+        hit += len(picks & actual)
+        tot += min(len(actual), k)
+    return hit / max(tot, 1), tot
+
+
+def potn(F, tr_cut, verbose=True):
+    """Performance of the Night, scored per fighter rather than per bout.
+
+    Two bonuses a card, so the measure is how many of a card's actual winners
+    the top two picks catch. Same three baselines, fighter-level: the main
+    event, the likeliest finisher, and the most decorated.
+    """
+    rows = []
+    for r in F.itertuples():
+        for side, nm, fin, pri in (("a", r.a, r.fin_a, r.prior_a),
+                                   ("b", r.b, r.fin_b, r.prior_b)):
+            rows.append(dict(event=r.event, date=r.date, idx=f"{r.fight_id}:{side}",
+                             name=nm, order=r.order, card_n=r.card_n, five=r.five,
+                             p_finish=fin, prior_bonus=pri,
+                             pace=r.pace_sum, kd=r.kd_sum, sub=r.sub_sum,
+                             y_potn=int(_key(nm) in r.potn_keys)))
+    P = pd.DataFrame(rows)
+    if P.empty or P.y_potn.sum() == 0:
+        return None
+    tr, te = P[P.date <= tr_cut].copy(), P[P.date > tr_cut].copy()
+    cols = ["p_finish", "order", "card_n", "five", "pace", "kd", "sub"]
+    sc = StandardScaler().fit(tr[cols])
+    m = LogisticRegression(max_iter=4000, C=0.5).fit(sc.transform(tr[cols]), tr.y_potn)
+    te["s_base"] = m.predict_proba(sc.transform(te[cols]))[:, 1]
+    sc2 = StandardScaler().fit(tr[cols + ["prior_bonus"]])
+    m2 = LogisticRegression(max_iter=4000, C=0.5).fit(sc2.transform(tr[cols + ["prior_bonus"]]), tr.y_potn)
+    te["s_full"] = m2.predict_proba(sc2.transform(te[cols + ["prior_bonus"]]))[:, 1]
+    te["b1"] = -te["order"]
+    te["b2"] = te["p_finish"]
+    te["b3"] = te["prior_bonus"]
+    res = {k: _top_k(te, c, 2) for k, c in
+           (("model, no bonus history", "s_base"), ("model, with bonus history", "s_full"),
+            ("B1 main-event fighters", "b1"), ("B2 likeliest finisher", "b2"),
+            ("B3 most prior bonuses", "b3"))}
+    if verbose:
+        n = res["B1 main-event fighters"][1]
+        print()
+        print(f"PERFORMANCE OF THE NIGHT, top-2 hit rate over {n} awards on held-out cards")
+        for k, (acc, _) in res.items():
+            print(f"  {k:<30} {100*acc:5.1f}%")
+        beats = res["model, no bonus history"][0] > max(
+            res["B1 main-event fighters"][0], res["B2 likeliest finisher"][0],
+            res["B3 most prior bonuses"][0])
+        print("  VERDICT: " + ("beats every baseline without bonus history"
+                               if beats else "does NOT beat all three baselines — not published"))
+    return res
 
 
 def run(fights, fighters, path=BONUS_FILE, verbose=True):
@@ -147,6 +214,7 @@ def run(fights, fighters, path=BONUS_FILE, verbose=True):
                                "the model does NOT beat all three baselines — not published"))
         print(f"  weights (no bonus history): {w_base}")
         print(f"  weights (with):             {w_full}")
+    potn(pd.concat([tr, te]), cut, verbose=verbose)
     return res
 
 

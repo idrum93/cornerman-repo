@@ -114,11 +114,16 @@
   .gname{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
   .pgroup.priced .gname{color:var(--gold)}
   .prow{display:flex;align-items:center;gap:9px;padding:6px 11px}
-  .pgroup>summary{cursor:pointer;list-style:none;align-items:baseline}
-  .pgroup>summary::-webkit-details-marker{display:none}
-  .pgroup>summary:after{content:"+";margin-left:auto;color:var(--dim);font-weight:700}
-  .pgroup[open]>summary:after{content:"\2212"}
-  .pgroup>summary:hover .gname{color:var(--bone)}
+  .mtabs{display:flex;gap:4px;overflow-x:auto;padding-bottom:8px;margin-bottom:2px;
+    border-bottom:1px solid var(--line);scrollbar-width:none}
+  .mtabs::-webkit-scrollbar{display:none}
+  .mtab{flex:0 0 auto;background:none;border:1px solid var(--line);border-radius:999px;
+    color:var(--mute);font:600 10px ui-sans-serif,system-ui;letter-spacing:.06em;
+    text-transform:uppercase;padding:5px 11px;cursor:pointer;white-space:nowrap}
+  .mtab:hover{color:var(--bone)}
+  .mtab.on{color:var(--ink);background:var(--bone);border-color:var(--bone)}
+  .mpanel{display:none;padding-top:8px}
+  .mpanel.on{display:block}
   .prow+.prow{border-top:1px solid var(--soft)}
   .prow.feat{background:rgba(236,232,224,.045);box-shadow:inset 2px 0 0 rgba(236,232,224,.4)}
   .featdot{color:var(--bone);font-size:7px;opacity:.7;width:10px;text-align:center}
@@ -1043,13 +1048,26 @@ function strikeRow(label,val,cls){
   return `<div class="prow"><span>${esc(label)}</span><span class="mono ${cls}">${val}</span></div>`;
 }
 function rovGroup(b){
-  const rov=b.round_of_victory||{}; const ks=Object.keys(rov).sort((x,y)=>rov[y]-rov[x]);
-  if(!ks.length) return '';
-  const nm={a:surname(b.a),b:surname(b.b)}, mth={ko:'KO/TKO',sub:'submission'};
-  return group('Round and method of victory','every route in every round — one contract each',
-    ks.map(k=>{const side=k.split('_')[0], meth=k.split('_')[1], rd=k.split('_r')[1];
-      return propRow(`${nm[side]} by ${mth[meth]} in round ${rd}`,rov[k],
-        side==='a'?'var(--red)':'var(--blue)',pmk(b,k),pnote(b,k),k);}));
+  const rov=b.round_of_victory||{};
+  if(!Object.keys(rov).length) return '';
+  // One fighter's contracts together rather than interleaved by probability,
+  // and the book's own wording: DQ rides with KO/TKO, submission separate,
+  // and the distance sits in the same list as the alternative to all of them.
+  const nm={a:surname(b.a),b:surname(b.b)}, mth={ko:'KO/TKO/DQ',sub:'Submission'};
+  const rows=[];
+  for(const side of ['a','b']){
+    const ks=Object.keys(rov).filter(k=>k.split('_')[0]===side)
+      .sort((x,y)=>{const mx=x.split('_')[1],my=y.split('_')[1];
+        return mx===my?(+x.split('_r')[1])-(+y.split('_r')[1]):(mx==='ko'?-1:1);});
+    for(const k of ks){
+      const meth=k.split('_')[1], rd=k.split('_r')[1];
+      rows.push(propRow(`${nm[side]} to win by ${mth[meth]} in round ${rd}`,rov[k],
+        side==='a'?'var(--red)':'var(--blue)',pmk(b,k),pnote(b,k),k));
+    }
+    if(side==='a') rows.push(propRow('To go the distance',b.m_decision,'var(--mute)',
+      pmk(b,'decision'),pnote(b,'decision'),'decision'));
+  }
+  return group('Round and method of victory','one contract each, by fighter',rows);
 }
 function endsBeforeGroup(b){
   const ks=Object.keys(b).filter(k=>k.indexOf('p_ends_before_r')===0&&b[k]!=null).sort();
@@ -1068,9 +1086,63 @@ function startsRoundGroup(b){
 function group(title,sub,rows,priced){
   const list=(rows||[]).filter(Boolean);
   if(!list.length) return '';
-  const open=(GROUP_N++===0)?' open':'';
-  return `<details class="pgroup${priced?' priced':''}"${open}><summary class="ghead">
-    <span class="gname">${esc(title)}</span><span class="lbl">${esc(sub)}</span></summary>${list.join('')}</details>`;
+  return `<div class="pgroup${priced?' priced':''}"><div class="ghead">
+    <span class="gname">${esc(title)}</span><span class="lbl">${esc(sub)}</span></div>${list.join('')}</div>`;
+}
+
+/* One row of tabs over a single panel area, the way a sportsbook lays its
+   markets out: every category one click away instead of a long scroll. Empty
+   categories are dropped rather than shown blank. */
+function marketTabs(b,mk,rr,totals){
+  const cats=[
+    ['lines','Fight Lines',
+      group('Winner',mk?'market price shown':'no feed',[
+        propRow(`${b.a} wins`,b.p_a,'var(--red)',mk?b.p_market:null,mk?`market ${P1(b.p_market)}%`:null,'winner_a'),
+        propRow(`${b.b} wins`,b.p_b,'var(--blue)',mk?1-b.p_market:null,mk?`market ${P1(1-b.p_market)}%`:null)],mk)
+      +group('Total rounds','over/under, as a sportsbook writes it',totals)],
+    ['method','Winning Method',
+      group('Method of victory','sums to 100% across the six',[
+        propRow(`${b.a} by KO/TKO/DQ`,b.m_a_ko,'var(--red)',pmk(b,'ko_a'),pnote(b,'ko_a'),'ko_a'),
+        propRow(`${b.a} by submission`,b.m_a_sub,'var(--red)',pmk(b,'sub_a'),pnote(b,'sub_a'),'sub_a'),
+        propRow(`${b.a} by decision`,b.m_a_dec,'var(--red)',pmk(b,'dec_a'),pnote(b,'dec_a'),'dec_a'),
+        propRow(`${b.b} by KO/TKO/DQ`,b.m_b_ko,'var(--blue)',pmk(b,'ko_b'),pnote(b,'ko_b'),'ko_b'),
+        propRow(`${b.b} by submission`,b.m_b_sub,'var(--blue)',pmk(b,'sub_b'),pnote(b,'sub_b'),'sub_b'),
+        propRow(`${b.b} by decision`,b.m_b_dec,'var(--blue)',pmk(b,'dec_b'),pnote(b,'dec_b'),'dec_b')])
+      +(b.m_a_finish!=null?group('To win by finish','either route',[
+        propRow(`${b.a} by KO/TKO/DQ or submission`,b.m_a_finish,'var(--red)',pmk(b,'finish_a'),pnote(b,'finish_a'),'finish_a'),
+        propRow(`${b.b} by KO/TKO/DQ or submission`,b.m_b_finish,'var(--blue)',pmk(b,'finish_b'),pnote(b,'finish_b'),'finish_b')]):'')
+      +(b.p_a_given_finish!=null?group('Moneyline, finish or decision only','given it ends that way, who wins',[
+        propRow(`${b.a} wins, if it finishes`,b.p_a_given_finish,'var(--red)',pmk(b,'ml_finish_a'),pnote(b,'ml_finish_a'),'ml_finish_a'),
+        propRow(`${b.b} wins, if it finishes`,b.p_b_given_finish,'var(--blue)',pmk(b,'ml_finish_b'),pnote(b,'ml_finish_b'),'ml_finish_b'),
+        propRow(`${b.a} wins, if it goes to decision`,b.p_a_given_decision,'var(--red)',pmk(b,'ml_dec_a'),pnote(b,'ml_dec_a'),'ml_dec_a'),
+        propRow(`${b.b} wins, if it goes to decision`,b.p_b_given_decision,'var(--blue)',pmk(b,'ml_dec_b'),pnote(b,'ml_dec_b'),'ml_dec_b')]):'')],
+    ['strikes','Significant Strikes',
+      b.exp_minutes?group('Significant strikes','over an expected '+b.exp_minutes.toFixed(1)+' minutes',[
+        strikeRow(`${surname(b.a)} total landed`,Math.round(b.a_slpm_mid*b.exp_minutes),'nm-a'),
+        strikeRow(`${surname(b.b)} total landed`,Math.round(b.b_slpm_mid*b.exp_minutes),'nm-b'),
+        strikeRow(`${surname(b.a)} per round`,Math.round(b.a_slpm_mid*5),'nm-a'),
+        strikeRow(`${surname(b.b)} per round`,Math.round(b.b_slpm_mid*5),'nm-b'),
+        '<div class="note" style="padding:6px 11px">Point projections for now. A full distribution — how likely each total is, not just the middle — is registered as addendum 26. Books quote their own ladders, which differ by fight and by book, so the model publishes its own estimate and you compare it against whatever line you are looking at.</div>']):''],
+    ['takedowns','Takedowns',
+      group('Takedowns and knockdowns',trackLine(),[
+        propRow(`${b.a} lands a takedown`,b.a_p_takedown,'var(--red)',null,vsBase('C1','a',b.bands,b.a_p_takedown),'takedown_a'),
+        propRow(`${b.b} lands a takedown`,b.b_p_takedown,'var(--blue)',null,vsBase('C1','b',b.bands,b.b_p_takedown),'takedown_b'),
+        propRow(`${b.a} scores a knockdown`,b.a_p_knockdown,'var(--red)',null,vsBase('C3','a',b.bands,b.a_p_knockdown),'knockdown_a'),
+        propRow(`${b.b} scores a knockdown`,b.b_p_knockdown,'var(--blue)',null,vsBase('C3','b',b.bands,b.b_p_knockdown),'knockdown_b')])
+      +'<div class="note" style="padding:6px 11px">The model prices at least one takedown. A count — how many, and how likely each number is — is registered as addendum 26.</div>'],
+    ['parlays','Fight Parlays',rovGroup(b)],
+    ['props','Fight Props',
+      group('Fight to go the distance','',[
+        propRow('Go the distance',b.m_decision,'var(--mute)',pmk(b,'decision'),
+          pnote(b,'decision')||vsBase('C9','fight',b.bands,b.m_decision),'decision')])],
+    ['rounds','Round Props',
+      group('Round of finish','projection only',rr.map(([k,v])=>propRow(`Ends in round ${k}`,v,'var(--gold)',pmk(b,'end_r'+k),pnote(b,'end_r'+k),'end_r'+k)))
+      +endsBeforeGroup(b)+startsRoundGroup(b)],
+  ].filter(c=>c[2]);
+  if(!cats.length) return '';
+  return `<div class="mtabs">${cats.map((c,i)=>
+      `<button class="mtab${i?'':' on'}" data-tab="${c[0]}">${esc(c[1])}</button>`).join('')}</div>
+    ${cats.map((c,i)=>`<div class="mpanel${i?'':' on'}" data-panel="${c[0]}">${c[2]}</div>`).join('')}`;
 }
 /* One calibration line for the whole group, not a note on every row.
    Repeating "said likely -> 72% happened" under each fighter read as a claim
@@ -1123,6 +1195,10 @@ function verdictLine(b){
   return t;
 }
 
+// Stats where a LOWER number is the advantage. Age was being highlighted as
+// though older were better, which is the opposite of what the model says — it
+// is the strongest single feature and its sign is negative.
+const LOWER_BETTER=new Set(['age','sapm','layoff']);
 const STAT_ROWS=[
   ['record','Record',v=>v],['age','Age',v=>v],['reach','Reach',v=>v+'"'],
   ['elo','Career rating',v=>v],['opp_elo','Opposition faced',v=>v],
@@ -1143,7 +1219,8 @@ function tale(b){
   if(!A||!B) return '';
   const rows=STAT_ROWS.filter(([k])=>A[k]!==undefined).map(([k,lab,fmt])=>{
     const na=parseFloat(A[k]), nb=parseFloat(B[k]);
-    const cmp=(isNaN(na)||isNaN(nb))?0:(na>nb?1:na<nb?-1:0);
+    let cmp=(isNaN(na)||isNaN(nb))?0:(na>nb?1:na<nb?-1:0);
+    if(LOWER_BETTER.has(k)) cmp=-cmp;
     return `<div class="tt">
       <div class="tv ${cmp>0?'lead a':''}">${esc(String(fmt(A[k])))}</div>
       <div class="tk">${esc(lab)}</div>
@@ -1239,50 +1316,7 @@ function open_(id){
         propRow(`${b.b} wins`,b.p_b,'var(--blue)',mk?1-b.p_market:null,mk?`market ${P1(1-b.p_market)}%`:null)],mk)}
     </div>`:`<div class="card"><div class="ghead" style="background:none;border:none;padding:0 0 8px">
       <span class="gname">All markets priced</span><span class="lbl">◆ = a market price exists</span></div>
-      ${/* FIGHT LINES */''}
-      ${group('Winner',mk?'market price shown':'no feed',[
-        propRow(`${b.a} wins`,b.p_a,'var(--red)',mk?b.p_market:null,mk?`market ${P1(b.p_market)}%`:null,'winner_a'),
-        propRow(`${b.b} wins`,b.p_b,'var(--blue)',mk?1-b.p_market:null,mk?`market ${P1(1-b.p_market)}%`:null)],mk)}
-      ${group('Total rounds','over/under, as a sportsbook writes it',totals)}
-      ${/* WINNING METHOD */''}
-      ${group('Method of victory','sums to 100% across the six',[
-        propRow(`${b.a} by KO/TKO`,b.m_a_ko,'var(--red)',pmk(b,'ko_a'),pnote(b,'ko_a'),'ko_a'),
-        propRow(`${b.a} by submission`,b.m_a_sub,'var(--red)',pmk(b,'sub_a'),pnote(b,'sub_a'),'sub_a'),
-        propRow(`${b.a} by decision`,b.m_a_dec,'var(--red)',pmk(b,'dec_a'),pnote(b,'dec_a'),'dec_a'),
-        propRow(`${b.b} by KO/TKO`,b.m_b_ko,'var(--blue)',pmk(b,'ko_b'),pnote(b,'ko_b'),'ko_b'),
-        propRow(`${b.b} by submission`,b.m_b_sub,'var(--blue)',pmk(b,'sub_b'),pnote(b,'sub_b'),'sub_b'),
-        propRow(`${b.b} by decision`,b.m_b_dec,'var(--blue)',pmk(b,'dec_b'),pnote(b,'dec_b'),'dec_b')])}
-      ${b.m_a_finish!=null?group('To win by finish','either route',[
-        propRow(`${b.a} by KO/TKO or submission`,b.m_a_finish,'var(--red)',pmk(b,'finish_a'),pnote(b,'finish_a'),'finish_a'),
-        propRow(`${b.b} by KO/TKO or submission`,b.m_b_finish,'var(--blue)',pmk(b,'finish_b'),pnote(b,'finish_b'),'finish_b')]):''}
-      ${b.p_a_given_finish!=null?group('Moneyline, finish or decision only','given it ends that way, who wins',[
-        propRow(`${b.a} wins, if it finishes`,b.p_a_given_finish,'var(--red)',pmk(b,'ml_finish_a'),pnote(b,'ml_finish_a'),'ml_finish_a'),
-        propRow(`${b.b} wins, if it finishes`,b.p_b_given_finish,'var(--blue)',pmk(b,'ml_finish_b'),pnote(b,'ml_finish_b'),'ml_finish_b'),
-        propRow(`${b.a} wins, if it goes to decision`,b.p_a_given_decision,'var(--red)',pmk(b,'ml_dec_a'),pnote(b,'ml_dec_a'),'ml_dec_a'),
-        propRow(`${b.b} wins, if it goes to decision`,b.p_b_given_decision,'var(--blue)',pmk(b,'ml_dec_b'),pnote(b,'ml_dec_b'),'ml_dec_b')]):''}
-      ${/* SIGNIFICANT STRIKES */''}
-      ${b.exp_minutes?group('Significant strikes','over an expected '+b.exp_minutes.toFixed(1)+' minutes',[
-        strikeRow(`${surname(b.a)} total landed`,Math.round(b.a_slpm_mid*b.exp_minutes),'nm-a'),
-        strikeRow(`${surname(b.b)} total landed`,Math.round(b.b_slpm_mid*b.exp_minutes),'nm-b'),
-        strikeRow(`${surname(b.a)} per round`,Math.round(b.a_slpm_mid*5),'nm-a'),
-        strikeRow(`${surname(b.b)} per round`,Math.round(b.b_slpm_mid*5),'nm-b'),
-        '<div class="note" style="padding:6px 11px">Point projections. Ladder markets (60+ strikes) need a count distribution, registered as addendum 26 and not built.</div>']):''}
-      ${/* TAKEDOWNS */''}
-      ${group('Takedowns and knockdowns',trackLine(),[
-        propRow(`${b.a} lands a takedown`,b.a_p_takedown,'var(--red)',null,vsBase('C1','a',b.bands,b.a_p_takedown),'takedown_a'),
-        propRow(`${b.b} lands a takedown`,b.b_p_takedown,'var(--blue)',null,vsBase('C1','b',b.bands,b.b_p_takedown),'takedown_b'),
-        propRow(`${b.a} scores a knockdown`,b.a_p_knockdown,'var(--red)',null,vsBase('C3','a',b.bands,b.a_p_knockdown),'knockdown_a'),
-        propRow(`${b.b} scores a knockdown`,b.b_p_knockdown,'var(--blue)',null,vsBase('C3','b',b.bands,b.b_p_knockdown),'knockdown_b')])}
-      ${/* FIGHT PARLAYS */''}
-      ${rovGroup(b)}
-      ${/* FIGHT PROPS */''}
-      ${group('Fight to go the distance','',[
-        propRow('Go the distance',b.m_decision,'var(--mute)',pmk(b,'decision'),pnote(b,'decision')||vsBase('C9','fight',b.bands,b.m_decision),'decision')])}
-      ${formulaNote(b,'finish','finish','sets how likely a finish is; the method and round split still comes from the survival model and sums to it')}
-      ${/* ROUND PROPS */''}
-      ${group('Round of finish','projection only',rr.map(([k,v])=>propRow(`Ends in round ${k}`,v,'var(--gold)',pmk(b,'end_r'+k),pnote(b,'end_r'+k),'end_r'+k)))}
-      ${endsBeforeGroup(b)}
-      ${startsRoundGroup(b)}
+      ${marketTabs(b,mk,rr,totals)}
       ${formulaNote(b,'knockdown','knockdown','a three-input formula matched the 46-input model it replaced, so the one you can check won')}
     </div>`}
     ${b.bands?`<div class="card"><div class="ghead" style="background:none;border:none;padding:0 0 8px">
@@ -1310,6 +1344,11 @@ function open_(id){
       <div class="note" style="margin-top:6px">A single fight's stat line is mostly noise, so these
         are ranges. The model explains ~11% of the variance but ranks fights better than a career average.</div>
     </div>`}`;
+  document.querySelectorAll('.mtab').forEach(t=>t.addEventListener('click',()=>{
+    document.querySelectorAll('.mtab').forEach(x=>x.classList.toggle('on',x===t));
+    document.querySelectorAll('.mpanel').forEach(p=>
+      p.classList.toggle('on',p.getAttribute('data-panel')===t.getAttribute('data-tab')));
+  }));
   document.getElementById('xb').addEventListener('click',close_);
   document.getElementById('draw').classList.add('on');
   document.getElementById('draw').setAttribute('aria-hidden','false');

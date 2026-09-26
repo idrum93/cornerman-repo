@@ -1888,6 +1888,24 @@ one and a fighter who stands and bangs are not the same process.
 
 "Most significant strikes" follows from the same two distributions.
 
+## Amendment (2026-09-25): the model publishes a distribution, not the book's rungs
+
+The first version of this addendum framed the target as the ladder a book
+quotes — 55+, 60+, 65+. That was backwards. Ladders differ by fight and by
+book, set by whoever is pricing that bout, so fitting to them makes this
+model's output a function of someone else's pricing decisions, and a rung that
+exists at one book and not another would change what we publish.
+
+The model instead produces a **count distribution** for each fighter, and
+publishes it on its own terms: the expected total, a range, and the
+probability of clearing any threshold a reader cares to name. A reader with a
+line in front of them reads their own number off it. Nothing in the fit, the
+evaluation or the display refers to a book's ladder.
+
+This also makes the evaluation cleaner: calibration of the whole distribution
+is the thing to measure, rather than accuracy at three arbitrary thresholds
+that move between fights.
+
 ## Evaluation and the bar
 
 Graded on held-out fights against two baselines:
@@ -1895,8 +1913,10 @@ Graded on held-out fights against two baselines:
     C1  the fighter's own career average rate x the median fight length
     C2  the league average for that division and scheduled length
 
-Reported as Brier for the ladder thresholds and calibration of the implied
-distribution. **Published only if it beats both**, and calibration slope falls
+Reported as calibration of the whole distribution — the share of fights whose
+actual count falls below each predicted quantile, which should track the
+quantile itself — plus Brier at a few fixed thresholds chosen by the model, not
+by a book. **Published only if it beats both**, and calibration slope falls
 between 0.8 and 1.2 — a count model that is sharp but miscalibrated is worse
 than useless on a ladder market, where every rung is priced off the tail.
 
