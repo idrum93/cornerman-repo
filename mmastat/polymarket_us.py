@@ -267,7 +267,10 @@ def moneylines(rows, max_spread=0.06, min_volume=200.0, require_book=True):
             # every one of them — "no card-keyed venues to record".
             if r["volume"] is not None and r["volume"] < min_volume:
                 continue
-            p = bk["mid"]
+            # The listed price, not the mid of the book: the exchange shows the
+            # listed price on its own page, so using the mid made our figure
+            # disagree with the link beside it. The book still gates a wide
+            # market; it no longer sets the number.
         if not (RESOLVED_EPS < p < 1 - RESOLVED_EPS):
             continue
         # link to the EVENT page: it carries every market for the bout, and a
@@ -435,7 +438,7 @@ def map_props(rows, bouts, max_spread=0.10, min_volume=100.0):
         if bk:
             if bk["spread"] > max_spread:
                 continue
-            p = bk["mid"] if yes == 0 else 1 - bk["mid"]
+            # listed price here too, for the same reason
         if r["volume"] is not None and r["volume"] < min_volume:
             continue
         if not (RESOLVED_EPS < p < 1 - RESOLVED_EPS):

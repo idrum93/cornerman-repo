@@ -1111,7 +1111,14 @@ function marketTabs(b,mk,rr,totals){
         strikeRow(`${surname(b.b)} per round`,Math.round((b.b_strikes_rate??b.b_slpm_mid)*5),'nm-b'),
         b.a_takedowns_rate!=null?strikeRow(`${surname(b.a)} takedowns landed`,(b.a_takedowns_rate*b.exp_minutes/15).toFixed(1),'nm-a'):'',
         b.b_takedowns_rate!=null?strikeRow(`${surname(b.b)} takedowns landed`,(b.b_takedowns_rate*b.exp_minutes/15).toFixed(1),'nm-b'):'',
-        '<div class="note" style="padding:6px 11px">Expected counts, from a model of the mean rate — beaten out against each fighter\'s own career rate and the league average on held-out fights (addendum 26). Books quote their own ladders, which differ by fight and by book, so the model publishes its estimate and you read your line against it. How likely each exact total is, rather than the average, is still to come.</div>']):'')
+        '<div class="note" style="padding:6px 11px">Expected counts, from a model of the mean rate — beaten out against each fighter\'s own career rate and the league average on held-out fights (addendum 26). How likely each exact total is, rather than the average, is still to come.</div>',
+        rangeBlock('Significant strikes','per min',
+          [[b.a,b.a_slpm_lo,b.a_slpm_mid,b.a_slpm_hi,'var(--red)'],
+           [b.b,b.b_slpm_lo,b.b_slpm_mid,b.b_slpm_hi,'var(--blue)']]),
+        rangeBlock('Control time','sec per min',
+          [[b.a,b.a_ctrl_lo,b.a_ctrl_mid,b.a_ctrl_hi,'var(--red)'],
+           [b.b,b.b_ctrl_lo,b.b_ctrl_mid,b.b_ctrl_hi,'var(--blue)']]),
+        '<div class="note" style="padding:6px 11px">A single fight\'s stat line is mostly noise, so the spread is an 80% range. The middle of that range is a median and the count above is a mean — they answer different questions, which is why they differ.</div>']):'')
 
       +formulaNote(b,'knockdown','knockdown','a three-input formula matched the 46-input model it replaced, so the one you can check won')],
     ['parlays','Fight Parlays',rovGroup(b)],
@@ -1180,6 +1187,18 @@ function verdictLine(b){
 // though older were better, which is the opposite of what the model says — it
 // is the strongest single feature and its sign is negative.
 const LOWER_BETTER=new Set(['age','sapm','layoff','kd_against15','ko_loss']);
+// No leader on these: "better record" is not well defined, and comparing
+// "10-6" with "9-4" on wins alone crowned the lower win rate.
+const NO_LEADER=new Set(['stance']);
+/* "Better record" means the better win RATE, not more wins. Tested on 4,167
+   held-out bouts: win rate predicts the winner at AUC 0.601, wins-minus-losses
+   at 0.547 — 20-10 is not better than 9-1. Draws count as half. */
+function winRate(rec){
+  const m=String(rec||'').match(/(\d+)\s*-\s*(\d+)(?:\s*-\s*(\d+))?/);
+  if(!m) return NaN;
+  const w=+m[1], l=+m[2], d=+(m[3]||0);
+  return (w+1+d/2)/(w+l+d+2);     // smoothed, so 1-0 does not outrank 9-1
+}
 const STAT_ROWS=[
   ['record','Record',v=>v],['age','Age',v=>v],['reach','Reach',v=>v+'"'],
   ['elo','Career rating',v=>v],['opp_elo','Opposition faced',v=>v],
@@ -1206,7 +1225,8 @@ function tale(b){
     // compare what is displayed: 0.401 and 0.404 both read "40%", and
     // highlighting one of them as the leader is noise presented as a finding
     const fa=String(fmt(A[k])), fb=String(fmt(B[k]));
-    let cmp=(isNaN(na)||isNaN(nb)||fa===fb)?0:(na>nb?1:na<nb?-1:0);
+    if(k==='record'){ na=winRate(A[k]); nb=winRate(B[k]); }
+    let cmp=(isNaN(na)||isNaN(nb)||fa===fb||NO_LEADER.has(k))?0:(na>nb?1:na<nb?-1:0);
     if(LOWER_BETTER.has(k)) cmp=-cmp;
     return `<div class="tt">
       <div class="tv ${cmp>0?'lead a':''}">${esc(String(fmt(A[k])))}</div>
@@ -1308,33 +1328,18 @@ function open_(id){
     ${b.bands?`<div class="card"><div class="ghead" style="background:none;border:none;padding:0 0 8px">
       <span class="gname">Where this bout sits</span><span class="lbl">markers show each corner</span></div>
       ${baseRatePanel(b.bands,b)}</div>`:''}
-    ${b.thin?'':`<div class="card"><div class="ghead" style="background:none;border:none;padding:0 0 8px">
-      <span class="gname">Projected output</span><span class="lbl">80% range</span></div>
-      ${b.exp_minutes?`<div class="prow"><span>Projected significant strikes landed</span>
-        <span class="mono" style="color:var(--mute)">
-          <b class="nm-a">${esc(surname(b.a))} ${Math.round(b.a_slpm_mid*b.exp_minutes)}</b> ·
-          <b class="nm-b">${esc(surname(b.b))} ${Math.round(b.b_slpm_mid*b.exp_minutes)}</b></span></div>
-        <div class="prow"><span>Per round</span>
-        <span class="mono" style="color:var(--mute)">
-          <b class="nm-a">${(b.a_slpm_mid*5).toFixed(0)}</b> ·
-          <b class="nm-b">${(b.b_slpm_mid*5).toFixed(0)}</b></span></div>
-        <div class="note" style="margin:4px 0 8px">Over an expected ${b.exp_minutes.toFixed(1)} minutes.
-          Ladder markets ("60+ strikes") need a count distribution, which is registered as addendum 26
-          and not built yet — these are point projections, not probabilities.</div>`:''}
-      ${rangeBlock('Significant strikes','per min',
-          [[b.a,b.a_slpm_lo,b.a_slpm_mid,b.a_slpm_hi,'var(--red)'],
-           [b.b,b.b_slpm_lo,b.b_slpm_mid,b.b_slpm_hi,'var(--blue)']])}
-      ${rangeBlock('Control time','sec per min',
-          [[b.a,b.a_ctrl_lo,b.a_ctrl_mid,b.a_ctrl_hi,'var(--red)'],
-           [b.b,b.b_ctrl_lo,b.b_ctrl_mid,b.b_ctrl_hi,'var(--blue)']])}
-      <div class="note" style="margin-top:6px">A single fight's stat line is mostly noise, so these
-        are ranges. The model explains ~11% of the variance but ranks fights better than a career average.</div>
-    </div>`}`;
-  document.querySelectorAll('.mtab').forEach(t=>t.addEventListener('click',()=>{
-    document.querySelectorAll('.mtab').forEach(x=>x.classList.toggle('on',x===t));
-    document.querySelectorAll('.mpanel').forEach(p=>
-      p.classList.toggle('on',p.getAttribute('data-panel')===t.getAttribute('data-tab')));
-  }));
+    `;
+  // Scoped to the tab's own group. This was global, so opening a market tab
+  // switched off the base-rate panels too — the "where this bout sits" section
+  // looked empty until you clicked one of its own tabs.
+  document.querySelectorAll('.mtabs').forEach(bar=>{
+    const panels=[]; let n=bar.nextElementSibling;
+    while(n&&n.classList&&n.classList.contains('mpanel')){ panels.push(n); n=n.nextElementSibling; }
+    bar.querySelectorAll('.mtab').forEach(t=>t.addEventListener('click',()=>{
+      bar.querySelectorAll('.mtab').forEach(x=>x.classList.toggle('on',x===t));
+      panels.forEach(p=>p.classList.toggle('on',p.getAttribute('data-panel')===t.getAttribute('data-tab')));
+    }));
+  });
   document.getElementById('xb').addEventListener('click',close_);
   document.getElementById('draw').classList.add('on');
   document.getElementById('draw').setAttribute('aria-hidden','false');

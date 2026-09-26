@@ -2123,3 +2123,84 @@ means over a career of about six fights, so most of what it captures is the
 sampling error of the earlier average.
 
 That closes the last untested item on either proposed feature list.
+
+---
+
+# Addendum 28: confidence by evidence (2026-09-26)
+
+Registered before fitting. Prompted by a bout where the model said 52/48 and
+the market said 26/74, on two fighters with three and four UFC bouts between
+them.
+
+Measured first, on held-out fights with odds:
+
+| | n | model log loss | market |
+|---|---|---|---|
+| all bouts | 854 | .6181 | .5802 |
+| disagree by 20+ points | 156 | .6923 | .5955 |
+| thin records (4 or fewer bouts) | 514 | .6256 | .5773 |
+| **thin AND disagree by 20+** | **117** | **.6959** | **.5762** |
+
+On that last group the model called 55% of winners against the market's 72%,
+and **.6959 is worse than a coin flip at .6931**. That is not only missing
+information — it is overconfidence, and overconfidence is correctable without
+any new data.
+
+## The correction
+
+Shrink the published probability toward even money by an amount that depends
+on how much evidence stands behind it:
+
+    logit(p_shown) = lambda(n) x logit(p_model)
+
+where n is the thinner record in the bout and lambda is fitted on the training
+window only, as a step function over the bands n<=2, 3-4, 5-9, 10+. A lambda
+below 1 pulls toward 50/50; the fit is free to return 1, which would mean the
+model is already calibrated at that evidence level.
+
+## The bar, fixed now
+
+Adopted only if held-out log loss improves **overall** and in the thin band,
+with a bootstrap interval excluding zero. Accuracy must not fall: shrinking
+toward 50% cannot change which side is picked, so any accuracy change would
+mean an error in the implementation rather than a finding.
+
+This does not close the information gap — the market knows things about
+prospects the corpus does not record. It stops the model overstating what it
+knows, which is the part that is ours to fix. The information half stays where
+it is: addendum 18, pre-UFC records, deferred.
+
+## Addendum 28: RESULT (2026-09-26)
+
+**Not adopted.** The correction makes things slightly worse everywhere.
+
+| | n | before | after | gain |
+|---|---|---|---|---|
+| all held-out bouts | 1216 | .6271 | .6283 | **-0.0012** |
+| thin records (4 or fewer) | 726 | .6312 | .6339 | **-0.0027** |
+| 10+ prior bouts | 169 | .6272 | .6296 | -0.0023 |
+
+Fitted lambda by band: 0.86 for two or fewer prior bouts, 0.86 for 3-4, 1.12
+for 5-9, 0.92 for 10+. Accuracy unchanged at 65.71%, as it must be — shrinking
+toward even money cannot change which side is picked, which confirms the
+implementation.
+
+### Why the earlier number was misleading
+
+The .6959 that prompted this was measured on **117 bouts selected for
+disagreeing with the market by 20 points or more**. Conditioning on
+disagreement selects the bouts where the model is most likely wrong, so the
+loss on that subset is not evidence that the model is overconfident in
+general — it is arithmetic. Fitted across all evidence levels, the shrinkage
+factors come out near 1 and the non-monotone pattern (0.86, 0.86, 1.12, 0.92)
+is what noise looks like, not a confidence curve.
+
+So the model is not systematically overconfident by evidence level. On thin
+records it is simply less informed than the market, and that is an information
+gap, not a calibration one. The only honest route to closing it is data the
+corpus does not hold — a fighter's record before the UFC, which is addendum 18
+and stays deferred.
+
+Recorded because the selection effect is worth remembering: any subset chosen
+for disagreeing with a better forecaster will make the worse forecaster look
+badly calibrated.
