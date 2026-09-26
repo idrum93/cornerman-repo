@@ -35,7 +35,11 @@ PAUSE = 0.4
 # bare "PROP" land in the same place. The live feed returned everything as
 # "other" on the first run, which is what a strict lookup does when the value
 # is written a different way.
-TYPE_WORDS = {"moneyline": "winner", "total": "total", "prop": "prop",
+# The live feed says "ufc_fight_winner", "ufc_round_of_finish" and the like —
+# nothing resembling the documented SPORTS_MARKET_TYPE_* names.
+TYPE_WORDS = {"moneyline": "winner", "fight_winner": "winner", "winner": "winner",
+              "total": "total", "round": "prop", "method": "prop", "prop": "prop",
+              "distance": "prop", "finish": "prop", "victory": "prop",
               "spread": "spread", "future": "future", "outright": "future"}
 
 
@@ -121,6 +125,13 @@ def _sides(m):
     return [], "none"
 
 
+def _num(x):
+    try:
+        return float(x)
+    except (TypeError, ValueError):
+        return None
+
+
 def _quote(m):
     def val(x):
         try:
@@ -134,7 +145,9 @@ def _quote(m):
             "mid": round((bid + ask) / 2, 5)}
 
 
-EVENT_PATHS = ["/v2/events/slug/{slug}", "/v2/events/{slug}", "/events/slug/{slug}"]
+EVENT_PATHS = ["/v2/events/slug/{slug}", "/v2/events/{slug}", "/events/slug/{slug}",
+               "/v2/leagues/ufc/events/{slug}", "/v1/events/slug/{slug}",
+               "/v2/events?slug={slug}", "/v2/markets?event_slug={slug}"]
 _EVENT_PATH = {"ok": None}
 
 
@@ -148,15 +161,22 @@ def fetch_event(slug):
     hard-code it instead of probing.
     """
     paths = ([_EVENT_PATH["ok"]] if _EVENT_PATH["ok"] else EVENT_PATHS)
+    tried = []
     for path in paths:
         try:
             j = _get(path.format(slug=slug))
-        except Exception:
+        except Exception as e:
+            tried.append(f"{path} -> {str(e)[:48]}")
             continue
+        if isinstance(j, list):
+            j = j[0] if j else {}
         ev = j.get("event") or (j if j.get("markets") is not None else None)
         if ev and ev.get("markets"):
             _EVENT_PATH["ok"] = path
             return ev
+        tried.append(f"{path} -> responded, no markets")
+    if "tried" not in _EVENT_PATH:
+        _EVENT_PATH["tried"] = tried
     return None
 
 
@@ -175,7 +195,10 @@ def expand(events, want_slugs=None, verbose=True):
                 continue
         out.append(e)
     if verbose:
-        print(f"polymarket us: expanded {fetched} events via {_EVENT_PATH['ok'] or 'no working path'}")
+        print(f"polymarket us: expanded {fetched} events via "
+              f"{_EVENT_PATH['ok'] or 'no working path'}")
+        for t in (_EVENT_PATH.get("tried") or [])[:8]:
+            print(f"    {t}")
     return out
 
 
@@ -198,7 +221,9 @@ def parse(events):
                 "question": m.get("question") or m.get("title") or "",
                 "kind": market_kind(m.get("sportsMarketType") or m.get("marketType")
                                     or m.get("type")),
-                "line": m.get("line"), "volume": m.get("volume"),
+                "line": m.get("line"),
+                "volume": _num(m.get("volume") if m.get("volume") is not None
+                               else m.get("volumeNum")),
                 "sides": sides, "shape": shape, "book": _quote(m)})
     return rows
 
@@ -237,7 +262,10 @@ def moneylines(rows, max_spread=0.06, min_volume=200.0, require_book=True):
                 continue
             if bk["spread"] > max_spread:
                 continue
-            if (r["volume"] or 0) < min_volume:
+            # Absent volume is not low volume. These markets arrived with a
+            # two-sided book and no volume field at all, and the gate rejected
+            # every one of them — "no card-keyed venues to record".
+            if r["volume"] is not None and r["volume"] < min_volume:
                 continue
             p = bk["mid"]
         if not (RESOLVED_EPS < p < 1 - RESOLVED_EPS):
@@ -387,7 +415,7 @@ def map_props(rows, bouts, max_spread=0.10, min_volume=100.0):
             if bk["spread"] > max_spread:
                 continue
             p = bk["mid"] if yes == 0 else 1 - bk["mid"]
-        if (r["volume"] or 0) < min_volume:
+        if r["volume"] is not None and r["volume"] < min_volume:
             continue
         if not (RESOLVED_EPS < p < 1 - RESOLVED_EPS):
             continue
