@@ -264,7 +264,6 @@ REQUIRED_SITE_FEATURES = {
     "LOWER_BETTER": "age and strikes absorbed read the right way round",
     "function marketTabs": "market categories as one row of tabs",
     "LOWER_BETTER": "age and strikes absorbed read the right way round",
-    "function otherMarkets": "links to Polymarket markets the model does not price",
     "divShort(b.weight_class)": "weight class on each tile",
     "class=\"zone ": "separated upcoming / results / history zones",
 }

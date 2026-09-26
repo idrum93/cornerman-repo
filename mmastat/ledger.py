@@ -447,7 +447,7 @@ def capture_props(card_path="data/upcoming.txt", payload_path="site/predictions.
     feed we can reach quotes method or round markets, and Polymarket may.
     Whether it does is answered by running this, not by arguing about it.
     """
-    from .polymarket import fetch_events, parse_events, map_props, unmatched
+    from .polymarket import fetch_events, parse_events, map_props
     from .upcoming import parse_card
     meta, bouts = parse_card(card_path)
     ev_date = pd.to_datetime(meta.get("date"), errors="coerce")
@@ -464,18 +464,12 @@ def capture_props(card_path="data/upcoming.txt", payload_path="site/predictions.
     try:
         _rows = parse_events(fetch_events())
         found = map_props(_rows, bouts)
-        extra = unmatched(_rows, bouts)
         try:
             from . import polymarket_us as pus
             us_rows = pus.parse(pus.expand(pus.fetch_events()))
             if verbose:
                 print(f"polymarket us props: {pus.describe(us_rows)}")
             found += pus.map_props(us_rows, bouts)
-            # the unpriced list comes from the US exchange too, so every link
-            # on the site resolves on the same site the prices came from
-            us_extra = pus.unmatched(us_rows, bouts)
-            if us_extra:
-                extra = us_extra
         except Exception as e:
             if verbose:
                 print(f"props: polymarket us unavailable ({e})")
@@ -497,13 +491,10 @@ def capture_props(card_path="data/upcoming.txt", payload_path="site/predictions.
                          spread=x["meta"].get("spread"), depth_usd=x["meta"].get("depth_usd"),
                          slug=x["meta"].get("slug"),
                          question=x["meta"].get("question"), settled=False))
-    # Markets the model does not price are display-only and re-fetched every
-    # run, so they go to a file that is overwritten — never appended to the
-    # ledger, which exists for claims that get graded.
-    Path(OTHER_FILE).parent.mkdir(parents=True, exist_ok=True)
-    Path(OTHER_FILE).write_text(json.dumps(
-        {"event_date": meta.get("date"), "fetched_utc": ts, "markets": extra[:20]},
-        indent=1), encoding="utf-8")
+    # The list of markets the model does NOT price has been removed. It was
+    # display-only, it needed its own matching logic to stay accurate, and that
+    # logic was wrong three times running. Prices we can place against a
+    # projection appear in the drawer; everything else is simply not our claim.
     if rows:
         f = prop_month_file()
         Path(f).parent.mkdir(parents=True, exist_ok=True)
@@ -519,8 +510,7 @@ def capture_props(card_path="data/upcoming.txt", payload_path="site/predictions.
                 fh.write(json.dumps(r, sort_keys=True) + "\n")
     if verbose:
         got = sorted({x["market"] for x in found})
-        print(f"polymarket: {len(_rows)} markets on the board, {len(extra)} naming a "
-              f"fighter on this card")
+        print(f"polymarket: {len(_rows)} markets on the board")
         print(f"props: {len(found)} quoted for this card "
               f"({', '.join(got) if got else 'none'}), {len(rows)} new rows")
     return len(rows)

@@ -342,7 +342,12 @@ def map_props(rows, bouts, max_spread=0.10, min_volume=100.0):
             continue
         if r["kind"] not in ("prop", "total", "other"):
             continue
-        q = _nm(r["question"])
+        # The subject, not the whole question. Every question repeats the bout
+        # ("... in Vieira vs Bryczek"), so both surnames appear in all of them
+        # and side detection gave up — which sent "Vieira win by decision" to
+        # the fight-level decision key, overwriting the real price.
+        q = _nm(re.sub(r"\bin\s+[^?]*?\bvs\.?\b[^?]*", " ", r["question"], flags=re.I))
+        q_full = _nm(r["question"])
         hit = None
         if r.get("event_slug") in by_event:
             a0, b0 = by_event[r["event_slug"]]
@@ -357,10 +362,21 @@ def map_props(rows, bouts, max_spread=0.10, min_volume=100.0):
                 hit = (a, b, "a"); break
             if lb in q:
                 hit = (a, b, "b"); break
+            # the bout was only in the stripped tail: still this fight, no side
+            if la in q_full and lb in q_full:
+                hit = (a, b, None); break
         if not hit:
             continue
         a, b, side = hit
         key = None
+        # "Will X win in round 2" is a per-fighter claim and must not be filed
+        # as the fight-level "ends in round 2". The model does price it — it is
+        # the sum of that fighter's KO and submission chances in that round —
+        # but there is no key for it yet, so it is skipped rather than
+        # mis-assigned.
+        if side is not None and ROUND_RE.search(r["question"]) \
+                and not re.search(r"ends? before round", r["question"], re.I):
+            continue
         # "Fight ends before Round 4 begins" — a cumulative round contract
         mb = re.search(r"ends? before round\s*([2-5])", r["question"], re.I)
         if mb:
@@ -388,6 +404,10 @@ def map_props(rows, bouts, max_spread=0.10, min_volume=100.0):
                 yes_is_over = any("over" in _nm(n) for n, _ in r["sides"])
                 if not yes_is_over:
                     key = None
+        # A per-fighter claim whose subject could not be identified is
+        # ambiguous, and must never fall through to a fight-level key.
+        if not key and side is None and re.search(r"\bwins?\s+by\b", r["question"], re.I):
+            continue
         if not key:
             # older phrasings, only reached when nothing above matched — this
             # chain used to run unguarded and overwrite every key set above,

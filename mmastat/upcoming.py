@@ -700,12 +700,11 @@ def predict_card(path, fights, fighters, verbose=True):
     # quotes method or round markets, so these are the only prices most of
     # these projections will ever be compared against.
     try:
-        from .ledger import latest_prop_prices, unpriced_markets
+        from .ledger import latest_prop_prices
         _pp = latest_prop_prices(meta.get("date"))
         for r in rows:
             if r["bout"] in _pp:
                 r["prop_market"] = _pp[r["bout"]]
-        OTHER["list"] = unpriced_markets(meta.get("date"))
     except Exception as e:
         print(f"note: prop prices unavailable ({e})")
 
@@ -896,10 +895,27 @@ def _grade_bout(b, row, a_is_red, base):
             continue
         binrow(f"Ends before round {n}", v, bool(finish and rnd < n),
                base.get("ends_before", {}).get((n_rounds, n)))
-    binrow(f"{a} lands a takedown", b.get("a_p_takedown"), a_td, base["td"])
-    binrow(f"{bb} lands a takedown", b.get("b_p_takedown"), b_td, base["td"])
-    binrow(f"{a} scores a knockdown", b.get("a_p_knockdown"), a_kd, base["kd"])
-    binrow(f"{bb} scores a knockdown", b.get("b_p_knockdown"), b_kd, base["kd"])
+    # Congruent with the upcoming card: the same families, in the same order.
+    # "Lands a takedown" and "scores a knockdown" are gone from both, because
+    # no book quotes them — the scorecard still grades them for the track
+    # record, they are simply not presented as contracts.
+    for n in range(2, n_rounds + 1):
+        v = b.get(f"p_starts_r{n}")
+        if v is not None:
+            binrow(f"Fight starts round {n}", v, bool(not finish or rnd >= n),
+                   1 - (base.get("ends_before", {}).get((n_rounds, n)) or 0))
+    a_won = row.winner == "r" if a_is_red else row.winner == "b"
+    ko, sub, dec = row.method == "KO/TKO", row.method == "SUB", row.method == "DEC"
+    for who, nm, won in (("a", a, a_won), ("b", bb, not a_won)):
+        binrow(f"{nm} by KO/TKO/DQ", b.get(f"m_{who}_ko"), bool(won and ko), None)
+        binrow(f"{nm} by submission", b.get(f"m_{who}_sub"), bool(won and sub), None)
+        binrow(f"{nm} by decision", b.get(f"m_{who}_dec"), bool(won and dec), None)
+        binrow(f"{nm} by KO/TKO/DQ or submission", b.get(f"m_{who}_finish"),
+               bool(won and finish), None)
+    for n in range(1, n_rounds + 1):
+        v = b.get(f"p_end_r{n}")
+        if v is not None:
+            binrow(f"Ends in round {n}", v, bool(finish and rnd == n), None)
 
     props = [r for r in rep if r["kind"] == "prop"]
     p_win_model = b["p_a"] if a_won else 1 - b["p_a"]
@@ -1038,7 +1054,6 @@ def write_json(out, skipped, unresolved, path="site/predictions.json",
         "market_source": MARKET_SRC.get("src"),
         "track_record": TRACK.get("rec"),
         "formulas": FORMULA_INFO,
-        "polymarket_other": OTHER.get("list", []),
     }
     Path(path).parent.mkdir(parents=True, exist_ok=True)
     Path(path).write_text(json.dumps(clean(payload), indent=1, allow_nan=False),
