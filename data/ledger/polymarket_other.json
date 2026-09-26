@@ -1,6 +1,6 @@
 {
  "event_date": "2026-09-26",
- "fetched_utc": "2026-09-26T03:39:56+00:00",
+ "fetched_utc": "2026-09-26T04:08:45+00:00",
  "markets": [
   {
    "question": "Will Vanessa Demopoulos vs. Yazmin Jauregui end by decision?",
@@ -33,17 +33,7 @@
    "kind": "prop"
   },
   {
-   "question": "Will Vanessa Demopoulos win in Round 1?",
-   "slug": "ufc-vandem-yazjau-2026-09-26",
-   "kind": "prop"
-  },
-  {
    "question": "Will Vanessa Demopoulos vs. Yazmin Jauregui end in a draw?",
-   "slug": "ufc-vandem-yazjau-2026-09-26",
-   "kind": "prop"
-  },
-  {
-   "question": "Will Vanessa Demopoulos win in Round 3?",
    "slug": "ufc-vandem-yazjau-2026-09-26",
    "kind": "prop"
   },
@@ -63,7 +53,17 @@
    "kind": "prop"
   },
   {
+   "question": "Will Vanessa Demopoulos win in Round 1?",
+   "slug": "ufc-vandem-yazjau-2026-09-26",
+   "kind": "prop"
+  },
+  {
    "question": "Will Vanessa Demopoulos win in Round 2?",
+   "slug": "ufc-vandem-yazjau-2026-09-26",
+   "kind": "prop"
+  },
+  {
+   "question": "Will Vanessa Demopoulos win in Round 3?",
    "slug": "ufc-vandem-yazjau-2026-09-26",
    "kind": "prop"
   },
@@ -78,17 +78,17 @@
    "kind": "prop"
   },
   {
-   "question": "Will Yazmin Jauregui win by submission in Vanessa Demopoulos vs Yazmin Jauregui",
-   "slug": "ufc-vandem-yazjau-2026-09-26",
-   "kind": "prop"
-  },
-  {
    "question": "Will Vanessa Demopoulos win by KO, TKO, or DQ in Vanessa Demopoulos vs Yazmin Jauregui",
    "slug": "ufc-vandem-yazjau-2026-09-26",
    "kind": "prop"
   },
   {
    "question": "Will Vanessa Demopoulos win by submission in Vanessa Demopoulos vs Yazmin Jauregui",
+   "slug": "ufc-vandem-yazjau-2026-09-26",
+   "kind": "prop"
+  },
+  {
+   "question": "Will Yazmin Jauregui win by submission in Vanessa Demopoulos vs Yazmin Jauregui",
    "slug": "ufc-vandem-yazjau-2026-09-26",
    "kind": "prop"
   },
