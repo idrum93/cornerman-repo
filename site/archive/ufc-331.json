@@ -2,7 +2,7 @@
  "event": "UFC 331",
  "date": "2026-09-19",
  "venue": "Crypto.com Arena, Los Angeles",
- "generated_utc": "2026-09-26T16:37:39.414695+00:00",
+ "generated_utc": "2026-09-26T18:02:41.767214+00:00",
  "bouts": [
   {
    "bout": "Joshua Van vs. Alexandre Pantoja",
@@ -34,7 +34,8 @@
      "ctrl": 0.084,
      "kd15": 0.43,
      "kd_against15": 0.15,
-     "ko_loss": 0.157
+     "ko_loss": 0.157,
+     "avg_time": 13.18
     },
     "b": {
      "record": "14-4",
@@ -55,7 +56,8 @@
      "ctrl": 0.313,
      "kd15": 0.28,
      "kd_against15": 0.1,
-     "ko_loss": 0.1
+     "ko_loss": 0.1,
+     "avg_time": 11.93
     }
    },
    "record_split": {
@@ -318,7 +320,8 @@
      "ctrl": 0.401,
      "kd15": 0.3,
      "kd_against15": 0.05,
-     "ko_loss": 0.075
+     "ko_loss": 0.075,
+     "avg_time": 12.26
     },
     "b": {
      "record": "5-1",
@@ -339,7 +342,8 @@
      "ctrl": 0.079,
      "kd15": 1.34,
      "kd_against15": 0.12,
-     "ko_loss": 0.12
+     "ko_loss": 0.12,
+     "avg_time": 7.29
     }
    },
    "record_split": {
@@ -588,7 +592,8 @@
      "ctrl": 0.144,
      "kd15": 0.15,
      "kd_against15": 0.4,
-     "ko_loss": 0.2
+     "ko_loss": 0.2,
+     "avg_time": null
     },
     "b": {
      "record": "6-3",
@@ -609,7 +614,8 @@
      "ctrl": 0.185,
      "kd15": 0.74,
      "kd_against15": 0.48,
-     "ko_loss": 0.229
+     "ko_loss": 0.229,
+     "avg_time": null
     }
    },
    "record_split": {
@@ -836,7 +842,8 @@
      "ctrl": 0.216,
      "kd15": 0.18,
      "kd_against15": 0.32,
-     "ko_loss": 0.175
+     "ko_loss": 0.175,
+     "avg_time": 9.4
     },
     "b": {
      "record": "8-5",
@@ -857,7 +864,8 @@
      "ctrl": 0.093,
      "kd15": 0.38,
      "kd_against15": 0.17,
-     "ko_loss": 0.178
+     "ko_loss": 0.178,
+     "avg_time": 13.81
     }
    },
    "record_split": {
@@ -1106,7 +1114,8 @@
      "ctrl": 0.176,
      "kd15": 2.07,
      "kd_against15": 0.72,
-     "ko_loss": 0.171
+     "ko_loss": 0.171,
+     "avg_time": 1.12
     },
     "b": {
      "record": "11-6",
@@ -1127,7 +1136,8 @@
      "ctrl": 0.228,
      "kd15": 0.63,
      "kd_against15": 0.47,
-     "ko_loss": 0.236
+     "ko_loss": 0.236,
+     "avg_time": 8.32
     }
    },
    "record_split": {
@@ -1368,7 +1378,8 @@
      "ctrl": 0.164,
      "kd15": 0.74,
      "kd_against15": 0.27,
-     "ko_loss": 0.24
+     "ko_loss": 0.24,
+     "avg_time": 2.52
     },
     "b": {
      "record": "0-2",
@@ -1389,7 +1400,8 @@
      "ctrl": 0.112,
      "kd15": 0.19,
      "kd_against15": 0.19,
-     "ko_loss": 0.533
+     "ko_loss": 0.533,
+     "avg_time": 8.03
     }
    },
    "record_split": {
@@ -1605,7 +1617,8 @@
      "ctrl": 0.118,
      "kd15": 0.52,
      "kd_against15": 0.18,
-     "ko_loss": 0.06
+     "ko_loss": 0.06,
+     "avg_time": 11.84
     },
     "b": {
      "record": "15-11",
@@ -1626,7 +1639,8 @@
      "ctrl": 0.09,
      "kd15": 0.53,
      "kd_against15": 0.06,
-     "ko_loss": 0.04
+     "ko_loss": 0.04,
+     "avg_time": 13.6
     }
    },
    "record_split": {
@@ -1878,7 +1892,8 @@
      "ctrl": 0.13,
      "kd15": 0.73,
      "kd_against15": 0.56,
-     "ko_loss": 0.191
+     "ko_loss": 0.191,
+     "avg_time": 8.09
     },
     "b": {
      "record": "1-1",
@@ -1899,7 +1914,8 @@
      "ctrl": 0.09,
      "kd15": 0.53,
      "kd_against15": 0.2,
-     "ko_loss": 0.2
+     "ko_loss": 0.2,
+     "avg_time": 7.65
     }
    },
    "record_split": {
@@ -2135,7 +2151,8 @@
      "ctrl": 0.172,
      "kd15": 0.78,
      "kd_against15": 0.29,
-     "ko_loss": 0.24
+     "ko_loss": 0.24,
+     "avg_time": 0.68
     },
     "b": {
      "record": "1-2",
@@ -2156,7 +2173,8 @@
      "ctrl": 0.097,
      "kd15": 0.17,
      "kd_against15": 0.73,
-     "ko_loss": 0.457
+     "ko_loss": 0.457,
+     "avg_time": 7.86
     }
    },
    "record_split": {
@@ -2367,7 +2385,8 @@
      "ctrl": 0.17,
      "kd15": 0.73,
      "kd_against15": 0.06,
-     "ko_loss": 0.221
+     "ko_loss": 0.221,
+     "avg_time": 8.37
     },
     "b": {
      "record": "6-4",
@@ -2388,7 +2407,8 @@
      "ctrl": 0.082,
      "kd15": 0.52,
      "kd_against15": 0.23,
-     "ko_loss": 0.229
+     "ko_loss": 0.229,
+     "avg_time": 7.33
     }
    },
    "record_split": {
@@ -2633,7 +2653,8 @@
      "ctrl": 0.24,
      "kd15": 0.21,
      "kd_against15": 0.08,
-     "ko_loss": 0.1
+     "ko_loss": 0.1,
+     "avg_time": 10.73
     },
     "b": {
      "record": "3-2",
@@ -2654,7 +2675,8 @@
      "ctrl": 0.372,
      "kd15": 0.09,
      "kd_against15": 0.25,
-     "ko_loss": 0.133
+     "ko_loss": 0.133,
+     "avg_time": 13.45
     }
    },
    "record_split": {
@@ -2904,7 +2926,8 @@
      "ctrl": 0.035,
      "kd15": 0.54,
      "kd_against15": 0.21,
-     "ko_loss": 0.138
+     "ko_loss": 0.138,
+     "avg_time": 12.76
     },
     "b": {
      "record": "7-3",
@@ -2925,7 +2948,8 @@
      "ctrl": 0.335,
      "kd15": 0.2,
      "kd_against15": 0.08,
-     "ko_loss": 0.086
+     "ko_loss": 0.086,
+     "avg_time": 8.74
     }
    },
    "record_split": {
