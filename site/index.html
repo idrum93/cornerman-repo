@@ -1044,6 +1044,29 @@ function rangeBlock(stat,unit,rows){
    you open rather than one long scroll. The first is open so the drawer still
    says something at a glance. */
 let GROUP_N=0;
+/* Career history behind the method and round markets: how each fighter's UFC
+   wins actually arrived. Descriptive, not a projection — the model tested
+   career method mix as a feature and dropped it. */
+function recordSplit(b){
+  const R=b.record_split; if(!R||!R.a||!R.a.n) return '';
+  const cell=(s,cls)=>`<span class="mono ${cls}">${s}</span>`;
+  const line=(nm,x,cls)=>{
+    const w=x.wins,l=x.losses,tw=w.ko+w.sub+w.dec;
+    // each finishing round split by how it ended, so "R1 4" does not hide
+    // two knockouts and two submissions
+    const rds=Object.keys(x.win_rounds).sort().map(k=>{
+      const c=x.win_rounds[k];
+      const bits=[c.ko?`${c.ko}&nbsp;KO`:'',c.sub?`${c.sub}&nbsp;sub`:''].filter(Boolean).join(' ');
+      return `R${k}&nbsp;${bits}`;}).join(' · ');
+    return `<div class="prow"><span>${esc(surname(nm))}
+      <span class="lbl">${tw}-${l.ko+l.sub+l.dec} in the UFC</span></span>
+      <span class="mono" style="color:var(--mute)">${cell(`${w.ko} KO`,cls)} ·
+        ${cell(`${w.sub} sub`,cls)} · ${cell(`${w.dec} dec`,cls)}${
+        rds?` <span class="lbl">finishes ${rds}</span>`:''}</span></div>`;};
+  return group('How they have won','their UFC record, not a projection',
+    [line(b.a,R.a,'nm-a'),line(b.b,R.b,'nm-b')]);
+}
+
 function strikeRow(label,val,cls){
   return `<div class="prow"><span>${esc(label)}</span><span class="mono ${cls}">${val}</span></div>`;
 }
@@ -1116,7 +1139,8 @@ function marketTabs(b,mk,rr,totals){
         propRow(`${b.b} wins`,b.p_b,'var(--blue)',mk?1-b.p_market:null,mk?`market ${P1(1-b.p_market)}%`:null)],mk)
       +group('Total rounds','over/under, as a sportsbook writes it',totals)],
     ['method','Winning Method',
-      group('Method of victory','sums to 100% across the six',[
+      recordSplit(b)
+      +group('Method of victory','sums to 100% across the six',[
         propRow(`${b.a} by KO/TKO/DQ`,b.m_a_ko,'var(--red)',pmk(b,'ko_a'),pnote(b,'ko_a'),'ko_a'),
         propRow(`${b.a} by submission`,b.m_a_sub,'var(--red)',pmk(b,'sub_a'),pnote(b,'sub_a'),'sub_a'),
         propRow(`${b.a} by decision`,b.m_a_dec,'var(--red)',pmk(b,'dec_a'),pnote(b,'dec_a'),'dec_a'),

@@ -475,6 +475,8 @@ def predict_card(path, fights, fighters, verbose=True):
         sb["stance_name"] = B.stance
         r["stats"] = {"a": tot(sa, A.wins, A.losses, A.n_fights),
                       "b": tot(sb, B.wins, B.losses, B.n_fights)}
+        r["record_split"] = {"a": _career_split(fights, na, meta.get("date")),
+                             "b": _career_split(fights, nb, meta.get("date"))}
         # How much evidence stands behind this number at all.
         r["evidence"] = {"a": A.n_fights, "b": B.n_fights,
                          "min": min(A.n_fights, B.n_fights)}
@@ -835,6 +837,40 @@ def archive_previous(new_event, path="site/predictions.json",
     if verbose:
         print(f"archived previous card '{ev}' -> {dest}")
     return str(dest)
+
+
+def _career_split(fights, name, before=None):
+    """How this fighter's UFC wins and losses arrived, and in which round.
+
+    Descriptive only. Career method mix was tested as a model feature and
+    dropped (finish_rate, carried by ko_edge); this exists so a reader looking
+    at a method or round market can see the history behind the projection.
+    Only bouts before this card count, like everything else here.
+    """
+    k = _key(name)
+    out = {"wins": {"ko": 0, "sub": 0, "dec": 0},
+           "losses": {"ko": 0, "sub": 0, "dec": 0},
+           "win_rounds": {}, "n": 0}
+    for row in fights.itertuples():
+        if before is not None and pd.notna(row.date) and pd.Timestamp(row.date) >= pd.Timestamp(before):
+            continue
+        parts = [x.strip() for x in str(row.bout).split(" vs. ")]
+        if len(parts) != 2:
+            continue
+        side = "r" if _key(parts[0]) == k else ("b" if _key(parts[1]) == k else None)
+        if side is None or row.winner not in ("r", "b"):
+            continue
+        meth = {"KO/TKO": "ko", "SUB": "sub", "DEC": "dec"}.get(row.method)
+        if not meth:
+            continue
+        out["n"] += 1
+        won = row.winner == side
+        out["wins" if won else "losses"][meth] += 1
+        if won and meth != "dec" and pd.notna(row.total_sec):
+            rnd = str(int(min(5, max(1, -(-float(row.total_sec) // 300)))))
+            cell = out["win_rounds"].setdefault(rnd, {"ko": 0, "sub": 0})
+            cell[meth] += 1
+    return out
 
 
 def _base_rates(fights, min_date="2012-01-01"):
