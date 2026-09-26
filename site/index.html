@@ -542,19 +542,20 @@ function propRank(b){
     push('ends_before_r'+n,`<b>${P0(b[k])}%</b> before R${n}`,b[k],EB[n],'pp-n',
          `the fight ends before round ${n} begins — normally ${P0(EB[n])}%`);
   });
-  [['a',b.a,b.a_p_takedown,b.a_p_knockdown],['b',b.b,b.b_p_takedown,b.b_p_knockdown]].forEach(([side,nm,td,kd])=>{
-    push('takedown_'+side,`TD ${esc(surname(nm))} <b>${P0(td)}%</b>`,td,MB.td,'pp-'+side,
-         `${nm} lands at least one takedown — normally ${P0(MB.td)}%`);
-    push('knockdown_'+side,`KD ${esc(surname(nm))} <b>${P0(kd)}%</b>`,kd,MB.kd,'pp-'+side,
-         `${nm} scores at least one knockdown — normally ${P0(MB.kd)}%`);
-  });
+  // Takedown and knockdown chips are gone with their drawer rows: no book
+  // quotes "lands a takedown", so the site does not present it as a contract.
   return C.sort((x,y)=>y.dev-x.dev);
 }
 
 function propChips(b){
-  return `<div class="props">${propRank(b).slice(0,4).map(c=>
-    `<span class="pp ${c.cls} ${c.dev>=0.12?'strong':''}" title="${esc(c.tip)} · ${
-      c.dev>=0.12?'well away from normal':'close to normal'}">${c.txt}</span>`).join('')}</div>`;
+  // Only what is well away from normal. A chip reading "close to normal" is
+  // a fact about the base rate, not about this fight, and it crowded out the
+  // ones worth seeing.
+  const notable=propRank(b).filter(c=>c.dev>=0.12).slice(0,4);
+  if(!notable.length) return '';
+  return `<div class="props">${notable.map(c=>
+    `<span class="pp ${c.cls} strong" title="${esc(c.tip)} · well away from normal">${c.txt}</span>`
+    ).join('')}</div>`;
 }
 
 /* Two fighters with three UFC bouts between them get the same confident

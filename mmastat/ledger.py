@@ -900,7 +900,9 @@ if __name__ == "__main__":
             # The sweep logs every listed bout, including the current card.
             sweep(f, p)
         # Polymarket is free and keyed to the card, so it runs regardless.
-        capture(f, p, venues_only=("polymarket",))
+        # both free venues, or the US exchange is fetched and then discarded —
+        # which is exactly what "no card-keyed venues to record" was reporting
+        capture(f, p, venues_only=("polymarket", "polymarket_us"))
         capture_props()
         from .odds_live import read_usage
         u = read_usage()
