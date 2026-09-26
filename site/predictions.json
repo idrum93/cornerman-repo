@@ -2,7 +2,7 @@
  "event": "UFC Fight Night: Rosas Jr. vs. Barcelos",
  "date": "2026-09-26",
  "venue": "Meta Apex, Enterprise, Nevada , United States",
- "generated_utc": "2026-09-26T04:05:13.785894+00:00",
+ "generated_utc": "2026-09-26T04:15:56.146971+00:00",
  "bouts": [
   {
    "bout": "Raul Rosas Jr vs. Raoni Barcelos",
@@ -1172,7 +1172,7 @@
    "p_open": null,
    "prop_market": {
     "decision": {
-     "p": 0.04688,
+     "p": 0.0625,
      "slug": "ufc-rodbel-chredw-2026-09-26",
      "venue": "polymarket_us"
     }
@@ -1829,7 +1829,7 @@
      "venue": "polymarket_us"
     },
     "ends_before_r3": {
-     "p": 0.05882,
+     "p": 0.04478,
      "slug": "ufc-johcas-alaten-2026-09-26",
      "venue": "polymarket_us"
     }
@@ -2224,11 +2224,6 @@
    "kind": "prop"
   },
   {
-   "question": "Will Yazmin Jauregui win by decision in Vanessa Demopoulos vs Yazmin Jauregui",
-   "slug": "ufc-vandem-yazjau-2026-09-26",
-   "kind": "prop"
-  },
-  {
    "question": "Will Vanessa Demopoulos vs. Yazmin Jauregui end before round 2?",
    "slug": "ufc-vandem-yazjau-2026-09-26",
    "kind": "prop"
@@ -2259,12 +2254,12 @@
    "kind": "prop"
   },
   {
-   "question": "Will Yazmin Jauregui win in Round 1?",
+   "question": "Will Yazmin Jauregui win in Round 2?",
    "slug": "ufc-vandem-yazjau-2026-09-26",
    "kind": "prop"
   },
   {
-   "question": "Will Yazmin Jauregui win in Round 2?",
+   "question": "Will Yazmin Jauregui win in Round 1?",
    "slug": "ufc-vandem-yazjau-2026-09-26",
    "kind": "prop"
   },
@@ -2275,6 +2270,11 @@
   },
   {
    "question": "Will Vanessa Demopoulos win in Round 2?",
+   "slug": "ufc-vandem-yazjau-2026-09-26",
+   "kind": "prop"
+  },
+  {
+   "question": "Will Vanessa Demopoulos win in Round 3?",
    "slug": "ufc-vandem-yazjau-2026-09-26",
    "kind": "prop"
   }
