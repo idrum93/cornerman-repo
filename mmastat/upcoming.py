@@ -470,13 +470,19 @@ def predict_card(path, fights, fighters, verbose=True):
                     "td15": round(S["adj_td15"], 2), "td_def": round(S["td_def"], 3),
                     "sub15": round(S["sub15"], 2), "ctrl": round(S["ctrl_share"], 3),
                     "kd15": round(S["kd15"], 2), "kd_against15": round(S["kd_against15"], 2),
-                    "ko_loss": round(S["ko_loss_rate"], 3)}
+                    "ko_loss": round(S["ko_loss_rate"], 3),
+                    # shown, not modelled: average fight time tested well
+                    # (addendum 31) but the holdout is spent, so it is a
+                    # forward candidate and stays out of the projection
+                    "avg_time": None}
         sa["stance_name"] = A.stance
         sb["stance_name"] = B.stance
         r["stats"] = {"a": tot(sa, A.wins, A.losses, A.n_fights),
                       "b": tot(sb, B.wins, B.losses, B.n_fights)}
         r["record_split"] = {"a": _career_split(fights, na, meta.get("date")),
                              "b": _career_split(fights, nb, meta.get("date"))}
+        for side, nm in (("a", na), ("b", nb)):
+            r["stats"][side]["avg_time"] = _avg_fight_time(fights, nm, meta.get("date"))
         # How much evidence stands behind this number at all.
         r["evidence"] = {"a": A.n_fights, "b": B.n_fights,
                          "min": min(A.n_fights, B.n_fights)}
@@ -837,6 +843,22 @@ def archive_previous(new_event, path="site/predictions.json",
     if verbose:
         print(f"archived previous card '{ev}' -> {dest}")
     return str(dest)
+
+
+def _avg_fight_time(fights, name, before=None):
+    """Average UFC fight length in minutes, from bouts before this card."""
+    k = _key(name)
+    tot = n = 0
+    for row in fights.itertuples():
+        if before is not None and pd.notna(row.date) and pd.Timestamp(row.date) >= pd.Timestamp(before):
+            continue
+        parts = [x.strip() for x in str(row.bout).split(" vs. ")]
+        if len(parts) != 2 or k not in (_key(parts[0]), _key(parts[1])):
+            continue
+        if pd.notna(row.total_sec):
+            tot += float(row.total_sec)
+            n += 1
+    return round(tot / n / 60.0, 2) if n else None
 
 
 def _career_split(fights, name, before=None):

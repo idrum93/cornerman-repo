@@ -1243,7 +1243,9 @@ function verdictLine(b){
 const LOWER_BETTER=new Set(['age','sapm','layoff','kd_against15','ko_loss']);
 // No leader on these: "better record" is not well defined, and comparing
 // "10-6" with "9-4" on wins alone crowned the lower win rate.
-const NO_LEADER=new Set(['stance']);
+// Average fight time has no better side: a short average means a finisher or
+// someone who gets finished, and the row is context for the round markets.
+const NO_LEADER=new Set(['stance','avg_time']);
 /* "Better record" means the better win RATE, not more wins. Tested on 4,167
    held-out bouts: win rate predicts the winner at AUC 0.601, wins-minus-losses
    at 0.547 — 20-10 is not better than 9-1. Draws count as half. */
@@ -1261,6 +1263,7 @@ const STAT_ROWS=[
   ['str_def','Striking defense',v=>(v*100).toFixed(0)+'%'],
   ['td15','Takedowns /15min',v=>v],
   ['td_def','Takedown defense',v=>(v*100).toFixed(0)+'%'],
+  ['avg_time','Average fight time',v=>`${Math.floor(v)}:${String(Math.round((v-Math.floor(v))*60)).padStart(2,'0')}`],
   ['kd15','Knockdowns /15min',v=>v],
   ['sub15','Submission attempts /15min',v=>v],
   ['kd_against15','Knockdowns absorbed /15min',v=>v],
@@ -1274,7 +1277,10 @@ const STAT_ROWS=[
 function tale(b){
   const A=b.stats&&b.stats.a, B=b.stats&&b.stats.b;
   if(!A||!B) return '';
-  const rows=STAT_ROWS.filter(([k])=>A[k]!==undefined).map(([k,lab,fmt])=>{
+  // null as well as undefined: a fighter with no UFC bouts has no average
+  // fight time, and formatting null produced "0:00"
+  const rows=STAT_ROWS.filter(([k])=>A[k]!==undefined&&A[k]!==null&&B[k]!==null)
+    .map(([k,lab,fmt])=>{
     let na=parseFloat(A[k]), nb=parseFloat(B[k]);   // reassigned for record
     // compare what is displayed: 0.401 and 0.404 both read "40%", and
     // highlighting one of them as the leader is noise presented as a finding

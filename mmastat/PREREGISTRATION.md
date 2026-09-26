@@ -2484,3 +2484,146 @@ The reason is in the registration and it held: the model already carries
 knockdown and submission rates, which are the mechanisms a method mix works
 through. Most of the signal measured on its own (AUC 0.62) is already inside
 the model by another route.
+
+---
+
+# Addendum 30: championship-round experience (2026-09-26)
+
+Registered before fitting. Distinct from the fortitude cluster (addendum 6,
+0 of 6), which measured late-round *output*. This measures *exposure*: has a
+fighter been in a five-round fight before, and has he actually contested
+rounds four and five?
+
+    E1  has fought a scheduled five-round bout before (0/1, differenced)
+    E2  prior minutes contested beyond 15:00 (differenced)
+    E3  E1 summed across both corners (for the fight-level target)
+    E4  E2 summed across both corners
+
+Two targets, on five-round bouts only:
+
+    T1  the win, model = the frozen 14 plus the measure
+    T2  the fight reaches round 4
+
+Four tests, Benjamini-Hochberg at FDR 0.10, bootstrap over 600 resamples.
+
+**Power, stated up front.** There are 673 five-round bouts since 2012, so a
+standard split leaves about 134 held out — too few for a modest effect. The
+test slice is widened to 40% for power, and the confidence interval is reported
+beside every gain. A null here means "not detectable in 270 bouts", not "zero",
+and that distinction is recorded now rather than argued afterwards.
+
+Prior: low. Experience overall is already in the model (`d_log_exp`), and the
+fortitude family found nothing in late-round behaviour.
+
+## Addendum 30: RESULT (2026-09-26)
+
+**A forward candidate, after correcting my own baseline.**
+
+First pass, against the frozen 14:
+
+| target | measure | n | gain | 95% CI | p |
+|---|---|---|---|---|---|
+| reaches round 4 | both corners' championship minutes | 504 | +0.0288 | [+0.0123, +0.0451] | .0017 |
+| reaches round 4 | both corners' five-round starts | 504 | +0.0011 | [+0.0003, +0.0021] | .010 |
+| the win | championship minutes | 252 | -0.0008 | [-0.0050, +0.0031] | .65 |
+| the win | has fought five rounds | 252 | +0.0007 | [-0.0060, +0.0076] | .90 |
+
+That +0.0288 would have been the largest gain in this project. **It was mostly
+a weak baseline.** The frozen 14 is a *win* model; it contains nothing that
+predicts how long a fight lasts, so any duration-aware feature improves it.
+The correct comparison is against the model that does predict duration.
+
+Re-run against the finish-formula inputs (knockdowns, control, pace,
+submissions, age gap):
+
+| measure | gain | 95% CI | p |
+|---|---|---|---|
+| **championship minutes** | **+0.0091** | [+0.0004, +0.0175] | .037 |
+| five-round starts | -0.0007 | [-0.0012, -0.0001] | .023 |
+
+The effect survives at **a third of its apparent size**, with a lower bound a
+hair above zero. The binary "has fought five rounds before" is worthless once
+the minutes are available, and slightly harmful.
+
+### Decision
+
+**Not adopted; carried forward.** Minutes actually contested past the
+fifteen-minute mark look like a real, small predictor of whether a five-round
+fight goes deep — distinct from the fortitude family, which measured
+performance rather than exposure, and found nothing. But this used a widened
+40% test slice for power on a scarce bout type, the holdout is spent, and the
+interval nearly touches zero. It needs forward confirmation on five-round bouts
+before it changes anything.
+
+Nothing on the site changes. Recorded with the first pass shown in full,
+because the difference between +0.0288 and +0.0091 was entirely in the choice
+of baseline, and that is the more useful lesson than either number.
+
+---
+
+# Addendum 31: average fight time (2026-09-26)
+
+Registered before fitting. Neither the finish formula (knockdowns, control,
+pace, submissions, age gap, weight, women, five rounds) nor the survival model
+sees how long a fighter's fights actually tend to last.
+
+    A1  sum of both fighters' average fight minutes
+    A2  difference between them
+
+Three targets, each against the **finish-formula inputs** as the baseline —
+the model that already predicts duration, not the win model. Addendum 30
+showed that testing a duration feature against the frozen 14 inflates the gain
+threefold.
+
+    T1  the fight ends inside the distance
+    T2  the fight ends before round 2
+    T3  a five-round fight reaches round 4
+
+Six tests, Benjamini-Hochberg at FDR 0.10, bootstrap over 600 resamples.
+
+Prior: low. Average fight time is close to a restatement of a fighter's finish
+rate, which addendum 29 found worth only +0.0016 in the method model, and the
+formula already holds knockdowns, control and pace — the mechanisms that make
+fights short.
+
+## Addendum 31: RESULT (2026-09-26)
+
+**Three of six supported, and they survive a corrected baseline.**
+
+The two fighters' average fight lengths, summed. The difference between them
+does nothing on any target, which is right — how long a fight lasts is a
+property of the pair, not of one corner.
+
+First pass used an incomplete baseline (knockdowns, control, pace,
+submissions, age gap) and omitted weight class, women and scheduled rounds —
+the same error addendum 30 had just caught, made again one addendum later.
+Both passes:
+
+| target | n | incomplete baseline | **complete finish formula** |
+|---|---|---|---|
+| ends inside the distance | 1658 | +0.0125 | **+0.0096** [+0.0039, +0.0164] |
+| ends before round 2 | 1658 | +0.0180 | **+0.0101** [+0.0054, +0.0150] |
+| five-rounder reaches round 4 | 378 | +0.0196 | **+0.0132** [+0.0039, +0.0224] |
+
+The inflation from the missing controls was about a third — heavyweight fights
+are short and five-rounders are long, and average fight time was partly
+standing in for both. After controlling properly, all three intervals still
+exclude zero by a clear margin.
+
+For scale, adopting the finish formula itself was worth +0.005 Brier. These are
+the largest confirmed gains of any candidate tested since.
+
+### Decision
+
+**Carried forward, not adopted.** The holdout is spent, so nothing enters the
+model on the strength of a retrospective test. Average fight time joins the
+forward list with championship minutes (addendum 30) and the two betting rules.
+
+### Why this one is different from the nulls
+
+Fourteen families failed because they tried to extract a new *kind* of
+information from seven fights of per-round totals. This asks for something the
+feed records directly and completely: how long a fighter's fights last. No
+inference, no reconstruction, no second moment of a noisy mean. That is the
+same reason the count models in addendum 26 worked where the behavioural
+families did not.
