@@ -2355,3 +2355,132 @@ its own registration and a held-out test, and the holdout is spent. Recorded
 here so the next model revision starts from the fact that this feature does not
 do what its name suggests — and as a caution about naming an interaction after
 the story that motivated it rather than after what it turns out to measure.
+
+---
+
+# Question answered: should the career breakdown use pro records? (2026-09-26)
+
+The per-round finish breakdown on the site counts UFC bouts only. On the
+current card that is a median of 4 finishes per fighter, with 11 of 24 having
+three or fewer. The question was whether pulling in full professional records
+would make it more informative.
+
+The collector for pre-UFC records exists (addendum 18, parked) but needs
+network. Tested the decisive proxy instead, on UFC data, which is cleaner than
+any regional source could be.
+
+**Does a fighter's own finish history predict his next finish?** Yes, modestly
+— held out on 1,483 bouts:
+
+| | AUC | Brier skill |
+|---|---|---|
+| wins by finish, from his own finish rate | 0.621 | +0.028 |
+| wins by KO, from his KO share of finishes | 0.618 | +0.016 |
+| wins in round 1, from his round-1 share | 0.607 | +0.011 |
+
+**Does MORE history sharpen it?** That is what a pro record would buy. No:
+
+| prior fights on record | n | AUC finish | AUC round 1 |
+|---|---|---|---|
+| 2-3 | 2658 | 0.570 | 0.552 |
+| 4-6 | 2626 | 0.592 | 0.587 |
+| 7-10 | 2193 | 0.605 | 0.564 |
+| 11 or more | 2674 | 0.584 | 0.536 |
+
+Non-monotone, peaking in the middle and falling again. A fighter with eleven
+or more prior bouts is predicted **no better** than one with two or three:
++0.013 AUC, 95% interval [-0.017, +0.046].
+
+## Decision: keep it UFC-only
+
+The signal in a finish profile saturates after a handful of fights. Extending
+the record would add observations that do not sharpen the estimate, while
+importing two problems: regional finishes are not the same event as UFC
+finishes, and a mixed denominator beside a line reading "9-1 in the UFC"
+invites misreading.
+
+The round-of-finish projection the breakdown sits beside is built from
+thousands of fights with opponent adjustment, and that is where the estimate
+comes from. The career counts are context, and four finishes are enough context
+for the job they do.
+
+---
+
+# Addendum 29: career method mix in the method and round models (2026-09-26)
+
+Registered before fitting. The site now shows how each fighter's UFC wins
+arrived; the question is whether that belongs in the projection rather than
+only beside it.
+
+Established already (2026-09-26): a fighter's own finish history predicts his
+next finish at AUC 0.621, his KO share at 0.618, his round-1 share at 0.607.
+The method model does NOT currently see any of it — it uses the frozen 14 plus
+symmetric sums of the panel stats, which carry rates (knockdowns, submission
+attempts) but never the actual method mix of a fighter's wins.
+
+Four measures, each built in the leakage-safe walk from prior bouts only:
+
+    M1  own finish rate            finishes / fights
+    M2  KO share of own finishes
+    M3  submission share of own finishes
+    M4  round-1 share of own finishes
+
+Two targets:
+
+    T1  the five-way method outcome (a by KO, a by sub, b by KO, b by sub,
+        decision), scored by multinomial log loss
+    T2  the fight ends in round 1, scored by log loss
+
+Each measure added individually to the current feature set. Eight tests,
+Benjamini-Hochberg at FDR 0.10. Bootstrap over 600 resamples for each p-value.
+The holdout is spent, so anything supported is a forward candidate, not an
+adoption.
+
+Prior: moderate for T1, low for T2. The AUCs above are real but modest, and
+the model already holds knockdown and submission rates, which are the
+mechanisms a method mix would work through. The honest expectation is that most
+of the signal is already carried and the increment is small.
+
+## Addendum 29: RESULT (2026-09-26)
+
+**One of eight supported, and it is small.** Held out on 1,300 bouts.
+
+| target | measure | gain | p | BH |
+|---|---|---|---|---|
+| **method (five-way)** | **own finish rate** | **+0.0016** | .0017 | .0125 |
+| ends in round 1 | sub share | 0.0000 | .0017 | .0250 |
+| ends in round 1 | KO share | 0.0000 | .0017 | .0375 |
+| ends in round 1 | own finish rate | 0.0000 | .0017 | .0500 |
+| ends in round 1 | round-1 share | 0.0000 | .0017 | .0625 |
+| method (five-way) | round-1 share | -0.0005 | .250 | .0750 |
+| method (five-way) | sub share | +0.0017 | .550 | .0875 |
+| method (five-way) | KO share | +0.0017 | .560 | .1000 |
+
+Only **own finish rate in the method model** clears its threshold with a
+positive gain, at +0.0016 multinomial log loss. For scale, adopting the finish
+formula was worth +0.005 Brier.
+
+### A caution in these numbers
+
+The four "ends in round 1" rows show a gain of 0.0000 with a p-value of .0017.
+That is the bootstrap detecting a consistently-signed difference of around a
+ten-thousandth of a nat — statistically distinguishable from zero and
+practically nothing. They fail only because the gain is not positive. It is a
+clean demonstration that a small p-value is not a finding, and the reason this
+project reports effect sizes beside every p.
+
+Note also that KO share and submission share show gains of +0.0017 — the same
+size as the survivor — at p = .55. The difference between them is not the
+effect but its consistency across resamples.
+
+### Decision
+
+**Not adopted.** The holdout is spent, so a single survivor at this effect size
+is a forward candidate, and the site's method and round projections are
+unchanged. The career breakdown stays where it is: displayed beside the
+projection as context, not folded into it.
+
+The reason is in the registration and it held: the model already carries
+knockdown and submission rates, which are the mechanisms a method mix works
+through. Most of the signal measured on its own (AUC 0.62) is already inside
+the model by another route.
