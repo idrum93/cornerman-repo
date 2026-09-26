@@ -2,7 +2,7 @@
  "event": "UFC Fight Night: Rosas Jr. vs. Barcelos",
  "date": "2026-09-26",
  "venue": "Meta Apex, Enterprise, Nevada , United States",
- "generated_utc": "2026-09-26T14:23:33.870745+00:00",
+ "generated_utc": "2026-09-26T14:57:14.554805+00:00",
  "bouts": [
   {
    "bout": "Raul Rosas Jr vs. Raoni Barcelos",
@@ -229,7 +229,7 @@
    "p_open": 0.6188,
    "prop_market": {
     "decision": {
-     "p": 0.49425,
+     "p": 0.49451,
      "slug": "ufc-rauros-raobar-2026-09-26",
      "venue": "polymarket_us"
     },
@@ -560,7 +560,7 @@
      "venue": "polymarket_us"
     },
     "sub_b": {
-     "p": 0.46154,
+     "p": 0.42857,
      "slug": "ufc-nordum-ailper-2026-09-26",
      "venue": "polymarket_us"
     },
@@ -575,7 +575,7 @@
      "venue": "polymarket_us"
     },
     "sub_a": {
-     "p": 0.46154,
+     "p": 0.42857,
      "slug": "ufc-nordum-ailper-2026-09-26",
      "venue": "polymarket_us"
     }
@@ -796,7 +796,7 @@
    "p_open": 0.2653,
    "prop_market": {
     "decision": {
-     "p": 0.4875,
+     "p": 0.48148,
      "slug": "ufc-brahie-rinnak-2026-09-26",
      "venue": "polymarket_us"
     },
@@ -835,8 +835,13 @@
      "slug": "ufc-brahie-rinnak-2026-09-26",
      "venue": "polymarket_us"
     },
+    "ends_before_r2": {
+     "p": 0.41667,
+     "slug": "ufc-brahie-rinnak-2026-09-26",
+     "venue": "polymarket_us"
+    },
     "ends_before_r3": {
-     "p": 0.04918,
+     "p": 0.02941,
      "slug": "ufc-brahie-rinnak-2026-09-26",
      "venue": "polymarket_us"
     }
@@ -1062,7 +1067,7 @@
      "venue": "polymarket_us"
     },
     "decision": {
-     "p": 0.48387,
+     "p": 0.4918,
      "slug": "ufc-rodvie-robbry-2026-09-26",
      "venue": "polymarket_us"
     },
@@ -1072,17 +1077,22 @@
      "venue": "polymarket_us"
     },
     "dec_a": {
-     "p": 0.45455,
+     "p": 0.47059,
      "slug": "ufc-rodvie-robbry-2026-09-26",
      "venue": "polymarket_us"
     },
     "dec_b": {
-     "p": 0.42857,
+     "p": 0.45,
      "slug": "ufc-rodvie-robbry-2026-09-26",
      "venue": "polymarket_us"
     },
     "ko_a": {
      "p": 0.41176,
+     "slug": "ufc-rodvie-robbry-2026-09-26",
+     "venue": "polymarket_us"
+    },
+    "ends_before_r2": {
+     "p": 0.43902,
      "slug": "ufc-rodvie-robbry-2026-09-26",
      "venue": "polymarket_us"
     },
@@ -1092,7 +1102,7 @@
      "venue": "polymarket_us"
     },
     "sub_b": {
-     "p": 0.25,
+     "p": 0.33333,
      "slug": "ufc-rodvie-robbry-2026-09-26",
      "venue": "polymarket_us"
     }
@@ -1330,6 +1340,11 @@
      "p": 0.3,
      "slug": "ufc-rodbel-chredw-2026-09-26",
      "venue": "polymarket_us"
+    },
+    "ends_before_r3": {
+     "p": 0.03077,
+     "slug": "ufc-rodbel-chredw-2026-09-26",
+     "venue": "polymarket_us"
     }
    }
   },
@@ -1532,7 +1547,7 @@
    "p_open": null,
    "prop_market": {
     "decision": {
-     "p": 0.47872,
+     "p": 0.47917,
      "slug": "ufc-joshar-elvbre-2026-09-26",
      "venue": "polymarket_us"
     },
@@ -1542,7 +1557,7 @@
      "venue": "polymarket_us"
     },
     "ko_a": {
-     "p": 0.45161,
+     "p": 0.43333,
      "slug": "ufc-joshar-elvbre-2026-09-26",
      "venue": "polymarket_us"
     },
@@ -1552,12 +1567,12 @@
      "venue": "polymarket_us"
     },
     "sub_a": {
-     "p": 0.41667,
+     "p": 0.45833,
      "slug": "ufc-joshar-elvbre-2026-09-26",
      "venue": "polymarket_us"
     },
     "sub_b": {
-     "p": 0.42105,
+     "p": 0.41176,
      "slug": "ufc-joshar-elvbre-2026-09-26",
      "venue": "polymarket_us"
     },
@@ -1567,7 +1582,7 @@
      "venue": "polymarket_us"
     },
     "dec_a": {
-     "p": 0.4878,
+     "p": 0.47619,
      "slug": "ufc-joshar-elvbre-2026-09-26",
      "venue": "polymarket_us"
     }
@@ -1788,7 +1803,7 @@
    "p_open": 0.6265,
    "prop_market": {
     "decision": {
-     "p": 0.02247,
+     "p": 0.49565,
      "slug": "ufc-monjac-ricsim-2026-09-26",
      "venue": "polymarket_us"
     },
@@ -1798,12 +1813,12 @@
      "venue": "polymarket_us"
     },
     "dec_b": {
-     "p": 0.36842,
+     "p": 0.47826,
      "slug": "ufc-monjac-ricsim-2026-09-26",
      "venue": "polymarket_us"
     },
     "sub_a": {
-     "p": 0.42857,
+     "p": 0.46667,
      "slug": "ufc-monjac-ricsim-2026-09-26",
      "venue": "polymarket_us"
     },
@@ -1818,12 +1833,12 @@
      "venue": "polymarket_us"
     },
     "ends_before_r3": {
-     "p": 0.46479,
+     "p": 0.43421,
      "slug": "ufc-monjac-ricsim-2026-09-26",
      "venue": "polymarket_us"
     },
     "dec_a": {
-     "p": 0.48485,
+     "p": 0.4697,
      "slug": "ufc-monjac-ricsim-2026-09-26",
      "venue": "polymarket_us"
     }
@@ -2054,7 +2069,7 @@
      "venue": "polymarket_us"
     },
     "sub_a": {
-     "p": 0.33333,
+     "p": 0.29412,
      "slug": "ufc-johcas-alaten-2026-09-26",
      "venue": "polymarket_us"
     },
@@ -2068,18 +2083,13 @@
      "slug": "ufc-johcas-alaten-2026-09-26",
      "venue": "polymarket_us"
     },
-    "dec_a": {
-     "p": 0.49123,
-     "slug": "ufc-johcas-alaten-2026-09-26",
-     "venue": "polymarket_us"
-    },
     "ko_a": {
-     "p": 0.1875,
+     "p": 0.23529,
      "slug": "ufc-johcas-alaten-2026-09-26",
      "venue": "polymarket_us"
     },
     "dec_b": {
-     "p": 0.23529,
+     "p": 0.25,
      "slug": "ufc-johcas-alaten-2026-09-26",
      "venue": "polymarket_us"
     }
@@ -2300,7 +2310,7 @@
    "p_open": 0.1432,
    "prop_market": {
     "decision": {
-     "p": 0.49587,
+     "p": 0.21101,
      "slug": "ufc-vandem-yazjau-2026-09-26",
      "venue": "polymarket_us"
     },
@@ -2320,7 +2330,7 @@
      "venue": "polymarket_us"
     },
     "sub_a": {
-     "p": 0.375,
+     "p": 0.33333,
      "slug": "ufc-vandem-yazjau-2026-09-26",
      "venue": "polymarket_us"
     },
@@ -2335,7 +2345,7 @@
      "venue": "polymarket_us"
     },
     "ko_b": {
-     "p": 0.44231,
+     "p": 0.42,
      "slug": "ufc-vandem-yazjau-2026-09-26",
      "venue": "polymarket_us"
     }
