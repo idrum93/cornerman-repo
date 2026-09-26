@@ -1,71 +1,106 @@
 {
  "event_date": "2026-09-26",
- "fetched_utc": "2026-09-26T02:54:29+00:00",
+ "fetched_utc": "2026-09-26T03:06:14+00:00",
  "markets": [
+  {
+   "question": "Will Vanessa Demopoulos vs. Yazmin Jauregui end by decision?",
+   "slug": "ufc-vandem-yazjau-2026-09-26",
+   "kind": "prop"
+  },
+  {
+   "question": "Will Yazmin Jauregui win by decision in Vanessa Demopoulos vs Yazmin Jauregui",
+   "slug": "ufc-vandem-yazjau-2026-09-26",
+   "kind": "prop"
+  },
+  {
+   "question": "Will Vanessa Demopoulos vs. Yazmin Jauregui end before round 2?",
+   "slug": "ufc-vandem-yazjau-2026-09-26",
+   "kind": "prop"
+  },
+  {
+   "question": "Will Vanessa Demopoulos vs. Yazmin Jauregui end before round 3?",
+   "slug": "ufc-vandem-yazjau-2026-09-26",
+   "kind": "prop"
+  },
+  {
+   "question": "Will Vanessa Demopoulos vs. Yazmin Jauregui end by KO, TKO, or DQ?",
+   "slug": "ufc-vandem-yazjau-2026-09-26",
+   "kind": "prop"
+  },
+  {
+   "question": "Will Yazmin Jauregui win in Round 3?",
+   "slug": "ufc-vandem-yazjau-2026-09-26",
+   "kind": "prop"
+  },
+  {
+   "question": "Will Vanessa Demopoulos vs. Yazmin Jauregui end in a draw?",
+   "slug": "ufc-vandem-yazjau-2026-09-26",
+   "kind": "prop"
+  },
+  {
+   "question": "Will Yazmin Jauregui win by KO, TKO, or DQ in Vanessa Demopoulos vs Yazmin Jauregui",
+   "slug": "ufc-vandem-yazjau-2026-09-26",
+   "kind": "prop"
+  },
+  {
+   "question": "Will Yazmin Jauregui win in Round 1?",
+   "slug": "ufc-vandem-yazjau-2026-09-26",
+   "kind": "prop"
+  },
+  {
+   "question": "Will Yazmin Jauregui win in Round 2?",
+   "slug": "ufc-vandem-yazjau-2026-09-26",
+   "kind": "prop"
+  },
+  {
+   "question": "Will Vanessa Demopoulos win in Round 1?",
+   "slug": "ufc-vandem-yazjau-2026-09-26",
+   "kind": "prop"
+  },
+  {
+   "question": "Will Vanessa Demopoulos win in Round 2?",
+   "slug": "ufc-vandem-yazjau-2026-09-26",
+   "kind": "prop"
+  },
+  {
+   "question": "Will Vanessa Demopoulos win in Round 3?",
+   "slug": "ufc-vandem-yazjau-2026-09-26",
+   "kind": "prop"
+  },
   {
    "question": "Who will win in the upcoming mma event Vanessa Demopoulos vs Yazmin Jauregui scheduled for September 26, 2026 at 9:00 PM UTC?",
    "slug": "ufc-vandem-yazjau-2026-09-26",
-   "kind": "other"
+   "kind": "winner"
+  },
+  {
+   "question": "Will Vanessa Demopoulos vs. Yazmin Jauregui end by submission?",
+   "slug": "ufc-vandem-yazjau-2026-09-26",
+   "kind": "prop"
+  },
+  {
+   "question": "Will Yazmin Jauregui win by submission in Vanessa Demopoulos vs Yazmin Jauregui",
+   "slug": "ufc-vandem-yazjau-2026-09-26",
+   "kind": "prop"
+  },
+  {
+   "question": "Will Vanessa Demopoulos win by KO, TKO, or DQ in Vanessa Demopoulos vs Yazmin Jauregui",
+   "slug": "ufc-vandem-yazjau-2026-09-26",
+   "kind": "prop"
+  },
+  {
+   "question": "Will Vanessa Demopoulos win by submission in Vanessa Demopoulos vs Yazmin Jauregui",
+   "slug": "ufc-vandem-yazjau-2026-09-26",
+   "kind": "prop"
   },
   {
    "question": "Who will win in the upcoming mma event John Castaneda vs Alatengheili scheduled for September 26, 2026 at 10:30 PM UTC?",
    "slug": "ufc-johcas-alaten-2026-09-26",
-   "kind": "other"
+   "kind": "winner"
   },
   {
-   "question": "Who will win in the upcoming mma event Montel Jackson vs Ricky Simon scheduled for September 27, 2026 at 12:30 AM UTC?",
-   "slug": "ufc-monjac-ricsim-2026-09-26",
-   "kind": "other"
-  },
-  {
-   "question": "Who will win in the upcoming mma event Josiah Harrell vs Elves Brener scheduled for September 26, 2026 at 10:00 PM UTC?",
-   "slug": "ufc-joshar-elvbre-2026-09-26",
-   "kind": "other"
-  },
-  {
-   "question": "Who will win in the upcoming mma event Rodolfo Bellato vs Christian Edwards scheduled for September 27, 2026 at 12:00 AM UTC?",
-   "slug": "ufc-rodbel-chredw-2026-09-26",
-   "kind": "other"
-  },
-  {
-   "question": "Who will win in the upcoming mma event Rodolfo Vieira vs Robert Bryczek scheduled for September 26, 2026 at 11:30 PM UTC?",
-   "slug": "ufc-rodvie-robbry-2026-09-26",
-   "kind": "other"
-  },
-  {
-   "question": "Who will win in the upcoming mma event Brady Hiestand vs Rinya Nakamura scheduled for September 26, 2026 at 11:00 PM UTC?",
-   "slug": "ufc-brahie-rinnak-2026-09-26",
-   "kind": "other"
-  },
-  {
-   "question": "Who will win in the upcoming mma event Melissa Amaya vs Valesca Machado scheduled for September 27, 2026 at 1:30 AM UTC?",
-   "slug": "ufc-melama-valmac-2026-09-26",
-   "kind": "other"
-  },
-  {
-   "question": "Who will win in the upcoming mma event Mehemmedeli Osmanli vs Ilimbek Akylbek Uulu scheduled for September 27, 2026 at 1:00 AM UTC?",
-   "slug": "ufc-mehosm-iliuul-2026-09-26",
-   "kind": "other"
-  },
-  {
-   "question": "Who will win in the upcoming mma event Luis Hernandez vs Sedriques Dumas scheduled for September 27, 2026 at 1:30 AM UTC?",
-   "slug": "ufc-luiher-seddum-2026-09-26",
-   "kind": "other"
-  },
-  {
-   "question": "Who will win in the upcoming mma event Norma Dumont vs Ailin Perez scheduled for September 26, 2026 at 9:30 PM UTC?",
-   "slug": "ufc-nordum-ailper-2026-09-26",
-   "kind": "other"
-  },
-  {
-   "question": "Who will win in the upcoming mma event Raul Rosas Jr. vs Raoni Barcelos scheduled for September 27, 2026 at 2:00 AM UTC?",
-   "slug": "ufc-rauros-raobar-2026-09-26",
-   "kind": "other"
-  },
-  {
-   "question": "Who will win in the upcoming mma event Rafael Dos Anjos vs Alexander Hernandez scheduled for October 3, 2026 at 9:30 PM UTC?",
-   "slug": "ufc-rafanj-aleher-2026-10-03",
-   "kind": "other"
+   "question": "Will the fight go the distance in John Castaneda vs Alatengheili",
+   "slug": "ufc-johcas-alaten-2026-09-26",
+   "kind": "prop"
   }
  ]
 }
