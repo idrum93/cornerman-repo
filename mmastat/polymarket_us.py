@@ -31,11 +31,20 @@ UA = "CornermanBot/1.0 (https://github.com/idrum93/cornerman-repo; research)"
 RESOLVED_EPS = 0.02
 PAUSE = 0.4
 
-TYPE_MAP = {"SPORTS_MARKET_TYPE_MONEYLINE": "winner",
-            "SPORTS_MARKET_TYPE_TOTAL": "total",
-            "SPORTS_MARKET_TYPE_PROP": "prop",
-            "SPORTS_MARKET_TYPE_SPREAD": "spread",
-            "SPORTS_MARKET_TYPE_FUTURE": "future"}
+# Matched on the tail of the value, so both "SPORTS_MARKET_TYPE_PROP" and a
+# bare "PROP" land in the same place. The live feed returned everything as
+# "other" on the first run, which is what a strict lookup does when the value
+# is written a different way.
+TYPE_WORDS = {"moneyline": "winner", "total": "total", "prop": "prop",
+              "spread": "spread", "future": "future", "outright": "future"}
+
+
+def market_kind(raw):
+    v = str(raw or "").lower()
+    for word, kind in TYPE_WORDS.items():
+        if word in v:
+            return kind
+    return "other"
 
 
 def market_url(slug):
@@ -125,6 +134,51 @@ def _quote(m):
             "mid": round((bid + ask) / 2, 5)}
 
 
+EVENT_PATHS = ["/v2/events/slug/{slug}", "/v2/events/{slug}", "/events/slug/{slug}"]
+_EVENT_PATH = {"ok": None}
+
+
+def fetch_event(slug):
+    """Full markets for one event.
+
+    The league listing returns a single summary market per event, so the props
+    are only reachable this way. The exact path is not in the public docs we
+    can read, so the candidates are tried in order and the one that works is
+    remembered for the rest of the run — and printed, so the next version can
+    hard-code it instead of probing.
+    """
+    paths = ([_EVENT_PATH["ok"]] if _EVENT_PATH["ok"] else EVENT_PATHS)
+    for path in paths:
+        try:
+            j = _get(path.format(slug=slug))
+        except Exception:
+            continue
+        ev = j.get("event") or (j if j.get("markets") is not None else None)
+        if ev and ev.get("markets"):
+            _EVENT_PATH["ok"] = path
+            return ev
+    return None
+
+
+def expand(events, want_slugs=None, verbose=True):
+    """Replace summary events with their full market lists where needed."""
+    out, fetched = [], 0
+    for e in events:
+        if want_slugs is not None and e.get("slug") not in want_slugs:
+            out.append(e)
+            continue
+        if len(e.get("markets") or []) <= 1:
+            full = fetch_event(e.get("slug"))
+            if full:
+                out.append(full)
+                fetched += 1
+                continue
+        out.append(e)
+    if verbose:
+        print(f"polymarket us: expanded {fetched} events via {_EVENT_PATH['ok'] or 'no working path'}")
+    return out
+
+
 def parse(events):
     """Flatten to rows: one per market, with its stated type and prices."""
     rows = []
@@ -135,13 +189,15 @@ def parse(events):
                 continue
             sides, shape = _sides(m)
             rows.append({
+                "raw_type": m.get("sportsMarketType") or m.get("marketType") or m.get("type") or "",
                 "event_slug": e.get("slug"), "event_title": e.get("title"),
                 "start": e.get("startDate") or e.get("eventDate"),
                 "weight_class": st.get("weightClass"), "segment": st.get("cardSegment"),
                 "rounds": st.get("rounds"),
                 "slug": m.get("slug") or e.get("slug"),
                 "question": m.get("question") or m.get("title") or "",
-                "kind": TYPE_MAP.get(m.get("sportsMarketType") or "", "other"),
+                "kind": market_kind(m.get("sportsMarketType") or m.get("marketType")
+                                    or m.get("type")),
                 "line": m.get("line"), "volume": m.get("volume"),
                 "sides": sides, "shape": shape, "book": _quote(m)})
     return rows
@@ -157,7 +213,15 @@ def moneylines(rows, max_spread=0.06, min_volume=200.0, require_book=True):
     """
     out = {}
     for r in rows:
-        if r["kind"] != "winner" or len(r["sides"]) != 2:
+        # Shape, not the stated type. The live feed labelled every market
+        # "other", which put twelve winner markets for this card into the
+        # not-priced list. Two sides with real names (rather than Yes/No) is a
+        # moneyline whatever the type field says.
+        if len(r["sides"]) != 2:
+            continue
+        names = [_nm(n) for n, _ in r["sides"]]
+        yes_no = any(x.startswith(("yes", "no", "over", "under")) for x in names)
+        if r["kind"] not in ("winner", "other") or yes_no:
             continue
         (na, pa), (nb, pb) = r["sides"]
         a, b = _nm(na), _nm(nb)
@@ -227,7 +291,8 @@ def map_props(rows, bouts, max_spread=0.10, min_volume=100.0):
     # handle, which is why those props were being dropped.
     by_event = {}
     for r in rows:
-        if r["kind"] != "winner" or len(r["sides"]) != 2:
+        names0 = [_nm(n) for n, _ in r["sides"]]
+        if len(r["sides"]) != 2 or any(x.startswith(("yes", "no")) for x in names0):
             continue
         variants = [frozenset(_nm(n) for n, _ in r["sides"]),
                     frozenset(_surname(n) for n, _ in r["sides"]),
@@ -240,7 +305,13 @@ def map_props(rows, bouts, max_spread=0.10, min_volume=100.0):
                 break
     out = []
     for r in rows:
-        if r["kind"] not in ("prop", "total") or len(r["sides"]) != 2:
+        if len(r["sides"]) != 2:
+            continue
+        # a Yes/No or Over/Under pair is a prop, whatever the type field says
+        names = [_nm(n) for n, _ in r["sides"]]
+        if not any(x.startswith(("yes", "no", "over", "under")) for x in names):
+            continue
+        if r["kind"] not in ("prop", "total", "other"):
             continue
         q = _nm(r["question"])
         hit = None
@@ -322,7 +393,11 @@ def map_props(rows, bouts, max_spread=0.10, min_volume=100.0):
             continue
         out.append({"bout": f"{a} vs. {b}", "a": a, "b": b, "market": key,
                     "p_market": round(p, 5),
-                    "meta": {"slug": r["event_slug"] or r["slug"], "question": r["question"],
+                    "meta": {"slug": r["event_slug"] or r["slug"],
+                             # the market's own slug too: the link uses the
+                             # event page, but the not-priced list has to
+                             # exclude by the market it actually matched
+                             "market_slug": r["slug"], "question": r["question"],
                              "venue": "polymarket_us", "volume": r["volume"], **bk}})
     return out
 
@@ -333,6 +408,8 @@ def describe(rows):
     cannot tell us."""
     per_event = Counter(r["event_slug"] for r in rows)
     return {"markets": len(rows), "events": len(per_event),
+            "raw_types": dict(Counter(r.get("raw_type", "") for r in rows).most_common(6)),
+            "sample_questions": [r["question"][:60] for r in rows[:3]],
             "markets_per_event_max": max(per_event.values()) if per_event else 0,
             "kinds": dict(Counter(r["kind"] for r in rows)),
             "shapes": dict(Counter(r["shape"] for r in rows)),
@@ -345,10 +422,12 @@ def unmatched(rows, bouts):
     Listed with links, never given a number. Sourced here rather than from the
     global feed so every link on the site resolves on the same exchange.
     """
-    placed = {x["meta"]["slug"] for x in map_props(rows, bouts)}
-    for r in rows:
-        if r["kind"] == "winner":
-            placed.add(r["slug"])
+    placed = set()
+    for x in map_props(rows, bouts):
+        placed.add(x["meta"]["slug"])
+        placed.add(x["meta"].get("market_slug"))
+    for k, (nm_a, _p, meta) in moneylines(rows, require_book=False).items():
+        placed.add(meta.get("slug"))
     names = {w for bt in bouts for n in (bt[0], bt[1]) for w in [_surname(n)] if len(w) >= 3}
     out, seen = [], set()
     for r in rows:

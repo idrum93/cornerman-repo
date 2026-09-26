@@ -266,7 +266,7 @@ def capture(fights, fighters, card_path="data/upcoming.txt", path=None,
         # global book. It slugs the same bout differently and has its own
         # order book, so a US reader and a global reader see different prices.
         from . import polymarket_us as pus
-        rows_us = pus.parse(pus.fetch_events())
+        rows_us = pus.parse(pus.expand(pus.fetch_events()))
         if verbose:
             print(f"polymarket us: {pus.describe(rows_us)}")
         us = pus.moneylines(rows_us)
@@ -310,7 +310,14 @@ def capture(fights, fighters, card_path="data/upcoming.txt", path=None,
             # price we never record
             hit = vbook.get(frozenset((_key(na), _key(nb))))
             if hit is None:
-                for v in (frozenset(x.split()[-1] for x in (_key(na), _key(nb)) if x.split()),
+                # The last token is not always the surname: "Raul Rosas Jr."
+                # ends in a suffix, so the fallback key came out as
+                # {jr, barcelos} and matched nothing.
+                def _sur(x):
+                    toks = [t for t in x.split()
+                            if len(t) > 1 and t not in ("jr", "sr", "ii", "iii", "iv")]
+                    return toks[-1] if toks else x
+                for v in (frozenset(_sur(x) for x in (_key(na), _key(nb))),
                           frozenset(x.replace(" ", "") for x in (_key(na), _key(nb)))):
                     if len(v) == 2 and vbook.get(v) is not None:
                         hit = vbook[v]
@@ -456,7 +463,7 @@ def capture_props(card_path="data/upcoming.txt", payload_path="site/predictions.
         extra = unmatched(_rows, bouts)
         try:
             from . import polymarket_us as pus
-            us_rows = pus.parse(pus.fetch_events())
+            us_rows = pus.parse(pus.expand(pus.fetch_events()))
             if verbose:
                 print(f"polymarket us props: {pus.describe(us_rows)}")
             found += pus.map_props(us_rows, bouts)

@@ -741,16 +741,19 @@ function baseRatePanel(here,bout,inZone){
         <div class="brverd ${verdict[1]}">${verdict[0]}</div>
       </div>`;}).join('');
     const c0=byId[g.ids[0]], base0=c0?brCells(c0).base:null;
-    return `<div class="brgroup">
+    return {id:g.title.toLowerCase().replace(/[^a-z]+/g,'-'), title:g.title,
+      html:`<div class="brgroup">
       <div class="brhead"><span class="brtitle">${esc(g.title)}</span>
         <span class="lbl">${base0!=null?`happens in ${(base0*100).toFixed(0)}% of fights overall`:''} · measured for ${esc(g.scope)}</span></div>
-      ${rows}</div>`;}).join('');
+      ${rows}</div>`};});
   const key=here&&bout
     ? `<span style="color:var(--red)">▲ ${esc(bout.a)}</span> · <span style="color:var(--blue)">▲ ${esc(bout.b)}</span> · <span style="color:var(--gold)">▲ this fight</span>`
     : 'each bar = share of past fights where it happened · dashed line = the overall rate';
   return `<div class="seg">${inZone?`<div class="lbl" style="margin:0 0 8px">${key}</div>`
       :`<div class="seghd"><h2>What usually happens</h2><span class="lbl">${key}</span></div>`}
-    <div class="brgrid">${groups}</div>
+    <div class="mtabs">${groups.map((g,i)=>
+        `<button class="mtab${i?'':' on'}" data-tab="br-${g.id}">${esc(g.title)}</button>`).join('')}</div>
+    ${groups.map((g,i)=>`<div class="mpanel${i?'':' on'}" data-panel="br-${g.id}">${g.html}</div>`).join('')}
     <div class="note" style="margin-top:8px"><b style="color:var(--mute)">How to read this.</b>
       Each row sorts every past fight by one measurement and splits them into four equal groups. The
       sentence gives the outcome rate in the lowest and the highest group, against the rate across all
@@ -1119,7 +1122,7 @@ function marketTabs(b,mk,rr,totals){
     ['volume','Strikes & Takedowns',
       // parenthesised: without it, + binds tighter than ?: and everything
       // after the ternary lands in the false branch only
-      (b.exp_minutes?group('Significant strikes','over an expected '+b.exp_minutes.toFixed(1)+' minutes',[
+      (b.exp_minutes?group('Amount landed','over an expected '+b.exp_minutes.toFixed(1)+' minutes',[
         strikeRow(`${surname(b.a)} significant strikes landed`,Math.round((b.a_strikes_rate??b.a_slpm_mid)*b.exp_minutes),'nm-a'),
         strikeRow(`${surname(b.b)} significant strikes landed`,Math.round((b.b_strikes_rate??b.b_slpm_mid)*b.exp_minutes),'nm-b'),
         strikeRow(`${surname(b.a)} per round`,Math.round((b.a_strikes_rate??b.a_slpm_mid)*5),'nm-a'),
@@ -1127,11 +1130,6 @@ function marketTabs(b,mk,rr,totals){
         b.a_takedowns_rate!=null?strikeRow(`${surname(b.a)} takedowns landed`,(b.a_takedowns_rate*b.exp_minutes/15).toFixed(1),'nm-a'):'',
         b.b_takedowns_rate!=null?strikeRow(`${surname(b.b)} takedowns landed`,(b.b_takedowns_rate*b.exp_minutes/15).toFixed(1),'nm-b'):'',
         '<div class="note" style="padding:6px 11px">Expected counts, from a model of the mean rate — beaten out against each fighter\'s own career rate and the league average on held-out fights (addendum 26). Books quote their own ladders, which differ by fight and by book, so the model publishes its estimate and you read your line against it. How likely each exact total is, rather than the average, is still to come.</div>']):'')
-      +group('Takedowns and knockdowns',trackLine(),[
-        propRow(`${b.a} lands a takedown`,b.a_p_takedown,'var(--red)',null,vsBase('C1','a',b.bands,b.a_p_takedown),'takedown_a'),
-        propRow(`${b.b} lands a takedown`,b.b_p_takedown,'var(--blue)',null,vsBase('C1','b',b.bands,b.b_p_takedown),'takedown_b'),
-        propRow(`${b.a} scores a knockdown`,b.a_p_knockdown,'var(--red)',null,vsBase('C3','a',b.bands,b.a_p_knockdown),'knockdown_a'),
-        propRow(`${b.b} scores a knockdown`,b.b_p_knockdown,'var(--blue)',null,vsBase('C3','b',b.bands,b.b_p_knockdown),'knockdown_b')])
 
       +formulaNote(b,'knockdown','knockdown','a three-input formula matched the 46-input model it replaced, so the one you can check won')],
     ['parlays','Fight Parlays',rovGroup(b)],
