@@ -2,7 +2,7 @@
  "event": "UFC Fight Night: Rosas Jr. vs. Barcelos",
  "date": "2026-09-26",
  "venue": "Meta Apex, Enterprise, Nevada , United States",
- "generated_utc": "2026-09-26T05:26:20.512841+00:00",
+ "generated_utc": "2026-09-26T05:35:47.537799+00:00",
  "bouts": [
   {
    "bout": "Raul Rosas Jr vs. Raoni Barcelos",
@@ -304,7 +304,7 @@
      "venue": "polymarket_us"
     },
     "sub_b": {
-     "p": 0.095,
+     "p": 0.105,
      "slug": "ufc-rauros-raobar-2026-09-26",
      "venue": "polymarket_us"
     }
@@ -821,7 +821,7 @@
      "venue": "polymarket_us"
     },
     "dec_a": {
-     "p": 0.07,
+     "p": 0.075,
      "slug": "ufc-brahie-rinnak-2026-09-26",
      "venue": "polymarket_us"
     },
@@ -934,9 +934,9 @@
      "key": "d_str_def"
     }
    ],
-   "p_market": 0.5934,
+   "p_market": 0.6,
    "books": 16.0,
-   "edge": -0.0762,
+   "edge": -0.0827,
    "p_finish_survival_raw": 0.4496,
    "m_a_ko": 0.1381,
    "m_b_ko": 0.1389,
@@ -1517,7 +1517,7 @@
      "venue": "polymarket_us"
     },
     "ko_a": {
-     "p": 0.135,
+     "p": 0.14,
      "slug": "ufc-joshar-elvbre-2026-09-26",
      "venue": "polymarket_us"
     },
@@ -1527,7 +1527,7 @@
      "venue": "polymarket_us"
     },
     "sub_a": {
-     "p": 0.105,
+     "p": 0.12,
      "slug": "ufc-joshar-elvbre-2026-09-26",
      "venue": "polymarket_us"
     },
@@ -1753,12 +1753,7 @@
    "p_open": 0.6265,
    "prop_market": {
     "decision": {
-     "p": 0.21053,
-     "slug": "ufc-monjac-ricsim-2026-09-26",
-     "venue": "polymarket_us"
-    },
-    "ends_before_r3": {
-     "p": 0.35,
+     "p": 0.05435,
      "slug": "ufc-monjac-ricsim-2026-09-26",
      "venue": "polymarket_us"
     },
@@ -1784,6 +1779,11 @@
     },
     "sub_b": {
      "p": 0.045,
+     "slug": "ufc-monjac-ricsim-2026-09-26",
+     "venue": "polymarket_us"
+    },
+    "ends_before_r3": {
+     "p": 0.355,
      "slug": "ufc-monjac-ricsim-2026-09-26",
      "venue": "polymarket_us"
     }
@@ -2009,7 +2009,7 @@
      "venue": "polymarket_us"
     },
     "ends_before_r3": {
-     "p": 0.07143,
+     "p": 0.06944,
      "slug": "ufc-johcas-alaten-2026-09-26",
      "venue": "polymarket_us"
     },
@@ -2245,12 +2245,12 @@
    "p_open": 0.1432,
    "prop_market": {
     "decision": {
-     "p": 0.03226,
+     "p": 0.03297,
      "slug": "ufc-vandem-yazjau-2026-09-26",
      "venue": "polymarket_us"
     },
     "dec_b": {
-     "p": 0.52,
+     "p": 0.515,
      "slug": "ufc-vandem-yazjau-2026-09-26",
      "venue": "polymarket_us"
     },
