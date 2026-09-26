@@ -10,10 +10,10 @@
    "method_right": 3,
    "round_n": 4,
    "round_right": 2,
-   "props_n": 76,
-   "props_right": 37,
-   "props_base_n": 76,
-   "props_base_right": 44,
+   "props_n": 152,
+   "props_right": 101,
+   "props_base_n": 62,
+   "props_base_right": 35,
    "market_n": 10,
    "market_right": 7,
    "model_closer": 6,
@@ -127,45 +127,162 @@
       },
       {
        "kind": "prop",
-       "label": "Joshua Van lands a takedown",
-       "said": 0.173,
-       "happened": false,
+       "label": "Fight starts round 2",
+       "said": 0.893,
+       "happened": true,
        "right": true,
-       "base": 0.447,
+       "base": 0.784,
        "base_right": true
       },
       {
        "kind": "prop",
-       "label": "Alexandre Pantoja lands a takedown",
-       "said": 0.695,
+       "label": "Fight starts round 3",
+       "said": 0.769,
        "happened": true,
        "right": true,
-       "base": 0.447,
+       "base": 0.624,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Fight starts round 4",
+       "said": 0.675,
+       "happened": true,
+       "right": true,
+       "base": 0.521,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Fight starts round 5",
+       "said": 0.59,
+       "happened": true,
+       "right": true,
+       "base": 0.462,
        "base_right": false
       },
       {
        "kind": "prop",
-       "label": "Joshua Van scores a knockdown",
-       "said": 0.164,
+       "label": "Joshua Van by KO/TKO/DQ",
+       "said": 0.167,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Joshua Van by submission",
+       "said": 0.1,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Joshua Van by decision",
+       "said": 0.445,
        "happened": true,
        "right": false,
-       "base": 0.187,
-       "base_right": false
+       "base": null,
+       "base_right": null
       },
       {
        "kind": "prop",
-       "label": "Alexandre Pantoja scores a knockdown",
-       "said": 0.146,
+       "label": "Joshua Van by KO/TKO/DQ or submission",
+       "said": 0.267,
        "happened": false,
        "right": true,
-       "base": 0.187,
-       "base_right": true
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Alexandre Pantoja by KO/TKO/DQ",
+       "said": 0.094,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Alexandre Pantoja by submission",
+       "said": 0.127,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Alexandre Pantoja by decision",
+       "said": 0.066,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Alexandre Pantoja by KO/TKO/DQ or submission",
+       "said": 0.222,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 1",
+       "said": 0.107,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 2",
+       "said": 0.123,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 3",
+       "said": 0.094,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 4",
+       "said": 0.085,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 5",
+       "said": 0.079,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
       }
      ],
-     "props_n": 13,
-     "props_right": 12,
+     "props_n": 26,
+     "props_right": 25,
      "props_base_n": 13,
-     "props_base_right": 8,
+     "props_base_right": 9,
      "market": {
       "p_market": 0.5483,
       "p_winner_market": 0.548,
@@ -255,45 +372,126 @@
       },
       {
        "kind": "prop",
-       "label": "Arman Tsarukyan lands a takedown",
-       "said": 0.784,
-       "happened": true,
-       "right": true,
-       "base": 0.447,
+       "label": "Fight starts round 2",
+       "said": 0.788,
+       "happened": false,
+       "right": false,
+       "base": 0.746,
        "base_right": false
       },
       {
        "kind": "prop",
-       "label": "Mauricio Ruffy lands a takedown",
-       "said": 0.13,
+       "label": "Fight starts round 3",
+       "said": 0.624,
        "happened": false,
-       "right": true,
-       "base": 0.447,
-       "base_right": true
+       "right": false,
+       "base": 0.592,
+       "base_right": false
       },
       {
        "kind": "prop",
-       "label": "Arman Tsarukyan scores a knockdown",
-       "said": 0.147,
+       "label": "Arman Tsarukyan by KO/TKO/DQ",
+       "said": 0.221,
        "happened": true,
        "right": false,
-       "base": 0.187,
-       "base_right": false
+       "base": null,
+       "base_right": null
       },
       {
        "kind": "prop",
-       "label": "Mauricio Ruffy scores a knockdown",
-       "said": 0.379,
+       "label": "Arman Tsarukyan by submission",
+       "said": 0.024,
        "happened": false,
        "right": true,
-       "base": 0.187,
-       "base_right": true
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Arman Tsarukyan by decision",
+       "said": 0.505,
+       "happened": false,
+       "right": false,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Arman Tsarukyan by KO/TKO/DQ or submission",
+       "said": 0.245,
+       "happened": true,
+       "right": false,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Mauricio Ruffy by KO/TKO/DQ",
+       "said": 0.228,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Mauricio Ruffy by submission",
+       "said": 0.014,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Mauricio Ruffy by decision",
+       "said": 0.007,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Mauricio Ruffy by KO/TKO/DQ or submission",
+       "said": 0.242,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 1",
+       "said": 0.212,
+       "happened": true,
+       "right": false,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 2",
+       "said": 0.165,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 3",
+       "said": 0.111,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
       }
      ],
-     "props_n": 9,
-     "props_right": 3,
-     "props_base_n": 9,
-     "props_base_right": 2,
+     "props_n": 18,
+     "props_right": 7,
+     "props_base_n": 7,
+     "props_base_right": 0,
      "market": {
       "p_market": 0.7277,
       "p_winner_market": 0.728,
@@ -374,44 +572,125 @@
       },
       {
        "kind": "prop",
-       "label": "Iwo Baraniewski lands a takedown",
-       "said": 0.126,
+       "label": "Fight starts round 2",
+       "said": 0.616,
        "happened": true,
-       "right": false,
-       "base": 0.447,
-       "base_right": false
-      },
-      {
-       "kind": "prop",
-       "label": "Alonzo Menifield lands a takedown",
-       "said": 0.21,
-       "happened": true,
-       "right": false,
-       "base": 0.447,
-       "base_right": false
-      },
-      {
-       "kind": "prop",
-       "label": "Iwo Baraniewski scores a knockdown",
-       "said": 0.715,
-       "happened": false,
-       "right": false,
-       "base": 0.187,
+       "right": true,
+       "base": 0.746,
        "base_right": true
       },
       {
        "kind": "prop",
-       "label": "Alonzo Menifield scores a knockdown",
-       "said": 0.348,
+       "label": "Fight starts round 3",
+       "said": 0.362,
+       "happened": true,
+       "right": false,
+       "base": 0.592,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Iwo Baraniewski by KO/TKO/DQ",
+       "said": 0.438,
        "happened": false,
        "right": true,
-       "base": 0.187,
-       "base_right": true
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Iwo Baraniewski by submission",
+       "said": 0.026,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Iwo Baraniewski by decision",
+       "said": 0.175,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Iwo Baraniewski by KO/TKO/DQ or submission",
+       "said": 0.464,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Alonzo Menifield by KO/TKO/DQ",
+       "said": 0.219,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Alonzo Menifield by submission",
+       "said": 0.042,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Alonzo Menifield by decision",
+       "said": 0.1,
+       "happened": true,
+       "right": false,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Alonzo Menifield by KO/TKO/DQ or submission",
+       "said": 0.261,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 1",
+       "said": 0.384,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 2",
+       "said": 0.254,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 3",
+       "said": 0.087,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
       }
      ],
-     "props_n": 9,
-     "props_right": 2,
-     "props_base_n": 9,
+     "props_n": 18,
+     "props_right": 12,
+     "props_base_n": 7,
      "props_base_right": 7,
      "market": {
       "p_market": 0.6811,
@@ -530,44 +809,125 @@
       },
       {
        "kind": "prop",
-       "label": "Charles Jourdain lands a takedown",
-       "said": 0.314,
-       "happened": false,
+       "label": "Fight starts round 2",
+       "said": 0.838,
+       "happened": true,
        "right": true,
-       "base": 0.447,
+       "base": 0.746,
        "base_right": true
       },
       {
        "kind": "prop",
-       "label": "Marlon Vera lands a takedown",
-       "said": 0.296,
+       "label": "Fight starts round 3",
+       "said": 0.65,
        "happened": true,
-       "right": false,
-       "base": 0.447,
-       "base_right": false
-      },
-      {
-       "kind": "prop",
-       "label": "Charles Jourdain scores a knockdown",
-       "said": 0.173,
-       "happened": false,
        "right": true,
-       "base": 0.187,
+       "base": 0.592,
        "base_right": true
       },
       {
        "kind": "prop",
-       "label": "Marlon Vera scores a knockdown",
-       "said": 0.198,
+       "label": "Charles Jourdain by KO/TKO/DQ",
+       "said": 0.185,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Charles Jourdain by submission",
+       "said": 0.049,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Charles Jourdain by decision",
+       "said": 0.372,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Charles Jourdain by KO/TKO/DQ or submission",
+       "said": 0.234,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Marlon Vera by KO/TKO/DQ",
+       "said": 0.112,
        "happened": true,
        "right": false,
-       "base": 0.187,
-       "base_right": false
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Marlon Vera by submission",
+       "said": 0.132,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Marlon Vera by decision",
+       "said": 0.15,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Marlon Vera by KO/TKO/DQ or submission",
+       "said": 0.244,
+       "happened": true,
+       "right": false,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 1",
+       "said": 0.162,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 2",
+       "said": 0.188,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 3",
+       "said": 0.129,
+       "happened": true,
+       "right": false,
+       "base": null,
+       "base_right": null
       }
      ],
-     "props_n": 9,
-     "props_right": 5,
-     "props_base_n": 9,
+     "props_n": 18,
+     "props_right": 13,
+     "props_base_n": 7,
      "props_base_right": 5,
      "market": {
       "p_market": 0.6548,
@@ -649,44 +1009,125 @@
       },
       {
        "kind": "prop",
-       "label": "Tai Tuivasa lands a takedown",
-       "said": 0.105,
+       "label": "Fight starts round 2",
+       "said": 0.731,
        "happened": true,
-       "right": false,
-       "base": 0.447,
-       "base_right": false
-      },
-      {
-       "kind": "prop",
-       "label": "Robelis Despaigne lands a takedown",
-       "said": 0.182,
-       "happened": true,
-       "right": false,
-       "base": 0.447,
-       "base_right": false
-      },
-      {
-       "kind": "prop",
-       "label": "Tai Tuivasa scores a knockdown",
-       "said": 0.249,
-       "happened": false,
        "right": true,
-       "base": 0.187,
+       "base": 0.746,
        "base_right": true
       },
       {
        "kind": "prop",
-       "label": "Robelis Despaigne scores a knockdown",
-       "said": 0.28,
+       "label": "Fight starts round 3",
+       "said": 0.476,
+       "happened": true,
+       "right": false,
+       "base": 0.592,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Tai Tuivasa by KO/TKO/DQ",
+       "said": 0.159,
        "happened": false,
        "right": true,
-       "base": 0.187,
-       "base_right": true
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Tai Tuivasa by submission",
+       "said": 0.035,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Tai Tuivasa by decision",
+       "said": 0.262,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Tai Tuivasa by KO/TKO/DQ or submission",
+       "said": 0.194,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Robelis Despaigne by KO/TKO/DQ",
+       "said": 0.352,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Robelis Despaigne by submission",
+       "said": 0.093,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Robelis Despaigne by decision",
+       "said": 0.099,
+       "happened": true,
+       "right": false,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Robelis Despaigne by KO/TKO/DQ or submission",
+       "said": 0.445,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 1",
+       "said": 0.269,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 2",
+       "said": 0.255,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 3",
+       "said": 0.115,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
       }
      ],
-     "props_n": 9,
-     "props_right": 4,
-     "props_base_n": 9,
+     "props_n": 18,
+     "props_right": 13,
+     "props_base_n": 7,
      "props_base_right": 7,
      "market": {
       "p_market": 0.1796,
@@ -796,44 +1237,125 @@
       },
       {
        "kind": "prop",
-       "label": "Edmen Shahbazyan lands a takedown",
-       "said": 0.37,
+       "label": "Fight starts round 2",
+       "said": 0.76,
        "happened": true,
-       "right": false,
-       "base": 0.447,
-       "base_right": false
-      },
-      {
-       "kind": "prop",
-       "label": "Brunno Ferreira lands a takedown",
-       "said": 0.377,
-       "happened": false,
        "right": true,
-       "base": 0.447,
+       "base": 0.746,
        "base_right": true
       },
       {
        "kind": "prop",
-       "label": "Edmen Shahbazyan scores a knockdown",
-       "said": 0.255,
+       "label": "Fight starts round 3",
+       "said": 0.542,
        "happened": true,
-       "right": false,
-       "base": 0.187,
-       "base_right": false
+       "right": true,
+       "base": 0.592,
+       "base_right": true
       },
       {
        "kind": "prop",
-       "label": "Brunno Ferreira scores a knockdown",
-       "said": 0.175,
+       "label": "Edmen Shahbazyan by KO/TKO/DQ",
+       "said": 0.234,
        "happened": false,
        "right": true,
-       "base": 0.187,
-       "base_right": true
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Edmen Shahbazyan by submission",
+       "said": 0.129,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Edmen Shahbazyan by decision",
+       "said": 0.306,
+       "happened": true,
+       "right": false,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Edmen Shahbazyan by KO/TKO/DQ or submission",
+       "said": 0.363,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Brunno Ferreira by KO/TKO/DQ",
+       "said": 0.104,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Brunno Ferreira by submission",
+       "said": 0.092,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Brunno Ferreira by decision",
+       "said": 0.135,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Brunno Ferreira by KO/TKO/DQ or submission",
+       "said": 0.197,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 1",
+       "said": 0.24,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 2",
+       "said": 0.217,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 3",
+       "said": 0.102,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
       }
      ],
-     "props_n": 9,
-     "props_right": 5,
-     "props_base_n": 9,
+     "props_n": 18,
+     "props_right": 15,
+     "props_base_n": 7,
      "props_base_right": 7,
      "market": {
       "p_market": 0.611,
@@ -924,45 +1446,126 @@
       },
       {
        "kind": "prop",
-       "label": "Casey O'Neill lands a takedown",
-       "said": 0.158,
-       "happened": false,
-       "right": true,
-       "base": 0.447,
-       "base_right": true
-      },
-      {
-       "kind": "prop",
-       "label": "Eduarda Moura lands a takedown",
-       "said": 0.911,
+       "label": "Fight starts round 2",
+       "said": 0.888,
        "happened": false,
        "right": false,
-       "base": 0.447,
-       "base_right": true
+       "base": 0.746,
+       "base_right": false
       },
       {
        "kind": "prop",
-       "label": "Casey O'Neill scores a knockdown",
-       "said": 0.151,
+       "label": "Fight starts round 3",
+       "said": 0.786,
        "happened": false,
-       "right": true,
-       "base": 0.187,
-       "base_right": true
+       "right": false,
+       "base": 0.592,
+       "base_right": false
       },
       {
        "kind": "prop",
-       "label": "Eduarda Moura scores a knockdown",
-       "said": 0.11,
+       "label": "Casey O'Neill by KO/TKO/DQ",
+       "said": 0.146,
        "happened": false,
        "right": true,
-       "base": 0.187,
-       "base_right": true
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Casey O'Neill by submission",
+       "said": 0.052,
+       "happened": true,
+       "right": false,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Casey O'Neill by decision",
+       "said": 0.446,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Casey O'Neill by KO/TKO/DQ or submission",
+       "said": 0.198,
+       "happened": true,
+       "right": false,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Eduarda Moura by KO/TKO/DQ",
+       "said": 0.043,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Eduarda Moura by submission",
+       "said": 0.063,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Eduarda Moura by decision",
+       "said": 0.249,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Eduarda Moura by KO/TKO/DQ or submission",
+       "said": 0.107,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 1",
+       "said": 0.112,
+       "happened": true,
+       "right": false,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 2",
+       "said": 0.102,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 3",
+       "said": 0.091,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
       }
      ],
-     "props_n": 9,
-     "props_right": 3,
-     "props_base_n": 9,
-     "props_base_right": 4,
+     "props_n": 18,
+     "props_right": 8,
+     "props_base_n": 7,
+     "props_base_right": 0,
      "market": {
       "p_market": 0.6678,
       "p_winner_market": 0.668,
@@ -1052,45 +1655,126 @@
       },
       {
        "kind": "prop",
-       "label": "Giga Chikadze lands a takedown",
-       "said": 0.105,
-       "happened": false,
-       "right": true,
-       "base": 0.447,
-       "base_right": true
-      },
-      {
-       "kind": "prop",
-       "label": "Joanderson Brito lands a takedown",
-       "said": 0.574,
+       "label": "Fight starts round 2",
+       "said": 0.819,
        "happened": false,
        "right": false,
-       "base": 0.447,
-       "base_right": true
+       "base": 0.746,
+       "base_right": false
       },
       {
        "kind": "prop",
-       "label": "Giga Chikadze scores a knockdown",
-       "said": 0.183,
+       "label": "Fight starts round 3",
+       "said": 0.627,
        "happened": false,
-       "right": true,
-       "base": 0.187,
-       "base_right": true
+       "right": false,
+       "base": 0.592,
+       "base_right": false
       },
       {
        "kind": "prop",
-       "label": "Joanderson Brito scores a knockdown",
-       "said": 0.145,
+       "label": "Giga Chikadze by KO/TKO/DQ",
+       "said": 0.13,
        "happened": false,
        "right": true,
-       "base": 0.187,
-       "base_right": true
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Giga Chikadze by submission",
+       "said": 0.055,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Giga Chikadze by decision",
+       "said": 0.176,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Giga Chikadze by KO/TKO/DQ or submission",
+       "said": 0.184,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Joanderson Brito by KO/TKO/DQ",
+       "said": 0.172,
+       "happened": true,
+       "right": false,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Joanderson Brito by submission",
+       "said": 0.12,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Joanderson Brito by decision",
+       "said": 0.347,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Joanderson Brito by KO/TKO/DQ or submission",
+       "said": 0.292,
+       "happened": true,
+       "right": false,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 1",
+       "said": 0.181,
+       "happened": true,
+       "right": false,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 2",
+       "said": 0.191,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 3",
+       "said": 0.104,
+       "happened": false,
+       "right": true,
+       "base": null,
+       "base_right": null
       }
      ],
-     "props_n": 9,
-     "props_right": 3,
-     "props_base_n": 9,
-     "props_base_right": 4,
+     "props_n": 18,
+     "props_right": 8,
+     "props_base_n": 7,
+     "props_base_right": 0,
      "market": {
       "p_market": 0.2322,
       "p_winner_market": 0.768,

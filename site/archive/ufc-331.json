@@ -2,7 +2,7 @@
  "event": "UFC 331",
  "date": "2026-09-19",
  "venue": "Crypto.com Arena, Los Angeles",
- "generated_utc": "2026-09-26T05:01:38.260552+00:00",
+ "generated_utc": "2026-09-26T05:15:01.675178+00:00",
  "bouts": [
   {
    "bout": "Joshua Van vs. Alexandre Pantoja",
@@ -2682,6 +2682,5 @@
    "intercept": -0.048,
    "note": "weights are per standard deviation of each input"
   }
- },
- "polymarket_other": []
+ }
 }
