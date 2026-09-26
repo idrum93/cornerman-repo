@@ -2,7 +2,7 @@
  "event": "UFC 331",
  "date": "2026-09-19",
  "venue": "Crypto.com Arena, Los Angeles",
- "generated_utc": "2026-09-26T05:15:01.675178+00:00",
+ "generated_utc": "2026-09-26T15:15:25.963450+00:00",
  "bouts": [
   {
    "bout": "Joshua Van vs. Alexandre Pantoja",
@@ -86,7 +86,12 @@
      "label": "takedown threat",
      "value": -0.1387,
      "favors": "b",
-     "key": "grapple_edge"
+     "key": "grapple_edge",
+     "parts": {
+      "a": 0.31,
+      "b": 0.7,
+      "how": "their takedown rate x the other's takedown defense"
+     }
     },
     {
      "label": "striking defense",
@@ -309,7 +314,12 @@
      "label": "takedown threat",
      "value": 0.2137,
      "favors": "a",
-     "key": "grapple_edge"
+     "key": "grapple_edge",
+     "parts": {
+      "a": 0.8,
+      "b": 0.19,
+      "how": "their takedown rate x the other's takedown defense"
+     }
     },
     {
      "label": "experience",
@@ -534,7 +544,12 @@
      "label": "takedown threat",
      "value": 0.0923,
      "favors": "a",
-     "key": "grapple_edge"
+     "key": "grapple_edge",
+     "parts": {
+      "a": 0.76,
+      "b": 0.5,
+      "how": "their takedown rate x the other's takedown defense"
+     }
     }
    ],
    "p_market": null,
@@ -747,7 +762,12 @@
      "label": "takedown threat",
      "value": 0.1194,
      "favors": "a",
-     "key": "grapple_edge"
+     "key": "grapple_edge",
+     "parts": {
+      "a": 0.71,
+      "b": 0.37,
+      "how": "their takedown rate x the other's takedown defense"
+     }
     }
    ],
    "p_market": 0.6483,
@@ -960,7 +980,12 @@
      "label": "knockout threat",
      "value": -0.1381,
      "favors": "b",
-     "key": "ko_edge"
+     "key": "ko_edge",
+     "parts": {
+      "a": 1.14,
+      "b": 0.61,
+      "how": "their striking output x how often the other has been finished by strikes"
+     }
     }
    ],
    "p_market": 0.6811,
@@ -1161,7 +1186,12 @@
      "label": "knockout threat",
      "value": -0.3245,
      "favors": "b",
-     "key": "ko_edge"
+     "key": "ko_edge",
+     "parts": {
+      "a": 2.54,
+      "b": 1.3,
+      "how": "their striking output x how often the other has been finished by strikes"
+     }
     },
     {
      "label": "career quality",
@@ -1987,7 +2017,12 @@
      "label": "takedown threat",
      "value": 0.0796,
      "favors": "a",
-     "key": "grapple_edge"
+     "key": "grapple_edge",
+     "parts": {
+      "a": 0.62,
+      "b": 0.39,
+      "how": "their takedown rate x the other's takedown defense"
+     }
     },
     {
      "label": "strength of schedule",
@@ -2200,13 +2235,23 @@
      "label": "takedown threat",
      "value": -0.203,
      "favors": "b",
-     "key": "grapple_edge"
+     "key": "grapple_edge",
+     "parts": {
+      "a": 0.38,
+      "b": 0.96,
+      "how": "their takedown rate x the other's takedown defense"
+     }
     },
     {
      "label": "knockout threat",
      "value": -0.1829,
      "favors": "b",
-     "key": "ko_edge"
+     "key": "ko_edge",
+     "parts": {
+      "a": 0.96,
+      "b": 0.25,
+      "how": "their striking output x how often the other has been finished by strikes"
+     }
     }
    ],
    "p_market": 0.6678,
@@ -2407,7 +2452,12 @@
      "label": "takedown threat",
      "value": -0.2406,
      "favors": "b",
-     "key": "grapple_edge"
+     "key": "grapple_edge",
+     "parts": {
+      "a": 0.17,
+      "b": 0.86,
+      "how": "their takedown rate x the other's takedown defense"
+     }
     },
     {
      "label": "strikes absorbed",
