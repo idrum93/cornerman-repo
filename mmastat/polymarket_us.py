@@ -272,7 +272,8 @@ def moneylines(rows, max_spread=0.06, min_volume=200.0, require_book=True):
             continue
         # link to the EVENT page: it carries every market for the bout, and a
         # market-level slug need not resolve on its own
-        meta = {"slug": r["event_slug"] or r["slug"], "venue": "polymarket_us",
+        meta = {"slug": r["event_slug"] or r["slug"], "market_slug": r["slug"],
+                "venue": "polymarket_us",
                 "volume": r["volume"],
                 "weight_class": r["weight_class"], "segment": r["segment"], **bk}
         out[frozenset((a, b))] = (a, round(p, 5), meta)
@@ -456,9 +457,14 @@ def unmatched(rows, bouts):
         placed.add(x["meta"].get("market_slug"))
     for k, (nm_a, _p, meta) in moneylines(rows, require_book=False).items():
         placed.add(meta.get("slug"))
+        placed.add(meta.get("market_slug"))
     names = {w for bt in bouts for n in (bt[0], bt[1]) for w in [_surname(n)] if len(w) >= 3}
     out, seen = [], set()
     for r in rows:
+        # By market slug only. Both ids are recorded when a market is priced,
+        # so this catches them; excluding by event slug as well would hide
+        # every unpriced market that happens to share an event with a priced
+        # one — which on this feed is all of them.
         if r["slug"] in placed or r["slug"] in seen or not r["question"]:
             continue
         q = _nm(r["question"])

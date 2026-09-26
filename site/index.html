@@ -1240,7 +1240,7 @@ function tale(b){
 const DRV_STAT={'age':'age','career quality':'elo','strength of schedule':'opp_elo',
   'experience':'n_fights','striking output':'slpm','strikes absorbed':'sapm',
   'striking accuracy':'str_acc','striking defense':'str_def','reach':'reach',
-  'durability':'ko_loss','takedown threat':'td15','knockout threat':'kd15',
+  'losses by strikes':'ko_loss','takedown threat':'td15','knockout threat':'kd15',
   'submission threat':'sub15'};
 function drvRaw(b,label){
   const k=DRV_STAT[label]; if(!k||!b.stats) return '';

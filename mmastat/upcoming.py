@@ -337,7 +337,11 @@ def predict_card(path, fights, fighters, verbose=True):
         "d_sapm": "strikes absorbed", "d_str_acc": "striking accuracy",
         "d_str_def": "striking defense", "d_reach": "reach",
         "d_age": "age", "d_log_layoff": "layoff",
-        "d_ko_loss_rate": "durability", "grapple_edge": "takedown threat",
+        # "durability" read backwards on the page: the stat is the share of a
+        # fighter's losses that came by strikes, so a HIGHER number is worse.
+        # Shown as "durability 17% v 9%" it looked like the higher number was
+        # the advantage, while the bar correctly favoured the other corner.
+        "d_ko_loss_rate": "losses by strikes", "grapple_edge": "takedown threat",
         "ko_edge": "knockout threat", "sub_edge": "submission threat",
     }
 

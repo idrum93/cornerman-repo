@@ -1,0 +1,37 @@
+name: capture
+on:
+  schedule:
+    - cron: "0 2,10,16,22 * * *"
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: ledger
+  cancel-in-progress: false
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - run: python -m mmastat.sources --corpus --no-upcoming
+      - run: python -m mmastat.ledger capture
+        env:
+          ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+      - run: python -m mmastat.ledger settle
+      - name: commit the ledger
+        run: |
+          git config user.name "cornerman-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add data/ledger/
+          if git diff --staged --quiet; then echo "nothing new"; exit 0; fi
+          git commit -m "ledger"
+          for attempt in 1 2 3; do
+            if git push; then echo "pushed"; exit 0; fi
+            git pull --rebase --no-edit
+          done
+          echo "could not push"; exit 1

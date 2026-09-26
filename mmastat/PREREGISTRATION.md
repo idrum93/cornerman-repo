@@ -2028,3 +2028,98 @@ the same sparsity that sank reversals in addendum 25.
 The list is a good list. It is aimed at a richer feed than this one: the
 features that would repay the effort need shot-difficulty labels or event
 timestamps, and UFCStats publishes neither.
+
+---
+
+# Audit: the dataset-structure list (2026-09-25)
+
+A second proposed feature list, audited the same way. Almost all of it is
+either already built or already closed.
+
+## Already built
+
+One row per fighter per fight with leakage-safe rolling state, built by
+walking fights in date order and updating after each — the exact structure
+proposed, and the reason the leakage tests pass. Opponent-adjusted striking and
+takedowns. Target and position shares. Knockdowns and submission attempts per
+15. Separate models for winner, method, round, duration and per-fighter output
+(strikes, control, takedowns, knockdowns), which is the "fight outputs" branch
+of the proposed architecture. Time-based splits, never random. Logistic
+regression benchmarked against gradient boosting, with the betting market as
+the baseline every model is measured against.
+
+## Already tested and closed
+
+Recency windows and exponential weighting (addendum 7, null). Pace decay and
+round-to-round output (addendum 6, 0 of 6, cluster harmful). Volatility
+(addendum 22, 0 of 8). Conversion ratios — control per takedown, ground strikes
+per takedown, submissions per control (addendum 25 and the 2026-09-25 audit,
+all at or below AUC 0.51). Target and position entropy (same audit, 0.502 and
+0.514). Knockdown per strike landed (0.500). Offence x defence interactions
+(addendum 1, 0 of 9; three survive in the model as `grapple_edge`, `ko_edge`,
+`sub_edge`).
+
+## The one item not yet measured
+
+**Style drift** — the size of the change between a fighter's recent profile and
+his career profile, as a feature in its own right rather than as a re-weighting.
+Recency weighting was tested and failed, but that asked whether recent form
+predicts better than career form. This asks something different: whether a
+fighter who has *changed* is less predictable. Untested here.
+
+Prior: low. It is a second moment of a noisy quantity over ~6.5 fights, which
+is the same shape as addendum 22's volatility family, and that returned 0 of 8.
+Recorded as an open candidate rather than run, because the arithmetic that
+closed addendum 22 applies unchanged.
+
+---
+
+# Addendum 27: style drift (2026-09-25)
+
+Registered before computing. Recency weighting was tested and failed
+(addendum 7): recent form does not predict better than career form. This asks
+a different question — whether a fighter whose style has **changed** is worth
+knowing about, either because he is improving or because he is less
+predictable.
+
+    drift = distance between a fighter's last-three-fight profile and his
+            career profile, across clinch share, ground share, body share,
+            leg share, striking rate and takedown rate
+
+Built in the leakage-safe walk from prior fights only, differenced between
+corners as every other feature is.
+
+    D1  style drift
+    D2  striking-rate drift alone (signed: rising or falling output)
+    D3  grappling-rate drift alone (signed)
+
+Added individually to the frozen 14 and to the market-residual model.
+Benjamini-Hochberg at FDR 0.10 across all six tests. The holdout is spent, so
+anything supported is a candidate needing forward confirmation.
+
+Prior: low. This is a second moment of a noisy quantity over about six fights,
+the same shape as the volatility family that returned 0 of 8.
+
+## Addendum 27: RESULT (2026-09-25)
+
+**Zero of six supported.** Every gain is negative or zero.
+
+| target | measure | gain | p |
+|---|---|---|---|
+| win model | grappling drift | **-0.0065** | .023 |
+| market residual | style drift | -0.0007 | .077 |
+| win model | style drift | -0.0011 | .393 |
+| win model | striking drift | +0.0000 | .453 |
+| market residual | striking drift | -0.0002 | .727 |
+| market residual | grappling drift | -0.0003 | .777 |
+
+Grappling drift has the smallest p-value in the family and **makes the model
+worse** by the largest margin of any feature tested in this project. It did not
+clear its BH threshold, and it would not go in if it had.
+
+Held out on 536 bouts for the win model and 756 for the residual. The prior was
+low for the right reason: a drift measure is the difference between two noisy
+means over a career of about six fights, so most of what it captures is the
+sampling error of the earlier average.
+
+That closes the last untested item on either proposed feature list.
