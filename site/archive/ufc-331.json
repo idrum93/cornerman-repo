@@ -2,7 +2,7 @@
  "event": "UFC 331",
  "date": "2026-09-19",
  "venue": "Crypto.com Arena, Los Angeles",
- "generated_utc": "2026-09-26T15:15:25.963450+00:00",
+ "generated_utc": "2026-09-26T16:37:39.414695+00:00",
  "bouts": [
   {
    "bout": "Joshua Van vs. Alexandre Pantoja",
@@ -56,6 +56,62 @@
      "kd15": 0.28,
      "kd_against15": 0.1,
      "ko_loss": 0.1
+    }
+   },
+   "record_split": {
+    "a": {
+     "wins": {
+      "ko": 3,
+      "sub": 0,
+      "dec": 6
+     },
+     "losses": {
+      "ko": 1,
+      "sub": 0,
+      "dec": 0
+     },
+     "win_rounds": {
+      "2": {
+       "ko": 1,
+       "sub": 0
+      },
+      "1": {
+       "ko": 1,
+       "sub": 0
+      },
+      "5": {
+       "ko": 1,
+       "sub": 0
+      }
+     },
+     "n": 10
+    },
+    "b": {
+     "wins": {
+      "ko": 2,
+      "sub": 6,
+      "dec": 6
+     },
+     "losses": {
+      "ko": 1,
+      "sub": 0,
+      "dec": 3
+     },
+     "win_rounds": {
+      "3": {
+       "ko": 0,
+       "sub": 2
+      },
+      "1": {
+       "ko": 2,
+       "sub": 2
+      },
+      "2": {
+       "ko": 0,
+       "sub": 2
+      }
+     },
+     "n": 18
     }
    },
    "evidence": {
@@ -286,6 +342,58 @@
      "ko_loss": 0.12
     }
    },
+   "record_split": {
+    "a": {
+     "wins": {
+      "ko": 4,
+      "sub": 1,
+      "dec": 5
+     },
+     "losses": {
+      "ko": 0,
+      "sub": 0,
+      "dec": 2
+     },
+     "win_rounds": {
+      "1": {
+       "ko": 2,
+       "sub": 0
+      },
+      "2": {
+       "ko": 1,
+       "sub": 1
+      },
+      "3": {
+       "ko": 1,
+       "sub": 0
+      }
+     },
+     "n": 12
+    },
+    "b": {
+     "wins": {
+      "ko": 4,
+      "sub": 0,
+      "dec": 1
+     },
+     "losses": {
+      "ko": 0,
+      "sub": 1,
+      "dec": 0
+     },
+     "win_rounds": {
+      "1": {
+       "ko": 3,
+       "sub": 0
+      },
+      "2": {
+       "ko": 1,
+       "sub": 0
+      }
+     },
+     "n": 6
+    }
+   },
    "evidence": {
     "a": 12,
     "b": 6,
@@ -502,6 +610,36 @@
      "kd15": 0.74,
      "kd_against15": 0.48,
      "ko_loss": 0.229
+    }
+   },
+   "record_split": {
+    "a": {
+     "wins": {
+      "ko": 0,
+      "sub": 0,
+      "dec": 0
+     },
+     "losses": {
+      "ko": 0,
+      "sub": 0,
+      "dec": 0
+     },
+     "win_rounds": {},
+     "n": 0
+    },
+    "b": {
+     "wins": {
+      "ko": 0,
+      "sub": 0,
+      "dec": 0
+     },
+     "losses": {
+      "ko": 0,
+      "sub": 0,
+      "dec": 0
+     },
+     "win_rounds": {},
+     "n": 0
     }
    },
    "evidence": {
@@ -722,6 +860,58 @@
      "ko_loss": 0.178
     }
    },
+   "record_split": {
+    "a": {
+     "wins": {
+      "ko": 2,
+      "sub": 7,
+      "dec": 4
+     },
+     "losses": {
+      "ko": 3,
+      "sub": 2,
+      "dec": 2
+     },
+     "win_rounds": {
+      "2": {
+       "ko": 2,
+       "sub": 4
+      },
+      "1": {
+       "ko": 0,
+       "sub": 3
+      }
+     },
+     "n": 20
+    },
+    "b": {
+     "wins": {
+      "ko": 3,
+      "sub": 4,
+      "dec": 1
+     },
+     "losses": {
+      "ko": 2,
+      "sub": 0,
+      "dec": 3
+     },
+     "win_rounds": {
+      "3": {
+       "ko": 2,
+       "sub": 3
+      },
+      "2": {
+       "ko": 0,
+       "sub": 1
+      },
+      "1": {
+       "ko": 1,
+       "sub": 0
+      }
+     },
+     "n": 13
+    }
+   },
    "evidence": {
     "a": 20,
     "b": 14,
@@ -938,6 +1128,50 @@
      "kd15": 0.63,
      "kd_against15": 0.47,
      "ko_loss": 0.236
+    }
+   },
+   "record_split": {
+    "a": {
+     "wins": {
+      "ko": 3,
+      "sub": 0,
+      "dec": 0
+     },
+     "losses": {
+      "ko": 0,
+      "sub": 0,
+      "dec": 0
+     },
+     "win_rounds": {
+      "1": {
+       "ko": 3,
+       "sub": 0
+      }
+     },
+     "n": 3
+    },
+    "b": {
+     "wins": {
+      "ko": 5,
+      "sub": 2,
+      "dec": 4
+     },
+     "losses": {
+      "ko": 4,
+      "sub": 0,
+      "dec": 2
+     },
+     "win_rounds": {
+      "1": {
+       "ko": 5,
+       "sub": 1
+      },
+      "2": {
+       "ko": 0,
+       "sub": 1
+      }
+     },
+     "n": 17
     }
    },
    "evidence": {
@@ -1158,6 +1392,41 @@
      "ko_loss": 0.533
     }
    },
+   "record_split": {
+    "a": {
+     "wins": {
+      "ko": 1,
+      "sub": 0,
+      "dec": 0
+     },
+     "losses": {
+      "ko": 0,
+      "sub": 0,
+      "dec": 0
+     },
+     "win_rounds": {
+      "1": {
+       "ko": 1,
+       "sub": 0
+      }
+     },
+     "n": 1
+    },
+    "b": {
+     "wins": {
+      "ko": 0,
+      "sub": 0,
+      "dec": 0
+     },
+     "losses": {
+      "ko": 2,
+      "sub": 0,
+      "dec": 0
+     },
+     "win_rounds": {},
+     "n": 2
+    }
+   },
    "evidence": {
     "a": 1,
     "b": 2,
@@ -1358,6 +1627,66 @@
      "kd15": 0.53,
      "kd_against15": 0.06,
      "ko_loss": 0.04
+    }
+   },
+   "record_split": {
+    "a": {
+     "wins": {
+      "ko": 2,
+      "sub": 4,
+      "dec": 3
+     },
+     "losses": {
+      "ko": 0,
+      "sub": 1,
+      "dec": 5
+     },
+     "win_rounds": {
+      "2": {
+       "ko": 1,
+       "sub": 1
+      },
+      "3": {
+       "ko": 1,
+       "sub": 0
+      },
+      "1": {
+       "ko": 0,
+       "sub": 3
+      }
+     },
+     "n": 15
+    },
+    "b": {
+     "wins": {
+      "ko": 7,
+      "sub": 4,
+      "dec": 4
+     },
+     "losses": {
+      "ko": 0,
+      "sub": 0,
+      "dec": 11
+     },
+     "win_rounds": {
+      "2": {
+       "ko": 1,
+       "sub": 3
+      },
+      "3": {
+       "ko": 3,
+       "sub": 0
+      },
+      "1": {
+       "ko": 2,
+       "sub": 1
+      },
+      "4": {
+       "ko": 1,
+       "sub": 0
+      }
+     },
+     "n": 26
     }
    },
    "evidence": {
@@ -1573,6 +1902,50 @@
      "ko_loss": 0.2
     }
    },
+   "record_split": {
+    "a": {
+     "wins": {
+      "ko": 7,
+      "sub": 0,
+      "dec": 1
+     },
+     "losses": {
+      "ko": 3,
+      "sub": 3,
+      "dec": 4
+     },
+     "win_rounds": {
+      "1": {
+       "ko": 5,
+       "sub": 0
+      },
+      "2": {
+       "ko": 2,
+       "sub": 0
+      }
+     },
+     "n": 18
+    },
+    "b": {
+     "wins": {
+      "ko": 1,
+      "sub": 0,
+      "dec": 0
+     },
+     "losses": {
+      "ko": 0,
+      "sub": 0,
+      "dec": 1
+     },
+     "win_rounds": {
+      "1": {
+       "ko": 1,
+       "sub": 0
+      }
+     },
+     "n": 2
+    }
+   },
    "evidence": {
     "a": 18,
     "b": 2,
@@ -1786,6 +2159,41 @@
      "ko_loss": 0.457
     }
    },
+   "record_split": {
+    "a": {
+     "wins": {
+      "ko": 1,
+      "sub": 0,
+      "dec": 0
+     },
+     "losses": {
+      "ko": 0,
+      "sub": 0,
+      "dec": 0
+     },
+     "win_rounds": {
+      "1": {
+       "ko": 1,
+       "sub": 0
+      }
+     },
+     "n": 1
+    },
+    "b": {
+     "wins": {
+      "ko": 0,
+      "sub": 0,
+      "dec": 1
+     },
+     "losses": {
+      "ko": 2,
+      "sub": 0,
+      "dec": 0
+     },
+     "win_rounds": {},
+     "n": 3
+    }
+   },
    "evidence": {
     "a": 1,
     "b": 3,
@@ -1981,6 +2389,54 @@
      "kd15": 0.52,
      "kd_against15": 0.23,
      "ko_loss": 0.229
+    }
+   },
+   "record_split": {
+    "a": {
+     "wins": {
+      "ko": 6,
+      "sub": 1,
+      "dec": 2
+     },
+     "losses": {
+      "ko": 3,
+      "sub": 1,
+      "dec": 2
+     },
+     "win_rounds": {
+      "1": {
+       "ko": 5,
+       "sub": 1
+      },
+      "2": {
+       "ko": 1,
+       "sub": 0
+      }
+     },
+     "n": 15
+    },
+    "b": {
+     "wins": {
+      "ko": 3,
+      "sub": 2,
+      "dec": 1
+     },
+     "losses": {
+      "ko": 2,
+      "sub": 1,
+      "dec": 1
+     },
+     "win_rounds": {
+      "1": {
+       "ko": 3,
+       "sub": 1
+      },
+      "2": {
+       "ko": 0,
+       "sub": 1
+      }
+     },
+     "n": 10
     }
    },
    "evidence": {
@@ -2199,6 +2655,54 @@
      "kd15": 0.09,
      "kd_against15": 0.25,
      "ko_loss": 0.133
+    }
+   },
+   "record_split": {
+    "a": {
+     "wins": {
+      "ko": 3,
+      "sub": 1,
+      "dec": 2
+     },
+     "losses": {
+      "ko": 0,
+      "sub": 1,
+      "dec": 1
+     },
+     "win_rounds": {
+      "2": {
+       "ko": 2,
+       "sub": 0
+      },
+      "3": {
+       "ko": 0,
+       "sub": 1
+      },
+      "1": {
+       "ko": 1,
+       "sub": 0
+      }
+     },
+     "n": 8
+    },
+    "b": {
+     "wins": {
+      "ko": 1,
+      "sub": 0,
+      "dec": 2
+     },
+     "losses": {
+      "ko": 0,
+      "sub": 0,
+      "dec": 2
+     },
+     "win_rounds": {
+      "2": {
+       "ko": 1,
+       "sub": 0
+      }
+     },
+     "n": 5
     }
    },
    "evidence": {
@@ -2422,6 +2926,54 @@
      "kd15": 0.2,
      "kd_against15": 0.08,
      "ko_loss": 0.086
+    }
+   },
+   "record_split": {
+    "a": {
+     "wins": {
+      "ko": 3,
+      "sub": 0,
+      "dec": 5
+     },
+     "losses": {
+      "ko": 1,
+      "sub": 0,
+      "dec": 3
+     },
+     "win_rounds": {
+      "1": {
+       "ko": 2,
+       "sub": 0
+      },
+      "3": {
+       "ko": 1,
+       "sub": 0
+      }
+     },
+     "n": 12
+    },
+    "b": {
+     "wins": {
+      "ko": 3,
+      "sub": 3,
+      "dec": 1
+     },
+     "losses": {
+      "ko": 0,
+      "sub": 0,
+      "dec": 3
+     },
+     "win_rounds": {
+      "1": {
+       "ko": 2,
+       "sub": 2
+      },
+      "2": {
+       "ko": 1,
+       "sub": 1
+      }
+     },
+     "n": 10
     }
    },
    "evidence": {
