@@ -479,9 +479,41 @@ def predict_card(path, fights, fighters, verbose=True):
         r["evidence"] = {"a": A.n_fights, "b": B.n_fights,
                          "min": min(A.n_fights, B.n_fights)}
 
-        r["drivers"] = [{"label": LABELS.get(k, k), "value": round(v, 4),
-                         "favors": "a" if v > 0 else "b", "key": k}
-                        for k, v in contrib[:6] if abs(v) > 0.01]
+        # The interaction features are products of two different stats, so the
+        # site cannot show a single career number beside them. It was showing
+        # knockdown rate next to ko_edge, which is striking output times the
+        # opponent's rate of losing by strikes — a different quantity, and the
+        # numbers disagreed with the bar. Each corner's actual component is
+        # carried instead.
+        parts = {
+            "ko_edge": (sa["adj_slpm"] * sb["ko_loss_rate"],
+                        sb["adj_slpm"] * sa["ko_loss_rate"],
+                        "their striking output x how often the other has been finished by strikes"),
+            "grapple_edge": (sa["adj_td15"] * (1 - sb["td_def"]),
+                             sb["adj_td15"] * (1 - sa["td_def"]),
+                             "their takedown rate x the other's takedown defense"),
+            "sub_edge": (sa["sub15"] * (1 - sb["td_def"]),
+                         sb["sub15"] * (1 - sa["td_def"]),
+                         "their submission attempts x the other's takedown defense"),
+            "power_edge": (sa["kd15"] * sb["kd_against15"],
+                           sb["kd15"] * sa["kd_against15"],
+                           "their knockdown rate x how often the other is knocked down"),
+            "position_edge": ((sa["clinch_share"] + sa["ground_share"]) * (1 - sb["td_def"]),
+                              (sb["clinch_share"] + sb["ground_share"]) * (1 - sa["td_def"]),
+                              "how much they fight in the clinch or on the ground x "
+                              "the other's takedown defense"),
+        }
+        drv = []
+        for k, v in contrib[:6]:
+            if abs(v) <= 0.01:
+                continue
+            d = {"label": LABELS.get(k, k), "value": round(v, 4),
+                 "favors": "a" if v > 0 else "b", "key": k}
+            if k in parts:
+                pa, pb, how = parts[k]
+                d["parts"] = {"a": round(float(pa), 2), "b": round(float(pb), 2), "how": how}
+            drv.append(d)
+        r["drivers"] = drv
         hit = market.get(frozenset((_key(na), _key(nb))))
         if hit:
             src, pm, nbooks = hit
@@ -852,9 +884,17 @@ def _grade_bout(b, row, a_is_red, base):
     def binrow(label, p, happened, basep):
         if p is None:
             return
+        # Brier alongside the threshold. Verified 2026-09-26: on a long-shot
+        # market like "ends in round 1", the base rate, a real fitted model and
+        # a forecaster saying 2% to everything ALL score 76.4% on "right side",
+        # because nothing crosses 50%. Brier separates them (+0.023, 0.000,
+        # -0.259), so it is what the summary reports.
+        y = 1.0 if happened else 0.0
         rep.append({"kind": "prop", "label": label, "said": round(float(p), 3),
                     "happened": bool(happened), "right": bool((p >= 0.5) == bool(happened)),
+                    "brier": round((float(p) - y) ** 2, 4),
                     "base": None if basep is None else round(basep, 3),
+                    "base_brier": None if basep is None else round((basep - y) ** 2, 4),
                     "base_right": None if basep is None else bool((basep >= 0.5) == bool(happened))})
 
     # how it ended
@@ -926,6 +966,9 @@ def _grade_bout(b, row, a_is_red, base):
            "seconds": int(row.total_sec), "model_right": bool((b["p_a"] > 0.5) == a_won),
            "p_winner_model": round(p_win_model, 3), "report": rep,
            "props_n": len(props), "props_right": sum(r["right"] for r in props),
+           "props_brier": round(sum(r["brier"] for r in props if r["base_brier"] is not None), 4),
+           "props_base_brier": round(sum(r["base_brier"] for r in props
+                                         if r["base_brier"] is not None), 4),
            "props_base_n": sum(r["base_right"] is not None for r in props),
            "props_base_right": sum(bool(r["base_right"]) for r in props)}
     pm = b.get("p_market")
@@ -994,6 +1037,8 @@ def grade_archive(fights, archive_dir="site/archive", out_path="site/history.jso
             "method_n": len(meth), "method_right": sum(r["right"] for r in meth),
             "round_n": len(rnds), "round_right": sum(r["right"] for r in rnds),
             "props_n": sum(g["props_n"] for g in graded),
+            "props_brier": round(sum(g["props_brier"] for g in graded), 4),
+            "props_base_brier": round(sum(g["props_base_brier"] for g in graded), 4),
             "props_right": sum(g["props_right"] for g in graded),
             "props_base_n": sum(g["props_base_n"] for g in graded),
             "props_base_right": sum(g["props_base_right"] for g in graded),

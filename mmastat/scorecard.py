@@ -65,6 +65,27 @@ def markets_from_bout(b):
             m[f"end_r{k}"] = (v, f"ends in round {k}")
     for k, v in (b.get("totals") or {}).items():
         m[f"total_{k}"] = (v, f"over {k.replace('over_','').replace('_','.')} rounds")
+    # Families the site shows but the record never tracked. The parlays matter
+    # most here: every one sits under 10%, so a count of "right sides" would
+    # score about 95% by doing nothing at all. The scorecard has always used
+    # Brier against the base rate, which is the measure that survives contact
+    # with a market that resolves "no" nineteen times in twenty.
+    m["dec_a"] = (b.get("m_a_dec"), f"{a} by decision")
+    m["dec_b"] = (b.get("m_b_dec"), f"{bb} by decision")
+    m["finish_a"] = (b.get("m_a_finish"), f"{a} by KO/TKO or submission")
+    m["finish_b"] = (b.get("m_b_finish"), f"{bb} by KO/TKO or submission")
+    for k in range(2, 6):
+        v = b.get(f"p_ends_before_r{k}")
+        if v is not None:
+            m[f"ends_before_r{k}"] = (v, f"ends before round {k}")
+        v = b.get(f"p_starts_r{k}")
+        if v is not None:
+            m[f"starts_r{k}"] = (v, f"reaches round {k}")
+    nm = {"a": a, "b": bb}
+    for key, v in (b.get("round_of_victory") or {}).items():
+        side, meth = key.split("_")[0], key.split("_")[1]
+        rd = key.split("_r")[1]
+        m[f"rov_{key}"] = (v, f"{nm[side]} by {'KO/TKO' if meth == 'ko' else 'submission'} in round {rd}")
     return {k: v for k, v in m.items() if v[0] is not None}
 
 
@@ -95,6 +116,10 @@ def log(payload, path=None, verbose=True):
             rows.append({"logged_utc": pd.Timestamp.now(tz="UTC").isoformat(timespec="seconds"),
                          "event": payload.get("event"), "event_date": payload.get("date"),
                          "bout": b["bout"], "a": b["a"], "b": b["b"],
+                         # where on the card it sat, so the record can later be
+                         # split by main event / main card / prelims. Costs one
+                         # field now; cannot be recovered afterwards.
+                         "segment": b.get("segment"), "rounds": b.get("rounds"),
                          "market": mk, "label": label, "p": round(float(prob), 4),
                          "settled": False})
     if rows:
@@ -133,6 +158,18 @@ def _outcome(market, f, a_is_red):
         "total_over_3_5": f.total_sec > 1050,
         "total_over_4_5": f.total_sec > 1350,
     }
+    table["dec_a"] = a_won and dec
+    table["dec_b"] = (not a_won) and dec
+    table["finish_a"] = a_won and not dec
+    table["finish_b"] = (not a_won) and not dec
+    for key in ("a_ko", "a_sub", "b_ko", "b_sub"):
+        side, meth = key.split("_")
+        won = a_won if side == "a" else not a_won
+        by = f.method == ("KO/TKO" if meth == "ko" else "SUB")
+        for k in range(1, 6):
+            table[f"rov_{key}_r{k}"] = bool(won and by and (not dec) and rnd == k)
+    for k in range(2, 6):
+        table[f"starts_r{k}"] = bool(dec or rnd >= k)
     for k in range(1, 6):
         table[f"end_r{k}"] = (not dec) and rnd == k
         # Polymarket US quotes cumulative round markets — "Fight ends before

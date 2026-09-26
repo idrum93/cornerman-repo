@@ -2204,3 +2204,154 @@ and stays deferred.
 Recorded because the selection effect is worth remembering: any subset chosen
 for disagreeing with a better forecaster will make the worse forecaster look
 badly calibrated.
+
+---
+
+# Audit: does accuracy vary by position on the card? (2026-09-26)
+
+Descriptive, not a registered test. Prompted by 25 of 26 props landing on one
+main event.
+
+| position | n | accuracy | log loss | avg prior UFC bouts |
+|---|---|---|---|---|
+| main event | 70 | 67.1% | .6182 | 7.7 |
+| rest of main card | 283 | 66.8% | .6203 | 6.3 |
+| prelims | 277 | 69.0% | .6227 | 6.4 |
+| early prelims | 199 | 65.8% | .6196 | 6.4 |
+
+Flat. The 3-point spread sits inside the standard error on samples this size.
+
+Against the market the gap looked smaller on main events — +0.0044 against
++0.0371 for prelims and early prelims — but bootstrapped, the difference is
+**-0.0329 with a 95% interval of [-0.116, +0.049]**, crossing zero at P = 0.78.
+No claim.
+
+The mechanism would have been plausible: main-event fighters carry 7.7 prior
+UFC bouts against 6.3 elsewhere, so the model is better informed exactly where
+the market is sharpest. It is simply not visible at this sample size.
+
+**On the 25-of-26 that prompted this:** props inside one bout are strongly
+correlated — when a fight goes to a decision, the distance market, every
+"ends before round" and every method contract resolve together. That is one
+observation dressed as twenty-six, and it is why the scorecard requires 25
+graded claims *per market across cards* before it shows a number.
+
+Recorded alongside a change: the scorecard now stores each claim's card
+segment and scheduled rounds, so this question can be answered properly from
+graded props once enough cards have settled. That field cannot be recovered
+retrospectively, which is why it goes in now.
+
+---
+
+# Audit: is there a confidence score beyond the probability? (2026-09-26)
+
+Asked whether the model can say, before a fight, how much to trust itself —
+in particular whether more recorded history on the two fighters means a more
+accurate prediction.
+
+Tested by predicting the model's own held-out log loss from pre-fight
+quantities (829 bouts):
+
+| predictor of the error | R2 |
+|---|---|
+| a constant (the average loss) | -0.009 |
+| all evidence features together | +0.002 |
+| how many fights we have on them | -0.009 |
+| **its own confidence, \|p - 0.5\|** | **+0.057** |
+
+And accuracy by how much history exists:
+
+| thinner record | n | accuracy | log loss |
+|---|---|---|---|
+| 2-4 prior bouts | 339 | 66.1% | .6205 |
+| 5-9 | 321 | 70.1% | .6176 |
+| 10+ | 169 | 64.5% | .6272 |
+
+Non-monotone, and the spread is inside the standard error.
+
+**There is no confidence score to build.** The only thing carrying any signal
+about the model's error is the probability it already publishes — which is
+what a calibrated probability means. Knowing more about a fighter does not make
+the prediction better, and a bout with fifteen fights of history behind it is
+not a safer read than one with four.
+
+This matches two earlier findings and completes the picture: the learning curve
+is flat (quadrupling training data moved log loss by 0.0009, 2026-09-23), and
+evidence-weighted recalibration made things worse (addendum 28). The constraint
+is one bit of outcome per fight, and it does not relax with more fights on
+either side of it.
+
+On the related question of collapsing correlated props at settlement: not done,
+and not recommended. Each prop is a separate contract and grading each
+separately is correct. The correlation is a reason not to read a single card's
+tally as independent evidence, not a reason to stop counting — which is what
+the 25-claims-per-market threshold already handles.
+
+---
+
+# Measure change: props scored by Brier, not by threshold (2026-09-26)
+
+The prop record was headlined by a count of "right sides" — the model said
+above 50% and it happened, or below and it did not. Verified on held-out
+fights that this measure is unable to distinguish a real model from a
+forecaster that lowballs everything.
+
+**GOES THE DISTANCE** (happens 53% of the time, n=846)
+
+| forecaster | right side | Brier skill |
+|---|---|---|
+| the base rate itself | 52.8% | 0.000 |
+| a real fitted model | 59.3% | +0.035 |
+| lowballer, 2% on everything | 47.2% | -1.034 |
+| noise around the base rate | 49.5% | -0.145 |
+
+**ENDS IN ROUND 1** (happens 24% of the time)
+
+| forecaster | right side | Brier skill |
+|---|---|---|
+| the base rate itself | **76.4%** | 0.000 |
+| a real fitted model | **76.4%** | +0.023 |
+| lowballer, 2% on everything | **76.4%** | -0.259 |
+| noise around the base rate | 73.0% | -0.123 |
+
+On the long-shot market all three score **identically** on the threshold
+measure, because none of them ever crosses 50%. The measure is blind exactly
+where most props live: a market that resolves "no" four times in five.
+
+Brier separates them correctly in both cases, so the card summary now reports
+**Brier skill against the base rate** — how much closer the model's
+probabilities sat to what happened than the league rate would have — with the
+right-side count kept as a secondary figure. Both are stored per row, so
+nothing is lost and older cards can be rescored.
+
+---
+
+# Finding: ko_edge is a correction, not a threat (2026-09-26)
+
+Noticed from the site: a bout showed "knockout threat 1.14 v 0.61" with the
+bar favouring the fighter on 0.61. Not a display bug.
+
+    ko_edge = own striking output x opponent's rate of losing by strikes
+
+Both halves are already in the model on their own — `d_adj_slpm` at +0.245 and
+`d_ko_loss_rate` at -0.179. The product is collinear with its own inputs, and
+the fit gives it a **negative** weight of -0.121: a higher "knockout threat"
+lowers the predicted win probability.
+
+So the feature is not measuring what its name says. It is a residual
+adjustment on two main effects that are already counted, and it earned its
+place in the frozen 14 on predictive grounds, not interpretive ones.
+
+The other two interactions behave as named: `grapple_edge` +0.156,
+`sub_edge` +0.009 (the latter near zero).
+
+**Display:** any interaction driver whose bar favours the corner with the
+smaller component is now marked "correction", with a note that the model
+already counts both halves separately. Showing a contradiction without
+explanation was worse than showing nothing.
+
+**Model:** unchanged. Removing or re-signing a feature in the frozen set needs
+its own registration and a held-out test, and the holdout is spent. Recorded
+here so the next model revision starts from the fact that this feature does not
+do what its name suggests — and as a caution about naming an interaction after
+the story that motivated it rather than after what it turns out to measure.

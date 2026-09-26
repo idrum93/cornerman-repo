@@ -805,10 +805,18 @@ function lastCard(){
       `${pct(c.method_right,c.method_n)} · <span class="nomk">no market line</span>`)}
     ${c.round_n?stat(`${c.round_right}/${c.round_n}`,'finish round — top pick',
       `${pct(c.round_right,c.round_n)} · <span class="nomk">no market line</span>`):''}
-    ${stat(`${c.props_right}/${c.props_n}`,'props on the right side',
-      `usual outcome alone: ${c.props_base_right}/${c.props_base_n}${
-        c.props_base_n?` · <b class="${edgeProps>0?'up':edgeProps<0?'dn':''}">${
-          (100*(c.props_right/Math.max(c.props_n,1)-c.props_base_right/c.props_base_n)).toFixed(0)}pp</b>`:''}`)}
+    ${(()=>{
+      /* Brier skill, not the count of "right sides". Verified on held-out
+         fights: on a long-shot market the base rate, a real model and a
+         forecaster saying 2% to everything all score identically on the
+         threshold measure, because none of them crosses 50%. Brier tells them
+         apart, so it is the headline. */
+      if(!c.props_base_brier) return stat(`${c.props_right}/${c.props_n}`,
+        `props on the right side, across ${c.n} bouts`,'no base rate to compare against');
+      const sk=100*(1-c.props_brier/c.props_base_brier);
+      return stat(`<span class="${sk>0?'up':sk<0?'dn':''}">${sk>0?'+':''}${sk.toFixed(1)}%</span>`,
+        'sharper than the usual outcome',
+        `over ${c.props_base_n} props across ${c.n} bouts · ${c.props_right}/${c.props_n} on the right side`);})()}
     ${c.market_n?stat(`${c.model_closer}/${c.market_n}`,'closer than the market',
       c.disagree_n?`in ${c.disagree_n} disagreements: ${c.disagree_model_closer}`:'no big disagreements'):''}
   </div>`;
@@ -859,7 +867,13 @@ function openPast(id){
       <div class="note" style="margin-top:6px">Top pick is the single likeliest of five endings. A decision
         can be the likeliest one ending even when a finish of some kind is likelier overall.</div></div>`:''}
     <div class="card"><div class="ghead" style="background:none;border:none;padding:0 0 6px">
-      <span class="gname">Every prop</span><span class="lbl">${g.props_right}/${g.props_n} right side · usual outcome alone ${g.props_base_right}/${g.props_base_n}</span></div>
+      <span class="gname">Every prop</span><span class="lbl">${
+        g.props_base_brier?`${(100*(1-g.props_brier/g.props_base_brier)).toFixed(1)}% sharper than the usual outcome · `:''
+        }${g.props_right}/${g.props_n} on the right side</span></div>
+      <div class="note" style="margin:0 0 7px">These resolve together, not separately: once this fight
+        went ${g.method==='DEC'?'to a decision':`to a ${g.method==='SUB'?'submission':'knockout'} in round ${g.round}`},
+        the distance market, every "ends before round" and every method contract were settled by the
+        same event. ${g.props_n} rows here, but one fight's worth of evidence.</div>
       ${props.map(r=>`<div class="pline"><span>${esc(r.label)}</span>
         <span class="mono ps">said ${P0(r.said)}%</span><b>${r.happened?'happened':'did not'}</b>${tick(r.right)}</div>`).join('')}
       <div class="note" style="margin-top:6px">Right side means the model said over 50% and it happened, or
@@ -1254,12 +1268,27 @@ function tale(b){
     <div class="tt tth"><div class="tv">${esc(b.a)}</div><div class="tk"></div>
       <div class="tv r">${esc(b.b)}</div></div>${rows}</div>`;
 }
+/* Only for drivers that ARE a single career stat. The interaction drivers
+   (knockout, takedown and submission threat) are products of two different
+   numbers, and showing one fighter's knockdown rate beside a bar driven by
+   output-times-opponent-fragility made the numbers contradict the bar. Those
+   carry their own components in the payload. */
 const DRV_STAT={'age':'age','career quality':'elo','strength of schedule':'opp_elo',
   'experience':'n_fights','striking output':'slpm','strikes absorbed':'sapm',
   'striking accuracy':'str_acc','striking defense':'str_def','reach':'reach',
-  'losses by strikes':'ko_loss','takedown threat':'td15','knockout threat':'kd15',
-  'submission threat':'sub15'};
-function drvRaw(b,label){
+  'losses by strikes':'ko_loss'};
+function drvRaw(b,label,d){
+  if(d&&d.parts){
+    // When the bar favours the corner with the SMALLER component, this driver
+    // is not doing what its name says: it is a product of two stats the model
+    // already counts on their own, so the fit uses it as a correction and its
+    // weight comes out negative. Say so rather than show a contradiction.
+    const bigger=d.parts.a>d.parts.b?'a':'b';
+    const flipped=(bigger!==d.favors);
+    return `<span class="drvraw" title="${esc(d.parts.how||'')}${flipped?
+      ' — the model already counts both halves of this separately, so this row only corrects them':''}">${
+      d.parts.a} v ${d.parts.b}${flipped?' <i style="opacity:.6">correction</i>':''}</span>`;
+  }
   const k=DRV_STAT[label]; if(!k||!b.stats) return '';
   const a=b.stats.a[k], c=b.stats.b[k]; if(a===undefined) return '';
   const f=v=>(k==='str_acc'||k==='str_def'||k==='td_def'||k==='ko_loss')?(v*100).toFixed(0)+'%':v;
@@ -1325,7 +1354,7 @@ function open_(id){
     ${drv.length?`<div class="card"><div class="ghead" style="background:none;border:none;padding:0 0 6px">
       <span class="gname">Why</span><span class="lbl">push on the log-odds</span></div>
       ${drv.map(d=>{const w=Math.abs(d.value)/mx*50, red=d.favors==='a';
-        return `<div class="drv"><div style="width:148px;flex:none;font-size:11.5px;color:var(--mute)">${esc(d.label)}${drvRaw(b,d.label)}</div>
+        return `<div class="drv"><div style="width:148px;flex:none;font-size:11.5px;color:var(--mute)">${esc(d.label)}${drvRaw(b,d.label,d)}</div>
           <div class="dt"><div class="bg"></div><div class="zero"></div>
             <i style="${red?'right:50%':'left:50%'};width:${w}%;background:${red?'var(--red)':'var(--blue)'}"></i></div>
           <div class="mono" style="width:52px;text-align:right;font-size:11px;color:var(--dim)">${d.value>0?'+':''}${d.value.toFixed(2)}</div></div>`;}).join('')}
