@@ -774,18 +774,18 @@ function baseRatePanel(here,bout,inZone){
 function divisionTable(){
   const D=BR&&BR.divisions; if(!D||!D.length) return '';
   const cur=new Set((DATA.bouts||[]).map(b=>b.weight_class));
-  const max=Math.max(...D.map(x=>x.finish));
+  const max=Math.max(...D.map(x=>x.distance!=null?x.distance:1-x.finish));
   const rows=D.map(x=>`<tr class="${cur.has(x.division)?'oncard':''}">
     <td>${esc(x.division)}${cur.has(x.division)?' <span class="lbl" style="color:var(--gold)">on this card</span>':''}</td>
     <td class="mono">${x.n.toLocaleString()}</td>
-    <td><div class="dbar"><i style="width:${(x.finish/max*100).toFixed(0)}%"></i></div><span class="mono">${P0(x.finish)}%</span></td>
+    <td><div class="dbar"><i style="width:${((x.distance!=null?x.distance:1-x.finish)/max*100).toFixed(0)}%"></i></div><span class="mono">${P0(x.distance!=null?x.distance:1-x.finish)}%</span></td>
     <td class="mono">${P0(x.ko)}%</td><td class="mono">${P0(x.sub)}%</td>
-    <td class="mono">${P0(x.any_kd)}%</td><td class="mono">${P0(x.any_td)}%</td>
-    <td class="mono">${x.pace}</td></tr>`).join('');
+    <td class="mono">${x.strikes!=null?x.strikes:'—'}</td>
+    <td class="mono">${x.takedowns!=null?x.takedowns:'—'}</td></tr>`).join('');
   return `<div class="brgroup" style="margin-top:12px"><div class="brhead"><span class="brtitle">By division</span>
-      <span class="lbl">every fight since 2012 · finishes rise with weight, takedowns fall, pace barely moves</span></div>
-    <div style="overflow-x:auto"><table class="dtab"><thead><tr><th>division</th><th>fights</th><th>ends inside distance</th>
-      <th>KO/TKO</th><th>sub</th><th>any knockdown</th><th>any takedown</th><th>strikes/min</th></tr></thead>
+      <span class="lbl">every fight since 2012 · each column is a market you can bet</span></div>
+    <div style="overflow-x:auto"><table class="dtab"><thead><tr><th>division</th><th>fights</th><th>goes the distance</th>
+      <th>KO/TKO</th><th>submission</th><th>strikes per fighter</th><th>takedowns per fighter</th></tr></thead>
     <tbody>${rows}</tbody></table></div></div>`;
 }
 
@@ -917,6 +917,7 @@ function render(){
     el.addEventListener('click',()=>openPast(el.dataset.past)));
   document.querySelectorAll('[data-f]').forEach(el=>
     el.addEventListener('click',()=>{ ONLY_GAPS = el.dataset.f==='gaps'; render(); }));
+  bindTabs();          // the page's own tab groups, bound after every draw
 
 }
 
@@ -1068,6 +1069,21 @@ function startsRoundGroup(b){
     ks.map(k=>propRow(`Fight starts round ${k.slice(-1)}`,b[k],'var(--mute)',
       pmk(b,k.slice(2)),pnote(b,k.slice(2)),k.slice(2))));
 }
+/* Each tab bar drives only the panels that follow it. Called after every draw
+   — the page's own tab groups need this as much as the drawer's, and binding
+   it inside the drawer alone left the "what usually happens" toggles dead. */
+function bindTabs(){
+  document.querySelectorAll('.mtabs').forEach(bar=>{
+    const panels=[]; let n=bar.nextElementSibling;
+    while(n&&n.classList&&n.classList.contains('mpanel')){ panels.push(n); n=n.nextElementSibling; }
+    bar.querySelectorAll('.mtab').forEach(t=>t.addEventListener('click',()=>{
+      bar.querySelectorAll('.mtab').forEach(x=>x.classList.toggle('on',x===t));
+      panels.forEach(p=>p.classList.toggle('on',
+        p.getAttribute('data-panel')===t.getAttribute('data-tab')));
+    }));
+  });
+}
+
 function group(title,sub,rows,priced){
   const list=(rows||[]).filter(Boolean);
   if(!list.length) return '';
@@ -1221,7 +1237,7 @@ function tale(b){
   const A=b.stats&&b.stats.a, B=b.stats&&b.stats.b;
   if(!A||!B) return '';
   const rows=STAT_ROWS.filter(([k])=>A[k]!==undefined).map(([k,lab,fmt])=>{
-    const na=parseFloat(A[k]), nb=parseFloat(B[k]);
+    let na=parseFloat(A[k]), nb=parseFloat(B[k]);   // reassigned for record
     // compare what is displayed: 0.401 and 0.404 both read "40%", and
     // highlighting one of them as the leader is noise presented as a finding
     const fa=String(fmt(A[k])), fb=String(fmt(B[k]));
@@ -1329,17 +1345,7 @@ function open_(id){
       <span class="gname">Where this bout sits</span><span class="lbl">markers show each corner</span></div>
       ${baseRatePanel(b.bands,b)}</div>`:''}
     `;
-  // Scoped to the tab's own group. This was global, so opening a market tab
-  // switched off the base-rate panels too — the "where this bout sits" section
-  // looked empty until you clicked one of its own tabs.
-  document.querySelectorAll('.mtabs').forEach(bar=>{
-    const panels=[]; let n=bar.nextElementSibling;
-    while(n&&n.classList&&n.classList.contains('mpanel')){ panels.push(n); n=n.nextElementSibling; }
-    bar.querySelectorAll('.mtab').forEach(t=>t.addEventListener('click',()=>{
-      bar.querySelectorAll('.mtab').forEach(x=>x.classList.toggle('on',x===t));
-      panels.forEach(p=>p.classList.toggle('on',p.getAttribute('data-panel')===t.getAttribute('data-tab')));
-    }));
-  });
+  bindTabs();
   document.getElementById('xb').addEventListener('click',close_);
   document.getElementById('draw').classList.add('on');
   document.getElementById('draw').setAttribute('aria-hidden','false');

@@ -151,13 +151,17 @@ def divisions(fights, min_date="2012-01-01"):
         G = F[F["div"] == d]
         if len(G) < 50:
             continue
+        # Only quantities a book actually sells. "Any knockdown" and "any
+        # takedown" are nobody's contract, and strikes per minute is a rate no
+        # market quotes — the market sells a fighter's TOTAL, so that is what
+        # this reports.
         out.append({"division": d, "n": int(len(G)),
-                    "finish": round(float((G.method != "DEC").mean()), 3),
+                    "distance": round(float((G.method == "DEC").mean()), 3),
                     "ko": round(float((G.method == "KO/TKO").mean()), 3),
                     "sub": round(float((G.method == "SUB").mean()), 3),
-                    "any_kd": round(float(((G.r_kd > 0) | (G.b_kd > 0)).mean()), 3),
-                    "any_td": round(float(((G.r_td_landed > 0) | (G.b_td_landed > 0)).mean()), 3),
-                    "pace": round(float(((G.r_ss_landed + G.b_ss_landed) / mins.loc[G.index]).median()), 2)})
+                    "strikes": round(float(((G.r_ss_landed + G.b_ss_landed) / 2).median()), 1),
+                    "takedowns": round(float(((G.r_td_landed + G.b_td_landed) / 2).mean()), 2),
+                    "finish": round(float((G.method != "DEC").mean()), 3)})
     return out
 
 
