@@ -353,6 +353,10 @@ def capture(fights, fighters, card_path="data/upcoming.txt", path=None,
                     depth_usd=meta_x.get("depth_usd"),
                     bet=bool(fires(p_model, implied, rule)),
                     rule_frozen_on=rule.get("frozen_on"), settled=False))
+    # Resolve the shard here: the helpers below take None and resolve it
+    # themselves, but this block reads the file directly. It was never reached
+    # before, because capture returned early whenever no venue was card-keyed.
+    path = path or month_file()
     # Read the raw rows, not a DataFrame view: indexing by column list breaks
     # the moment a key field postdates some of the file.
     prior = []
