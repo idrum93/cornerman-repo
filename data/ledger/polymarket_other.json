@@ -1,48 +1,71 @@
 {
  "event_date": "2026-09-26",
- "fetched_utc": "2026-09-25T19:43:01+00:00",
+ "fetched_utc": "2026-09-26T00:16:19+00:00",
  "markets": [
   {
-   "question": "Will Ian Machado Garry become UFC champion in 2026?",
-   "slug": "will-ian-machado-garry-become-ufc-champion-in-2026",
-   "kind": "winner",
-   "liquidity": 650.3794
+   "question": "Who will win in the upcoming mma event Vanessa Demopoulos vs Yazmin Jauregui scheduled for September 26, 2026 at 9:00 PM UTC?",
+   "slug": "ufc-vandem-yazjau-2026-09-26",
+   "kind": "other"
   },
   {
-   "question": "Will Leon Edwards become UFC champion in 2026?",
-   "slug": "will-leon-edwards-become-ufc-champion-in-2026",
-   "kind": "winner",
-   "liquidity": 156.29362
+   "question": "Who will win in the upcoming mma event John Castaneda vs Alatengheili scheduled for September 26, 2026 at 10:30 PM UTC?",
+   "slug": "ufc-johcas-alaten-2026-09-26",
+   "kind": "other"
   },
   {
-   "question": "Will Ian Machado Garry be the UFC Welterweight Champion on December 31, 2026?",
-   "slug": "will-ian-machado-garry-be-the-ufc-welterweight-champion-on-december-31-2026",
-   "kind": "winner",
-   "liquidity": 710.84602
+   "question": "Who will win in the upcoming mma event Montel Jackson vs Ricky Simon scheduled for September 27, 2026 at 12:30 AM UTC?",
+   "slug": "ufc-monjac-ricsim-2026-09-26",
+   "kind": "other"
   },
   {
-   "question": "Will Leon Edwards be the UFC Welterweight Champion on December 31, 2026?",
-   "slug": "will-leon-edwards-be-the-ufc-welterweight-champion-on-december-31-2026",
-   "kind": "winner",
-   "liquidity": 2108.48674
+   "question": "Who will win in the upcoming mma event Josiah Harrell vs Elves Brener scheduled for September 26, 2026 at 10:00 PM UTC?",
+   "slug": "ufc-joshar-elvbre-2026-09-26",
+   "kind": "other"
   },
   {
-   "question": "Will Anthony Hernandez be the UFC Middleweight Champion on December 31, 2026?",
-   "slug": "will-anthony-hernandez-be-the-ufc-middleweight-champion-on-december-31-2026",
-   "kind": "winner",
-   "liquidity": 2085.65352
+   "question": "Who will win in the upcoming mma event Rodolfo Bellato vs Christian Edwards scheduled for September 27, 2026 at 12:00 AM UTC?",
+   "slug": "ufc-rodbel-chredw-2026-09-26",
+   "kind": "other"
   },
   {
-   "question": "Will Anthony Hernandez fight Joe Pyfer next?",
-   "slug": "will-anthony-hernandez-fight-joe-pyfer-next",
-   "kind": "winner",
-   "liquidity": 317.60646
+   "question": "Who will win in the upcoming mma event Rodolfo Vieira vs Robert Bryczek scheduled for September 26, 2026 at 11:30 PM UTC?",
+   "slug": "ufc-rodvie-robbry-2026-09-26",
+   "kind": "other"
   },
   {
-   "question": "UFC 332: Rafael Dos Anjos vs. Alexander Hernandez (Lightweight, Early Prelims)",
-   "slug": "ufc-raf1-ale-2026-10-03",
-   "kind": "winner",
-   "liquidity": 2143.7149
+   "question": "Who will win in the upcoming mma event Brady Hiestand vs Rinya Nakamura scheduled for September 26, 2026 at 11:00 PM UTC?",
+   "slug": "ufc-brahie-rinnak-2026-09-26",
+   "kind": "other"
+  },
+  {
+   "question": "Who will win in the upcoming mma event Melissa Amaya vs Valesca Machado scheduled for September 27, 2026 at 1:30 AM UTC?",
+   "slug": "ufc-melama-valmac-2026-09-26",
+   "kind": "other"
+  },
+  {
+   "question": "Who will win in the upcoming mma event Mehemmedeli Osmanli vs Ilimbek Akylbek Uulu scheduled for September 27, 2026 at 1:00 AM UTC?",
+   "slug": "ufc-mehosm-iliuul-2026-09-26",
+   "kind": "other"
+  },
+  {
+   "question": "Who will win in the upcoming mma event Luis Hernandez vs Sedriques Dumas scheduled for September 27, 2026 at 1:30 AM UTC?",
+   "slug": "ufc-luiher-seddum-2026-09-26",
+   "kind": "other"
+  },
+  {
+   "question": "Who will win in the upcoming mma event Norma Dumont vs Ailin Perez scheduled for September 26, 2026 at 9:30 PM UTC?",
+   "slug": "ufc-nordum-ailper-2026-09-26",
+   "kind": "other"
+  },
+  {
+   "question": "Who will win in the upcoming mma event Raul Rosas Jr. vs Raoni Barcelos scheduled for September 27, 2026 at 2:00 AM UTC?",
+   "slug": "ufc-rauros-raobar-2026-09-26",
+   "kind": "other"
+  },
+  {
+   "question": "Who will win in the upcoming mma event Rafael Dos Anjos vs Alexander Hernandez scheduled for October 3, 2026 at 9:30 PM UTC?",
+   "slug": "ufc-rafanj-aleher-2026-10-03",
+   "kind": "other"
   }
  ]
 }
