@@ -1116,28 +1116,29 @@ function marketTabs(b,mk,rr,totals){
         propRow(`${b.b} wins, if it finishes`,b.p_b_given_finish,'var(--blue)',pmk(b,'ml_finish_b'),pnote(b,'ml_finish_b'),'ml_finish_b'),
         propRow(`${b.a} wins, if it goes to decision`,b.p_a_given_decision,'var(--red)',pmk(b,'ml_dec_a'),pnote(b,'ml_dec_a'),'ml_dec_a'),
         propRow(`${b.b} wins, if it goes to decision`,b.p_b_given_decision,'var(--blue)',pmk(b,'ml_dec_b'),pnote(b,'ml_dec_b'),'ml_dec_b')]):'')],
-    ['strikes','Significant Strikes',
-      b.exp_minutes?group('Significant strikes','over an expected '+b.exp_minutes.toFixed(1)+' minutes',[
-        strikeRow(`${surname(b.a)} total landed`,Math.round(b.a_slpm_mid*b.exp_minutes),'nm-a'),
-        strikeRow(`${surname(b.b)} total landed`,Math.round(b.b_slpm_mid*b.exp_minutes),'nm-b'),
-        strikeRow(`${surname(b.a)} per round`,Math.round(b.a_slpm_mid*5),'nm-a'),
-        strikeRow(`${surname(b.b)} per round`,Math.round(b.b_slpm_mid*5),'nm-b'),
-        '<div class="note" style="padding:6px 11px">Point projections for now. A full distribution — how likely each total is, not just the middle — is registered as addendum 26. Books quote their own ladders, which differ by fight and by book, so the model publishes its own estimate and you compare it against whatever line you are looking at.</div>']):''],
-    ['takedowns','Takedowns',
-      group('Takedowns and knockdowns',trackLine(),[
+    ['volume','Strikes & Takedowns',
+      // parenthesised: without it, + binds tighter than ?: and everything
+      // after the ternary lands in the false branch only
+      (b.exp_minutes?group('Significant strikes','over an expected '+b.exp_minutes.toFixed(1)+' minutes',[
+        strikeRow(`${surname(b.a)} significant strikes landed`,Math.round((b.a_strikes_rate??b.a_slpm_mid)*b.exp_minutes),'nm-a'),
+        strikeRow(`${surname(b.b)} significant strikes landed`,Math.round((b.b_strikes_rate??b.b_slpm_mid)*b.exp_minutes),'nm-b'),
+        strikeRow(`${surname(b.a)} per round`,Math.round((b.a_strikes_rate??b.a_slpm_mid)*5),'nm-a'),
+        strikeRow(`${surname(b.b)} per round`,Math.round((b.b_strikes_rate??b.b_slpm_mid)*5),'nm-b'),
+        b.a_takedowns_rate!=null?strikeRow(`${surname(b.a)} takedowns landed`,(b.a_takedowns_rate*b.exp_minutes/15).toFixed(1),'nm-a'):'',
+        b.b_takedowns_rate!=null?strikeRow(`${surname(b.b)} takedowns landed`,(b.b_takedowns_rate*b.exp_minutes/15).toFixed(1),'nm-b'):'',
+        '<div class="note" style="padding:6px 11px">Expected counts, from a model of the mean rate — beaten out against each fighter\'s own career rate and the league average on held-out fights (addendum 26). Books quote their own ladders, which differ by fight and by book, so the model publishes its estimate and you read your line against it. How likely each exact total is, rather than the average, is still to come.</div>']):'')
+      +group('Takedowns and knockdowns',trackLine(),[
         propRow(`${b.a} lands a takedown`,b.a_p_takedown,'var(--red)',null,vsBase('C1','a',b.bands,b.a_p_takedown),'takedown_a'),
         propRow(`${b.b} lands a takedown`,b.b_p_takedown,'var(--blue)',null,vsBase('C1','b',b.bands,b.b_p_takedown),'takedown_b'),
         propRow(`${b.a} scores a knockdown`,b.a_p_knockdown,'var(--red)',null,vsBase('C3','a',b.bands,b.a_p_knockdown),'knockdown_a'),
         propRow(`${b.b} scores a knockdown`,b.b_p_knockdown,'var(--blue)',null,vsBase('C3','b',b.bands,b.b_p_knockdown),'knockdown_b')])
-      +'<div class="note" style="padding:6px 11px">The model prices at least one takedown. A count — how many, and how likely each number is — is registered as addendum 26.</div>'],
+
+      +formulaNote(b,'knockdown','knockdown','a three-input formula matched the 46-input model it replaced, so the one you can check won')],
     ['parlays','Fight Parlays',rovGroup(b)],
-    ['props','Fight Props',
-      group('Fight to go the distance','',[
-        propRow('Go the distance',b.m_decision,'var(--mute)',pmk(b,'decision'),
-          pnote(b,'decision')||vsBase('C9','fight',b.bands,b.m_decision),'decision')])],
     ['rounds','Round Props',
       group('Round of finish','projection only',rr.map(([k,v])=>propRow(`Ends in round ${k}`,v,'var(--gold)',pmk(b,'end_r'+k),pnote(b,'end_r'+k),'end_r'+k)))
-      +endsBeforeGroup(b)+startsRoundGroup(b)],
+      +endsBeforeGroup(b)+startsRoundGroup(b)
+      +formulaNote(b,'finish','finish','sets how likely a finish is; the method and round split still comes from the survival model and sums to it')],
   ].filter(c=>c[2]);
   if(!cats.length) return '';
   return `<div class="mtabs">${cats.map((c,i)=>
@@ -1198,7 +1199,7 @@ function verdictLine(b){
 // Stats where a LOWER number is the advantage. Age was being highlighted as
 // though older were better, which is the opposite of what the model says — it
 // is the strongest single feature and its sign is negative.
-const LOWER_BETTER=new Set(['age','sapm','layoff']);
+const LOWER_BETTER=new Set(['age','sapm','layoff','kd_against15','ko_loss']);
 const STAT_ROWS=[
   ['record','Record',v=>v],['age','Age',v=>v],['reach','Reach',v=>v+'"'],
   ['elo','Career rating',v=>v],['opp_elo','Opposition faced',v=>v],
@@ -1207,6 +1208,9 @@ const STAT_ROWS=[
   ['str_def','Striking defense',v=>(v*100).toFixed(0)+'%'],
   ['td15','Takedowns /15min',v=>v],
   ['td_def','Takedown defense',v=>(v*100).toFixed(0)+'%'],
+  ['kd15','Knockdowns /15min',v=>v],
+  ['sub15','Submission attempts /15min',v=>v],
+  ['kd_against15','Knockdowns absorbed /15min',v=>v],
   ['ctrl','Control share',v=>(v*100).toFixed(0)+'%'],
   ['sub15','Sub attempts /15min',v=>v],['kd15','Knockdowns /15min',v=>v],
   ['kd_against15','Knocked down /15min',v=>v],
@@ -1219,7 +1223,10 @@ function tale(b){
   if(!A||!B) return '';
   const rows=STAT_ROWS.filter(([k])=>A[k]!==undefined).map(([k,lab,fmt])=>{
     const na=parseFloat(A[k]), nb=parseFloat(B[k]);
-    let cmp=(isNaN(na)||isNaN(nb))?0:(na>nb?1:na<nb?-1:0);
+    // compare what is displayed: 0.401 and 0.404 both read "40%", and
+    // highlighting one of them as the leader is noise presented as a finding
+    const fa=String(fmt(A[k])), fb=String(fmt(B[k]));
+    let cmp=(isNaN(na)||isNaN(nb)||fa===fb)?0:(na>nb?1:na<nb?-1:0);
     if(LOWER_BETTER.has(k)) cmp=-cmp;
     return `<div class="tt">
       <div class="tv ${cmp>0?'lead a':''}">${esc(String(fmt(A[k])))}</div>
@@ -1283,15 +1290,6 @@ function open_(id){
             ${b.edge>0?'+':'−'}${(Math.abs(b.edge)*100).toFixed(1)}</div></div></div>
       <div class="note" style="margin-top:9px">Tested, the market wins these disagreements more
         often than we do. Treat a gap as an argument, not a tip.</div></div>`:''}
-    ${drv.length?`<div class="card"><div class="ghead" style="background:none;border:none;padding:0 0 6px">
-      <span class="gname">Why</span><span class="lbl">push on the log-odds</span></div>
-      ${drv.map(d=>{const w=Math.abs(d.value)/mx*50, red=d.favors==='a';
-        return `<div class="drv"><div style="width:148px;flex:none;font-size:11.5px;color:var(--mute)">${esc(d.label)}${drvRaw(b,d.label)}</div>
-          <div class="dt"><div class="bg"></div><div class="zero"></div>
-            <i style="${red?'right:50%':'left:50%'};width:${w}%;background:${red?'var(--red)':'var(--blue)'}"></i></div>
-          <div class="mono" style="width:52px;text-align:right;font-size:11px;color:var(--dim)">${d.value>0?'+':''}${d.value.toFixed(2)}</div></div>`;}).join('')}
-      </div>`:''}
-    ${tale(b)}
     ${(()=>{const c=topCall(b); if(!c) return '';
       const col=c.side==='a'?'var(--redsoft)':'var(--bluesoft)';
       const v=c.verdict;
@@ -1308,6 +1306,15 @@ function open_(id){
           that is for the fight, not for a particular fighter, since the model does not price per-fighter rounds.`
           :(c.key.startsWith('dec_')?' A decision call is by definition the fight going the distance.':'')}</div>
       </div>`;})()}
+    ${drv.length?`<div class="card"><div class="ghead" style="background:none;border:none;padding:0 0 6px">
+      <span class="gname">Why</span><span class="lbl">push on the log-odds</span></div>
+      ${drv.map(d=>{const w=Math.abs(d.value)/mx*50, red=d.favors==='a';
+        return `<div class="drv"><div style="width:148px;flex:none;font-size:11.5px;color:var(--mute)">${esc(d.label)}${drvRaw(b,d.label)}</div>
+          <div class="dt"><div class="bg"></div><div class="zero"></div>
+            <i style="${red?'right:50%':'left:50%'};width:${w}%;background:${red?'var(--red)':'var(--blue)'}"></i></div>
+          <div class="mono" style="width:52px;text-align:right;font-size:11px;color:var(--dim)">${d.value>0?'+':''}${d.value.toFixed(2)}</div></div>`;}).join('')}
+      </div>`:''}
+    ${tale(b)}
     ${b.thin?thinNote(b):''}
     ${b.thin?`<div class="card"><div class="ghead" style="background:none;border:none;padding:0 0 8px">
       <span class="gname">Winner</span><span class="lbl">probability · fair price</span></div>
@@ -1317,7 +1324,6 @@ function open_(id){
     </div>`:`<div class="card"><div class="ghead" style="background:none;border:none;padding:0 0 8px">
       <span class="gname">All markets priced</span><span class="lbl">◆ = a market price exists</span></div>
       ${marketTabs(b,mk,rr,totals)}
-      ${formulaNote(b,'knockdown','knockdown','a three-input formula matched the 46-input model it replaced, so the one you can check won')}
     </div>`}
     ${b.bands?`<div class="card"><div class="ghead" style="background:none;border:none;padding:0 0 8px">
       <span class="gname">Where this bout sits</span><span class="lbl">markers show each corner</span></div>

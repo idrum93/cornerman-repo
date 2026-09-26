@@ -1932,3 +1932,99 @@ the quantity this data measures most directly, and a count distribution is a
 modelling gap rather than an information gap — which is the opposite of every
 null recorded above. The risk is not that the signal is absent but that the
 tails are wrong, which is exactly what the calibration bar is there to catch.
+
+## Addendum 26: RESULT, first half (2026-09-25)
+
+**Expected counts adopted. Ladder probabilities still to come.**
+
+Prompted by an obvious question: why does the model show zero takedowns when a
+book quotes a ladder from 3+ to 9+ for the same bout? Because the projection
+used the MEDIAN, and 55% of fighters land no takedowns — so the median is
+genuinely zero for most of them, and the fitted median was zero for every
+fighter, carrying no information at all. Rosas Jr.'s career rate is 2.88
+takedowns per 15 minutes and Barcelos's is 2.19; the rates were never the
+problem, the statistic was.
+
+A mean-rate model, on held-out fights:
+
+| target | model | own career rate (C1) | league average (C2) | calibration slope |
+|---|---|---|---|---|
+| takedowns per 15 min | **1.401** | 1.532 | 1.681 | 0.87 |
+| significant strikes per min | **2.044** | 2.092 | 2.154 | 0.85 |
+
+Mean absolute error; lower is better. Both beat C1 and C2, P(better than own
+career rate) is 1.000 for takedowns and 0.961 for strikes, and both calibration
+slopes fall inside the 0.8 to 1.2 band fixed above. Published.
+
+Still outstanding, and the harder half: the probability of clearing a given
+total, which needs the distribution rather than the mean. The zero inflation
+that broke the median is exactly what that model has to represent.
+
+---
+
+# Audit: the "hidden UFC metrics" list (2026-09-25)
+
+Not a test — an audit of a proposed feature list against what the model already
+has and what this corpus can support. Recorded so the same ground is not
+covered twice.
+
+## Already in the model
+
+| proposed | where it lives |
+|---|---|
+| % strikes from clinch / on ground | `clinch_share`, `ground_share` |
+| head/body/leg distribution | `body_share`, `leg_share` |
+| control-time % | `ctrl_share` |
+| knockdowns per 15 min | `kd15` |
+| submission attempts per 15 | `sub15` |
+| opponent-adjusted striking and takedowns | `adj_slpm`, `adj_td15` — the adjustment IS the opponent baseline |
+| striking differential | `adj_slpm` and `sapm`, entered separately so the model can weight them |
+| stance | `southpaw` |
+| target-specific and position-specific defense | `str_def`, `td_def`; the position split was tested in addendum 25 |
+| offense x defense interactions | `grapple_edge`, `ko_edge`, `sub_edge` |
+
+## Already tested and closed
+
+Pace decay and round-to-round output (addendum 6 fortitude cluster, 0 of 6,
+cluster harmful). Output volatility and trend (addendum 22, 0 of 8). Position
+accuracy and submission-per-control (addendum 25, 0 of 10). Recency weighting
+(addendum 7, null). Style interactions (addendum 1, 0 of 9).
+
+## Impossible here
+
+Anything needing event sequences: chain wrestling, failed-takedown
+consequences, counter-strikes after a miss, time-to-first-takedown. The round
+feed has **no timestamps** — only per-round totals — so the order of events
+inside a round is unrecoverable at any price.
+
+UFC's own Weighted Striking Accuracy uses shot-difficulty data we do not have.
+The nearest buildable analogue is below.
+
+## Genuinely new, built and measured
+
+| candidate | usable rows | solo AUC | nearest existing feature |
+|---|---|---|---|
+| accuracy residual (actual minus expected from position/target mix) | 100% | 0.550 | `d_str_acc`, **r = 0.78** |
+| position entropy | 100% | 0.514 | `d_str_acc`, r = 0.28 |
+| ground strikes per takedown | 81% | 0.509 | `d_str_acc`, r = 0.24 |
+| control per takedown | 81% | 0.503 | `d_sapm`, r = 0.21 |
+| target entropy | 100% | 0.502 | `sub_edge`, r = 0.21 |
+| knockdowns per strike landed | 100% | 0.500 | `grapple_edge`, r = 0.08 |
+
+For scale, the model's strongest single feature, age difference, has solo AUC
+0.631. An AUC of 0.500 is a coin flip.
+
+## Conclusion: none are worth a registered test
+
+The only candidate with any standalone signal is the accuracy residual — the
+analogue of UFC's Weighted Striking Accuracy — and it correlates **0.78** with
+striking accuracy, which is already in the model. It is a rotation of an
+existing feature, not a new one.
+
+Everything else sits between 0.500 and 0.514, which is noise. The two takedown
+conversion measures are also undefined for the 19% of bouts with no takedown,
+the same sparsity that sank reversals in addendum 25.
+
+The list is a good list. It is aimed at a richer feed than this one: the
+features that would repay the effort need shot-difficulty labels or event
+timestamps, and UFCStats publishes neither.

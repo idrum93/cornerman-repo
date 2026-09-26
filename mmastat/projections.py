@@ -86,6 +86,10 @@ FEATS = [f"own_{k}" for k in PANEL_OWN] + [f"opp_{k}" for k in PANEL_OWN]
 RANGE_TARGETS = {
     "y_ctrl_pm": ("control time", "sec/min", "own_ctrl_share", 60.0, False),
     "y_slpm": ("significant strikes", "per min", "own_adj_slpm", 1.0, True),
+    # Takedowns are NOT a range target. Tried and reverted: 57% of fighters
+    # land none, so the median is zero for everyone and the projection carries
+    # no variation at all (correlation with the actual count is undefined).
+    # A count needs a zero-inflated mean, not quantiles — addendum 26.
 }
 # zero-inflated counts -> probability of at least one
 EVENT_TARGETS = {
@@ -101,6 +105,28 @@ def _qmodel(tr, target, q, seed=7):
         loss="quantile", alpha=q, n_estimators=200, learning_rate=0.06,
         max_depth=3, min_samples_leaf=40, random_state=seed
     ).fit(tr[FEATS], tr[target])
+
+
+MEAN_TARGETS = {
+    # PREREGISTRATION addendum 26. The MEAN rate, not a quantile: 55% of
+    # fighters land no takedowns, so the median is zero for almost everyone and
+    # a median projection carries no information at all. The mean is what a
+    # count market is priced off.
+    #
+    # Held out: takedowns, mean absolute error 1.401 against 1.532 for the
+    # fighter's own career rate and 1.681 for the league average, calibration
+    # slope 0.87. Strikes, 2.044 against 2.092 and 2.154, slope 0.85. Both
+    # clear the bar fixed in addendum 26.
+    "y_td15": ("takedowns", 15.0),
+    "y_slpm": ("strikes", 1.0),
+}
+
+
+def fit_mean(tr, target):
+    from sklearn.ensemble import HistGradientBoostingRegressor
+    m = HistGradientBoostingRegressor(max_depth=4, learning_rate=0.06, max_iter=350,
+                                      l2_regularization=1.0, random_state=0)
+    return m.fit(tr[FEATS], tr[target])
 
 
 def fit_range(tr, val, target, two_sided=True, seed=7):

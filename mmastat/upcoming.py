@@ -37,7 +37,8 @@ from sklearn.linear_model import LogisticRegression
 
 from .features import (PANEL_OWN, WIN_FEATURES, _init_states, build,
                        elo_eff, make_features)
-from .projections import FEATS as PROJ_FEATS, RANGE_TARGETS, EVENT_TARGETS
+from .projections import (FEATS as PROJ_FEATS, RANGE_TARGETS, EVENT_TARGETS,
+                          MEAN_TARGETS, fit_mean)
 from .projections import FORMULAS, FormulaModel, fit_finish_formula, finish_row
 FORMULA_INFO = {}
 OTHER = {"list": []}
@@ -355,6 +356,7 @@ def predict_card(path, fights, fighters, verbose=True):
     ptr, pval = P[P.date <= vcut], P[P.date > vcut]
     rng_models = {t: fit_range(ptr, pval, t, two_sided=cfg[4])
                   for t, cfg in RANGE_TARGETS.items()}
+    mean_models = {t: fit_mean(ptr, t) for t in MEAN_TARGETS}
     evt_models = {}
     for t in EVENT_TARGETS:
         yb = (P[t] > 0).astype(int)
@@ -582,10 +584,20 @@ def predict_card(path, fights, fighters, verbose=True):
                 xx = pd.DataFrame([row])[PROJ_FEATS]
                 for t, (models, k) in rng_models.items():
                     lo, mid, hi = predict_range(models, k, xx, RANGE_TARGETS[t][4])
-                    nm = "ctrl" if t == "y_ctrl_pm" else "slpm"
+                    # named from the target, so a new range target appears in
+                    # the payload without editing this line again
+                    nm = {"y_ctrl_pm": "ctrl", "y_slpm": "slpm",
+                          "y_td15": "td15"}.get(t, t.replace("y_", ""))
                     r[f"{who}_{nm}_lo"] = round(float(lo[0]), 2)
                     r[f"{who}_{nm}_mid"] = round(float(mid[0]), 2)
                     r[f"{who}_{nm}_hi"] = round(float(hi[0]), 2)
+                # Expected counts (addendum 26): the mean rate, which is what a
+                # count market is priced off. The median is zero for most
+                # fighters and carries no information.
+                for t, (nm2, per) in MEAN_TARGETS.items():
+                    # a count cannot be negative; the regressor can and did
+                    # (-0.10 takedowns for one fighter on this card)
+                    r[f"{who}_{nm2}_rate"] = round(max(0.0, float(mean_models[t].predict(xx)[0])), 3)
                 for t, (lab, _) in EVENT_TARGETS.items():
                     r[f"{who}_p_{lab}"] = round(
                         float(evt_models[t].predict_proba(xx)[0, 1]), 3)
