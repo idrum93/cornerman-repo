@@ -1176,10 +1176,18 @@ function recordSplit(b){
   let head='';
   if(b.m_decision!=null){
     const hist=ds?vsBase('C13','fight',b.bands,fin):'';
-    head=`<div class="prow" style="align-items:baseline">
-      <span><b>Model: ${P0(fin)}% chance this ends inside the distance</b>${
-        ds?`<span class="lbl"> · their fights go the distance ${P0(ds.a)}% and ${P0(ds.b)}% of the time</span>`:''}</span>
-      <span class="mono" style="color:var(--mute)">${esc(hist||'')}</span></div>`;
+    // built like every other row in the drawer: a label column, the number on
+    // the right in the mono column. It was a paragraph in bold before.
+    head=`<div class="prow">
+      <div style="width:146px;flex:none;font-size:11.5px;color:var(--mute)">Ends inside the distance
+        ${ds?`<span class="lbl" style="display:block;margin-top:1px">their fights go long ${
+          P0(ds.a)}% · ${P0(ds.b)}%</span>`:''}</div>
+      <div style="flex:1;position:relative;height:8px">
+        <div style="position:absolute;inset:0;background:var(--soft);border-radius:4px"></div>
+        <div style="position:absolute;left:0;top:0;height:8px;border-radius:4px;
+          width:${(fin*100).toFixed(2)}%;background:var(--gold)"></div></div>
+      <div class="mono" style="width:48px;text-align:right;font-size:12px;font-weight:600">${P1(fin)}%</div>
+      <div class="lbl" style="flex:none;max-width:150px;text-align:right">${esc(hist||'')}</div></div>`;
   }
   return group('How they have won','their UFC record, and what it usually means',
     [head,line(b.a,R.a,'nm-a'),line(b.b,R.b,'nm-b')]);
@@ -1238,15 +1246,15 @@ function rovGrid(b){
           background:${cls==='nm-a'?'var(--red)':'var(--blue)'};
           outline:${k===best?'1px solid var(--gold)':'none'};outline-offset:1px"></div></div>`;
     };
-    return `<td style="text-align:center;padding:0 3px;vertical-align:bottom">
+    return `<td style="text-align:center;padding:0 1px;vertical-align:bottom">
       <div style="display:flex;align-items:flex-end;justify-content:center;gap:3px;height:${H+12}px">
         ${bar(pa,ka,'nm-a')}${bar(pb,kb,'nm-b')}</div></td>`;
   };
-  const row=(meth,label)=>`<tr><td class="lbl" style="white-space:nowrap;padding-right:8px">${label}</td>
+  const row=(meth,label)=>`<tr><td class="lbl" style="white-space:nowrap;padding:0 4px 0 0;width:1%">${label}</td>
     ${rounds.map(r=>cell(meth,r)).join('')}</tr>`;
   return `<div class="pgroup"><div class="ghead">
       <span class="gname">Round and method of victory</span>
-      <span class="lbl">${esc(surname(b.a))} left · ${esc(surname(b.b))} right · one scale across the grid</span></div>
+      <span class="lbl">% chance · ${esc(surname(b.a))} left · ${esc(surname(b.b))} right · one scale</span></div>
     <table style="width:100%;border-collapse:collapse;margin:6px 0 4px">
       ${row('ko','KO/TKO/DQ')}${row('sub','Submission')}
       <tr><td></td>${rounds.map(r=>`<td class="lbl" style="text-align:center;padding-top:3px">R${r}</td>`).join('')}</tr>
