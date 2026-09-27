@@ -768,9 +768,23 @@ def predict_card(path, fights, fighters, verbose=True):
     try:
         from .ledger import latest_prop_prices
         _pp = latest_prop_prices(meta.get("date"))
+        # Only prices from the US exchange reach the page. Both exchanges are
+        # captured, but every "verify" link is built for polymarket.us, and the
+        # two slug the same bout differently — so a price taken from the global
+        # site was being shown with a US link that lands on a page where the
+        # market is not there. A number a reader cannot check is worse than no
+        # number, because the link is what makes it checkable.
+        dropped = 0
         for r in rows:
-            if r["bout"] in _pp:
-                r["prop_market"] = _pp[r["bout"]]
+            src = _pp.get(r["bout"])
+            if not src:
+                continue
+            keep = {k: v for k, v in src.items() if (v or {}).get("venue") == "polymarket_us"}
+            dropped += len(src) - len(keep)
+            if keep:
+                r["prop_market"] = keep
+        if dropped:
+            print(f"props: {dropped} price(s) held back — not on the exchange we link to")
     except Exception as e:
         print(f"note: prop prices unavailable ({e})")
 

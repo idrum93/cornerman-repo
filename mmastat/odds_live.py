@@ -119,18 +119,28 @@ def fetch_events(api_key=None, regions="us,uk,eu", timeout=30):
 
     out = []
     for ev in r.json():
-        quotes, names = {}, {}
+        quotes, names, per_book = {}, {}, {}
         for bk in ev.get("bookmakers", []):
+            title = bk.get("title") or bk.get("key")
             for mkt in bk.get("markets", []):
                 if mkt.get("key") != "h2h":
                     continue
                 o = mkt.get("outcomes", [])
                 if len(o) != 2:
                     continue
+                pair = {}
                 for side in o:
                     k = _nm(side["name"])
                     names.setdefault(k, side["name"])
                     quotes.setdefault(k, []).append(float(side["price"]))
+                    pair[k] = float(side["price"])
+                # each book's own devigged price, kept rather than discarded —
+                # we already pay for it in the same call
+                if len(pair) == 2:
+                    (a, pa), (b2, pb) = pair.items()
+                    ia, ib = 1.0 / pa, 1.0 / pb
+                    per_book.setdefault(title, {})[a] = ia / (ia + ib)
+                    per_book[title][b2] = ib / (ia + ib)
         if len(quotes) != 2:
             continue
         (k1, p1), (k2, p2) = quotes.items()
@@ -138,6 +148,7 @@ def fetch_events(api_key=None, regions="us,uk,eu", timeout=30):
         i1, i2 = 1.0 / med(p1), 1.0 / med(p2)
         out.append({"k1": k1, "k2": k2, "name1": names[k1], "name2": names[k2],
                     "p1": i1 / (i1 + i2), "books": max(len(p1), len(p2)),
+                    "per_book": {t: v.get(k1) for t, v in per_book.items() if k1 in v},
                     "commence": ev.get("commence_time")})
     _CACHE[ck] = out
     return out
@@ -153,6 +164,36 @@ def fetch_moneylines(api_key=None, regions="us,uk,eu", timeout=30):
     """
     return {frozenset((e["k1"], e["k2"])): (e["k1"], e["p1"], e["books"])
             for e in fetch_events(api_key, regions, timeout)}
+
+
+def fetch_book_prices(api_key=None, regions="us,uk,eu", timeout=30, book="FanDuel"):
+    """One named book's devigged price. NOT USED BY THE SITE.
+
+    Built and then withdrawn on 2026-09-27. A single book's line was shown
+    beside the consensus and removed again: it is not the benchmark, it reads
+    as if it might be, and it is not present for every bout, so it appeared on
+    some fights and not others for no reason a reader could see. The site shows
+    one market number.
+
+    Kept because the parsing is already done inside fetch_events and costs
+    nothing, and because the next question about a named book starts here.
+
+
+    The consensus median stays the market of record: addendum 1 and addendum 13
+    are running forward tests against it, with bets already triggered, and
+    swapping the benchmark mid-flight would void the series. A single book is
+    also a softer benchmark than the median of many — beating FanDuel is an
+    easier bar than beating the consensus, and quietly moving to the easier bar
+    would flatter the model for free.
+
+    So this is shown beside the consensus, never in place of it.
+    """
+    out = {}
+    for e in fetch_events(api_key, regions, timeout):
+        for title, p in (e.get("per_book") or {}).items():
+            if title.lower().replace(" ", "") == book.lower().replace(" ", ""):
+                out[frozenset((e["k1"], e["k2"]))] = (e["k1"], p)
+    return out
 
 
 def remaining_quota(api_key=None):

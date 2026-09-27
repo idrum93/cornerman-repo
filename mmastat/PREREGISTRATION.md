@@ -3081,3 +3081,57 @@ data — so this is a choice, not a finding. What it buys:
 `mmastat/record_probe.py` and `workflows/records.yml` stay in the tree unrun.
 If the question is reopened, the gate is already written and the bar is already
 fixed at 70%, which is the part that is hard to do honestly after the fact.
+
+---
+
+# Audit: which drivers actually carry the model? (2026-09-27)
+
+Descriptive. Every feature in the frozen 14, measured two ways on 829 held-out
+bouts: predictive power **alone**, and the cost of **removing it** from the
+full model. Full-model log loss is 0.6208.
+
+| driver | AUC alone | cost of removing |
+|---|---|---|
+| **age** | **0.664** | **+0.0178** |
+| UFC mileage | 0.617 | +0.0027 |
+| striking accuracy | 0.611 | +0.0010 |
+| takedown threat | 0.607 | +0.0033 |
+| **strikes absorbed** | 0.606 | **+0.0062** |
+| submission threat | 0.584 | -0.0002 |
+| layoff | 0.582 | -0.0013 |
+| **career quality** | 0.573 | **+0.0055** |
+| **strength of schedule** | 0.532 | **+0.0058** |
+| striking defense | 0.529 | -0.0009 |
+| losses by strikes | 0.521 | +0.0001 |
+| reach | 0.520 | -0.0003 |
+| striking vs chin | 0.510 | +0.0000 |
+| striking output | 0.505 | +0.0009 |
+
+## Age is the only outlier on both measures
+
+At 0.664 alone it is 47 points clear of the next feature, and removing it costs
+**three times** more than removing anything else. Nothing here rivals it.
+
+## The two measures disagree, and that is the finding
+
+**Strength of schedule looks useless alone (0.532) and is the second most
+valuable thing in the model (+0.0058).** It only means anything once career
+rating is present: a rating of 1550 says one thing against tough opposition and
+another against weak. Career quality behaves the same way at a smaller scale.
+
+Running the other way, **UFC mileage, striking accuracy, submission threat and
+layoff all look strong alone and contribute nothing at the margin** — three of
+the four are negative, meaning the model is very slightly better without them.
+They are proxies for what age and the ratings already carry.
+
+## Four features currently earn nothing
+
+Submission threat, layoff, striking defense and reach all cost nothing or less
+than nothing to remove, and striking vs chin sits at exactly 0.0000. Reach was
+noted on 2026-09-26 as dead weight; this confirms it and adds three more.
+
+**No change made.** Removing a feature from the frozen set needs its own
+registration and a held-out test, and this holdout is spent. Recorded so the
+next model revision starts from evidence rather than from the original
+selection, which was made on a different slice of data and has not been
+revisited since.
