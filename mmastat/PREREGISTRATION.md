@@ -3057,3 +3057,27 @@ endpoint is a maintenance risk, not a correctness one.
 Prior: moderate for the thin population, low for everyone else. A regional
 record against weak opposition is poor evidence, but it is being compared
 against no evidence at all.
+
+## Addendum 36: NOT PURSUED (2026-09-27)
+
+The coverage probe was built and shipped but never ran: it failed on a missing
+corpus, because the record workflow has no scrape step and the UFCStats CSVs
+are not committed. That is a one-line fix, and it is not being made.
+
+Decision: the model stays **UFC-only**. Pre-UFC records are not collected, and
+step 2 is not attempted.
+
+The reasoning stands where addendum 36 left it — 21% of fighter-appearances are
+thin, and for those the comparison is against nothing rather than against good
+data — so this is a choice, not a finding. What it buys:
+
+- one source, one definition, one boundary. Every number on the site means
+  "in the UFC", including average fight time, the method splits, the career
+  records and C13. A mixed denominator would need explaining on every row.
+- no dependency on an undocumented endpoint that can change without notice.
+- no risk of a record present for well-known debutants and absent for obscure
+  ones, which is signal arriving exactly where it is least needed.
+
+`mmastat/record_probe.py` and `workflows/records.yml` stay in the tree unrun.
+If the question is reopened, the gate is already written and the bar is already
+fixed at 70%, which is the part that is hard to do honestly after the fact.

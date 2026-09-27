@@ -1,0 +1,35 @@
+name: records
+
+# PREREGISTRATION addendum 36, step 1. Coverage only — this runs the probe and
+# prints a number. It writes nothing, changes no model, touches no site file.
+# Run it by hand; there is nothing here worth a schedule.
+on:
+  workflow_dispatch:
+    inputs:
+      source:
+        description: "which source to probe"
+        default: "both"
+        type: choice
+        options: [both, espn, wiki]
+      months:
+        description: "how far back to take fighters"
+        default: "12"
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install pandas numpy scikit-learn
+      - name: probe record coverage for thin fighters
+        run: |
+          python -m mmastat.record_probe \
+            --source "${{ inputs.source }}" \
+            --months "${{ inputs.months }}" \
+            --limit 60

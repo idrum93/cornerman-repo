@@ -572,9 +572,27 @@ function propChips(b){
   // A "Distance 35%" chip beside "FINISH 65%" says the same thing twice. The
   // distance chip now only appears when a fight is likelier than usual to go
   // long; the short direction is the badge's job.
-  const notableTrim=notable.filter(c=>!(c.key==='decision'&&c.dev>0&&c.p<c.base));
+  /* How long the fight lasts is ONE question, so it gets ONE chip.
+     "O2.5 82% · 23% before R4 · O3.5 73% · 14% before R3" is four ways of
+     saying the same fight is long, and "FINISH 64% · O2.5 42%" is two ways of
+     saying it is short. The badge answers it when it fires; otherwise the
+     single strongest rung does, measured the way every chip is ranked. */
+  const isLength=c=>c.key==='decision'||c.key.startsWith('total_')||c.key.startsWith('ends_before_');
+  let lengthChip=null;
+  notable.forEach(c=>{ if(isLength(c)&&(!lengthChip||c.dev>lengthChip.dev)) lengthChip=c; });
   const badge=(fin!=null&&fin-finBase>=0.12)
     ? `<span class="pp finish" title="the model makes a finish ${P0(fin-finBase)} points likelier than normal — a finish happens in ${P0(finBase)}% of fights">FINISH <b>${P0(fin)}%</b></span>` : '';
+  // the badge already answers "how long", so no length chip beside it
+  /* Ranked by deviation to decide WHICH chips show, then ordered by the round
+     they name to decide the order they show in. Ranking order made a row read
+     "O2.5 · before R4 · O3.5 · before R3", which is the same ladder shuffled. */
+  const roundOf=c=>{
+    const m=/(?:total_over_|ends_before_r|starts_r)(\d+)(?:_(\d))?/.exec(c.key);
+    if(!m) return c.key==='decision'?99:98;        // distance last, it spans them all
+    return parseFloat(m[1]+(m[2]?'.'+m[2]:''));
+  };
+  const notableTrim=notable.filter(c=>!isLength(c)||(!badge&&c===lengthChip))
+    .sort((x,y)=>roundOf(x)-roundOf(y));
   if(!notableTrim.length&&!badge) return '';
   return `<div class="props">${badge}${notableTrim.map(c=>
     `<span class="pp ${c.cls} strong" title="${esc(c.tip)} · well away from normal">${c.txt}</span>`
