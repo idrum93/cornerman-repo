@@ -125,6 +125,8 @@
   .mpanel{display:none;padding-top:8px}
   .mpanel.on{display:block}
   .pp.finish{color:var(--ink);background:var(--gold);border-color:var(--gold);font-weight:700}
+  .prow.faint>div:last-child,.prow.faint>div:first-child{opacity:.42}
+  .prow.faint:hover>div{opacity:1}
   .prow.top{background:rgba(214,178,94,.07);box-shadow:inset 3px 0 0 var(--gold)}
   .prow.top>span:first-child{color:var(--bone);font-weight:600}
   .prow+.prow{border-top:1px solid var(--soft)}
@@ -1021,7 +1023,11 @@ function fairOdds(p){
    dishonest thing this site could do. */
 function marketRecord(mk){
   const m=SC&&SC.markets&&SC.markets[mk];
-  if(!m||m.n<25) return {txt:'no record yet', cls:'none', n:m?m.n:0};
+  // Silent until there IS a record. "no record yet" was true on every row of
+  // every bout, which makes it a property of the site rather than of the
+  // contract beside it — and twenty of them down a panel crowd out the
+  // numbers that differ. It returns when a market has been graded 25 times.
+  if(!m||m.n<25) return null;
   const better=m.skill>0;
   return {txt:`${m.n} graded · ${better?'beats':'below'} base rate`, cls:better?'good':'bad', n:m.n};
 }
@@ -1050,10 +1056,18 @@ function pnote(b,key){
            :`market ${P1(v)}%`;
 }
 
-function propRow(name,p,col,marker,note,mkey){
+/* `base` dims a row whose number sits close to the rate for every fight. A
+   contract at its base rate is the model declining to say anything, and
+   printing it at the same weight as a real reading invites it to be read as
+   one. Within 6 points is faint; the row still shows, because "nothing
+   unusual here" is worth knowing and hiding it would misrepresent the ladder.
+   Only passed where a base rate genuinely exists — per-fighter method
+   contracts have none, and inventing one would be worse than dimming nothing. */
+function propRow(name,p,col,marker,note,mkey,base){
   const mk=marker==null?'':`<div style="position:absolute;left:calc(${marker*100}% - 4px);top:-3px;
     color:var(--gold);font-size:10px;line-height:1">◆</div>`;
-  return `<div class="prow ${mkey&&FEATURED.has(mkey)?'feat':''}">
+  const faint=(base!=null&&Math.abs(p-base)<0.06)?' faint':'';
+  return `<div class="prow${faint} ${mkey&&FEATURED.has(mkey)?'feat':''}">
     <div style="width:146px;flex:none;font-size:11.5px;color:var(--mute)">${esc(name)}
       ${note?`<span class="lbl" style="display:block;margin-top:1px">${note}</span>`:''}</div>
     <div style="flex:1;position:relative;height:8px">
@@ -1063,7 +1077,7 @@ function propRow(name,p,col,marker,note,mkey){
     <div class="mono" style="width:48px;text-align:right;font-size:12px;font-weight:600">${P1(p)}%</div>
     <div class="mono fo" title="fair price implied by this probability">${fairOdds(p).us}</div>
     ${mkey&&FEATURED.has(mkey)?'<span class="featdot" title="shown on this fight\'s tile">●</span>':''}
-    ${mkey?(()=>{const r=marketRecord(mkey);
+    ${mkey?(()=>{const r=marketRecord(mkey); if(!r) return '';
       return `<span class="rec ${r.cls}" title="${r.n} graded claims for this market">${esc(r.txt)}</span>`;})():'<span class="rec none"></span>'}
     </div>`;
 }
@@ -1161,16 +1175,19 @@ function rovGroup(b){
 function endsBeforeGroup(b){
   const ks=Object.keys(b).filter(k=>k.indexOf('p_ends_before_r')===0&&b[k]!=null).sort();
   if(!ks.length) return '';
+  const EBr=((((BR||{}).market_bases||{}).ends_before)||{})[b.rounds===5?'5':'3']||{};
   return group('Ends before round',ks.some(k=>pmk(b,k.slice(2))!=null)?'market priced':'no market line',
     ks.map(k=>propRow(`Ends before round ${k.slice(-1)}`,b[k],'var(--gold)',
-      pmk(b,k.slice(2)),pnote(b,k.slice(2)),k.slice(2))));
+      pmk(b,k.slice(2)),pnote(b,k.slice(2)),k.slice(2),EBr[k.slice(-1)])));
 }
 function startsRoundGroup(b){
   const ks=Object.keys(b).filter(k=>/^p_starts_r[0-9]$/.test(k)&&b[k]!=null).sort();
   if(!ks.length) return '';
+  const SBr=((((BR||{}).market_bases||{}).ends_before)||{})[b.rounds===5?'5':'3']||{};
   return group('To start round','a contract DraftKings sells',
     ks.map(k=>propRow(`Fight starts round ${k.slice(-1)}`,b[k],'var(--mute)',
-      pmk(b,k.slice(2)),pnote(b,k.slice(2)),k.slice(2))));
+      pmk(b,k.slice(2)),pnote(b,k.slice(2)),k.slice(2),
+      SBr[k.slice(-1)]!=null?1-SBr[k.slice(-1)]:null)));
 }
 /* Each tab bar drives only the panels that follow it. Called after every draw
    — the page's own tab groups need this as much as the drawer's, and binding
@@ -1234,11 +1251,26 @@ function marketTabs(b,mk,rr,totals){
         propRow(`${b.a} wins, if it goes to decision`,b.p_a_given_decision,'var(--red)',pmk(b,'ml_dec_a'),pnote(b,'ml_dec_a'),'ml_dec_a'),
         propRow(`${b.b} wins, if it goes to decision`,b.p_b_given_decision,'var(--blue)',pmk(b,'ml_dec_b'),pnote(b,'ml_dec_b'),'ml_dec_b')]):'')],
     ['rounds','Rounds & Distance',
-      group('Total rounds','over/under, as a sportsbook writes it',totals)
+      group('Total rounds','faint means it sits where most fights do',totals)
       +group('Fight to go the distance','',[
         propRow('Go the distance',b.m_decision,'var(--mute)',pmk(b,'decision'),
-          pnote(b,'decision')||vsBase('C9','fight',b.bands,b.m_decision),'decision')])
-      +group('Round of finish','projection only',rr.map(([k,v])=>propRow(`Ends in round ${k}`,v,'var(--gold)',pmk(b,'end_r'+k),pnote(b,'end_r'+k),'end_r'+k)),false,rr.map(([,v])=>v))
+          pnote(b,'decision')||vsBase('C9','fight',b.bands,b.m_decision),'decision',
+          (((BR||{}).market_bases||{}).dec))])
+      +(()=>{
+        /* No base rate is published for "ends in round N", but it is the
+           difference between two that are: the chance it is over before N+1
+           minus the chance it was over before N. Derived rather than left
+           undimmed, so this group reads like the rest of the tab. */
+        const EB=((((BR||{}).market_bases||{}).ends_before)||{})[b.rounds===5?'5':'3']||{};
+        const itd=1-((((BR||{}).market_bases||{}).dec)??0.505);
+        const baseFor=n=>{
+          const lo=n===1?0:EB[String(n)], hi=(n===b.rounds)?itd:EB[String(n+1)];
+          return (lo==null||hi==null)?null:hi-lo;
+        };
+        return group('Round of finish','faint means it sits where most fights do',
+          rr.map(([k,v])=>propRow(`Ends in round ${k}`,v,'var(--gold)',
+            pmk(b,'end_r'+k),pnote(b,'end_r'+k),'end_r'+k,baseFor(+k))),
+          false,rr.map(([,v])=>v));})()
       +endsBeforeGroup(b)+startsRoundGroup(b)
       +formulaNote(b,'finish','finish','sets how likely a finish is; the method and round split still comes from the survival model and sums to it')],
     ['parlays','Method & Round Combo',recordSplit(b)+rovGroup(b)],   // esc() handles the &
@@ -1420,9 +1452,12 @@ function open_(id){
   // 2.5 rounds". Both are real contracts, and they are NOT the same claim —
   // over 1.5 rounds means past 7:30 of round two, not past round one — so
   // each is labelled with the wording its own book uses.
-  const totals=b.totals?Object.keys(b.totals).map(k=>
-    propRow(`Over ${k.replace('over_','').replace('_','.')} rounds`,b.totals[k],'var(--gold)',
-      pmk(b,'total_'+k),pnote(b,'total_'+k),'total_'+k)):[];
+  const TB=((BR||{}).market_bases||{}).totals||{};
+  const TBr=TB[b.rounds===5?'5':'3']||{};
+  const totals=b.totals?Object.keys(b.totals).map(k=>{
+    const line=k.replace('over_','').replace('_','.');
+    return propRow(`Over ${line} rounds`,b.totals[k],'var(--gold)',
+      pmk(b,'total_'+k),pnote(b,'total_'+k),'total_'+k,TBr[line]);}):[];
   document.getElementById('drawin').innerHTML=`
     <button class="xbtn" id="xb">close ✕</button>
     <div class="lbl">${esc(b.segment||'')}${b.weight_class?' · '+esc(b.weight_class):''} · ${b.rounds===5?'5 rounds':'3 rounds'}</div>
