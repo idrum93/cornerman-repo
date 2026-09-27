@@ -333,7 +333,7 @@ def predict_card(path, fights, fighters, verbose=True):
     # the reasoning is the only thing this site has that they do not.
     LABELS = {
         "d_elo": "career quality", "d_opp_elo": "strength of schedule",
-        "d_log_exp": "experience", "d_adj_slpm": "striking output",
+        "d_log_exp": "UFC mileage", "d_adj_slpm": "striking output",
         "d_sapm": "strikes absorbed", "d_str_acc": "striking accuracy",
         "d_str_def": "striking defense", "d_reach": "reach",
         "d_age": "age", "d_log_layoff": "layoff",
@@ -341,8 +341,19 @@ def predict_card(path, fights, fighters, verbose=True):
         # fighter's losses that came by strikes, so a HIGHER number is worse.
         # Shown as "durability 17% v 9%" it looked like the higher number was
         # the advantage, while the bar correctly favoured the other corner.
-        "d_ko_loss_rate": "losses by strikes", "grapple_edge": "takedown threat",
-        "ko_edge": "knockout threat", "sub_edge": "submission threat",
+        "d_ko_loss_rate": "losses by strikes",
+        # Both of these carry NEGATIVE weights while their old names implied
+        # more was better, which is why the panel needed an italic "correction"
+        # tag to explain itself. The names now run the way the weights do.
+        #
+        # ko_edge is striking output times the opponent's rate of losing by
+        # strikes — a product of two things the model already holds separately,
+        # so the fit uses it to damp them rather than to add a threat.
+        #
+        # log_exp is negative once age is in the model: among fighters of the
+        # same age, more UFC bouts means more wear, not more craft.
+        "grapple_edge": "takedown threat",
+        "ko_edge": "striking vs chin, adjustment", "sub_edge": "submission threat",
     }
 
     # --- win model, trained on everything available

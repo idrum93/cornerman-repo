@@ -1561,7 +1561,7 @@ function tale(b){
    output-times-opponent-fragility made the numbers contradict the bar. Those
    carry their own components in the payload. */
 const DRV_STAT={'age':'age','career quality':'elo','strength of schedule':'opp_elo',
-  'experience':'n_fights','striking output':'slpm','strikes absorbed':'sapm',
+  'UFC mileage':'n_fights','striking output':'slpm','strikes absorbed':'sapm',
   'striking accuracy':'str_acc','striking defense':'str_def','reach':'reach',
   'losses by strikes':'ko_loss'};
 function drvRaw(b,label,d){
@@ -1570,11 +1570,13 @@ function drvRaw(b,label,d){
     // is not doing what its name says: it is a product of two stats the model
     // already counts on their own, so the fit uses it as a correction and its
     // weight comes out negative. Say so rather than show a contradiction.
+    // No italic tag: the label itself says "adjustment" where the row is one,
+    // so a second marker on the same row was explaining the same thing twice.
     const bigger=d.parts.a>d.parts.b?'a':'b';
     const flipped=(bigger!==d.favors);
     return `<span class="drvraw" title="${esc(d.parts.how||'')}${flipped?
-      ' — the model already counts both halves of this separately, so this row only corrects them':''}">${
-      d.parts.a} v ${d.parts.b}${flipped?' <i style="opacity:.6">correction</i>':''}</span>`;
+      ' — the model already counts both halves separately, so this row only corrects them':''}">${
+      d.parts.a} v ${d.parts.b}</span>`;
   }
   const k=DRV_STAT[label]; if(!k||!b.stats) return '';
   const a=b.stats.a[k], c=b.stats.b[k]; if(a===undefined) return '';
