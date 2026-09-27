@@ -1171,26 +1171,11 @@ function recordSplit(b){
         rds?` <span class="lbl">finishes ${rds}</span>`:''}</span></div>`;};
   // The reading this section exists for: what the model says about a finish,
   // beside what fights between fighters with these decision habits actually do.
-  const fin=1-(b.m_decision??0);
-  const ds=b.dec_share, bd=(b.bands||{}).C13;
-  let head='';
-  if(b.m_decision!=null){
-    const hist=ds?vsBase('C13','fight',b.bands,fin):'';
-    // built like every other row in the drawer: a label column, the number on
-    // the right in the mono column. It was a paragraph in bold before.
-    head=`<div class="prow">
-      <div style="width:146px;flex:none;font-size:11.5px;color:var(--mute)">Ends inside the distance
-        ${ds?`<span class="lbl" style="display:block;margin-top:1px">their fights go long ${
-          P0(ds.a)}% · ${P0(ds.b)}%</span>`:''}</div>
-      <div style="flex:1;position:relative;height:8px">
-        <div style="position:absolute;inset:0;background:var(--soft);border-radius:4px"></div>
-        <div style="position:absolute;left:0;top:0;height:8px;border-radius:4px;
-          width:${(fin*100).toFixed(2)}%;background:var(--gold)"></div></div>
-      <div class="mono" style="width:48px;text-align:right;font-size:12px;font-weight:600">${P1(fin)}%</div>
-      <div class="lbl" style="flex:none;max-width:150px;text-align:right">${esc(hist||'')}</div></div>`;
-  }
-  return group('How they have won','their UFC record, and what it usually means',
-    [head,line(b.a,R.a,'nm-a'),line(b.b,R.b,'nm-b')]);
+  /* The finish-likelihood line moved to Rounds & Distance, where "Go the
+     distance" already states the same thing from the other side. Two rows for
+     one number, in two tabs, is worse than one row in the tab about length. */
+  return group('How they have won','their UFC record, not a projection',
+    [line(b.a,R.a,'nm-a'),line(b.b,R.b,'nm-b')]);
 }
 
 /* Two sides of one certainty, so one bar rather than two rows. These pairs sum
@@ -1398,10 +1383,19 @@ function marketTabs(b,mk,rr,totals){
          is the one Polymarket prices: every rung here can carry a market
          number and a link to check it, and the totals family carries none.
          Totals are still graded in the results panel on their own terms. */
-      group('Fight to go the distance','',[
-        propRow('Go the distance',b.m_decision,'var(--mute)',pmk(b,'decision'),
-          pnote(b,'decision')||vsBase('C9','fight',b.bands,b.m_decision),'decision',
-          (((BR||{}).market_bases||{}).dec))])
+      (()=>{
+        /* Carries what the combo tab's header used to say: how often these two
+           fighters' own bouts have gone long, and how fights with that profile
+           actually end (C13). The model's number, the pair's habit and the
+           history, on the one row they all describe. */
+        const ds=b.dec_share;
+        const note=[pnote(b,'decision'),
+                    vsBase('C13','fight',b.bands,1-(b.m_decision??0))||vsBase('C9','fight',b.bands,b.m_decision),
+                    ds?`their fights go long ${P0(ds.a)}% · ${P0(ds.b)}%`:''
+                   ].filter(Boolean).join(' · ');
+        return group('Fight to go the distance','',[
+          propRow('Go the distance',b.m_decision,'var(--mute)',pmk(b,'decision'),
+            note,'decision',(((BR||{}).market_bases||{}).dec))]);})()
       +(()=>{
         /* No base rate is published for "ends in round N", but it is the
            difference between two that are: the chance it is over before N+1
