@@ -124,6 +124,7 @@
   .mtab.on{color:var(--ink);background:var(--bone);border-color:var(--bone)}
   .mpanel{display:none;padding-top:8px}
   .mpanel.on{display:block}
+  .pp.finish{color:var(--ink);background:var(--gold);border-color:var(--gold);font-weight:700}
   .prow+.prow{border-top:1px solid var(--soft)}
   .prow.feat{background:rgba(236,232,224,.045);box-shadow:inset 2px 0 0 rgba(236,232,224,.4)}
   .featdot{color:var(--bone);font-size:7px;opacity:.7;width:10px;text-align:center}
@@ -546,8 +547,16 @@ function propChips(b){
   // a fact about the base rate, not about this fight, and it crowded out the
   // ones worth seeing.
   const notable=propRank(b).filter(c=>c.dev>=0.12).slice(0,4);
-  if(!notable.length) return '';
-  return `<div class="props">${notable.map(c=>
+  // Same rule as every other chip: 12 points away from normal. An absolute
+  // 50% cutoff sounded like a claim and was not one — half of all fights end
+  // inside the distance, so it fired on anything a whisker above average. The
+  // badge now means the same thing the other chips mean.
+  const finBase=1-(((BR||{}).market_bases||{}).dec??0.51);
+  const fin=b.m_decision==null?null:1-b.m_decision;
+  const badge=(fin!=null&&fin-finBase>=0.12)
+    ? `<span class="pp finish" title="the model makes a finish ${P0(fin-finBase)} points likelier than normal — a finish happens in ${P0(finBase)}% of fights">FINISH <b>${P0(fin)}%</b></span>` : '';
+  if(!notable.length&&!badge) return '';
+  return `<div class="props">${badge}${notable.map(c=>
     `<span class="pp ${c.cls} strong" title="${esc(c.tip)} · well away from normal">${c.txt}</span>`
     ).join('')}</div>`;
 }

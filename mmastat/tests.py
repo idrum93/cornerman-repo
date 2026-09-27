@@ -262,8 +262,8 @@ REQUIRED_SITE_FEATURES = {
     "function topCall": "most likely outcome, with market agreement",
     "function marketTabs": "market categories as one row of tabs",
     "LOWER_BETTER": "age and strikes absorbed read the right way round",
-    "function marketTabs": "market categories as one row of tabs",
-    "LOWER_BETTER": "age and strikes absorbed read the right way round",
+    "pp finish": "the finish badge on bouts the model calls likelier to end early",
+    "function recordSplit": "how each fighter has actually won, beside the combo contracts",
     "divShort(b.weight_class)": "weight class on each tile",
     "class=\"zone ": "separated upcoming / results / history zones",
 }
