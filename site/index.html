@@ -1068,8 +1068,20 @@ function recordSplit(b){
       <span class="mono" style="color:var(--mute)">${cell(`${w.ko} KO`,cls)}${pc(w.ko)} ·
         ${cell(`${w.sub} sub`,cls)}${pc(w.sub)} · ${cell(`${w.dec} dec`,cls)}${pc(w.dec)}${
         rds?` <span class="lbl">finishes ${rds}</span>`:''}</span></div>`;};
-  return group('How they have won','their UFC record, not a projection',
-    [line(b.a,R.a,'nm-a'),line(b.b,R.b,'nm-b')]);
+  // The reading this section exists for: what the model says about a finish,
+  // beside what fights between fighters with these decision habits actually do.
+  const fin=1-(b.m_decision??0);
+  const ds=b.dec_share, bd=(b.bands||{}).C13;
+  let head='';
+  if(b.m_decision!=null){
+    const hist=ds?vsBase('C13','fight',b.bands,fin):'';
+    head=`<div class="prow" style="align-items:baseline">
+      <span><b>Model: ${P0(fin)}% chance this ends inside the distance</b>${
+        ds?`<span class="lbl"> · they win by decision ${P0(ds.a)}% and ${P0(ds.b)}% of the time</span>`:''}</span>
+      <span class="mono" style="color:var(--mute)">${esc(hist||'')}</span></div>`;
+  }
+  return group('How they have won','their UFC record, and what it usually means',
+    [head,line(b.a,R.a,'nm-a'),line(b.b,R.b,'nm-b')]);
 }
 
 function strikeRow(label,val,cls){

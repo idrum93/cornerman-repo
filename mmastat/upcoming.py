@@ -701,6 +701,21 @@ def predict_card(path, fights, fighters, verbose=True):
                 "C8": abs(sa2["age"] - sb2["age"]),
                 "C9": sa2["sub15"] + sb2["sub15"],
             }
+            # C13 (addendum 35): the pair's average decision share of their
+            # wins. Built from the same career walk the record block uses, so
+            # the panel row and the section agree by construction.
+            # r["a"] / r["b"], not na / nb: those belong to an earlier loop and
+            # gave every bout on the card the same pair of fighters
+            ra = _career_split(fights, r["a"], meta.get("date"))
+            rb = _career_split(fights, r["b"], meta.get("date"))
+            def _dec_share(x):
+                w = x["wins"]["ko"] + x["wins"]["sub"] + x["wins"]["dec"]
+                return (x["wins"]["dec"] / w) if w >= 2 else None
+            da, db = _dec_share(ra), _dec_share(rb)
+            if da is not None and db is not None:
+                per_fight["C13"] = (da + db) / 2
+                r["dec_share"] = {"a": round(da, 3), "b": round(db, 3),
+                                  "pair": round((da + db) / 2, 3)}
             bands = {}
             for k, (va, vb) in per_fighter.items():
                 if k in _by:
