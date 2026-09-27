@@ -2,7 +2,7 @@
  "event": "UFC 331",
  "date": "2026-09-19",
  "venue": "Crypto.com Arena, Los Angeles",
- "generated_utc": "2026-09-27T14:47:15.755715+00:00",
+ "generated_utc": "2026-09-27T20:48:00.514994+00:00",
  "bouts": [
   {
    "bout": "Joshua Van vs. Alexandre Pantoja",
@@ -442,7 +442,7 @@
      }
     },
     {
-     "label": "experience",
+     "label": "UFC mileage",
      "value": -0.0961,
      "favors": "b",
      "key": "d_log_exp"
@@ -695,7 +695,7 @@
      "key": "d_elo"
     },
     {
-     "label": "experience",
+     "label": "UFC mileage",
      "value": 0.2016,
      "favors": "a",
      "key": "d_log_exp"
@@ -1228,7 +1228,7 @@
      "key": "d_opp_elo"
     },
     {
-     "label": "experience",
+     "label": "UFC mileage",
      "value": 0.2418,
      "favors": "a",
      "key": "d_log_exp"
@@ -1246,7 +1246,7 @@
      "key": "d_sapm"
     },
     {
-     "label": "knockout threat",
+     "label": "striking vs chin, adjustment",
      "value": -0.1381,
      "favors": "b",
      "key": "ko_edge",
@@ -1497,7 +1497,7 @@
      "key": "d_ko_loss_rate"
     },
     {
-     "label": "knockout threat",
+     "label": "striking vs chin, adjustment",
      "value": -0.3245,
      "favors": "b",
      "key": "ko_edge",
@@ -1774,7 +1774,7 @@
      "key": "d_adj_slpm"
     },
     {
-     "label": "experience",
+     "label": "UFC mileage",
      "value": 0.0718,
      "favors": "a",
      "key": "d_log_exp"
@@ -2029,7 +2029,7 @@
      "key": "d_sapm"
     },
     {
-     "label": "experience",
+     "label": "UFC mileage",
      "value": -0.2864,
      "favors": "b",
      "key": "d_log_exp"
@@ -2821,7 +2821,7 @@
      }
     },
     {
-     "label": "knockout threat",
+     "label": "striking vs chin, adjustment",
      "value": -0.1829,
      "favors": "b",
      "key": "ko_edge",
