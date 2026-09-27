@@ -2,7 +2,7 @@
  "event": "UFC 331",
  "date": "2026-09-19",
  "venue": "Crypto.com Arena, Los Angeles",
- "generated_utc": "2026-09-27T13:53:22.307249+00:00",
+ "generated_utc": "2026-09-27T14:47:15.755715+00:00",
  "bouts": [
   {
    "bout": "Joshua Van vs. Alexandre Pantoja",
@@ -245,9 +245,9 @@
    "b_p_takedown": 0.695,
    "b_p_knockdown": 0.146,
    "dec_share": {
-    "a": 0.667,
-    "b": 0.429,
-    "pair": 0.548
+    "a": 0.6,
+    "b": 0.5,
+    "pair": 0.55
    },
    "bands": {
     "C1": {
@@ -525,9 +525,9 @@
    "b_p_takedown": 0.13,
    "b_p_knockdown": 0.379,
    "dec_share": {
-    "a": 0.5,
-    "b": 0.2,
-    "pair": 0.35
+    "a": 0.583,
+    "b": 0.167,
+    "pair": 0.375
    },
    "bands": {
     "C1": {
@@ -1056,9 +1056,9 @@
    "b_p_takedown": 0.428,
    "b_p_knockdown": 0.193,
    "dec_share": {
-    "a": 0.308,
-    "b": 0.125,
-    "pair": 0.216
+    "a": 0.3,
+    "b": 0.308,
+    "pair": 0.304
    },
    "bands": {
     "C1": {
@@ -1329,8 +1329,8 @@
    "b_p_knockdown": 0.348,
    "dec_share": {
     "a": 0.0,
-    "b": 0.364,
-    "pair": 0.182
+    "b": 0.353,
+    "pair": 0.176
    },
    "bands": {
     "C1": {
@@ -1851,9 +1851,9 @@
    "b_p_takedown": 0.296,
    "b_p_knockdown": 0.198,
    "dec_share": {
-    "a": 0.333,
-    "b": 0.267,
-    "pair": 0.3
+    "a": 0.533,
+    "b": 0.577,
+    "pair": 0.555
    },
    "bands": {
     "C1": {
@@ -1900,7 +1900,7 @@
      "fight": 3
     },
     "C13": {
-     "fight": 1
+     "fight": 3
     }
    }
   },
@@ -2622,9 +2622,9 @@
    "b_p_takedown": 0.377,
    "b_p_knockdown": 0.175,
    "dec_share": {
-    "a": 0.222,
-    "b": 0.167,
-    "pair": 0.194
+    "a": 0.267,
+    "b": 0.2,
+    "pair": 0.233
    },
    "bands": {
     "C1": {
@@ -2903,9 +2903,9 @@
    "b_p_takedown": 0.911,
    "b_p_knockdown": 0.11,
    "dec_share": {
-    "a": 0.333,
-    "b": 0.667,
-    "pair": 0.5
+    "a": 0.375,
+    "b": 0.8,
+    "pair": 0.588
    },
    "bands": {
     "C1": {
@@ -3179,9 +3179,9 @@
    "b_p_takedown": 0.574,
    "b_p_knockdown": 0.145,
    "dec_share": {
-    "a": 0.625,
-    "b": 0.143,
-    "pair": 0.384
+    "a": 0.667,
+    "b": 0.4,
+    "pair": 0.533
    },
    "bands": {
     "C1": {
@@ -3228,7 +3228,7 @@
      "fight": 3
     },
     "C13": {
-     "fight": 2
+     "fight": 3
     }
    }
   }
