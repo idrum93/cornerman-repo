@@ -12,7 +12,7 @@
    "round_right": 2,
    "props_n": 152,
    "props_brier": 18.4361,
-   "props_base_brier": 15.1639,
+   "props_base_brier": 15.1585,
    "props_right": 101,
    "props_base_n": 62,
    "props_base_right": 35,
@@ -54,7 +54,7 @@
        "right": true,
        "brier": 0.2391,
        "base": 0.505,
-       "base_brier": 0.2452,
+       "base_brier": 0.2454,
        "base_right": true
       },
       {
@@ -64,8 +64,8 @@
        "happened": true,
        "right": true,
        "brier": 0.0256,
-       "base": 0.702,
-       "base_brier": 0.0887,
+       "base": 0.703,
+       "base_brier": 0.0884,
        "base_right": true
       },
       {
@@ -75,8 +75,8 @@
        "happened": true,
        "right": true,
        "brier": 0.077,
-       "base": 0.563,
-       "base_brier": 0.191,
+       "base": 0.564,
+       "base_brier": 0.1904,
        "base_right": true
       },
       {
@@ -86,8 +86,8 @@
        "happened": true,
        "right": true,
        "brier": 0.1356,
-       "base": 0.489,
-       "base_brier": 0.2612,
+       "base": 0.49,
+       "base_brier": 0.2605,
        "base_right": false
       },
       {
@@ -97,8 +97,8 @@
        "happened": true,
        "right": true,
        "brier": 0.203,
-       "base": 0.43,
-       "base_brier": 0.3253,
+       "base": 0.429,
+       "base_brier": 0.326,
        "base_right": false
       },
       {
@@ -109,7 +109,7 @@
        "right": true,
        "brier": 0.0115,
        "base": 0.216,
-       "base_brier": 0.0468,
+       "base_brier": 0.0466,
        "base_right": true
       },
       {
@@ -120,7 +120,7 @@
        "right": true,
        "brier": 0.0531,
        "base": 0.376,
-       "base_brier": 0.1416,
+       "base_brier": 0.1412,
        "base_right": true
       },
       {
@@ -130,8 +130,8 @@
        "happened": false,
        "right": true,
        "brier": 0.1054,
-       "base": 0.479,
-       "base_brier": 0.229,
+       "base": 0.478,
+       "base_brier": 0.2283,
        "base_right": true
       },
       {
@@ -141,8 +141,8 @@
        "happened": false,
        "right": true,
        "brier": 0.1681,
-       "base": 0.538,
-       "base_brier": 0.2892,
+       "base": 0.537,
+       "base_brier": 0.2883,
        "base_right": false
       },
       {
@@ -153,7 +153,7 @@
        "right": true,
        "brier": 0.0115,
        "base": 0.784,
-       "base_brier": 0.0468,
+       "base_brier": 0.0466,
        "base_right": true
       },
       {
@@ -164,7 +164,7 @@
        "right": true,
        "brier": 0.0531,
        "base": 0.624,
-       "base_brier": 0.1416,
+       "base_brier": 0.1412,
        "base_right": true
       },
       {
@@ -174,8 +174,8 @@
        "happened": true,
        "right": true,
        "brier": 0.1054,
-       "base": 0.521,
-       "base_brier": 0.229,
+       "base": 0.522,
+       "base_brier": 0.2283,
        "base_right": true
       },
       {
@@ -185,8 +185,8 @@
        "happened": true,
        "right": true,
        "brier": 0.1681,
-       "base": 0.462,
-       "base_brier": 0.2892,
+       "base": 0.463,
+       "base_brier": 0.2883,
        "base_right": false
       },
       {
@@ -336,7 +336,7 @@
      "props_n": 26,
      "props_right": 25,
      "props_brier": 1.3565,
-     "props_base_brier": 2.5246,
+     "props_base_brier": 2.5195,
      "props_base_n": 13,
      "props_base_right": 9,
      "market": {
@@ -389,7 +389,7 @@
        "right": false,
        "brier": 0.263,
        "base": 0.505,
-       "base_brier": 0.2549,
+       "base_brier": 0.2546,
        "base_right": false
       },
       {
@@ -411,7 +411,7 @@
        "right": false,
        "brier": 0.3207,
        "base": 0.545,
-       "base_brier": 0.2972,
+       "base_brier": 0.2969,
        "base_right": false
       },
       {
@@ -422,7 +422,7 @@
        "right": false,
        "brier": 0.6216,
        "base": 0.254,
-       "base_brier": 0.5571,
+       "base_brier": 0.557,
        "base_right": false
       },
       {
@@ -433,7 +433,7 @@
        "right": false,
        "brier": 0.389,
        "base": 0.408,
-       "base_brier": 0.3508,
+       "base_brier": 0.3506,
        "base_right": false
       },
       {
@@ -444,7 +444,7 @@
        "right": false,
        "brier": 0.6216,
        "base": 0.746,
-       "base_brier": 0.5571,
+       "base_brier": 0.557,
        "base_right": false
       },
       {
@@ -455,7 +455,7 @@
        "right": false,
        "brier": 0.389,
        "base": 0.592,
-       "base_brier": 0.3508,
+       "base_brier": 0.3506,
        "base_right": false
       },
       {
@@ -583,7 +583,7 @@
      "props_n": 18,
      "props_right": 7,
      "props_brier": 3.1066,
-     "props_base_brier": 2.818,
+     "props_base_brier": 2.8168,
      "props_base_n": 7,
      "props_base_right": 0,
      "market": {
@@ -627,7 +627,7 @@
        "right": false,
        "brier": 0.5259,
        "base": 0.505,
-       "base_brier": 0.2452,
+       "base_brier": 0.2454,
        "base_right": true
       },
       {
@@ -649,7 +649,7 @@
        "right": false,
        "brier": 0.4685,
        "base": 0.545,
-       "base_brier": 0.2068,
+       "base_brier": 0.2071,
        "base_right": true
       },
       {
@@ -660,7 +660,7 @@
        "right": true,
        "brier": 0.1476,
        "base": 0.254,
-       "base_brier": 0.0643,
+       "base_brier": 0.0644,
        "base_right": true
       },
       {
@@ -671,7 +671,7 @@
        "right": false,
        "brier": 0.407,
        "base": 0.408,
-       "base_brier": 0.1662,
+       "base_brier": 0.1664,
        "base_right": true
       },
       {
@@ -682,7 +682,7 @@
        "right": true,
        "brier": 0.1476,
        "base": 0.746,
-       "base_brier": 0.0643,
+       "base_brier": 0.0644,
        "base_right": true
       },
       {
@@ -693,7 +693,7 @@
        "right": false,
        "brier": 0.407,
        "base": 0.592,
-       "base_brier": 0.1662,
+       "base_brier": 0.1664,
        "base_right": true
       },
       {
@@ -821,7 +821,7 @@
      "props_n": 18,
      "props_right": 12,
      "props_brier": 2.3746,
-     "props_base_brier": 1.0213,
+     "props_base_brier": 1.0224,
      "props_base_n": 7,
      "props_base_right": 7,
      "market": {
@@ -904,7 +904,7 @@
        "right": false,
        "brier": 0.2721,
        "base": 0.505,
-       "base_brier": 0.2549,
+       "base_brier": 0.2546,
        "base_right": false
       },
       {
@@ -926,7 +926,7 @@
        "right": false,
        "brier": 0.3439,
        "base": 0.545,
-       "base_brier": 0.2972,
+       "base_brier": 0.2969,
        "base_right": false
       },
       {
@@ -937,7 +937,7 @@
        "right": true,
        "brier": 0.0261,
        "base": 0.254,
-       "base_brier": 0.0643,
+       "base_brier": 0.0644,
        "base_right": true
       },
       {
@@ -948,7 +948,7 @@
        "right": true,
        "brier": 0.1224,
        "base": 0.408,
-       "base_brier": 0.1662,
+       "base_brier": 0.1664,
        "base_right": true
       },
       {
@@ -959,7 +959,7 @@
        "right": true,
        "brier": 0.0261,
        "base": 0.746,
-       "base_brier": 0.0643,
+       "base_brier": 0.0644,
        "base_right": true
       },
       {
@@ -970,7 +970,7 @@
        "right": true,
        "brier": 0.1224,
        "base": 0.592,
-       "base_brier": 0.1662,
+       "base_brier": 0.1664,
        "base_right": true
       },
       {
@@ -1142,7 +1142,7 @@
        "right": false,
        "brier": 0.4086,
        "base": 0.505,
-       "base_brier": 0.2452,
+       "base_brier": 0.2454,
        "base_right": true
       },
       {
@@ -1164,7 +1164,7 @@
        "right": false,
        "brier": 0.3347,
        "base": 0.545,
-       "base_brier": 0.2068,
+       "base_brier": 0.2071,
        "base_right": true
       },
       {
@@ -1175,7 +1175,7 @@
        "right": true,
        "brier": 0.0725,
        "base": 0.254,
-       "base_brier": 0.0643,
+       "base_brier": 0.0644,
        "base_right": true
       },
       {
@@ -1186,7 +1186,7 @@
        "right": false,
        "brier": 0.2744,
        "base": 0.408,
-       "base_brier": 0.1662,
+       "base_brier": 0.1664,
        "base_right": true
       },
       {
@@ -1197,7 +1197,7 @@
        "right": true,
        "brier": 0.0725,
        "base": 0.746,
-       "base_brier": 0.0643,
+       "base_brier": 0.0644,
        "base_right": true
       },
       {
@@ -1208,7 +1208,7 @@
        "right": false,
        "brier": 0.2744,
        "base": 0.592,
-       "base_brier": 0.1662,
+       "base_brier": 0.1664,
        "base_right": true
       },
       {
@@ -1336,7 +1336,7 @@
      "props_n": 18,
      "props_right": 13,
      "props_brier": 1.5741,
-     "props_base_brier": 1.0213,
+     "props_base_brier": 1.0224,
      "props_base_n": 7,
      "props_base_right": 7,
      "market": {
@@ -1410,7 +1410,7 @@
        "right": false,
        "brier": 0.3129,
        "base": 0.505,
-       "base_brier": 0.2452,
+       "base_brier": 0.2454,
        "base_right": true
       },
       {
@@ -1432,7 +1432,7 @@
        "right": false,
        "brier": 0.2613,
        "base": 0.545,
-       "base_brier": 0.2068,
+       "base_brier": 0.2071,
        "base_right": true
       },
       {
@@ -1443,7 +1443,7 @@
        "right": true,
        "brier": 0.0578,
        "base": 0.254,
-       "base_brier": 0.0643,
+       "base_brier": 0.0644,
        "base_right": true
       },
       {
@@ -1454,7 +1454,7 @@
        "right": true,
        "brier": 0.2093,
        "base": 0.408,
-       "base_brier": 0.1662,
+       "base_brier": 0.1664,
        "base_right": true
       },
       {
@@ -1465,7 +1465,7 @@
        "right": true,
        "brier": 0.0578,
        "base": 0.746,
-       "base_brier": 0.0643,
+       "base_brier": 0.0644,
        "base_right": true
       },
       {
@@ -1476,7 +1476,7 @@
        "right": true,
        "brier": 0.2093,
        "base": 0.592,
-       "base_brier": 0.1662,
+       "base_brier": 0.1664,
        "base_right": true
       },
       {
@@ -1604,7 +1604,7 @@
      "props_n": 18,
      "props_right": 15,
      "props_brier": 1.2294,
-     "props_base_brier": 1.0213,
+     "props_base_brier": 1.0224,
      "props_base_n": 7,
      "props_base_right": 7,
      "market": {
@@ -1657,7 +1657,7 @@
        "right": false,
        "brier": 0.4834,
        "base": 0.505,
-       "base_brier": 0.2549,
+       "base_brier": 0.2546,
        "base_right": false
       },
       {
@@ -1679,7 +1679,7 @@
        "right": false,
        "brier": 0.5488,
        "base": 0.545,
-       "base_brier": 0.2972,
+       "base_brier": 0.2969,
        "base_right": false
       },
       {
@@ -1690,7 +1690,7 @@
        "right": false,
        "brier": 0.7882,
        "base": 0.254,
-       "base_brier": 0.5571,
+       "base_brier": 0.557,
        "base_right": false
       },
       {
@@ -1701,7 +1701,7 @@
        "right": false,
        "brier": 0.618,
        "base": 0.408,
-       "base_brier": 0.3508,
+       "base_brier": 0.3506,
        "base_right": false
       },
       {
@@ -1712,7 +1712,7 @@
        "right": false,
        "brier": 0.7882,
        "base": 0.746,
-       "base_brier": 0.5571,
+       "base_brier": 0.557,
        "base_right": false
       },
       {
@@ -1723,7 +1723,7 @@
        "right": false,
        "brier": 0.618,
        "base": 0.592,
-       "base_brier": 0.3508,
+       "base_brier": 0.3506,
        "base_right": false
       },
       {
@@ -1851,7 +1851,7 @@
      "props_n": 18,
      "props_right": 8,
      "props_brier": 4.5512,
-     "props_base_brier": 2.818,
+     "props_base_brier": 2.8168,
      "props_base_n": 7,
      "props_base_right": 0,
      "market": {
@@ -1904,7 +1904,7 @@
        "right": false,
        "brier": 0.2742,
        "base": 0.505,
-       "base_brier": 0.2549,
+       "base_brier": 0.2546,
        "base_right": false
       },
       {
@@ -1926,7 +1926,7 @@
        "right": false,
        "brier": 0.3305,
        "base": 0.545,
-       "base_brier": 0.2972,
+       "base_brier": 0.2969,
        "base_right": false
       },
       {
@@ -1937,7 +1937,7 @@
        "right": false,
        "brier": 0.6699,
        "base": 0.254,
-       "base_brier": 0.5571,
+       "base_brier": 0.557,
        "base_right": false
       },
       {
@@ -1948,7 +1948,7 @@
        "right": false,
        "brier": 0.3936,
        "base": 0.408,
-       "base_brier": 0.3508,
+       "base_brier": 0.3506,
        "base_right": false
       },
       {
@@ -1959,7 +1959,7 @@
        "right": false,
        "brier": 0.6699,
        "base": 0.746,
-       "base_brier": 0.5571,
+       "base_brier": 0.557,
        "base_right": false
       },
       {
@@ -1970,7 +1970,7 @@
        "right": false,
        "brier": 0.3936,
        "base": 0.592,
-       "base_brier": 0.3508,
+       "base_brier": 0.3506,
        "base_right": false
       },
       {
@@ -2098,7 +2098,7 @@
      "props_n": 18,
      "props_right": 8,
      "props_brier": 3.2738,
-     "props_base_brier": 2.818,
+     "props_base_brier": 2.8168,
      "props_base_n": 7,
      "props_base_right": 0,
      "market": {
