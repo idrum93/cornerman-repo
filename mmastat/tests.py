@@ -262,7 +262,7 @@ REQUIRED_SITE_FEATURES = {
     "function topCall": "most likely outcome, with market agreement",
     "function marketTabs": "market categories as one row of tabs",
     "LOWER_BETTER": "age and strikes absorbed read the right way round",
-    "function lengthBadge": "one length rule: the FINISH and DISTANCE badges, and the call that must not repeat them",
+    "FINISH LIKELY": "the length verdict, led on the call line when the model is clear of normal",
     "function recordSplit": "how each fighter has actually won, beside the combo contracts",
     "divShort(b.weight_class)": "weight class on each tile",
     "class=\"zone ": "separated upcoming / results / history zones",

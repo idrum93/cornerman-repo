@@ -124,8 +124,10 @@
   .mtab.on{color:var(--ink);background:var(--bone);border-color:var(--bone)}
   .mpanel{display:none;padding-top:8px}
   .mpanel.on{display:block}
-  .pp.finish{color:var(--ink);background:var(--gold);border-color:var(--gold);font-weight:700}
-  .pp.distance{color:var(--ink);background:var(--bluesoft);border-color:var(--bluesoft);font-weight:700}
+  .calllead{display:inline-block;padding:1px 6px;border-radius:3px;font-size:10px;
+    letter-spacing:.06em;font-weight:700;margin-right:2px}
+  .calllead.finish{color:var(--ink);background:var(--gold)}
+  .calllead.distance{color:var(--ink);background:var(--bluesoft)}
   .prow.faint>div{opacity:.4}
   .prow.faint:hover>div{opacity:1}
   .prow.top{background:rgba(214,178,94,.07);box-shadow:inset 3px 0 0 var(--gold)}
@@ -545,16 +547,24 @@ function propRank(b){
   };
   push('decision',`Distance <b>${P0(b.m_decision)}%</b>`,b.m_decision,MB.dec,'pp-n',
        `the fight goes the distance — normally ${P0(MB.dec)}% of fights do`);
-  Object.keys(b.totals||{}).forEach(k=>{
-    const line=k.replace('over_','').replace('_','.');
-    push('total_'+k,`O${line} <b>${P0(b.totals[k])}%</b>`,b.totals[k],T[line],'pp-n',
-         `the fight lasts past ${line} rounds — normally ${P0(T[line])}%`);
-  });
+  /* The totals ladder is no longer shown in the drawer, so a chip pointing at
+     it would mark a row that is not there. Length chips come from the
+     ends-before family only, phrased in whichever direction the fight leans:
+     "reaches R5" for a long one, "before R3" for a short one. Same number
+     either way — one is the other subtracted from 1. */
   const EB=(MB.ends_before||{})[b.rounds===5?'5':'3']||{};
+  const leansLong=(b.m_decision!=null&&b.m_decision>(MB.dec??0.505));
   Object.keys(b).filter(k=>k.startsWith('p_ends_before_r')&&b[k]!=null).forEach(k=>{
-    const n=k.slice(-1);
-    push('ends_before_r'+n,`<b>${P0(b[k])}%</b> before R${n}`,b[k],EB[n],'pp-n',
-         `the fight ends before round ${n} begins — normally ${P0(EB[n])}%`);
+    const n=k.slice(-1), p=b[k], base=EB[n];
+    if(base==null) return;
+    // a long fight reads better as "reaches R5 59%" than "41% before R5";
+    // the complement of the same number, so the row it marks is unchanged
+    if(leansLong)
+      push('ends_before_r'+n,`reaches R${n} <b>${P0(1-p)}%</b>`,1-p,1-base,'pp-n',
+           `the fight gets to round ${n} — normally ${P0(1-base)}%`);
+    else
+      push('ends_before_r'+n,`<b>${P0(p)}%</b> before R${n}`,p,base,'pp-n',
+           `the fight ends before round ${n} begins — normally ${P0(base)}%`);
   });
   // Takedown and knockdown chips are gone with their drawer rows: no book
   // quotes "lands a takedown", so the site does not present it as a contract.
@@ -592,9 +602,9 @@ function chipSet(b){
     return m?parseFloat(m[1]+(m[2]?'.'+m[2]:'')):-1;};
   let lengthChip=null;
   if(!lb){
-    const goesLong=lb?false:(b.m_decision!=null&&b.m_decision>0.5);
-    const lane=c=>goesLong?c.key.startsWith('total_'):c.key.startsWith('ends_before_');
-    notable.filter(c=>isLength(c)&&lane(c)&&c.p>c.base).forEach(c=>{
+    // one ladder now, and propRank has already flipped its phrasing to the
+    // side the fight leans, so the rung above its base is the informative one
+    notable.filter(c=>c.key.startsWith('ends_before_')&&c.p>c.base).forEach(c=>{
       if(!lengthChip||roundKey(c)>roundKey(lengthChip)) lengthChip=c; });
     if(!lengthChip) notable.filter(isLength).forEach(c=>{
       if(!lengthChip||c.dev>lengthChip.dev) lengthChip=c; });
@@ -606,11 +616,12 @@ function chipSet(b){
 function chipKeys(b){ return chipSet(b).chips.map(c=>c.key); }
 
 function propChips(b){
-  const {badge, chips}=chipSet(b);
-  const bg=badge?`<span class="pp ${badge.kind==='finish'?'finish':'distance'}" title="${esc(badge.tip)}">${
-    badge.kind==='finish'?'FINISH':'DISTANCE'} <b>${P0(badge.p)}%</b></span>`:'';
-  if(!bg&&!chips.length) return '';
-  return `<div class="props">${bg}${chips.map(c=>
+  /* The badge belongs with the call, not among the specific chips — it answers
+     the same question the call's first line answers, at a higher bar. It is
+     rendered there; this row carries only the specific contracts. */
+  const {chips}=chipSet(b);
+  if(!chips.length) return '';
+  return `<div class="props">${chips.map(c=>
     `<span class="pp ${c.cls} strong" title="${esc(c.tip)} · well away from normal">${c.txt}</span>`
     ).join('')}</div>`;
 }
@@ -707,9 +718,16 @@ function tile(b){
       /* The badge beside this chip already states the family and the same
          percentage. Printing "a finish 65%" next to "FINISH 65%" is the
          number twice; the route is what the call adds. */
+      /* "FINISH LIKELY" when the model is 12 points clear of normal, plain
+         "a finish 56%" when it merely leans that way. Same line either way, so
+         the reader is not comparing a badge in one place with a sentence in
+         another — the wording is what separates them. */
       const lbc=lengthBadge(b);
-      const dup=lbc&&((lbc.kind==='finish'&&c.fam==='finish')||(lbc.kind==='distance'&&c.fam==='decision'));
-      const head=(c.fam&&!dup)?`${c.fam==='finish'?'a finish':'a decision'} <b>${P0(c.famP)}%</b>`:'';
+      const matches=lbc&&((lbc.kind==='finish'&&c.fam==='finish')||(lbc.kind==='distance'&&c.fam==='decision'));
+      const head=matches
+        ? `<span class="calllead ${lbc.kind}" title="${esc(lbc.tip)}">${
+            lbc.kind==='finish'?'FINISH LIKELY':'DISTANCE LIKELY'} <b>${P0(lbc.p)}%</b></span>`
+        : (c.fam?`${c.fam==='finish'?'a finish':'a decision'} <b>${P0(c.famP)}%</b>`:'');
       const route=c.routeClear?`${head?' · ':''}${esc(c.label)}${
         c.round?` <span style="color:var(--gold)">R${c.round.n}</span>`:''} ${P0(c.p)}%`:'';
       if(!head&&!route) return '';
@@ -1365,12 +1383,14 @@ function marketTabs(b,mk,rr,totals){
         splitRow('If it finishes',b,b.p_a_given_finish),
         splitRow('If it goes to decision',b,b.p_a_given_decision)]):'')],
     ['rounds','Rounds & Distance',
-      (()=>{const TB2=((((BR||{}).market_bases||{}).totals)||{})[b.rounds===5?'5':'3']||{};
-        const ps=Object.keys(b.totals||{}).map(k=>b.totals[k]);
-        const bs=Object.keys(b.totals||{}).map(k=>TB2[k.replace('over_','').replace('_','.')]);
-        const v=ps.slice(); v.ladderPick=ladderTop(ps,bs);
-        return group('Total rounds','gold = the clearest line · faint = ordinary',totals,false,v);})()
-      +group('Fight to go the distance','',[
+      /* One length ladder, not two. "Over 2.5 at 72%" and "ends before round
+         3 at 23%" sum to 95% — the gap is a finish in the first half of round
+         three, so they are not complements, but four to eight points apart is
+         two ladders telling one story. The ends-before family stays because it
+         is the one Polymarket prices: every rung here can carry a market
+         number and a link to check it, and the totals family carries none.
+         Totals are still graded in the results panel on their own terms. */
+      group('Fight to go the distance','',[
         propRow('Go the distance',b.m_decision,'var(--mute)',pmk(b,'decision'),
           pnote(b,'decision')||vsBase('C9','fight',b.bands,b.m_decision),'decision',
           (((BR||{}).market_bases||{}).dec))])
