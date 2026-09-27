@@ -1083,7 +1083,7 @@ function pnote(b,key){
    Only passed where a base rate genuinely exists — per-fighter method
    contracts have none, and inventing one would be worse than dimming nothing. */
 function propRow(name,p,col,marker,note,mkey,base){
-  const mk=marker==null?'':`<div style="position:absolute;left:calc(${marker*100}% - 4px);top:-3px;
+  const mk=marker==null?'':`<div style="position:absolute;left:calc(${(marker*100).toFixed(2)}% - 4px);top:-3px;
     color:var(--gold);font-size:10px;line-height:1">◆</div>`;
   const faint=(base!=null&&Math.abs(p-base)<0.06)?' faint':'';
   return `<div class="prow${faint} ${mkey&&FEATURED.has(mkey)?'feat':''}">
@@ -1092,7 +1092,7 @@ function propRow(name,p,col,marker,note,mkey,base){
     <div style="flex:1;position:relative;height:8px">
       <div style="position:absolute;inset:0;background:var(--soft);border-radius:4px"></div>
       <div style="position:absolute;left:0;top:0;height:8px;border-radius:4px;
-        width:${Math.max(0,Math.min(100,p*100))}%;background:${col}"></div>${mk}</div>
+        width:${Math.max(0,Math.min(100,p*100)).toFixed(2)}%;background:${col}"></div>${mk}</div>
     <div class="mono" style="width:48px;text-align:right;font-size:12px;font-weight:600">${P1(p)}%</div>
     <div class="mono fo" title="fair price implied by this probability">${fairOdds(p).us}</div>
     ${mkey&&FEATURED.has(mkey)?'<span class="featdot" title="this is the line shown on the fight\'s tile">●</span>':''}
@@ -1118,9 +1118,9 @@ function rangeBlock(stat,unit,rows){
           <div style="position:absolute;top:5px;left:0;right:0;height:5px;
             background:var(--soft);border-radius:3px"></div>
           <div style="position:absolute;top:5px;height:5px;border-radius:3px;background:${c};
-            left:${lo/top*100}%;width:${Math.max(1,(hi-lo)/top*100)}%"></div>
+            left:${(lo/top*100).toFixed(2)}%;width:${Math.max(1,(hi-lo)/top*100).toFixed(2)}%"></div>
           <div style="position:absolute;top:2px;width:2px;height:11px;background:var(--bone);
-            left:${mid/top*100}%"></div>
+            left:${(mid/top*100).toFixed(2)}%"></div>
         </div>
         <span class="mono" style="width:84px;text-align:right;font-size:11.5px">
           ${lo.toFixed(1)}–${hi.toFixed(1)}</span>
@@ -1167,9 +1167,74 @@ function recordSplit(b){
     [head,line(b.a,R.a,'nm-a'),line(b.b,R.b,'nm-b')]);
 }
 
+/* Two sides of one certainty, so one bar rather than two rows. These pairs sum
+   to 100% by construction — given the fight ends this way, one of them wins —
+   and four separate bars made that look like four independent claims. */
+/* One bar, two corners. These conditionals split 100% between the fighters,
+   so four separate rows read as four independent claims when they are two.
+   No book quotes them, so there is no market marker to place — the bar is the
+   whole of it. */
+function splitRow(label,b,pa){
+  if(pa==null) return '';
+  const pct=Math.max(0,Math.min(100,pa*100)).toFixed(2);   // 32.300000000000004% in the markup otherwise
+  return `<div class="prow">
+    <div style="width:146px;flex:none;font-size:11.5px;color:var(--mute)">${esc(label)}</div>
+    <div style="flex:1;position:relative;height:8px;border-radius:4px;overflow:hidden">
+      <div style="position:absolute;inset:0;background:var(--blue)"></div>
+      <div style="position:absolute;left:0;top:0;bottom:0;width:${pct}%;background:var(--red)"></div>
+    </div>
+    <div class="mono" style="width:104px;text-align:right;font-size:12px;font-weight:600">
+      <span class="nm-a">${P0(pa)}%</span> <span style="color:var(--dim)">/</span>
+      <span class="nm-b">${P0(1-pa)}%</span></div>
+    <div class="mono fo" style="opacity:.6">${esc(surname(b.a))} / ${esc(surname(b.b))}</div>
+  </div>`;
+}
+
 function strikeRow(label,val,cls){
   return `<div class="prow"><span>${esc(label)}</span><span class="mono ${cls}">${val}</span></div>`;
 }
+/* Twenty contracts as a grid instead of twenty rows: method down, round
+   across, the two corners side by side in each cell. The rows were the longest
+   list in the drawer and mostly small numbers, which is exactly the shape a
+   chart reads better than a list. Bars share one scale across the whole grid,
+   so a tall bar means the same thing wherever it appears. */
+function rovGrid(b){
+  const rov=b.round_of_victory||{};
+  const ks=Object.keys(rov);
+  if(!ks.length) return '';
+  const rounds=[...new Set(ks.map(k=>+k.split('_r')[1]))].sort((x,y)=>x-y);
+  const top=Math.max(...ks.map(k=>rov[k]));
+  const best=ks.reduce((m,k)=>rov[k]>rov[m]?k:m,ks[0]);
+  const H=38;
+  const cell=(meth,rnd)=>{
+    const ka=`a_${meth}_r${rnd}`, kb=`b_${meth}_r${rnd}`;
+    const pa=rov[ka], pb=rov[kb];
+    const bar=(p,k,cls)=>{
+      if(p==null) return `<div style="width:13px"></div>`;
+      const h=Math.max(2,Math.round(p/top*H));
+      return `<div style="display:flex;flex-direction:column;align-items:center;gap:2px"
+        title="${esc(k===ka?surname(b.a):surname(b.b))} by ${meth==='ko'?'KO/TKO':'submission'} in round ${rnd} — ${P1(p)}%">
+        <span class="lbl ${cls}" style="font-size:9px;line-height:1">${
+          p>=0.095?P0(p):(100*p).toFixed(1)}</span>
+        <div style="width:13px;height:${h}px;border-radius:2px 2px 0 0;
+          background:${cls==='nm-a'?'var(--red)':'var(--blue)'};
+          outline:${k===best?'1px solid var(--gold)':'none'};outline-offset:1px"></div></div>`;
+    };
+    return `<td style="text-align:center;padding:0 3px;vertical-align:bottom">
+      <div style="display:flex;align-items:flex-end;justify-content:center;gap:3px;height:${H+12}px">
+        ${bar(pa,ka,'nm-a')}${bar(pb,kb,'nm-b')}</div></td>`;
+  };
+  const row=(meth,label)=>`<tr><td class="lbl" style="white-space:nowrap;padding-right:8px">${label}</td>
+    ${rounds.map(r=>cell(meth,r)).join('')}</tr>`;
+  return `<div class="pgroup"><div class="ghead">
+      <span class="gname">Round and method of victory</span>
+      <span class="lbl">${esc(surname(b.a))} left · ${esc(surname(b.b))} right · one scale across the grid</span></div>
+    <table style="width:100%;border-collapse:collapse;margin:6px 0 4px">
+      ${row('ko','KO/TKO/DQ')}${row('sub','Submission')}
+      <tr><td></td>${rounds.map(r=>`<td class="lbl" style="text-align:center;padding-top:3px">R${r}</td>`).join('')}</tr>
+    </table></div>`;
+}
+
 function rovGroup(b){
   const rov=b.round_of_victory||{};
   if(!Object.keys(rov).length) return '';
@@ -1277,22 +1342,28 @@ function marketTabs(b,mk,rr,totals){
           <span class="mono nm-a">${P0(b.m_a_ko/b.p_a)}% KO · ${P0(b.m_a_sub/b.p_a)}% sub · ${P0(b.m_a_dec/b.p_a)}% dec</span></div>`,
         `<div class="prow"><span>${esc(surname(b.b))} wins <b>${P0(b.p_b)}%</b> of the time</span>
           <span class="mono nm-b">${P0(b.m_b_ko/b.p_b)}% KO · ${P0(b.m_b_sub/b.p_b)}% sub · ${P0(b.m_b_dec/b.p_b)}% dec</span></div>`]):'')
-      +group('Method of victory','sums to 100% across the six',[
-        propRow(`${b.a} by KO/TKO/DQ`,b.m_a_ko,'var(--red)',pmk(b,'ko_a'),pnote(b,'ko_a'),'ko_a'),
-        propRow(`${b.a} by submission`,b.m_a_sub,'var(--red)',pmk(b,'sub_a'),pnote(b,'sub_a'),'sub_a'),
-        propRow(`${b.a} by decision`,b.m_a_dec,'var(--red)',pmk(b,'dec_a'),pnote(b,'dec_a'),'dec_a'),
-        propRow(`${b.b} by KO/TKO/DQ`,b.m_b_ko,'var(--blue)',pmk(b,'ko_b'),pnote(b,'ko_b'),'ko_b'),
-        propRow(`${b.b} by submission`,b.m_b_sub,'var(--blue)',pmk(b,'sub_b'),pnote(b,'sub_b'),'sub_b'),
-        propRow(`${b.b} by decision`,b.m_b_dec,'var(--blue)',pmk(b,'dec_b'),pnote(b,'dec_b'),'dec_b')],
-        false,[b.m_a_ko,b.m_a_sub,b.m_a_dec,b.m_b_ko,b.m_b_sub,b.m_b_dec])
+      +(()=>{
+        /* Ranked, not grouped by corner. Six rows is short enough that the
+           order can carry the meaning — first, second, third most likely — and
+           the colour already says whose contract each one is. The combo tab
+           stays grouped by fighter, where twenty rows would be unreadable any
+           other way. */
+        const mv=[[`${b.a} by KO/TKO/DQ`,b.m_a_ko,'var(--red)','ko_a'],
+                  [`${b.a} by submission`,b.m_a_sub,'var(--red)','sub_a'],
+                  [`${b.a} by decision`,b.m_a_dec,'var(--red)','dec_a'],
+                  [`${b.b} by KO/TKO/DQ`,b.m_b_ko,'var(--blue)','ko_b'],
+                  [`${b.b} by submission`,b.m_b_sub,'var(--blue)','sub_b'],
+                  [`${b.b} by decision`,b.m_b_dec,'var(--blue)','dec_b']]
+          .filter(r=>r[1]!=null).sort((x,y)=>y[1]-x[1]);
+        return group('Method of victory','most likely first · sums to 100% across the six',
+          mv.map(([nm,p,col,k])=>propRow(nm,p,col,pmk(b,k),pnote(b,k),k)),
+          false,mv.map(r=>r[1]));})()
       +(b.m_a_finish!=null?group('To win by finish','either route',[
         propRow(`${b.a} by KO/TKO/DQ or submission`,b.m_a_finish,'var(--red)',pmk(b,'finish_a'),pnote(b,'finish_a'),'finish_a'),
         propRow(`${b.b} by KO/TKO/DQ or submission`,b.m_b_finish,'var(--blue)',pmk(b,'finish_b'),pnote(b,'finish_b'),'finish_b')]):'')
-      +(b.p_a_given_finish!=null?group('Moneyline, finish or decision only','given it ends that way, who wins',[
-        propRow(`${b.a} wins, if it finishes`,b.p_a_given_finish,'var(--red)',pmk(b,'ml_finish_a'),pnote(b,'ml_finish_a'),'ml_finish_a'),
-        propRow(`${b.b} wins, if it finishes`,b.p_b_given_finish,'var(--blue)',pmk(b,'ml_finish_b'),pnote(b,'ml_finish_b'),'ml_finish_b'),
-        propRow(`${b.a} wins, if it goes to decision`,b.p_a_given_decision,'var(--red)',pmk(b,'ml_dec_a'),pnote(b,'ml_dec_a'),'ml_dec_a'),
-        propRow(`${b.b} wins, if it goes to decision`,b.p_b_given_decision,'var(--blue)',pmk(b,'ml_dec_b'),pnote(b,'ml_dec_b'),'ml_dec_b')]):'')],
+      +(b.p_a_given_finish!=null?group('Moneyline, finish or decision only','each line splits 100% between the corners',[
+        splitRow('If it finishes',b,b.p_a_given_finish),
+        splitRow('If it goes to decision',b,b.p_a_given_decision)]):'')],
     ['rounds','Rounds & Distance',
       (()=>{const TB2=((((BR||{}).market_bases||{}).totals)||{})[b.rounds===5?'5':'3']||{};
         const ps=Object.keys(b.totals||{}).map(k=>b.totals[k]);
@@ -1323,7 +1394,7 @@ function marketTabs(b,mk,rr,totals){
          only ever light up or dim as a mirror of that one. Kept in the code
          for the results panel, which grades the contract on its own terms. */
       +formulaNote(b,'finish','finish','sets how likely a finish is; the method and round split still comes from the survival model and sums to it')],
-    ['parlays','Method & Round Combo',recordSplit(b)+rovGroup(b)],   // esc() handles the &
+    ['parlays','Method & Round Combo',recordSplit(b)+rovGrid(b)],   // esc() handles the &
     ['volume','Strikes & Takedowns',
       // parenthesised: without it, + binds tighter than ?: and everything
       // after the ternary lands in the false branch only
@@ -1556,7 +1627,7 @@ function open_(id){
       ${drv.map(d=>{const w=Math.abs(d.value)/mx*50, red=d.favors==='a';
         return `<div class="drv"><div style="width:148px;flex:none;font-size:11.5px;color:var(--mute)">${esc(d.label)}${drvRaw(b,d.label,d)}</div>
           <div class="dt"><div class="bg"></div><div class="zero"></div>
-            <i style="${red?'right:50%':'left:50%'};width:${w}%;background:${red?'var(--red)':'var(--blue)'}"></i></div>
+            <i style="${red?'right:50%':'left:50%'};width:${(+w).toFixed(2)}%;background:${red?'var(--red)':'var(--blue)'}"></i></div>
           <div class="mono" style="width:52px;text-align:right;font-size:11px;color:var(--dim)">${d.value>0?'+':''}${d.value.toFixed(2)}</div></div>`;}).join('')}
       </div>`:''}
     ${tale(b)}
