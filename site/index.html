@@ -125,7 +125,8 @@
   .mpanel{display:none;padding-top:8px}
   .mpanel.on{display:block}
   .pp.finish{color:var(--ink);background:var(--gold);border-color:var(--gold);font-weight:700}
-  .prow.faint>div:last-child,.prow.faint>div:first-child{opacity:.42}
+  .pp.distance{color:var(--ink);background:var(--bluesoft);border-color:var(--bluesoft);font-weight:700}
+  .prow.faint>div{opacity:.4}
   .prow.faint:hover>div{opacity:1}
   .prow.top{background:rgba(214,178,94,.07);box-shadow:inset 3px 0 0 var(--gold)}
   .prow.top>span:first-child{color:var(--bone);font-weight:600}
@@ -560,59 +561,56 @@ function propRank(b){
   return C.sort((x,y)=>y.dev-x.dev);
 }
 
-function propChips(b){
-  // Only what is well away from normal. A chip reading "close to normal" is
-  // a fact about the base rate, not about this fight, and it crowded out the
-  // ones worth seeing.
-  const notable=propRank(b).filter(c=>c.dev>=0.12).slice(0,4);
-  // Same rule as every other chip: 12 points away from normal. An absolute
-  // 50% cutoff sounded like a claim and was not one — half of all fights end
-  // inside the distance, so it fired on anything a whisker above average. The
-  // badge now means the same thing the other chips mean.
-  // A "Distance 35%" chip beside "FINISH 65%" says the same thing twice. The
-  // distance chip now only appears when a fight is likelier than usual to go
-  // long; the short direction is the badge's job.
-  /* How long the fight lasts is ONE question, so it gets ONE chip.
-     "O2.5 82% · 23% before R4 · O3.5 73% · 14% before R3" is four ways of
-     saying the same fight is long, and "FINISH 64% · O2.5 42%" is two ways of
-     saying it is short. The badge answers it when it fires; otherwise the
-     single strongest rung does, measured the way every chip is ranked. */
-  const finBase=1-(((BR||{}).market_bases||{}).dec??0.51);
-  const fin=b.m_decision==null?null:1-b.m_decision;
+/* Does this fight's LENGTH deserve a badge, and which way? One rule, asked in
+   two places: the badge itself and the call chip, which must not repeat the
+   same percentage beside it. Twelve points from normal, the same bar every
+   chip clears. */
+function lengthBadge(b){
+  const MB=(BR||{}).market_bases||{};
+  const decBase=MB.dec??0.505, finBase=1-decBase;
+  if(b.m_decision==null) return null;
+  const fin=1-b.m_decision;
+  if(fin-finBase>=0.12)
+    return {kind:'finish', p:fin,
+            tip:`the model makes a finish ${P0(fin-finBase)} points likelier than normal — a finish happens in ${P0(finBase)}% of fights`};
+  if(b.m_decision-decBase>=0.12)
+    return {kind:'distance', p:b.m_decision,
+            tip:`the model makes the distance ${P0(b.m_decision-decBase)} points likelier than normal — ${P0(decBase)}% of fights go the distance`};
+  return null;
+}
+
+/* WHICH chips the tile shows. Split out so the drawer can mark exactly those
+   rows and no others — and so the ladder pick is made on the full ranking
+   rather than a list already cut to four, which is what left the tile on
+   "O3.5" while the drawer marked "Over 4.5". */
+function chipSet(b){
+  const all=propRank(b);
+  const notable=all.filter(c=>c.dev>=0.12);
+  const lb=lengthBadge(b);
   const isLength=c=>c.key==='decision'||c.key.startsWith('total_')||c.key.startsWith('ends_before_');
-  /* The same rule the drawer's ladders use: the LAST rung still clear of its
-     base, not the one furthest from it. A fight 65% to pass 4.5 rounds is
-     better described by that than by being 82% to pass 2.5, which it implies. */
   const roundKey=c=>{const m=/(?:total_over_|ends_before_r)(\d+)(?:_(\d))?/.exec(c.key);
     return m?parseFloat(m[1]+(m[2]?'.'+m[2]:'')):-1;};
-  /* Which ladder, then which rung. "Over N rounds" climbs when a fight is
-     long; "ends before N" climbs when it is short. Taking the highest round
-     number across both picked "32% before R4" for a fight the model likes to
-     go long — the right rung of the wrong ladder. */
-  const goesLong=(b.m_decision!=null&&fin!=null&&fin<finBase);
-  const lane=c=>goesLong?c.key.startsWith('total_'):c.key.startsWith('ends_before_');
   let lengthChip=null;
-  notable.filter(c=>isLength(c)&&lane(c)&&c.p>c.base).forEach(c=>{
-    if(!lengthChip||roundKey(c)>roundKey(lengthChip)) lengthChip=c;
-  });
-  // nothing in the leaning lane clears its base — fall back to the plain rule
-  if(!lengthChip) notable.filter(isLength).forEach(c=>{
-    if(!lengthChip||c.dev>lengthChip.dev) lengthChip=c; });
-  const badge=(fin!=null&&fin-finBase>=0.12)
-    ? `<span class="pp finish" title="the model makes a finish ${P0(fin-finBase)} points likelier than normal — a finish happens in ${P0(finBase)}% of fights">FINISH <b>${P0(fin)}%</b></span>` : '';
-  // the badge already answers "how long", so no length chip beside it
-  /* Ranked by deviation to decide WHICH chips show, then ordered by the round
-     they name to decide the order they show in. Ranking order made a row read
-     "O2.5 · before R4 · O3.5 · before R3", which is the same ladder shuffled. */
-  const roundOf=c=>{
-    const m=/(?:total_over_|ends_before_r|starts_r)(\d+)(?:_(\d))?/.exec(c.key);
-    if(!m) return c.key==='decision'?99:98;        // distance last, it spans them all
-    return parseFloat(m[1]+(m[2]?'.'+m[2]:''));
-  };
-  const notableTrim=notable.filter(c=>!isLength(c)||(!badge&&c===lengthChip))
-    .sort((x,y)=>roundOf(x)-roundOf(y));
-  if(!notableTrim.length&&!badge) return '';
-  return `<div class="props">${badge}${notableTrim.map(c=>
+  if(!lb){
+    const goesLong=lb?false:(b.m_decision!=null&&b.m_decision>0.5);
+    const lane=c=>goesLong?c.key.startsWith('total_'):c.key.startsWith('ends_before_');
+    notable.filter(c=>isLength(c)&&lane(c)&&c.p>c.base).forEach(c=>{
+      if(!lengthChip||roundKey(c)>roundKey(lengthChip)) lengthChip=c; });
+    if(!lengthChip) notable.filter(isLength).forEach(c=>{
+      if(!lengthChip||c.dev>lengthChip.dev) lengthChip=c; });
+  }
+  const rest=notable.filter(c=>!isLength(c)).slice(0,3);
+  const out=lengthChip?[lengthChip].concat(rest):rest;
+  return {badge:lb, chips:out.sort((x,y)=>roundKey(x)-roundKey(y))};
+}
+function chipKeys(b){ return chipSet(b).chips.map(c=>c.key); }
+
+function propChips(b){
+  const {badge, chips}=chipSet(b);
+  const bg=badge?`<span class="pp ${badge.kind==='finish'?'finish':'distance'}" title="${esc(badge.tip)}">${
+    badge.kind==='finish'?'FINISH':'DISTANCE'} <b>${P0(badge.p)}%</b></span>`:'';
+  if(!bg&&!chips.length) return '';
+  return `<div class="props">${bg}${chips.map(c=>
     `<span class="pp ${c.cls} strong" title="${esc(c.tip)} · well away from normal">${c.txt}</span>`
     ).join('')}</div>`;
 }
@@ -706,7 +704,12 @@ function tile(b){
     </div>
     ${(()=>{const c=b.thin?null:topCall(b); if(!c) return '';
       const v=c.verdict;
-      const head=c.fam?`${c.fam==='finish'?'a finish':'a decision'} <b>${P0(c.famP)}%</b>`:'';
+      /* The badge beside this chip already states the family and the same
+         percentage. Printing "a finish 65%" next to "FINISH 65%" is the
+         number twice; the route is what the call adds. */
+      const lbc=lengthBadge(b);
+      const dup=lbc&&((lbc.kind==='finish'&&c.fam==='finish')||(lbc.kind==='distance'&&c.fam==='decision'));
+      const head=(c.fam&&!dup)?`${c.fam==='finish'?'a finish':'a decision'} <b>${P0(c.famP)}%</b>`:'';
       const route=c.routeClear?`${head?' · ':''}${esc(c.label)}${
         c.round?` <span style="color:var(--gold)">R${c.round.n}</span>`:''} ${P0(c.p)}%`:'';
       if(!head&&!route) return '';
@@ -1092,7 +1095,7 @@ function propRow(name,p,col,marker,note,mkey,base){
         width:${Math.max(0,Math.min(100,p*100))}%;background:${col}"></div>${mk}</div>
     <div class="mono" style="width:48px;text-align:right;font-size:12px;font-weight:600">${P1(p)}%</div>
     <div class="mono fo" title="fair price implied by this probability">${fairOdds(p).us}</div>
-    ${mkey&&FEATURED.has(mkey)?'<span class="featdot" title="shown on this fight\'s tile">●</span>':''}
+    ${mkey&&FEATURED.has(mkey)?'<span class="featdot" title="this is the line shown on the fight\'s tile">●</span>':''}
     ${mkey?(()=>{const r=marketRecord(mkey); if(!r) return '';
       return `<span class="rec ${r.cls}" title="${r.n} graded claims for this market">${esc(r.txt)}</span>`;})():'<span class="rec none"></span>'}
     </div>`;
@@ -1230,9 +1233,21 @@ function bindTabs(){
    the one furthest from it. "Over 2.5 at 82%" and "Over 4.5 at 65%" both say
    the fight is long; the second says more, because it implies the first. */
 function ladderTop(ps,bases,margin){
+  /* Either direction. A ladder sitting well BELOW its base rate is saying
+     something — "ends before round 4 at 32% against a normal 48%" is the same
+     finding as a high "over" rung, read from the other side — so the group
+     gets a mark for it rather than none at all. The sign that dominates the
+     ladder decides which way is being read. */
+  const m=margin??0.06;
+  let up=0, down=0;
+  ps.forEach((p,i)=>{ const b=bases[i];
+    if(p==null||b==null) return;
+    if(p-b>=m) up++; else if(b-p>=m) down++; });
+  if(!up&&!down) return -1;
+  const rising=up>=down;
   let best=-1;
   ps.forEach((p,i)=>{ const b=bases[i];
-    if(p!=null&&b!=null&&p-b>=(margin??0.06)) best=i; });
+    if(p!=null&&b!=null&&(rising?p-b:b-p)>=m) best=i; });
   return best;
 }
 function group(title,sub,rows,priced,values){
@@ -1283,7 +1298,7 @@ function marketTabs(b,mk,rr,totals){
         const ps=Object.keys(b.totals||{}).map(k=>b.totals[k]);
         const bs=Object.keys(b.totals||{}).map(k=>TB2[k.replace('over_','').replace('_','.')]);
         const v=ps.slice(); v.ladderPick=ladderTop(ps,bs);
-        return group('Total rounds','faint means it sits where most fights do',totals,false,v);})()
+        return group('Total rounds','gold = the clearest line · faint = ordinary',totals,false,v);})()
       +group('Fight to go the distance','',[
         propRow('Go the distance',b.m_decision,'var(--mute)',pmk(b,'decision'),
           pnote(b,'decision')||vsBase('C9','fight',b.bands,b.m_decision),'decision',
@@ -1299,7 +1314,7 @@ function marketTabs(b,mk,rr,totals){
           const lo=n===1?0:EB[String(n)], hi=(n===b.rounds)?itd:EB[String(n+1)];
           return (lo==null||hi==null)?null:hi-lo;
         };
-        return group('Round of finish','faint means it sits where most fights do',
+        return group('Round of finish','gold = the clearest line · faint = ordinary',
           rr.map(([k,v])=>propRow(`Ends in round ${k}`,v,'var(--gold)',
             pmk(b,'end_r'+k),pnote(b,'end_r'+k),'end_r'+k,baseFor(+k))),
           false,rr.map(([,v])=>v));})()
@@ -1477,7 +1492,10 @@ function drvRaw(b,label,d){
 function open_(id){
   const b=DATA.bouts.find(x=>x.bout===id); if(!b) return;
   GROUP_N=0;
-  FEATURED=new Set(propRank(b).slice(0,4).map(c=>c.key));
+  // exactly what the tile shows, nothing else. This was the top four of the
+  // raw ranking, left over from when the tile carried four chips, so the
+  // drawer marked rows as "on the tile" that were not on it.
+  FEATURED=new Set(chipKeys(b));
   const mk=b.p_market!=null;
   const drv=(b.drivers||[]);
   const mx=drv.length?Math.max(...drv.map(d=>Math.abs(d.value))):1;
