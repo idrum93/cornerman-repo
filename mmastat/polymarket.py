@@ -1,4 +1,16 @@
-"""Polymarket as a second price source — and a structurally different one.
+"""Global Polymarket. NOT USED — retired 2026-09-27.
+
+The site is US-centric and a US reader cannot trade this book, nothing on the
+page ever showed its prices, and holding two slug spaces at once is what
+produced every mis-linked "verify" in this area. The registered distance rule
+(addendum 9) runs on the US exchange, which quotes the same markets.
+
+Kept in the tree because the parsing works and a second venue may be wanted
+again; nothing imports it.
+
+Original notes follow.
+
+Polymarket as a second price source — and a structurally different one.
 
 Why bother when The Odds API already works: **a prediction market has almost no
 vig.** Sportsbooks quote a two-way overround around 3.7% on the moneyline and

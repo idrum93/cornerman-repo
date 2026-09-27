@@ -143,6 +143,10 @@ def dedupe(rows):
 # historical schema forever, so every consumer must tolerate the oldest one:
 # adding `venue` to the dedupe key broke capture outright with
 # KeyError: ['venue'] not in index, because the first 48 rows predate it.
+# Captures run every six hours, so a price older than this means the market was
+# not quoted on the last two passes — almost always because it was delisted.
+MAX_PRICE_AGE_H = 18
+
 BACKFILL = {"venue": "sportsbook", "spread": None, "depth_usd": None,
             "books": None, "settled": False}
 
@@ -254,13 +258,11 @@ def capture(fights, fighters, card_path="data/upcoming.txt", path=None,
             venues["sportsbook"] = sb
     except Exception as e:
         print(f"note: sportsbook odds unavailable ({e})")
-    try:
-        from .polymarket import fetch_all
-        pm, _props, _rows = fetch_all(with_book=True)
-        if pm:
-            venues["polymarket"] = pm
-    except Exception as e:
-        print(f"note: polymarket unavailable ({e})")
+    # Global Polymarket was captured here as a second venue and is no longer.
+    # A US reader cannot trade it, nothing on the site showed it, and every
+    # mis-linked price in this area came from holding two slug spaces at once.
+    # The registered distance rule (addendum 9) runs on the US exchange, which
+    # quotes the same markets.
     try:
         # The CFTC-regulated US exchange: a third venue, never pooled with the
         # global book. It slugs the same bout differently and has its own
@@ -447,7 +449,6 @@ def capture_props(card_path="data/upcoming.txt", payload_path="site/predictions.
     feed we can reach quotes method or round markets, and Polymarket may.
     Whether it does is answered by running this, not by arguing about it.
     """
-    from .polymarket import fetch_events, parse_events, map_props
     from .upcoming import parse_card
     meta, bouts = parse_card(card_path)
     ev_date = pd.to_datetime(meta.get("date"), errors="coerce")
@@ -462,8 +463,7 @@ def capture_props(card_path="data/upcoming.txt", payload_path="site/predictions.
         payload = {"bouts": []}
     model = {b["bout"]: b for b in payload.get("bouts", [])}
     try:
-        _rows = parse_events(fetch_events())
-        found = map_props(_rows, bouts)
+        _rows, found = [], []          # global feed retired; US only below
         try:
             from . import polymarket_us as pus
             us_rows = pus.parse(pus.expand(pus.fetch_events()))
@@ -490,6 +490,7 @@ def capture_props(card_path="data/upcoming.txt", payload_path="site/predictions.
                          edge=(round(pm_model - x["p_market"], 5) if pm_model is not None else None),
                          spread=x["meta"].get("spread"), depth_usd=x["meta"].get("depth_usd"),
                          slug=x["meta"].get("slug"),
+                         url=x["meta"].get("url"),
                          question=x["meta"].get("question"), settled=False))
     # The list of markets the model does NOT price has been removed. It was
     # display-only, it needed its own matching logic to stay accurate, and that
@@ -510,7 +511,7 @@ def capture_props(card_path="data/upcoming.txt", payload_path="site/predictions.
                 fh.write(json.dumps(r, sort_keys=True) + "\n")
     if verbose:
         got = sorted({x["market"] for x in found})
-        print(f"polymarket: {len(_rows)} markets on the board")
+        pass          # the global board is no longer read
         print(f"props: {len(found)} quoted for this card "
               f"({', '.join(got) if got else 'none'}), {len(rows)} new rows")
     return len(rows)
@@ -607,11 +608,32 @@ def latest_prop_prices(event_date=None):
             continue
         out.setdefault(r["bout"], {})
         out[r["bout"]][r["market"]] = {"p": r["p_market"], "slug": r.get("slug"),
+                                       "url": r.get("url"),
+                                       "captured_utc": r.get("captured_utc"),
                                        "venue": r.get("venue", "polymarket")}
         # the exchange prices "Decision" where the site has a "goes the
         # distance" row: the same claim under two names
         if r["market"] == "method_dec":
             out[r["bout"]].setdefault("decision", out[r["bout"]]["method_dec"])
+    # A price the exchange has since pulled would otherwise sit on the page for
+    # ever: the ledger only ever appends, so the last quote we saw is the last
+    # quote we show. If a market is delisted between captures, nothing tells us
+    # — the row simply stops being updated. Anything older than MAX_PRICE_AGE_H
+    # is dropped, so a stale number disappears instead of being displayed with
+    # a link to a page that no longer carries it.
+    if out:
+        cutoff = (pd.Timestamp.now(tz="UTC") - pd.Timedelta(hours=MAX_PRICE_AGE_H)).isoformat()
+        stale = 0
+        for bout in list(out):
+            for mk in list(out[bout]):
+                ts = out[bout][mk].get("captured_utc")
+                if ts and ts < cutoff:
+                    del out[bout][mk]
+                    stale += 1
+            if not out[bout]:
+                del out[bout]
+        if stale:
+            print(f"props: {stale} price(s) older than {MAX_PRICE_AGE_H}h dropped as stale")
     return out
 
 

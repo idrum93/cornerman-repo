@@ -3135,3 +3135,23 @@ registration and a held-out test, and this holdout is spent. Recorded so the
 next model revision starts from evidence rather than from the original
 selection, which was made on a different slice of data and has not been
 revisited since.
+
+## Addendum 9: AMENDMENT — venue (2026-09-27)
+
+The frozen rule says "Polymarket distance markets". It was written when the
+global book was the only one; the CFTC-regulated US exchange now quotes the
+same markets, and global capture has been retired.
+
+**The rule runs on polymarket_us.** Nothing else about it changes — the
+probability, the 0.05 trigger, the flat stake, the 200-bet bar and the +2% ROI
+success line all stand as registered. The liquidity gates (spread <= 6c,
+depth >= $250) apply to the US book's order book.
+
+Why the change: a US reader cannot trade the global book, nothing on the site
+ever displayed its prices, and holding two slug spaces at once produced every
+mis-linked "verify" in this area. No bet has settled under this rule, so
+nothing is being re-based mid-series.
+
+The cost, stated plainly: a second price series that cannot be backfilled if it
+is wanted later. `mmastat/polymarket.py` stays in the tree, unimported, with
+the reason at the top.

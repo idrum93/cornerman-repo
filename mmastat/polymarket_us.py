@@ -213,6 +213,12 @@ def parse(events):
             sides, shape = _sides(m)
             rows.append({
                 "raw_type": m.get("sportsMarketType") or m.get("marketType") or m.get("type") or "",
+                # Whatever link the exchange gives for itself, preferred over one
+                # we build. Two markets on the same event were showing prices
+                # that could not be found at our constructed URL, and a
+                # constructed URL is a guess about someone else's routing.
+                "url": (m.get("url") or m.get("permalink") or m.get("link")
+                        or e.get("url") or e.get("permalink") or e.get("link")),
                 "event_slug": e.get("slug"), "event_title": e.get("title"),
                 "start": e.get("startDate") or e.get("eventDate"),
                 "weight_class": st.get("weightClass"), "segment": st.get("cardSegment"),
@@ -445,7 +451,8 @@ def map_props(rows, bouts, max_spread=0.10, min_volume=100.0):
             continue
         out.append({"bout": f"{a} vs. {b}", "a": a, "b": b, "market": key,
                     "p_market": round(p, 5),
-                    "meta": {"slug": r["event_slug"] or r["slug"],
+                    "meta": {"url": r.get("url"),
+                             "slug": r["event_slug"] or r["slug"],
                              # the market's own slug too: the link uses the
                              # event page, but the not-priced list has to
                              # exclude by the market it actually matched
@@ -459,7 +466,13 @@ def describe(rows):
     because the price shape and the market mix are the two things the docs
     cannot tell us."""
     per_event = Counter(r["event_slug"] for r in rows)
+    # Does the exchange give a link for its own markets? If it does, every
+    # "verify" uses its URL and lands where the price is. If it does not, we
+    # assemble one from the slug, which is a guess about their routing — and
+    # two prices that could not be found came from exactly that guess.
+    with_url = sum(1 for r in rows if r.get("url"))
     return {"markets": len(rows), "events": len(per_event),
+            "markets_with_their_own_url": with_url,
             "raw_types": dict(Counter(r.get("raw_type", "") for r in rows).most_common(6)),
             "sample_questions": [r["question"][:60] for r in rows[:3]],
             "markets_per_event_max": max(per_event.values()) if per_event else 0,
