@@ -2994,3 +2994,66 @@ three bouts on record.
 This is an amendment, not a result: C13 is a descriptive panel row, and
 choosing the better of two ways to measure the same registered idea is a
 definition being sharpened before any claim rests on it.
+
+---
+
+# Addendum 36: pre-UFC records for thin fighters (2026-09-26)
+
+Registered before collecting. This revives addendum 18 with a narrower target,
+because a measurement changed the case for it.
+
+## Why the earlier null does not settle this
+
+The 2026-09-26 saturation test found that a fighter's finish profile stops
+improving after a handful of bouts — 11 or more prior fights predicts no better
+than 2 or 3 (AUC +0.013, interval [-0.017, +0.046]). That answered: **does more
+history help a fighter who already has some?** No.
+
+It did not answer: **does any history help a fighter who has none?** For a
+debutant the model currently has nothing, and the site prints "no read".
+
+That population is not marginal:
+
+| prior UFC bouts | share of fighter-appearances since 2020 |
+|---|---|
+| debut, no record at all | 10.9% |
+| 1 prior fight | 10.2% |
+| 2-3 | 17.9% |
+| 4-9 | 32.9% |
+| 10 or more | 28.1% |
+
+**21.1% of appearances are thin**, touching about 4.5 of the 12 bouts on a
+typical card. Even at 2-3 prior bouts the finish signal is weak (AUC 0.570
+against 0.592 at 4-6), so the useful range extends past the debutants.
+
+## Sequence, and the gate that comes first
+
+**Step 1 is coverage, not prediction.** A record source is useless here if it
+misses precisely the fighters it is needed for. Before any model work:
+
+    pull the last 12 months of debutants and one-fight fighters, and report
+    what share have a retrievable professional record with a method split
+
+**Bar: 70%.** Below that the feature cannot do its job, and the honest outcome
+is to stop — a record present for the well-known half of debutants and absent
+for the obscure half would add signal exactly where it is least needed.
+
+**Step 2, only if the bar is cleared:** pre-UFC record and method split enter
+as features for fighters with 3 or fewer UFC bouts, tested against the current
+thin-record handling on the win, finish and method targets.
+
+## On the source
+
+Wikipedia is what the existing collector reads, and its weakness is the
+population that matters: a fighter with no UFC bout often has no article. An
+ESPN athlete endpoint would plausibly cover signed fighters better, since a
+fighter appears there once matched. Neither can be checked from here.
+
+The choice is settled by step 1 and nothing else: run the coverage count on
+both, take whichever clears 70%, and prefer the more stable interface if both
+do. Wikipedia has a documented API and an existing collector; an undocumented
+endpoint is a maintenance risk, not a correctness one.
+
+Prior: moderate for the thin population, low for everyone else. A regional
+record against weak opposition is poor evidence, but it is being compared
+against no evidence at all.
