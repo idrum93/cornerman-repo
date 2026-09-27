@@ -54,8 +54,8 @@ CONDITIONS = [
     # fighter's wins that went to decision, against whether THIS fight goes to
     # decision. Context, not a discovery — and not a model feature either
     # (addendum 33: worth nothing on top of average fight time).
-    ("C13", "Combined decision share of wins", "fight", "dec_share_sum", "itd",
-     "two fighters who win by decision produce decisions"),
+    ("C13", "Combined share of bouts going the distance", "fight", "dec_share_sum", "itd",
+     "two fighters whose fights go long produce another one"),
 ]
 
 OUTCOME_LABEL = {"y_td": "lands a takedown", "y_kd": "scores a knockdown",
@@ -91,13 +91,18 @@ def _frames(fights, fighters, min_date="2012-01-01"):
     hist, pair = {}, {}
     for r in fights.sort_values("date").itertuples():
         ha, hb = hist.get(r.r_id), hist.get(r.b_id)
-        if ha and hb and ha["w"] >= 2 and hb["w"] >= 2:
+        if ha and hb and ha["w"] >= 3 and hb["w"] >= 3:
             pair[r.fight_id] = (ha["dec"] / ha["w"] + hb["dec"] / hb["w"]) / 2
         for side, fid in (("r", r.r_id), ("b", r.b_id)):
+            # Every bout, not only the wins. Measured 2026-09-26: the
+            # participation version separates finishes better (AUC .647 against
+            # .623, a 35-point quartile spread against 27), because a fighter
+            # who gets finished contributes to short fights without ever
+            # finishing one. Adding the wins-only version on top is worth
+            # nothing (.6605 against .6599).
             h = hist.setdefault(fid, {"w": 0, "dec": 0})
-            if r.winner == side:
-                h["w"] += 1
-                h["dec"] += int(r.method == "DEC")
+            h["w"] += 1
+            h["dec"] += int(r.method == "DEC")
     F["dec_share_sum"] = pd.Series(pair)
     return P, F
 

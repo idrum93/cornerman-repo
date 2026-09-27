@@ -709,8 +709,8 @@ def predict_card(path, fights, fighters, verbose=True):
             ra = _career_split(fights, r["a"], meta.get("date"))
             rb = _career_split(fights, r["b"], meta.get("date"))
             def _dec_share(x):
-                w = x["wins"]["ko"] + x["wins"]["sub"] + x["wins"]["dec"]
-                return (x["wins"]["dec"] / w) if w >= 2 else None
+                # every bout the fighter has had, won or lost — see baserates.py
+                return ((x["wins"]["dec"] + x["losses"]["dec"]) / x["n"]) if x["n"] >= 3 else None
             da, db = _dec_share(ra), _dec_share(rb)
             if da is not None and db is not None:
                 per_fight["C13"] = (da + db) / 2

@@ -2969,3 +2969,28 @@ labelling must say so.
 It is also NOT a model feature: addendum 33 found this quantity worth +0.0047
 against the finish formula and nothing at all on top of average fight time.
 Most of what the table above shows is already inside the projection beside it.
+
+## Addendum 35: AMENDMENT (2026-09-26)
+
+C13 originally measured the decision share of a fighter's **wins**. Changed to
+the share of **all his bouts** that went the distance, won or lost, after
+measuring both on 3,039 fights:
+
+| measure | AUC | Q1 to Q4 |
+|---|---|---|
+| decision share of WINS | 0.623 | 62.5% to 35.3% (27 points) |
+| **decision share of ALL bouts** | **0.647** | **67.8% to 33.2% (35 points)** |
+| both together | no better than all-bouts alone (.6605 against .6599) |
+
+A fighter who is regularly finished contributes to short fights without ever
+finishing one, and the wins-only version cannot see him. The two correlate at
+0.87, and the wins-only measure adds nothing once the participation version is
+present, so it is replaced rather than joined.
+
+The registered quartiles become 66.1 / 50.8 / 43.9 / 33.1 against a 48.8% base,
+and the row's caption now says what it counts. Minimum raised from two wins to
+three bouts on record.
+
+This is an amendment, not a result: C13 is a descriptive panel row, and
+choosing the better of two ways to measure the same registered idea is a
+definition being sharpened before any claim rests on it.

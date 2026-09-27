@@ -493,9 +493,21 @@ const MOV=b=>[['dec_a',b.m_a_dec,`${surname(b.a)} by decision`],
 const movLabel=(b,key)=>(MOV(b).find(x=>x[0]===key)||[,,key])[2];
 function topCall(b){
   const m=MOV(b); if(m.length<2) return null;
-  const [k,p,label]=m[0], gap=p-m[1][1];
-  if(gap<0.05) return null;                      // no clear call
+  /* Finish or decision FIRST, then the route inside it. Taking the argmax over
+     all six contracts made a decision the "most likely outcome" of a fight the
+     model put at 73% to finish, because the finish splits four ways and the
+     decision does not. Both statements were true and together they read as a
+     contradiction. The family comes first now, and the headline percentage is
+     the family's, with the likeliest route beneath it. */
+  const pdec=b.m_decision, pfin=(pdec==null?null:1-pdec);
+  let fam=null;
+  if(pfin!=null && Math.abs(pfin-pdec)>=0.05) fam=(pfin>pdec)?'finish':'decision';
+  const inFam=fam?m.filter(([key])=>fam==='decision'?key.startsWith('dec_'):!key.startsWith('dec_')):m;
+  if(inFam.length<2) return null;
+  const [k,p,label]=inFam[0], gap=p-inFam[1][1];
+  if(!fam && gap<0.05) return null;              // no clear call either way
   const side=k.endsWith('_a')?'a':'b';
+  const famP=fam?(fam==='finish'?pfin:pdec):null;
   // Round, only when the call is a finish. The round distribution is for the
   // fight, not conditioned on who wins — the model does not price per-fighter
   // hazards — so it is stated as a share of finishes and labelled that way.
@@ -513,7 +525,9 @@ function topCall(b){
     verdict={agrees:mk[0][0]===k, theirs:mk[0][0], theirP:mk[0][1],
              ours:pmk(b,k)};
   }
-  return {key:k,p,label,gap,side,verdict,round};
+  return {key:k,p,label,gap,side,verdict,round,fam,famP,
+          // the route is only worth naming when it stands clear of the next one
+          routeClear:gap>=0.05};
 }
 
 function propRank(b){
@@ -553,10 +567,14 @@ function propChips(b){
   // badge now means the same thing the other chips mean.
   const finBase=1-(((BR||{}).market_bases||{}).dec??0.51);
   const fin=b.m_decision==null?null:1-b.m_decision;
+  // A "Distance 35%" chip beside "FINISH 65%" says the same thing twice. The
+  // distance chip now only appears when a fight is likelier than usual to go
+  // long; the short direction is the badge's job.
+  const notableTrim=notable.filter(c=>!(c.key==='decision'&&c.dev>0&&c.p<c.base));
   const badge=(fin!=null&&fin-finBase>=0.12)
     ? `<span class="pp finish" title="the model makes a finish ${P0(fin-finBase)} points likelier than normal — a finish happens in ${P0(finBase)}% of fights">FINISH <b>${P0(fin)}%</b></span>` : '';
-  if(!notable.length&&!badge) return '';
-  return `<div class="props">${badge}${notable.map(c=>
+  if(!notableTrim.length&&!badge) return '';
+  return `<div class="props">${badge}${notableTrim.map(c=>
     `<span class="pp ${c.cls} strong" title="${esc(c.tip)} · well away from normal">${c.txt}</span>`
     ).join('')}</div>`;
 }
@@ -650,8 +668,11 @@ function tile(b){
     </div>
     ${(()=>{const c=b.thin?null:topCall(b); if(!c) return '';
       const v=c.verdict;
-      return `<div class="callchip ${c.side==='a'?'ca':'cb'}">${esc(c.label)}${
-        c.round?` <span style="color:var(--gold)">R${c.round.n}</span>`:''} <b>${P0(c.p)}%</b>${
+      const head=c.fam?`${c.fam==='finish'?'a finish':'a decision'} <b>${P0(c.famP)}%</b>`:'';
+      const route=c.routeClear?`${head?' · ':''}${esc(c.label)}${
+        c.round?` <span style="color:var(--gold)">R${c.round.n}</span>`:''} ${P0(c.p)}%`:'';
+      if(!head&&!route) return '';
+      return `<div class="callchip ${c.side==='a'?'ca':'cb'}">${head}${route}${
         v?`<span class="${v.agrees?'cagree':'cdis'}">${v.agrees?'market agrees':'market differs'}</span>`:''}</div>`;})()}
     ${b.thin?`<div class="props"><span class="pp" style="color:var(--warn);border-color:rgba(222,140,52,.4)">winner only · ${Math.min((b.evidence||{}).a??9,(b.evidence||{}).b??9)===0?'debut':'1 prior UFC fight'}</span></div>`:propChips(b)}
   </button>`;
@@ -684,7 +705,7 @@ const BR_LABEL={
   C4:"Both fighters' knockdown rates", C5:"Both fighters' control time",
   C7:"Both fighters' striking pace", C8:'Age gap between them',
   C9:"Both fighters' submission attempts",
-  C13:"How often they win by decision",
+  C13:"How often their fights go the distance",
 };
 // Captions that say which way the relationship runs, where the registered
 // mechanism alone reads backwards. Reach is the case in point: a reach EDGE
@@ -699,7 +720,7 @@ const BR_LABEL={
 // predicting whether THIS fight goes to decision, is the same measure earlier.
 const BR_DIRECT=new Set(['C1','C3','C13']);
 const BR_WHY={C12:'volume taken does not predict a knockdown; clean shots taken does',
-              C13:'the gap between the two fighters is flat — it is their level that matters, not the mismatch',
+              C13:'counts every bout, won or lost — being finished makes a short fight too',
               C6:'shorter fighters land more — they are the ones closing distance',
               C2:'better defense in front of them, fewer landed'};
 function brCells(c){
@@ -1086,7 +1107,7 @@ function recordSplit(b){
     const hist=ds?vsBase('C13','fight',b.bands,fin):'';
     head=`<div class="prow" style="align-items:baseline">
       <span><b>Model: ${P0(fin)}% chance this ends inside the distance</b>${
-        ds?`<span class="lbl"> · they win by decision ${P0(ds.a)}% and ${P0(ds.b)}% of the time</span>`:''}</span>
+        ds?`<span class="lbl"> · their fights go the distance ${P0(ds.a)}% and ${P0(ds.b)}% of the time</span>`:''}</span>
       <span class="mono" style="color:var(--mute)">${esc(hist||'')}</span></div>`;
   }
   return group('How they have won','their UFC record, and what it usually means',
