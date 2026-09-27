@@ -2,7 +2,7 @@
  "event": "UFC 331",
  "date": "2026-09-19",
  "venue": "Crypto.com Arena, Los Angeles",
- "generated_utc": "2026-09-26T18:02:41.767214+00:00",
+ "generated_utc": "2026-09-27T13:53:22.307249+00:00",
  "bouts": [
   {
    "bout": "Joshua Van vs. Alexandre Pantoja",
@@ -244,6 +244,11 @@
    "b_strikes_rate": 6.186,
    "b_p_takedown": 0.695,
    "b_p_knockdown": 0.146,
+   "dec_share": {
+    "a": 0.667,
+    "b": 0.429,
+    "pair": 0.548
+   },
    "bands": {
     "C1": {
      "a": 2,
@@ -286,6 +291,9 @@
      "fight": 4
     },
     "C9": {
+     "fight": 3
+    },
+    "C13": {
      "fight": 3
     }
    }
@@ -516,6 +524,11 @@
    "b_strikes_rate": 3.418,
    "b_p_takedown": 0.13,
    "b_p_knockdown": 0.379,
+   "dec_share": {
+    "a": 0.5,
+    "b": 0.2,
+    "pair": 0.35
+   },
    "bands": {
     "C1": {
      "a": 4,
@@ -559,6 +572,9 @@
     },
     "C9": {
      "fight": 1
+    },
+    "C13": {
+     "fight": 2
     }
    }
   },
@@ -766,6 +782,7 @@
    "b_strikes_rate": 3.949,
    "b_p_takedown": 0.314,
    "b_p_knockdown": 0.297,
+   "dec_share": null,
    "bands": {
     "C1": {
      "a": 3,
@@ -1038,6 +1055,11 @@
    "b_strikes_rate": 3.843,
    "b_p_takedown": 0.428,
    "b_p_knockdown": 0.193,
+   "dec_share": {
+    "a": 0.308,
+    "b": 0.125,
+    "pair": 0.216
+   },
    "bands": {
     "C1": {
      "a": 3,
@@ -1081,6 +1103,9 @@
     },
     "C9": {
      "fight": 3
+    },
+    "C13": {
+     "fight": 1
     }
    }
   },
@@ -1302,6 +1327,11 @@
    "b_strikes_rate": 5.346,
    "b_p_takedown": 0.21,
    "b_p_knockdown": 0.348,
+   "dec_share": {
+    "a": 0.0,
+    "b": 0.364,
+    "pair": 0.182
+   },
    "bands": {
     "C1": {
      "a": 3,
@@ -1345,6 +1375,9 @@
     },
     "C9": {
      "fight": 2
+    },
+    "C13": {
+     "fight": 1
     }
    }
   },
@@ -1541,6 +1574,7 @@
    "b_strikes_rate": null,
    "b_p_takedown": null,
    "b_p_knockdown": null,
+   "dec_share": null,
    "bands": {
     "C1": {
      "a": 2,
@@ -1816,6 +1850,11 @@
    "b_strikes_rate": 5.804,
    "b_p_takedown": 0.296,
    "b_p_knockdown": 0.198,
+   "dec_share": {
+    "a": 0.333,
+    "b": 0.267,
+    "pair": 0.3
+   },
    "bands": {
     "C1": {
      "a": 1,
@@ -1859,6 +1898,9 @@
     },
     "C9": {
      "fight": 3
+    },
+    "C13": {
+     "fight": 1
     }
    }
   },
@@ -2075,6 +2117,7 @@
    "b_strikes_rate": 7.797,
    "b_p_takedown": 0.182,
    "b_p_knockdown": 0.28,
+   "dec_share": null,
    "bands": {
     "C1": {
      "a": 1,
@@ -2309,6 +2352,7 @@
    "b_strikes_rate": null,
    "b_p_takedown": null,
    "b_p_knockdown": null,
+   "dec_share": null,
    "bands": {
     "C1": {
      "a": 2,
@@ -2577,6 +2621,11 @@
    "b_strikes_rate": 3.752,
    "b_p_takedown": 0.377,
    "b_p_knockdown": 0.175,
+   "dec_share": {
+    "a": 0.222,
+    "b": 0.167,
+    "pair": 0.194
+   },
    "bands": {
     "C1": {
      "a": 3,
@@ -2620,6 +2669,9 @@
     },
     "C9": {
      "fight": 2
+    },
+    "C13": {
+     "fight": 1
     }
    }
   },
@@ -2850,6 +2902,11 @@
    "b_strikes_rate": 3.717,
    "b_p_takedown": 0.911,
    "b_p_knockdown": 0.11,
+   "dec_share": {
+    "a": 0.333,
+    "b": 0.667,
+    "pair": 0.5
+   },
    "bands": {
     "C1": {
      "a": 2,
@@ -2893,6 +2950,9 @@
     },
     "C9": {
      "fight": 2
+    },
+    "C13": {
+     "fight": 3
     }
    }
   },
@@ -3118,6 +3178,11 @@
    "b_strikes_rate": 4.096,
    "b_p_takedown": 0.574,
    "b_p_knockdown": 0.145,
+   "dec_share": {
+    "a": 0.625,
+    "b": 0.143,
+    "pair": 0.384
+   },
    "bands": {
     "C1": {
      "a": 1,
@@ -3161,6 +3226,9 @@
     },
     "C9": {
      "fight": 3
+    },
+    "C13": {
+     "fight": 2
     }
    }
   }
