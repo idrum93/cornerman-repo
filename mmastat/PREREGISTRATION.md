@@ -2627,3 +2627,304 @@ feed records directly and completely: how long a fighter's fights last. No
 inference, no reconstruction, no second moment of a noisy mean. That is the
 same reason the count models in addendum 26 worked where the behavioural
 families did not.
+
+---
+
+# Diagnosis: where the market's advantage actually lives (2026-09-26)
+
+Asked whether anything could make a decisive improvement. Measured the shape
+of the deficit rather than guessing.
+
+Held out, 582 bouts with odds. The market beats the model by **0.0305 log
+loss** overall. But:
+
+| | |
+|---|---|
+| bouts where the MODEL is closer | **40%** |
+| the worst 10 bouts | 38% of the whole gap |
+| the worst 25 bouts | **80% of the whole gap** |
+| median gap per bout | +0.051 |
+
+The deficit is not diffuse. Twenty-five bouts out of 582 carry four fifths of
+it.
+
+## What those 25 have in common
+
+| | worst 25 | the other 557 |
+|---|---|---|
+| thinner record (fights) | 4.68 | 6.56 |
+| age gap | 4.47 | 4.45 |
+| model-market disagreement | **29.0 points** | 10.0 points |
+| model called the wrong side | **24 of 25** | — |
+| market called the wrong side | **2 of 25** | — |
+
+These are bouts where the model was confident, the market disagreed sharply,
+and the market was right — on thinner records than average.
+
+## What this means for "decisive"
+
+A broad feature cannot fix this. Closing a 0.0305 gap with features of the size
+this project has found (the best confirmed candidate, average fight time, is
+worth about 0.010 on a duration target) would take roughly four independent
+finds, and fourteen families have already failed to produce one for the win
+model.
+
+The realistic target is not the average bout. It is the twenty-five: fights
+where something knowable — but not recorded in per-round totals — made a
+confident projection wrong. Those are the candidates worth collecting, in
+order of plausibility:
+
+1. **Short-notice and replacement bouts.** Recorded on the Wikipedia event
+   pages the bonus collector already fetches. A fighter taking a bout on two
+   weeks' notice is a different fighter, and nothing in the corpus says so.
+2. **Missed weight.** Same pages, same scrape. A depleted or oversized opponent
+   changes a fight and leaves no trace in career rates.
+3. **Layoff reason.** The model has layoff length but not whether it was injury,
+   suspension or inactivity.
+
+All three are situational facts about a single bout, which is precisely the
+category the corpus has no column for, and the category the market prices well.
+None is tested. Recorded here as the next thing worth trying, ahead of any
+further feature engineering on the existing columns.
+
+---
+
+# Addendum 32: official UFC rankings (2026-09-26)
+
+Registered before fitting. The diagnosis above found the deficit concentrated
+in 25 bouts where the model was confident, the market disagreed by 29 points,
+and the market was right. The category identified as missing was *external
+judgment about a fighter* — something no per-round total records.
+
+The odds file already carries one such judgment: the UFC's own divisional
+rankings at the time of the bout. A ranking is a matchmaker's assessment,
+informed by tape and reputation, and nothing in the corpus reflects it.
+
+    K1  difference in divisional rank (unranked treated as 16)
+    K2  one fighter ranked and the other not (signed)
+    K3  the bout is a title fight
+
+Target: the win, added individually to the frozen 14.
+
+**Coverage, stated up front.** Only 18% of bouts have both fighters ranked and
+29% have either. K1 is therefore tested twice: on all bouts with the unranked
+encoding, and on the ranked-only subset, which is reported separately because
+the second is a different population, not a robustness check.
+
+Five tests, Benjamini-Hochberg at FDR 0.10, bootstrap over 600 resamples.
+
+Prior: moderate. This is the first candidate tested that carries information
+from outside the fight record rather than a new arrangement of it. Against
+that, rankings follow results, so much of what they encode may already be in
+Elo and strength of schedule.
+
+## Addendum 32: RESULT (2026-09-26)
+
+**Zero of five.** Every gain is negative or zero.
+
+| population | measure | n | gain | 95% CI | p |
+|---|---|---|---|---|---|
+| all bouts | title bout | 829 | -0.0000 | [-0.0000, +0.0000] | .28 |
+| both ranked | rank difference | 187 | -0.0048 | [-0.0188, +0.0099] | .54 |
+| all bouts | rank difference | 829 | -0.0013 | [-0.0066, +0.0033] | .56 |
+| all bouts | ranked vs unranked | 829 | -0.0009 | [-0.0048, +0.0021] | .59 |
+| both ranked | title bout | 187 | +0.0000 | [-0.0000, +0.0000] | .80 |
+
+Matched 8,334 bouts to rankings, 2,296 with both fighters ranked.
+
+The prior named the reason it might fail, and that is what happened: rankings
+follow results, so a ranked fighter is one who has been beating good
+opposition — which is what Elo and strength of schedule already measure. The
+UFC's judgment adds nothing the record has not already shown.
+
+Worth noting what this rules out. Rankings were the best available proxy for
+"external judgment about a fighter", and the one piece of that category
+obtainable without new scraping. Its failure does not settle the three
+candidates named in the diagnosis — short notice, missed weight, layoff reason
+— because those are facts about *this bout's circumstances*, not assessments of
+a fighter's quality. A ranking cannot tell you a fighter took the fight on
+eleven days' notice.
+
+That distinction is now the whole of the remaining hypothesis: the market's
+advantage on those 25 bouts is situational, not evaluative. Rankings tested the
+evaluative half and it is null.
+
+---
+
+# Validation: are the parlay contracts calibrated? (2026-09-26)
+
+The round-and-method contracts (fighter x method x round) went on the site
+without ever being checked. Only their marginals had been validated. Measured
+on 10,680 contracts across 812 held-out fights — one hit at most per fight,
+decisions contributing none.
+
+| predicted band | n | predicted | actual |
+|---|---|---|---|
+| 0-2% | 3596 | 1.2% | 1.1% |
+| 2-4% | 3311 | 2.9% | 2.3% |
+| 4-6% | 1689 | 4.9% | 4.7% |
+| 6-9% | 1153 | **7.3%** | **5.4%** |
+| 9-14% | 625 | 11.0% | 12.3% |
+| 14%+ | 306 | 19.1% | 17.6% |
+
+Overall: predicted 4.05% per contract against 3.61% actual, Brier skill +3.4%
+over a flat base rate.
+
+**The bias is in the finish level, not the joint.** Per fight the raw survival
+model predicts finishes at 53.3% against an actual 47.5%. Applying a single
+rescale of 0.891 brings the contracts to 3.61% predicted against 3.61% actual,
+with skill essentially unchanged at +3.5%.
+
+Production already applies exactly this correction, using the finish formula
+rather than a held-out average (addendum 15). So the contracts as published are
+close to unbiased, and the shape of the joint — which contract within a fight
+— is sound without adjustment.
+
+**No further calibration applied.** The one band that stands out, 6-9%
+predicting 7.3% against 5.4%, is 1,153 contracts drawn from 812 fights, so the
+rows are not independent and the deviation is within what that dependence
+allows. Fitting a correction to it would be fitting noise, and the rescale that
+production already performs removes the bias that is real.
+
+Worth noting the skill number is modest by construction: +3.4% against a flat
+base rate is what a 20-way split of a mostly-decision outcome allows. The
+meaningful check is the calibration table, and it holds.
+
+---
+
+# Addendum 33: distance rate of a fighter's own bouts (2026-09-26)
+
+Registered before fitting. Addendum 29 tested a fighter's own FINISH rate —
+his wins by stoppage over his fights. This is a different quantity: the share
+of his bouts that went the distance at all, whoever won. A fighter who is
+regularly finished contributes to short fights without ever finishing one, and
+the win-only measure cannot see him.
+
+    S1  sum of both fighters' distance rates (their bouts that reached a decision)
+    S2  the same, differenced
+
+Two targets, against the **complete finish formula inputs** (weight class,
+women, knockdowns, control, pace, age gap, submissions, five rounds):
+
+    T1  the fight ends inside the distance
+    T2  the fight ends before round 2
+
+And the question that decides what gets used: S1 tested **on top of average
+fight time**, which addendum 31 found worth +0.0096 on T1. Average fight time
+is largely a consequence of how often a fighter's bouts end early, so the two
+may be the same signal twice.
+
+Six tests, Benjamini-Hochberg at FDR 0.10, bootstrap over 600 resamples.
+
+Prior: moderate for S1 alone, low for S1 on top of average fight time.
+
+## Addendum 33: RESULT (2026-09-26)
+
+**Zero of six, and the reason is the useful part.**
+
+| target | measure | gain | 95% CI | p |
+|---|---|---|---|---|
+| ends before round 2 | distance rate (sum) | +0.0041 | [+0.0003, +0.0073] | .037 |
+| ends inside the distance | distance rate (sum) | +0.0047 | [-0.0007, +0.0102] | .093 |
+| ends before round 2 | **on top of average fight time** | +0.0000 | [-0.0000, +0.0001] | .32 |
+| ends inside the distance | **on top of average fight time** | -0.0004 | [-0.0020, +0.0011] | .55 |
+| both targets | distance rate (difference) | 0.0000 | — | — |
+
+On its own the distance rate does carry signal — +0.0047 and +0.0041, the right
+sign and roughly the size expected. Neither cleared its BH threshold, and the
+round-2 row missed by a hair (.037 against .0333).
+
+**But on top of average fight time it is worth nothing at all.** They are the
+same signal measured two ways, and the minutes version is the stronger carrier:
++0.0096 against +0.0047 on the same target, same baseline, same split.
+
+That answers the question as asked. Screening for likely-finish matchups on
+the share of a fighter's bouts that reached a decision is a sound idea, and the
+model captures it better through how long his fights actually last. A rate
+throws away the difference between a first-round knockout and a stoppage at
+14:50; the minutes keep it.
+
+The differenced version is exactly zero on both targets, as it should be —
+whether a fight goes long is a property of the pair, not of one corner. Same
+result as average fight time, which is another sign the two are one signal.
+
+No change. Average fight time remains the forward candidate; the distance rate
+is redundant with it and is not carried forward.
+
+---
+
+# Addendum 34: does a gating rule beat smooth use of the same inputs? (2026-09-26)
+
+Registered before fitting. Proposal: gate on a threshold (each fighter's
+finish share of wins exceeds his decision share), then weigh method mix
+against the opponent, then consult the per-round breakdown — with a
+second-order filter on the pair's combined decision rate.
+
+This is a decision tree specified by hand. The question is not whether the
+inputs matter — addendums 29, 31 and 33 measured that — but whether the
+**gating structure** adds anything a model would not find on its own.
+
+Four models, same target (the fight ends inside the distance), same baseline
+(complete finish formula inputs), same split:
+
+    G0  baseline only
+    G1  baseline + the inputs entered smoothly (finish share, method mix,
+        average fight time, distance rate), linear
+    G2  baseline + the same inputs, gradient boosted — free to discover any
+        threshold or interaction in them
+    G3  baseline + the hand-specified gate as a binary, plus its second-order
+        filter (combined decision rate below 50%)
+
+If G3 beats G1 and G2, the structure is doing work. If G2 >= G3, the gate is a
+worse version of something a tree finds automatically. If all three sit near
+G0, the inputs were already carried.
+
+Prior: the gate adds nothing over G2. Trees exist to find thresholds, and
+nothing about the proposed one is unavailable to a model given the same
+columns. The interesting outcome is G1 vs G2 — whether the signal in these
+inputs is smooth or genuinely threshold-shaped.
+
+## Addendum 34: RESULT (2026-09-26)
+
+**The inputs are worth having. The gate is not.** Held out on 1,326 bouts,
+target = the fight ends inside the distance.
+
+| | log loss |
+|---|---|
+| G0 baseline (finish formula inputs) | .6599 |
+| **G1 + the inputs, entered smoothly** | **.6466** |
+| G2 + the same inputs, gradient boosted | .6774 |
+| G3 + the hand-specified gate and its filter | .6537 |
+| G3b + gate, filter AND the smooth inputs | .6470 |
+
+Three things, in order of usefulness.
+
+**The gate is a lossy version of the inputs.** G3 (.6537) beats the baseline,
+so the rule is picking up something real — but G1 (.6466) beats it using the
+same information without the threshold. And adding the gate to the smooth
+inputs (G3b, .6470) is no better than the smooth inputs alone. The gate throws
+away the difference between a fighter who finishes 51% of the time and one who
+finishes 90%, and nothing is gained back by the structure.
+
+**The signal is smooth, not threshold-shaped.** The prediction registered above
+was that the interesting comparison would be G1 against G2. Gradient boosting,
+free to find any threshold in these columns, came out **worst of all** at
+.6774 — worse than the baseline. With five inputs over ~5,000 training bouts
+it fits noise that a linear model cannot. If the relationship had a genuine
+cliff in it, the tree would have found it and won.
+
+**The features themselves are a real gain: .6599 to .6466.** That is larger
+than anything in addendums 29 to 33, because it is all of them at once —
+finish share, method mix, distance rate and average fight time entered
+together.
+
+### Decision
+
+No change to the model. The holdout is spent and this was a structural test,
+not a registered adoption. But it sharpens the forward candidate: what goes on
+the forward list is **the block of career-outcome inputs entered smoothly**,
+not average fight time alone, and not any gating rule.
+
+Recorded because the instinct behind the proposal was right — these inputs do
+predict finishes — and the specific mechanism proposed was the one part that
+does not help.
