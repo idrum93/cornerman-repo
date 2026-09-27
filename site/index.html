@@ -569,8 +569,6 @@ function propChips(b){
   // 50% cutoff sounded like a claim and was not one — half of all fights end
   // inside the distance, so it fired on anything a whisker above average. The
   // badge now means the same thing the other chips mean.
-  const finBase=1-(((BR||{}).market_bases||{}).dec??0.51);
-  const fin=b.m_decision==null?null:1-b.m_decision;
   // A "Distance 35%" chip beside "FINISH 65%" says the same thing twice. The
   // distance chip now only appears when a fight is likelier than usual to go
   // long; the short direction is the badge's job.
@@ -579,9 +577,27 @@ function propChips(b){
      saying the same fight is long, and "FINISH 64% · O2.5 42%" is two ways of
      saying it is short. The badge answers it when it fires; otherwise the
      single strongest rung does, measured the way every chip is ranked. */
+  const finBase=1-(((BR||{}).market_bases||{}).dec??0.51);
+  const fin=b.m_decision==null?null:1-b.m_decision;
   const isLength=c=>c.key==='decision'||c.key.startsWith('total_')||c.key.startsWith('ends_before_');
+  /* The same rule the drawer's ladders use: the LAST rung still clear of its
+     base, not the one furthest from it. A fight 65% to pass 4.5 rounds is
+     better described by that than by being 82% to pass 2.5, which it implies. */
+  const roundKey=c=>{const m=/(?:total_over_|ends_before_r)(\d+)(?:_(\d))?/.exec(c.key);
+    return m?parseFloat(m[1]+(m[2]?'.'+m[2]:'')):-1;};
+  /* Which ladder, then which rung. "Over N rounds" climbs when a fight is
+     long; "ends before N" climbs when it is short. Taking the highest round
+     number across both picked "32% before R4" for a fight the model likes to
+     go long — the right rung of the wrong ladder. */
+  const goesLong=(b.m_decision!=null&&fin!=null&&fin<finBase);
+  const lane=c=>goesLong?c.key.startsWith('total_'):c.key.startsWith('ends_before_');
   let lengthChip=null;
-  notable.forEach(c=>{ if(isLength(c)&&(!lengthChip||c.dev>lengthChip.dev)) lengthChip=c; });
+  notable.filter(c=>isLength(c)&&lane(c)&&c.p>c.base).forEach(c=>{
+    if(!lengthChip||roundKey(c)>roundKey(lengthChip)) lengthChip=c;
+  });
+  // nothing in the leaning lane clears its base — fall back to the plain rule
+  if(!lengthChip) notable.filter(isLength).forEach(c=>{
+    if(!lengthChip||c.dev>lengthChip.dev) lengthChip=c; });
   const badge=(fin!=null&&fin-finBase>=0.12)
     ? `<span class="pp finish" title="the model makes a finish ${P0(fin-finBase)} points likelier than normal — a finish happens in ${P0(finBase)}% of fights">FINISH <b>${P0(fin)}%</b></span>` : '';
   // the badge already answers "how long", so no length chip beside it
@@ -1178,7 +1194,9 @@ function endsBeforeGroup(b){
   const EBr=((((BR||{}).market_bases||{}).ends_before)||{})[b.rounds===5?'5':'3']||{};
   return group('Ends before round',ks.some(k=>pmk(b,k.slice(2))!=null)?'market priced':'no market line',
     ks.map(k=>propRow(`Ends before round ${k.slice(-1)}`,b[k],'var(--gold)',
-      pmk(b,k.slice(2)),pnote(b,k.slice(2)),k.slice(2),EBr[k.slice(-1)])));
+      pmk(b,k.slice(2)),pnote(b,k.slice(2)),k.slice(2),EBr[k.slice(-1)])),
+    false,(()=>{const ps=ks.map(k=>b[k]), bs=ks.map(k=>EBr[k.slice(-1)]);
+      const v=ps.slice(); v.ladderPick=ladderTop(ps,bs); return v;})());
 }
 function startsRoundGroup(b){
   const ks=Object.keys(b).filter(k=>/^p_starts_r[0-9]$/.test(k)&&b[k]!=null).sort();
@@ -1208,11 +1226,21 @@ function bindTabs(){
    alternatives — method of victory, round of finish, the combos. A ladder like
    "ends before round N" climbs by construction, so marking its largest number
    would be pointing at arithmetic, not at a finding. */
+/* For a ladder, the useful rung is the LAST one still clear of its base, not
+   the one furthest from it. "Over 2.5 at 82%" and "Over 4.5 at 65%" both say
+   the fight is long; the second says more, because it implies the first. */
+function ladderTop(ps,bases,margin){
+  let best=-1;
+  ps.forEach((p,i)=>{ const b=bases[i];
+    if(p!=null&&b!=null&&p-b>=(margin??0.06)) best=i; });
+  return best;
+}
 function group(title,sub,rows,priced,values){
   let list=(rows||[]).filter(Boolean);
   if(values&&values.length===list.length){
     let bi=-1,bv=-1;
-    values.forEach((v,i)=>{ if(v!=null&&v>bv){bv=v;bi=i;} });
+    if(values.ladderPick!=null){ bi=values.ladderPick; }
+    else values.forEach((v,i)=>{ if(v!=null&&v>bv){bv=v;bi=i;} });
     if(bi>=0) list=list.map((h,i)=>i===bi?h.replace('class="prow','class="prow top'):h);
   }
   if(!list.length) return '';
@@ -1251,7 +1279,11 @@ function marketTabs(b,mk,rr,totals){
         propRow(`${b.a} wins, if it goes to decision`,b.p_a_given_decision,'var(--red)',pmk(b,'ml_dec_a'),pnote(b,'ml_dec_a'),'ml_dec_a'),
         propRow(`${b.b} wins, if it goes to decision`,b.p_b_given_decision,'var(--blue)',pmk(b,'ml_dec_b'),pnote(b,'ml_dec_b'),'ml_dec_b')]):'')],
     ['rounds','Rounds & Distance',
-      group('Total rounds','faint means it sits where most fights do',totals)
+      (()=>{const TB2=((((BR||{}).market_bases||{}).totals)||{})[b.rounds===5?'5':'3']||{};
+        const ps=Object.keys(b.totals||{}).map(k=>b.totals[k]);
+        const bs=Object.keys(b.totals||{}).map(k=>TB2[k.replace('over_','').replace('_','.')]);
+        const v=ps.slice(); v.ladderPick=ladderTop(ps,bs);
+        return group('Total rounds','faint means it sits where most fights do',totals,false,v);})()
       +group('Fight to go the distance','',[
         propRow('Go the distance',b.m_decision,'var(--mute)',pmk(b,'decision'),
           pnote(b,'decision')||vsBase('C9','fight',b.bands,b.m_decision),'decision',
@@ -1271,7 +1303,10 @@ function marketTabs(b,mk,rr,totals){
           rr.map(([k,v])=>propRow(`Ends in round ${k}`,v,'var(--gold)',
             pmk(b,'end_r'+k),pnote(b,'end_r'+k),'end_r'+k,baseFor(+k))),
           false,rr.map(([,v])=>v));})()
-      +endsBeforeGroup(b)+startsRoundGroup(b)
+      +endsBeforeGroup(b)   /* startsRoundGroup removed: every row was exactly
+         1 minus the row above it in "ends before round", so the section could
+         only ever light up or dim as a mirror of that one. Kept in the code
+         for the results panel, which grades the contract on its own terms. */
       +formulaNote(b,'finish','finish','sets how likely a finish is; the method and round split still comes from the survival model and sums to it')],
     ['parlays','Method & Round Combo',recordSplit(b)+rovGroup(b)],   // esc() handles the &
     ['volume','Strikes & Takedowns',
