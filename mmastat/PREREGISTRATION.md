@@ -2928,3 +2928,44 @@ not average fight time alone, and not any gating rule.
 Recorded because the instinct behind the proposal was right — these inputs do
 predict finishes — and the specific mechanism proposed was the one part that
 does not help.
+
+---
+
+# Addendum 35: base-rate condition C13, combined decision share (2026-09-26)
+
+Registered before building, as conditions C1 to C12 were (addendums 10 to 12).
+
+    C13  measure  the pair's average decision share of their wins
+         outcome  the fight ends inside the distance
+         level    fight
+         why      two fighters who win by decision produce decisions
+
+Descriptive, measured across every fight since 2012 with both fighters holding
+at least two wins on record. Reported the same way as every other row: the
+outcome rate in the lowest and highest quartile of the measure, against the
+rate across all fights, with the same significance marking.
+
+The marginal relationship is already measured (2026-09-26):
+
+| pair's average decision share | n | finish rate |
+|---|---|---|
+| 0-15% | 149 | 71.8% |
+| 15-30% | 594 | 60.6% |
+| 30-45% | 850 | 54.1% |
+| 45-60% | 842 | 46.4% |
+| 60-75% | 586 | 37.5% |
+| 75-100% | 226 | 31.0% |
+
+Monotone across six bands with non-overlapping intervals at the ends. The gap
+BETWEEN the two fighters is flat (48.7%, 51.6%, 47.2%, 50.3%), so the level is
+the measure and the mismatch is not.
+
+**This row is labelled "same measure", not "different measure".** The share of
+a fighter's wins that went to decision, predicting whether this fight goes to
+decision, is close to definitional — the same relationship C1 has for
+takedowns. It earns a place as context, not as a discovery, and the panel's own
+labelling must say so.
+
+It is also NOT a model feature: addendum 33 found this quantity worth +0.0047
+against the finish formula and nothing at all on top of average fight time.
+Most of what the table above shows is already inside the projection beside it.

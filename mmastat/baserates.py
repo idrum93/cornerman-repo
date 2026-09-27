@@ -50,6 +50,12 @@ CONDITIONS = [
      "a chin that has gone before goes again"),
     ("C12", "Opponent's strikes absorbed", "fighter", "opp_sapm", "y_kd",
      "a hittable opponent gets hit cleanly more often"),
+    # addendum 35. Same-measure by construction, like C1: the share of a
+    # fighter's wins that went to decision, against whether THIS fight goes to
+    # decision. Context, not a discovery — and not a model feature either
+    # (addendum 33: worth nothing on top of average fight time).
+    ("C13", "Combined decision share of wins", "fight", "dec_share_sum", "itd",
+     "two fighters who win by decision produce decisions"),
 ]
 
 OUTCOME_LABEL = {"y_td": "lands a takedown", "y_kd": "scores a knockdown",
@@ -78,6 +84,21 @@ def _frames(fights, fighters, min_date="2012-01-01"):
     F["slpm_sum"] = F.own_adj_slpm0 + F.own_adj_slpm1
     F["sub_sum"] = F.own_sub150 + F.own_sub151
     F["age_gap"] = (F.own_age0 - F.own_age1).abs()
+
+    # addendum 35 (C13). Built from prior bouts only, walking in date order,
+    # so the row is leakage-safe the same way every model feature is. Needs two
+    # wins on record per corner before a share means anything.
+    hist, pair = {}, {}
+    for r in fights.sort_values("date").itertuples():
+        ha, hb = hist.get(r.r_id), hist.get(r.b_id)
+        if ha and hb and ha["w"] >= 2 and hb["w"] >= 2:
+            pair[r.fight_id] = (ha["dec"] / ha["w"] + hb["dec"] / hb["w"]) / 2
+        for side, fid in (("r", r.r_id), ("b", r.b_id)):
+            h = hist.setdefault(fid, {"w": 0, "dec": 0})
+            if r.winner == side:
+                h["w"] += 1
+                h["dec"] += int(r.method == "DEC")
+    F["dec_share_sum"] = pd.Series(pair)
     return P, F
 
 
