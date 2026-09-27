@@ -2,7 +2,7 @@
  "event": "UFC 332",
  "date": "2026-10-03",
  "venue": "Delta Center, Salt Lake City , Utah, United States",
- "generated_utc": "2026-09-27T14:51:57.727580+00:00",
+ "generated_utc": "2026-09-27T15:35:47.946848+00:00",
  "bouts": [
   {
    "bout": "Nat\u00e1lia Silva vs. Wang Cong",
@@ -744,7 +744,7 @@
     }
    ],
    "p_market": 0.3015,
-   "books": 11.0,
+   "books": 13.0,
    "edge": 0.209,
    "p_finish_survival_raw": 0.4885,
    "m_a_ko": 0.084,
@@ -1546,7 +1546,7 @@
     }
    ],
    "p_market": 0.7931,
-   "books": 13.0,
+   "books": 14.0,
    "edge": -0.1552,
    "p_finish_survival_raw": 0.5912,
    "m_a_ko": 0.1371,
@@ -2616,9 +2616,9 @@
      "key": "d_str_def"
     }
    ],
-   "p_market": 0.4517,
-   "books": 14.0,
-   "edge": -0.0776,
+   "p_market": 0.4577,
+   "books": 15.0,
+   "edge": -0.0835,
    "p_finish_survival_raw": 0.2826,
    "m_a_ko": 0.0767,
    "m_b_ko": 0.1274,
@@ -2890,7 +2890,7 @@
     }
    ],
    "p_market": 0.3146,
-   "books": 13.0,
+   "books": 14.0,
    "edge": 0.0513,
    "p_finish_survival_raw": 0.5841,
    "m_a_ko": 0.0901,
