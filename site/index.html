@@ -1218,6 +1218,27 @@ function splitRow(label,b,pa){
   </div>`;
 }
 
+/* Two counts, one row, drawn to the larger of the pair. These are independent
+   quantities, not a split of 100%, so the bars show the RATIO between the
+   fighters — which is the comparison worth making — rather than a share of
+   anything. Six numbered lines became two rows a reader can read at a glance.
+   Per round rides in the label: it is the same projection divided by five, so
+   giving it its own bars would draw the same picture twice. */
+function countRow(label,va,vb,b,sub){
+  if(va==null||vb==null) return '';
+  const top=Math.max(va,vb,0.001);
+  const bar=(v,cls,col)=>`<div style="display:flex;align-items:center;gap:6px">
+    <span class="mono ${cls}" style="width:40px;text-align:right;font-weight:600">${v}</span>
+    <div style="flex:1;height:7px;background:var(--soft);border-radius:4px;overflow:hidden">
+      <div style="height:7px;border-radius:4px;width:${(v/top*100).toFixed(1)}%;background:${col}"></div></div></div>`;
+  return `<div class="prow" style="align-items:flex-start">
+    <div style="width:146px;flex:none;font-size:11.5px;color:var(--mute)">${esc(label)}
+      ${sub?`<span class="lbl" style="display:block;margin-top:1px">${esc(sub)}</span>`:''}</div>
+    <div style="flex:1;display:flex;flex-direction:column;gap:3px">
+      ${bar(va,'nm-a','var(--red)')}${bar(vb,'nm-b','var(--blue)')}</div>
+    <div class="lbl" style="flex:none;width:96px;text-align:right">${esc(surname(b.a))} · ${esc(surname(b.b))}</div></div>`;
+}
+
 function strikeRow(label,val,cls){
   return `<div class="prow"><span>${esc(label)}</span><span class="mono ${cls}">${val}</span></div>`;
 }
@@ -1452,12 +1473,14 @@ function marketTabs(b,mk,rr,totals){
       // parenthesised: without it, + binds tighter than ?: and everything
       // after the ternary lands in the false branch only
       (b.exp_minutes?group('Projected output','over an expected '+b.exp_minutes.toFixed(1)+' minutes',[
-        strikeRow(`${surname(b.a)} significant strikes landed`,Math.round((b.a_strikes_rate??b.a_slpm_mid)*b.exp_minutes),'nm-a'),
-        strikeRow(`${surname(b.b)} significant strikes landed`,Math.round((b.b_strikes_rate??b.b_slpm_mid)*b.exp_minutes),'nm-b'),
-        strikeRow(`${surname(b.a)} per round`,Math.round((b.a_strikes_rate??b.a_slpm_mid)*5),'nm-a'),
-        strikeRow(`${surname(b.b)} per round`,Math.round((b.b_strikes_rate??b.b_slpm_mid)*5),'nm-b'),
-        b.a_takedowns_rate!=null?strikeRow(`${surname(b.a)} takedowns landed`,(b.a_takedowns_rate*b.exp_minutes/15).toFixed(1),'nm-a'):'',
-        b.b_takedowns_rate!=null?strikeRow(`${surname(b.b)} takedowns landed`,(b.b_takedowns_rate*b.exp_minutes/15).toFixed(1),'nm-b'):'',
+        countRow('Significant strikes',
+          Math.round((b.a_strikes_rate??b.a_slpm_mid)*b.exp_minutes),
+          Math.round((b.b_strikes_rate??b.b_slpm_mid)*b.exp_minutes), b,
+          `${Math.round((b.a_strikes_rate??b.a_slpm_mid)*5)} and ${
+             Math.round((b.b_strikes_rate??b.b_slpm_mid)*5)} per round`),
+        (b.a_takedowns_rate!=null&&b.b_takedowns_rate!=null)?countRow('Takedowns',
+          +(b.a_takedowns_rate*b.exp_minutes/15).toFixed(1),
+          +(b.b_takedowns_rate*b.exp_minutes/15).toFixed(1), b):'',
         '<div class="note" style="padding:6px 11px">Expected counts, from a model of the mean rate — beaten out against each fighter\'s own career rate and the league average on held-out fights (addendum 26). How likely each exact total is, rather than the average, is still to come.</div>',
         rangeBlock('Significant strikes','per min',
           [[b.a,b.a_slpm_lo,b.a_slpm_mid,b.a_slpm_hi,'var(--red)'],
