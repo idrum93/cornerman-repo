@@ -1390,7 +1390,11 @@ function marketTabs(b,mk,rr,totals){
            contradiction when stated in different places. Said here instead. */
         const pdec=b.m_decision, pfin=(pdec==null?null:1-pdec);
         const topIsDec=/by decision$/.test(mv[0][0]);
-        const note=(pfin!=null&&pfin>pdec&&topIsDec)
+        // the same 5-point margin the call uses before it names a family. At
+        // 52/48 the model is not saying a fight is a likely finish, and this
+        // note was saying so anyway — the drawer claimed a lean the tile had
+        // deliberately stayed quiet about.
+        const note=(pfin!=null&&pfin-pdec>=0.05&&topIsDec)
           ? `a finish is likelier overall (${P0(pfin)}%) — it is split across four routes, a decision is not`
           : 'most likely first · sums to 100% across the six';
         return group('Method of victory',note,
