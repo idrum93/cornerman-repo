@@ -441,10 +441,16 @@ def map_props(rows, bouts, max_spread=0.10, min_volume=100.0):
             continue
         p = r["sides"][yes][1] / tot
         bk = r["book"]
-        if bk:
-            if bk["spread"] > max_spread:
-                continue
-            # listed price here too, for the same reason
+        # A two-sided book is required. Without one the exchange shows "-" for
+        # the market, because nobody is quoting it — but the payload still
+        # carries a nominal price on each side, and publishing that presented a
+        # number as "the market" when the market had not spoken. It is how a
+        # KO prop reached the page at 13% against a model at 39%, with a verify
+        # link to a page showing a dash.
+        if not bk:
+            continue
+        if bk["spread"] > max_spread:
+            continue
         if r["volume"] is not None and r["volume"] < min_volume:
             continue
         if not (RESOLVED_EPS < p < 1 - RESOLVED_EPS):

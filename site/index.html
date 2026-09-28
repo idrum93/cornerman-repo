@@ -1093,7 +1093,8 @@ function pnote(b,key){
   const href=rec.url||polyURL(pslug(b,key));
   const sl=rec.url||pslug(b,key);
   return sl?`market ${P1(v)}% · <a class="plink" href="${esc(href)}" target="_blank"
-      rel="noopener" title="${rec.url?'the exchange\'s own link for this market':'assembled from the market slug — if it does not land on the market, tell me'}">verify</a>`
+      rel="noopener" title="${esc(rec.question||'')}${rec.question?' — ':''}${
+        rec.url?'the exchange\'s own link for this market':'link assembled from the market slug'}">verify</a>`
            :`market ${P1(v)}%`;
 }
 

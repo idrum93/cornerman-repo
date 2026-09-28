@@ -609,6 +609,11 @@ def latest_prop_prices(event_date=None):
         out.setdefault(r["bout"], {})
         out[r["bout"]][r["market"]] = {"p": r["p_market"], "slug": r.get("slug"),
                                        "url": r.get("url"),
+                                       # the exchange's own wording, carried to
+                                       # the page: a price that looks wrong is
+                                       # usually a question that was read wrong,
+                                       # and this says which one produced it
+                                       "question": r.get("question"),
                                        "captured_utc": r.get("captured_utc"),
                                        "venue": r.get("venue", "polymarket")}
         # the exchange prices "Decision" where the site has a "goes the
