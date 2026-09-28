@@ -627,18 +627,27 @@ def latest_prop_prices(event_date=None):
     # is dropped, so a stale number disappears instead of being displayed with
     # a link to a page that no longer carries it.
     if out:
-        cutoff = (pd.Timestamp.now(tz="UTC") - pd.Timedelta(hours=MAX_PRICE_AGE_H)).isoformat()
-        stale = 0
+        # Parsed, not string-compared. "2026-09-27T04:00:00Z" and
+        # "2026-09-27 04:00:00+00:00" are the same instant and sort differently
+        # as text, so a text comparison silently keeps or drops the wrong rows.
+        cutoff = pd.Timestamp.now(tz="UTC") - pd.Timedelta(hours=MAX_PRICE_AGE_H)
+        stale = undated = 0
         for bout in list(out):
             for mk in list(out[bout]):
-                ts = out[bout][mk].get("captured_utc")
-                if ts and ts < cutoff:
+                ts = pd.to_datetime(out[bout][mk].get("captured_utc"),
+                                    utc=True, errors="coerce")
+                if pd.isna(ts):
+                    # cannot date it, so cannot vouch for it
+                    del out[bout][mk]
+                    undated += 1
+                elif ts < cutoff:
                     del out[bout][mk]
                     stale += 1
             if not out[bout]:
                 del out[bout]
-        if stale:
-            print(f"props: {stale} price(s) older than {MAX_PRICE_AGE_H}h dropped as stale")
+        if stale or undated:
+            print(f"props: dropped {stale} price(s) older than {MAX_PRICE_AGE_H}h"
+                  f"{f', {undated} with no capture time' if undated else ''}")
     return out
 
 
