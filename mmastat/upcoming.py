@@ -768,23 +768,28 @@ def predict_card(path, fights, fighters, verbose=True):
     try:
         from .ledger import latest_prop_prices
         _pp = latest_prop_prices(meta.get("date"))
-        # Only prices from the US exchange reach the page. Both exchanges are
-        # captured, but every "verify" link is built for polymarket.us, and the
-        # two slug the same bout differently — so a price taken from the global
-        # site was being shown with a US link that lands on a page where the
-        # market is not there. A number a reader cannot check is worse than no
-        # number, because the link is what makes it checkable.
-        dropped = 0
-        for r in rows:
-            src = _pp.get(r["bout"])
-            if not src:
-                continue
-            keep = {k: v for k, v in src.items() if (v or {}).get("venue") == "polymarket_us"}
-            dropped += len(src) - len(keep)
-            if keep:
-                r["prop_market"] = keep
-        if dropped:
-            print(f"props: {dropped} price(s) held back — not on the exchange we link to")
+        # PROP PRICES ARE NOT DISPLAYED (2026-09-28).
+        #
+        # They are still captured, still stored, still graded, and the
+        # registered distance rule still runs on them. They are simply not put
+        # on the page, because they cannot be verified by a reader.
+        #
+        # The case that settled it: two markets on one bout, correctly mapped
+        # from the exchange's own wording, captured minutes earlier, tagged
+        # polymarket_us — and the exchange's page shows a dash for both,
+        # because nobody is quoting them. The API reported a book where the
+        # site shows none, and returned url: null, so there is not even a link
+        # to point at. Five separate fixes upstream of this each corrected a
+        # real defect and none of them changed what a reader saw, because the
+        # disagreement is between the exchange's API and the exchange's site.
+        #
+        # A number that carries a "verify" link and cannot be verified is worse
+        # than no number. The moneyline market stays — that comes from a
+        # licensed sportsbook feed and is consistent.
+        if _pp:
+            n = sum(len(v) for v in _pp.values())
+            print(f"props: {n} price(s) captured, none displayed "
+                  f"(see the note in upcoming.py)")
     except Exception as e:
         print(f"note: prop prices unavailable ({e})")
 
