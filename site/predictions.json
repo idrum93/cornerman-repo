@@ -2,7 +2,7 @@
  "event": "UFC 332",
  "date": "2026-10-03",
  "venue": "Delta Center, Salt Lake City , Utah, United States",
- "generated_utc": "2026-09-27T23:59:08.853311+00:00",
+ "generated_utc": "2026-09-28T00:03:47.208962+00:00",
  "bouts": [
   {
    "bout": "Nat\u00e1lia Silva vs. Wang Cong",
@@ -147,9 +147,9 @@
      "key": "d_sapm"
     }
    ],
-   "p_market": 0.6383,
+   "p_market": 0.6392,
    "books": 24.0,
-   "edge": 0.0425,
+   "edge": 0.0417,
    "p_finish_survival_raw": 0.2948,
    "m_a_ko": 0.2246,
    "m_b_ko": 0.1216,
@@ -292,7 +292,7 @@
      "p": 0.05263,
      "slug": "ufc-natsil-wancon-2026-10-03",
      "url": null,
-     "captured_utc": "2026-09-27T23:57:21+00:00",
+     "captured_utc": "2026-09-28T00:02:21+00:00",
      "venue": "polymarket_us"
     },
     "ends_before_r5": {
@@ -461,9 +461,9 @@
      }
     }
    ],
-   "p_market": 0.1691,
+   "p_market": 0.1729,
    "books": 21.0,
-   "edge": 0.1148,
+   "edge": 0.111,
    "p_finish_survival_raw": 0.5652,
    "m_a_ko": 0.108,
    "m_b_ko": 0.2322,
@@ -589,7 +589,7 @@
      "p": 0.05263,
      "slug": "ufc-deifig-paytal-2026-10-03",
      "url": null,
-     "captured_utc": "2026-09-27T23:57:21+00:00",
+     "captured_utc": "2026-09-28T00:02:21+00:00",
      "venue": "polymarket_us"
     }
    },
@@ -751,9 +751,9 @@
      "key": "d_ko_loss_rate"
     }
    ],
-   "p_market": 0.3015,
+   "p_market": 0.3084,
    "books": 13.0,
-   "edge": 0.2077,
+   "edge": 0.2008,
    "p_finish_survival_raw": 0.4911,
    "m_a_ko": 0.0842,
    "m_b_ko": 0.2483,
@@ -879,14 +879,14 @@
      "p": 0.24242,
      "slug": "ufc-kingre-estrib-2026-10-03",
      "url": null,
-     "captured_utc": "2026-09-27T23:57:21+00:00",
+     "captured_utc": "2026-09-28T00:02:21+00:00",
      "venue": "polymarket_us"
     },
     "ends_before_r2": {
      "p": 0.0678,
      "slug": "ufc-kingre-estrib-2026-10-03",
      "url": null,
-     "captured_utc": "2026-09-27T23:57:21+00:00",
+     "captured_utc": "2026-09-28T00:02:21+00:00",
      "venue": "polymarket_us"
     }
    },
@@ -1039,9 +1039,9 @@
      "key": "d_adj_slpm"
     }
    ],
-   "p_market": 0.6188,
+   "p_market": 0.6368,
    "books": 15.0,
-   "edge": 0.1329,
+   "edge": 0.1149,
    "p_finish_survival_raw": 0.5008,
    "m_a_ko": 0.3895,
    "m_b_ko": 0.2023,
@@ -1167,14 +1167,14 @@
      "p": 0.13043,
      "slug": "ufc-ategau-romkop-2026-10-03",
      "url": null,
-     "captured_utc": "2026-09-27T23:57:21+00:00",
+     "captured_utc": "2026-09-28T00:02:21+00:00",
      "venue": "polymarket_us"
     },
     "ends_before_r3": {
      "p": 0.19277,
      "slug": "ufc-ategau-romkop-2026-10-03",
      "url": null,
-     "captured_utc": "2026-09-27T23:57:21+00:00",
+     "captured_utc": "2026-09-28T00:02:21+00:00",
      "venue": "polymarket_us"
     }
    },
@@ -2905,9 +2905,9 @@
      "key": "d_opp_elo"
     }
    ],
-   "p_market": 0.3182,
+   "p_market": 0.3218,
    "books": 14.0,
-   "edge": 0.0467,
+   "edge": 0.043,
    "p_finish_survival_raw": 0.5854,
    "m_a_ko": 0.0909,
    "m_b_ko": 0.0919,
