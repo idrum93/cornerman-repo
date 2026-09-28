@@ -1371,7 +1371,17 @@ function marketTabs(b,mk,rr,totals){
                   [`${b.b} by submission`,b.m_b_sub,'var(--blue)','sub_b'],
                   [`${b.b} by decision`,b.m_b_dec,'var(--blue)','dec_b']]
           .filter(r=>r[1]!=null).sort((x,y)=>y[1]-x[1]);
-        return group('Method of victory','most likely first · sums to 100% across the six',
+        /* The gold row is the single biggest contract. That can be a decision
+           on a fight the model calls a likely finish, because four finish
+           routes split the finish probability between them and a decision is
+           not split at all — both readings are true and they looked like a
+           contradiction when stated in different places. Said here instead. */
+        const pdec=b.m_decision, pfin=(pdec==null?null:1-pdec);
+        const topIsDec=/by decision$/.test(mv[0][0]);
+        const note=(pfin!=null&&pfin>pdec&&topIsDec)
+          ? `a finish is likelier overall (${P0(pfin)}%) — it is split across four routes, a decision is not`
+          : 'most likely first · sums to 100% across the six';
+        return group('Method of victory',note,
           mv.map(([nm,p,col,k])=>propRow(nm,p,col,pmk(b,k),pnote(b,k),k)),
           false,mv.map(r=>r[1]));})()
       +(b.m_a_finish!=null?group('To win by finish','either route',[
