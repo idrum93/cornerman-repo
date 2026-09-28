@@ -2,7 +2,7 @@
  "event": "UFC 332",
  "date": "2026-10-03",
  "venue": "Delta Center, Salt Lake City , Utah, United States",
- "generated_utc": "2026-09-28T02:10:21.602407+00:00",
+ "generated_utc": "2026-09-28T18:35:33.234577+00:00",
  "bouts": [
   {
    "bout": "Nat\u00e1lia Silva vs. Wang Cong",
@@ -147,9 +147,9 @@
      "key": "d_sapm"
     }
    ],
-   "p_market": 0.6392,
-   "books": 24.0,
-   "edge": 0.0417,
+   "p_market": 0.6401,
+   "books": 23.0,
+   "edge": 0.0408,
    "p_finish_survival_raw": 0.2948,
    "m_a_ko": 0.2246,
    "m_b_ko": 0.1216,
@@ -439,7 +439,7 @@
     }
    ],
    "p_market": 0.1729,
-   "books": 21.0,
+   "books": 20.0,
    "edge": 0.111,
    "p_finish_survival_raw": 0.5652,
    "m_a_ko": 0.108,
@@ -719,9 +719,9 @@
      "key": "d_ko_loss_rate"
     }
    ],
-   "p_market": 0.3084,
-   "books": 13.0,
-   "edge": 0.2008,
+   "p_market": 0.3079,
+   "books": 14.0,
+   "edge": 0.2014,
    "p_finish_survival_raw": 0.4911,
    "m_a_ko": 0.0842,
    "m_b_ko": 0.2483,
@@ -991,9 +991,9 @@
      "key": "d_adj_slpm"
     }
    ],
-   "p_market": 0.6368,
-   "books": 15.0,
-   "edge": 0.1149,
+   "p_market": 0.65,
+   "books": 16.0,
+   "edge": 0.1017,
    "p_finish_survival_raw": 0.5008,
    "m_a_ko": 0.3895,
    "m_b_ko": 0.2023,
@@ -1497,7 +1497,7 @@
     }
    ],
    "p_market": 0.7931,
-   "books": 14.0,
+   "books": 15.0,
    "edge": -0.1544,
    "p_finish_survival_raw": 0.5934,
    "m_a_ko": 0.1378,
@@ -2563,9 +2563,9 @@
      "key": "d_str_def"
     }
    ],
-   "p_market": 0.4615,
-   "books": 15.0,
-   "edge": -0.088,
+   "p_market": 0.4494,
+   "books": 16.0,
+   "edge": -0.0758,
    "p_finish_survival_raw": 0.2837,
    "m_a_ko": 0.0767,
    "m_b_ko": 0.1276,
@@ -2836,7 +2836,7 @@
     }
    ],
    "p_market": 0.3218,
-   "books": 14.0,
+   "books": 15.0,
    "edge": 0.043,
    "p_finish_survival_raw": 0.5854,
    "m_a_ko": 0.0909,
@@ -2975,64 +2975,64 @@
  "market_source": "ledger (latest capture, 54% of card)",
  "track_record": {
   "winner": {
-   "n_tested": 829,
-   "accuracy": 0.673,
-   "tested_from": "2024-04-06",
-   "tested_to": "2026-09-12",
+   "n_tested": 827,
+   "accuracy": 0.672,
+   "tested_from": "2024-04-27",
+   "tested_to": "2026-09-26",
    "bands": [
     {
      "said": "50-60%",
-     "n": 366,
-     "right": 0.596
+     "n": 365,
+     "right": 0.597
     },
     {
      "said": "60-70%",
-     "n": 299,
-     "right": 0.682
+     "n": 295,
+     "right": 0.675
     },
     {
      "said": "70-80%",
-     "n": 138,
-     "right": 0.833
+     "n": 139,
+     "right": 0.835
     },
     {
      "said": "80-100%",
-     "n": 26,
-     "right": 0.808
+     "n": 28,
+     "right": 0.821
     }
    ]
   },
   "takedown": {
    "said_likely": {
-    "n": 397,
-    "happened": 0.718,
+    "n": 387,
+    "happened": 0.739,
     "avg_said": 0.716
    },
    "said_unlikely": {
-    "n": 812,
-    "happened": 0.246,
+    "n": 832,
+    "happened": 0.255,
     "avg_said": 0.246
    },
-   "auc": 0.743
+   "auc": 0.745
   },
   "knockdown": {
    "said_unlikely": {
-    "n": 1584,
-    "happened": 0.17,
-    "avg_said": 0.164
+    "n": 1587,
+    "happened": 0.169,
+    "avg_said": 0.165
    },
-   "auc": 0.662
+   "auc": 0.676
   },
   "ranges": {
    "control time": {
     "claimed": 0.8,
-    "actual": 0.797,
-    "n": 1692
+    "actual": 0.795,
+    "n": 1706
    },
    "significant strikes": {
     "claimed": 0.8,
-    "actual": 0.795,
-    "n": 1692
+    "actual": 0.775,
+    "n": 1706
    }
   }
  },
