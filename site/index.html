@@ -124,6 +124,9 @@
   .mtab.on{color:var(--ink);background:var(--bone);border-color:var(--bone)}
   .mpanel{display:none;padding-top:8px}
   .mpanel.on{display:block}
+  .callfam{display:inline-block;padding:1px 6px;border-radius:3px;font-size:10px;
+    letter-spacing:.05em;font-weight:600;color:var(--mute);background:var(--soft);
+    border:1px solid var(--line);margin-right:3px}
   .calllead{display:inline-block;padding:1px 6px;border-radius:3px;font-size:10px;
     letter-spacing:.06em;font-weight:700;margin-right:2px}
   .calllead.finish{color:var(--ink);background:var(--gold)}
@@ -724,10 +727,19 @@ function tile(b){
          another — the wording is what separates them. */
       const lbc=lengthBadge(b);
       const matches=lbc&&((lbc.kind==='finish'&&c.fam==='finish')||(lbc.kind==='distance'&&c.fam==='decision'));
+      /* The family is a fact about the FIGHT, so it gets neither corner's
+         colour — it sat in the corner tint of whoever the route favoured,
+         which read as though "a finish" belonged to that fighter. And it says
+         "distance", not "decision": "a decision 54% · Pinas by decision 30%"
+         used one word for two different claims. Its own pill, so it reads as
+         separate from the route beside it and from any prop badge below. */
       const head=matches
         ? `<span class="calllead ${lbc.kind}" title="${esc(lbc.tip)}">${
             lbc.kind==='finish'?'FINISH LIKELY':'DISTANCE LIKELY'} <b>${P0(lbc.p)}%</b></span>`
-        : (c.fam?`${c.fam==='finish'?'a finish':'a decision'} <b>${P0(c.famP)}%</b>`:'');
+        : (c.fam?`<span class="callfam" title="${c.fam==='finish'
+              ?'the fight ends inside the distance, by any route'
+              :'the fight goes to the judges'}">${
+            c.fam==='finish'?'finish':'distance'} <b>${P0(c.famP)}%</b></span>`:'');
       const route=c.routeClear?`${head?' · ':''}${esc(c.label)}${
         c.round?` <span style="color:var(--gold)">R${c.round.n}</span>`:''} ${P0(c.p)}%`:'';
       if(!head&&!route) return '';
