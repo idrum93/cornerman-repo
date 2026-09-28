@@ -630,7 +630,22 @@ def latest_prop_prices(event_date=None):
         # Parsed, not string-compared. "2026-09-27T04:00:00Z" and
         # "2026-09-27 04:00:00+00:00" are the same instant and sort differently
         # as text, so a text comparison silently keeps or drops the wrong rows.
+        # Measured against the LAST CAPTURE, not the wall clock. A market that
+        # stops being quoted keeps its final row for ever, and that row stays
+        # "the latest" for its market — so an age limit only removes it once
+        # the whole card goes cold. What matters is whether the most recent
+        # sweep still saw it: if a sweep ran and this market was not in it, the
+        # exchange is no longer quoting it and the price should go now, not in
+        # eighteen hours.
+        seen = [pd.to_datetime(v.get("captured_utc"), utc=True, errors="coerce")
+                for mk in out.values() for v in mk.values()]
+        seen = [t for t in seen if not pd.isna(t)]
+        last_sweep = max(seen) if seen else None
         cutoff = pd.Timestamp.now(tz="UTC") - pd.Timedelta(hours=MAX_PRICE_AGE_H)
+        if last_sweep is not None:
+            # an hour's tolerance, so a sweep that takes a while is not
+            # mistaken for two different sweeps
+            cutoff = max(cutoff, last_sweep - pd.Timedelta(hours=1))
         stale = undated = 0
         for bout in list(out):
             for mk in list(out[bout]):
@@ -646,7 +661,7 @@ def latest_prop_prices(event_date=None):
             if not out[bout]:
                 del out[bout]
         if stale or undated:
-            print(f"props: dropped {stale} price(s) older than {MAX_PRICE_AGE_H}h"
+            print(f"props: dropped {stale} price(s) the last sweep did not re-quote"
                   f"{f', {undated} with no capture time' if undated else ''}")
     return out
 
