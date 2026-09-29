@@ -2,7 +2,7 @@
  "event": "UFC 332",
  "date": "2026-10-03",
  "venue": "Delta Center, Salt Lake City , Utah, United States",
- "generated_utc": "2026-09-28T18:35:33.234577+00:00",
+ "generated_utc": "2026-09-29T16:51:07.183110+00:00",
  "bouts": [
   {
    "bout": "Nat\u00e1lia Silva vs. Wang Cong",
@@ -148,7 +148,7 @@
     }
    ],
    "p_market": 0.6401,
-   "books": 23.0,
+   "books": 22.0,
    "edge": 0.0408,
    "p_finish_survival_raw": 0.2948,
    "m_a_ko": 0.2246,
@@ -438,9 +438,9 @@
      }
     }
    ],
-   "p_market": 0.1729,
+   "p_market": 0.1727,
    "books": 20.0,
-   "edge": 0.111,
+   "edge": 0.1112,
    "p_finish_survival_raw": 0.5652,
    "m_a_ko": 0.108,
    "m_b_ko": 0.2322,
@@ -719,9 +719,9 @@
      "key": "d_ko_loss_rate"
     }
    ],
-   "p_market": 0.3079,
-   "books": 14.0,
-   "edge": 0.2014,
+   "p_market": 0.3218,
+   "books": 17.0,
+   "edge": 0.1874,
    "p_finish_survival_raw": 0.4911,
    "m_a_ko": 0.0842,
    "m_b_ko": 0.2483,
@@ -991,9 +991,9 @@
      "key": "d_adj_slpm"
     }
    ],
-   "p_market": 0.65,
-   "books": 16.0,
-   "edge": 0.1017,
+   "p_market": 0.6475,
+   "books": 19.0,
+   "edge": 0.1042,
    "p_finish_survival_raw": 0.5008,
    "m_a_ko": 0.3895,
    "m_b_ko": 0.2023,
@@ -1496,9 +1496,9 @@
      "key": "d_str_acc"
     }
    ],
-   "p_market": 0.7931,
-   "books": 15.0,
-   "edge": -0.1544,
+   "p_market": 0.7895,
+   "books": 19.0,
+   "edge": -0.1508,
    "p_finish_survival_raw": 0.5934,
    "m_a_ko": 0.1378,
    "m_b_ko": 0.2663,
@@ -2563,9 +2563,9 @@
      "key": "d_str_def"
     }
    ],
-   "p_market": 0.4494,
-   "books": 16.0,
-   "edge": -0.0758,
+   "p_market": 0.4482,
+   "books": 20.0,
+   "edge": -0.0747,
    "p_finish_survival_raw": 0.2837,
    "m_a_ko": 0.0767,
    "m_b_ko": 0.1276,
@@ -2835,9 +2835,9 @@
      "key": "d_opp_elo"
     }
    ],
-   "p_market": 0.3218,
-   "books": 15.0,
-   "edge": 0.043,
+   "p_market": 0.3151,
+   "books": 19.0,
+   "edge": 0.0498,
    "p_finish_survival_raw": 0.5854,
    "m_a_ko": 0.0909,
    "m_b_ko": 0.0919,
@@ -2966,13 +2966,20 @@
    "b": "Lucas Armand",
    "reason": "name not in UFCStats corpus",
    "segment": "Prelims"
+  },
+  {
+   "a": "Jacobe Smith",
+   "b": "Bruce Whitehead",
+   "reason": "name not in UFCStats corpus",
+   "segment": "Early prelims"
   }
  ],
  "unresolved_names": [
+  "Bruce Whitehead",
   "Lucas Armand",
   "Roberto Soldi\u0107"
  ],
- "market_source": "ledger (latest capture, 54% of card)",
+ "market_source": "ledger (latest capture, 50% of card)",
  "track_record": {
   "winner": {
    "n_tested": 827,
