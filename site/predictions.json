@@ -2,7 +2,7 @@
  "event": "UFC 332",
  "date": "2026-10-03",
  "venue": "Delta Center, Salt Lake City , Utah, United States",
- "generated_utc": "2026-09-29T16:51:07.183110+00:00",
+ "generated_utc": "2026-09-30T16:45:15.218230+00:00",
  "bouts": [
   {
    "bout": "Nat\u00e1lia Silva vs. Wang Cong",
@@ -148,7 +148,7 @@
     }
    ],
    "p_market": 0.6401,
-   "books": 22.0,
+   "books": 23.0,
    "edge": 0.0408,
    "p_finish_survival_raw": 0.2948,
    "m_a_ko": 0.2246,
@@ -438,9 +438,9 @@
      }
     }
    ],
-   "p_market": 0.1727,
-   "books": 20.0,
-   "edge": 0.1112,
+   "p_market": 0.1716,
+   "books": 23.0,
+   "edge": 0.1123,
    "p_finish_survival_raw": 0.5652,
    "m_a_ko": 0.108,
    "m_b_ko": 0.2322,
@@ -720,7 +720,7 @@
     }
    ],
    "p_market": 0.3218,
-   "books": 17.0,
+   "books": 20.0,
    "edge": 0.1874,
    "p_finish_survival_raw": 0.4911,
    "m_a_ko": 0.0842,
@@ -991,9 +991,9 @@
      "key": "d_adj_slpm"
     }
    ],
-   "p_market": 0.6475,
-   "books": 19.0,
-   "edge": 0.1042,
+   "p_market": 0.6548,
+   "books": 22.0,
+   "edge": 0.0969,
    "p_finish_survival_raw": 0.5008,
    "m_a_ko": 0.3895,
    "m_b_ko": 0.2023,
@@ -1496,9 +1496,9 @@
      "key": "d_str_acc"
     }
    ],
-   "p_market": 0.7895,
-   "books": 19.0,
-   "edge": -0.1508,
+   "p_market": 0.8027,
+   "books": 22.0,
+   "edge": -0.164,
    "p_finish_survival_raw": 0.5934,
    "m_a_ko": 0.1378,
    "m_b_ko": 0.2663,
@@ -2563,9 +2563,9 @@
      "key": "d_str_def"
     }
    ],
-   "p_market": 0.4482,
+   "p_market": 0.4453,
    "books": 20.0,
-   "edge": -0.0747,
+   "edge": -0.0718,
    "p_finish_survival_raw": 0.2837,
    "m_a_ko": 0.0767,
    "m_b_ko": 0.1276,
@@ -2835,9 +2835,9 @@
      "key": "d_opp_elo"
     }
    ],
-   "p_market": 0.3151,
+   "p_market": 0.3115,
    "books": 19.0,
-   "edge": 0.0498,
+   "edge": 0.0534,
    "p_finish_survival_raw": 0.5854,
    "m_a_ko": 0.0909,
    "m_b_ko": 0.0919,
