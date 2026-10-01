@@ -2,7 +2,7 @@
  "event": "UFC 332",
  "date": "2026-10-03",
  "venue": "Delta Center, Salt Lake City , Utah, United States",
- "generated_utc": "2026-09-30T16:45:15.218230+00:00",
+ "generated_utc": "2026-10-01T17:20:16.187200+00:00",
  "bouts": [
   {
    "bout": "Nat\u00e1lia Silva vs. Wang Cong",
@@ -438,9 +438,9 @@
      }
     }
    ],
-   "p_market": 0.1716,
-   "books": 23.0,
-   "edge": 0.1123,
+   "p_market": 0.1643,
+   "books": 26.0,
+   "edge": 0.1196,
    "p_finish_survival_raw": 0.5652,
    "m_a_ko": 0.108,
    "m_b_ko": 0.2322,
@@ -719,9 +719,9 @@
      "key": "d_ko_loss_rate"
     }
    ],
-   "p_market": 0.3218,
-   "books": 20.0,
-   "edge": 0.1874,
+   "p_market": 0.3256,
+   "books": 22.0,
+   "edge": 0.1837,
    "p_finish_survival_raw": 0.4911,
    "m_a_ko": 0.0842,
    "m_b_ko": 0.2483,
@@ -991,9 +991,9 @@
      "key": "d_adj_slpm"
     }
    ],
-   "p_market": 0.6548,
-   "books": 22.0,
-   "edge": 0.0969,
+   "p_market": 0.6604,
+   "books": 24.0,
+   "edge": 0.0913,
    "p_finish_survival_raw": 0.5008,
    "m_a_ko": 0.3895,
    "m_b_ko": 0.2023,
@@ -1496,9 +1496,9 @@
      "key": "d_str_acc"
     }
    ],
-   "p_market": 0.8027,
+   "p_market": 0.8104,
    "books": 22.0,
-   "edge": -0.164,
+   "edge": -0.1717,
    "p_finish_survival_raw": 0.5934,
    "m_a_ko": 0.1378,
    "m_b_ko": 0.2663,
@@ -1613,267 +1613,6 @@
     }
    },
    "p_open": 0.801
-  },
-  {
-   "bout": "Marcus McGhee vs. Bernardo Sopaj",
-   "a": "Marcus McGhee",
-   "b": "Bernardo Sopaj",
-   "rounds": 3,
-   "segment": "Prelims",
-   "weight_class": "Bantamweight",
-   "thin": false,
-   "p_a": 0.4633,
-   "p_b": 0.5367,
-   "stats": {
-    "a": {
-     "record": "5-1",
-     "n_fights": 6,
-     "age": 36.4,
-     "height": 68.0,
-     "reach": 69.0,
-     "stance": "Orthodox",
-     "elo": 1555,
-     "opp_elo": 1522,
-     "slpm": 5.42,
-     "sapm": 3.71,
-     "str_acc": 0.437,
-     "str_def": 0.564,
-     "td15": 0.64,
-     "td_def": 0.721,
-     "sub15": 0.36,
-     "ctrl": 0.072,
-     "kd15": 0.58,
-     "kd_against15": 0.1,
-     "ko_loss": 0.12,
-     "avg_time": 10.47
-    },
-    "b": {
-     "record": "2-1",
-     "n_fights": 3,
-     "age": 26.0,
-     "height": 66.0,
-     "reach": 66.0,
-     "stance": "Orthodox",
-     "elo": 1512,
-     "opp_elo": 1500,
-     "slpm": 4.26,
-     "sapm": 4.49,
-     "str_acc": 0.569,
-     "str_def": 0.529,
-     "td15": 1.83,
-     "td_def": 0.691,
-     "sub15": 0.72,
-     "ctrl": 0.222,
-     "kd15": 0.58,
-     "kd_against15": 0.36,
-     "ko_loss": 0.314,
-     "avg_time": null
-    }
-   },
-   "record_split": {
-    "a": {
-     "wins": {
-      "ko": 2,
-      "sub": 1,
-      "dec": 2
-     },
-     "losses": {
-      "ko": 0,
-      "sub": 0,
-      "dec": 1
-     },
-     "win_rounds": {
-      "2": {
-       "ko": 1,
-       "sub": 1
-      },
-      "1": {
-       "ko": 1,
-       "sub": 0
-      }
-     },
-     "n": 6
-    },
-    "b": {
-     "wins": {
-      "ko": 0,
-      "sub": 0,
-      "dec": 0
-     },
-     "losses": {
-      "ko": 0,
-      "sub": 0,
-      "dec": 0
-     },
-     "win_rounds": {},
-     "n": 0
-    }
-   },
-   "evidence": {
-    "a": 6,
-    "b": 3,
-    "min": 3
-   },
-   "drivers": [
-    {
-     "label": "age",
-     "value": -0.817,
-     "favors": "b",
-     "key": "d_age"
-    },
-    {
-     "label": "losses by strikes",
-     "value": 0.3533,
-     "favors": "a",
-     "key": "d_ko_loss_rate"
-    },
-    {
-     "label": "striking vs chin, adjustment",
-     "value": -0.3105,
-     "favors": "b",
-     "key": "ko_edge",
-     "parts": {
-      "a": 1.7,
-      "b": 0.51,
-      "how": "their striking output x how often the other has been finished by strikes"
-     }
-    },
-    {
-     "label": "career quality",
-     "value": 0.2664,
-     "favors": "a",
-     "key": "d_elo"
-    },
-    {
-     "label": "strength of schedule",
-     "value": 0.2054,
-     "favors": "a",
-     "key": "d_opp_elo"
-    },
-    {
-     "label": "striking output",
-     "value": 0.1959,
-     "favors": "a",
-     "key": "d_adj_slpm"
-    }
-   ],
-   "p_market": null,
-   "books": null,
-   "edge": null,
-   "p_finish_survival_raw": 0.3868,
-   "m_a_ko": 0.2234,
-   "m_b_ko": 0.1646,
-   "m_a_sub": 0.0499,
-   "m_b_sub": 0.0398,
-   "m_decision": 0.5223,
-   "m_a_dec": 0.19,
-   "m_b_dec": 0.3323,
-   "p_finish": 0.4777,
-   "p_end_r1": 0.1774,
-   "p_end_r2": 0.1723,
-   "p_end_r3": 0.128,
-   "p_end_r4": null,
-   "p_end_r5": null,
-   "p_ends_before_r2": 0.1774,
-   "p_starts_r2": 0.8226,
-   "p_ends_before_r3": 0.3497,
-   "p_starts_r3": 0.6503,
-   "p_ends_before_r4": null,
-   "p_starts_r4": null,
-   "p_ends_before_r5": null,
-   "p_starts_r5": null,
-   "p_a_given_finish": 0.572,
-   "p_b_given_finish": 0.428,
-   "p_a_given_decision": 0.3638,
-   "p_b_given_decision": 0.6362,
-   "exp_minutes": 11.17,
-   "round_of_victory": {
-    "a_ko_r1": 0.0818,
-    "b_ko_r1": 0.0641,
-    "a_sub_r1": 0.017,
-    "b_sub_r1": 0.0146,
-    "a_ko_r2": 0.079,
-    "b_ko_r2": 0.0592,
-    "a_sub_r2": 0.0193,
-    "b_sub_r2": 0.0148,
-    "a_ko_r3": 0.0626,
-    "b_ko_r3": 0.0414,
-    "a_sub_r3": 0.0136,
-    "b_sub_r3": 0.0105
-   },
-   "m_a_finish": 0.2733,
-   "m_b_finish": 0.2044,
-   "totals": {
-    "over_1_5": 0.7409,
-    "over_2_5": 0.5842
-   },
-   "a_ctrl_lo": 0.0,
-   "a_ctrl_mid": 2.1,
-   "a_ctrl_hi": 6.22,
-   "a_slpm_lo": 1.8,
-   "a_slpm_mid": 4.69,
-   "a_slpm_hi": 8.48,
-   "a_takedowns_rate": 0.784,
-   "a_strikes_rate": 4.434,
-   "a_p_takedown": 0.251,
-   "a_p_knockdown": 0.245,
-   "b_ctrl_lo": 0.0,
-   "b_ctrl_mid": 6.39,
-   "b_ctrl_hi": 21.14,
-   "b_slpm_lo": 1.53,
-   "b_slpm_mid": 4.01,
-   "b_slpm_hi": 6.95,
-   "b_takedowns_rate": 0.894,
-   "b_strikes_rate": 3.979,
-   "b_p_takedown": 0.582,
-   "b_p_knockdown": 0.193,
-   "dec_share": null,
-   "bands": {
-    "C1": {
-     "a": 1,
-     "b": 3
-    },
-    "C2": {
-     "a": 3,
-     "b": 4
-    },
-    "C3": {
-     "a": 4,
-     "b": 4
-    },
-    "C6": {
-     "a": 4,
-     "b": 1
-    },
-    "C10": {
-     "a": 1,
-     "b": 4
-    },
-    "C11": {
-     "a": 4,
-     "b": 1
-    },
-    "C12": {
-     "a": 4,
-     "b": 3
-    },
-    "C4": {
-     "fight": 4
-    },
-    "C5": {
-     "fight": 1
-    },
-    "C7": {
-     "fight": 4
-    },
-    "C8": {
-     "fight": 4
-    },
-    "C9": {
-     "fight": 2
-    }
-   },
-   "p_open": null
   },
   {
    "bout": "Johnny Walker vs. Mick Parkin",
@@ -2563,9 +2302,9 @@
      "key": "d_str_def"
     }
    ],
-   "p_market": 0.4453,
-   "books": 20.0,
-   "edge": -0.0718,
+   "p_market": 0.443,
+   "books": 23.0,
+   "edge": -0.0695,
    "p_finish_survival_raw": 0.2837,
    "m_a_ko": 0.0767,
    "m_b_ko": 0.1276,
@@ -2835,9 +2574,9 @@
      "key": "d_opp_elo"
     }
    ],
-   "p_market": 0.3115,
-   "books": 19.0,
-   "edge": 0.0534,
+   "p_market": 0.3271,
+   "books": 22.0,
+   "edge": 0.0378,
    "p_finish_survival_raw": 0.5854,
    "m_a_ko": 0.0909,
    "m_b_ko": 0.0919,
@@ -2962,6 +2701,12 @@
    "segment": "Main card"
   },
   {
+   "a": "Marcus McGhee",
+   "b": "Anthony Romero",
+   "reason": "name not in UFCStats corpus",
+   "segment": "Prelims"
+  },
+  {
    "a": "Anthony Wint",
    "b": "Lucas Armand",
    "reason": "name not in UFCStats corpus",
@@ -2975,6 +2720,7 @@
   }
  ],
  "unresolved_names": [
+  "Anthony Romero",
   "Bruce Whitehead",
   "Lucas Armand",
   "Roberto Soldi\u0107"
