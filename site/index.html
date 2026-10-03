@@ -118,6 +118,12 @@
   .cmark{position:relative;height:15px;margin-bottom:3px}
   .cmark i{position:absolute;transform:translateX(-50%);font-size:9.5px;color:var(--gold);
     white-space:nowrap;letter-spacing:.06em}
+  /* the same two counts, graded, in the last-card zone */
+  .ctally{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;font-size:11.5px;
+    padding:6px 0;border-bottom:1px solid var(--line)}
+  .ctally:last-of-type{border-bottom:none}
+  .ctally .ctl{min-width:168px;color:var(--bone)}
+  .ctally b{font-size:13.5px}
 
   /* detail drawer */
   .scrim{position:fixed;inset:0;background:rgba(5,7,10,.62);opacity:0;pointer-events:none;
@@ -997,7 +1003,32 @@ function lastCard(){
         <span class="rc">${g.props_right}/${g.props_n} props</span>
         ${mk?`<span class="rc ${mk.model_closer?'ok':'no'}">${mk.model_closer?'beat':'lost to'} market</span>`:''}
       </div></button>`;}).join('');
+  /* The two counts the strip at the top of the page claimed before the fights,
+     against what the card actually produced — and against the base rate over
+     the same bouts, because landing near 3 when 3 is simply the usual number is
+     not a read. This is the only place the card-level claim is scored; the
+     fight-by-fight tiles below cannot see it, since neither count belongs to
+     any one bout. */
+  const ct=c.card_tally;
+  const cline=(said,hit,bse,label)=>{
+    const miss=Math.abs(said-hit), bmiss=Math.abs(bse-hit);
+    const verdict=Math.abs(miss-bmiss)<0.25?'level with the base rate'
+      :miss<bmiss?'closer than the base rate':'the base rate was closer';
+    return `<div class="ctally"><span class="ctl">${label}</span>
+      <span class="mono">said <b>${said.toFixed(1)}</b></span>
+      <span class="mono">happened <b>${hit}</b></span>
+      <span class="mono" style="color:var(--dim)">base rate ${bse.toFixed(1)}</span>
+      <span class="rc ${miss<bmiss-0.25?'ok':bmiss<miss-0.25?'no':''}">${verdict}</span></div>`;
+  };
+  const tally=ct?`<div class="lbl tothd" style="margin:16px 0 6px">how the card broke — against what was said beforehand</div>
+    ${ct.r1_n?cline(ct.r1_said,ct.r1_hit,ct.r1_base,'first-round finishes'):''}
+    ${ct.fin_n?cline(ct.fin_said,ct.fin_hit,ct.fin_base,'ended inside the distance'):''}
+    <div class="note" style="margin-top:7px">Over the ${Math.max(ct.r1_n,ct.fin_n)} graded
+      bouts. The base rate is summed at each bout's own scheduled length, so a card with
+      more five-round fights is not graded against a three-round number.</div>`:'';
+
   return `<div class="totals"><div class="lbl tothd">card totals</div>${head}</div>
+    ${tally}
     <div class="lbl tothd" style="margin:16px 0 6px">fight by fight</div>
     <div class="grid">${tiles}</div>`;
 }
