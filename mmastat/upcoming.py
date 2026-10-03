@@ -866,7 +866,21 @@ def archive_previous(new_event, path="site/predictions.json",
     the finished one vanishes — usually before its results have even reached
     the corpus. Grading only ever worked in the overlap between "card is over"
     and "card is still the current file", which is frequently empty. Archiving
-    on event change removes the race entirely.
+    removes the race entirely.
+
+    Archiving ONLY on event change was the earlier behaviour and it lost whole
+    cards. It assumed the one way a card leaves is by being replaced with the
+    next one, so the outgoing event name differs. It does not: data/upcoming.txt
+    can also be rolled BACKWARD — restored from an older copy of the repo, say —
+    and then predictions.json is rewritten for an event it already names. The
+    change test sees no change, nothing is archived, and the card that was
+    sitting there is gone with no record it ever existed. It can never be
+    graded, so the site goes on showing an older event as the last card.
+
+    Writing every run fixes that: a card lands on disk the first run it appears,
+    long before it is over, and later runs refresh it in place under the same
+    slug. Re-archiving the same event is idempotent, so the cost is one
+    rewritten file per run and a card can no longer be lost between two runs.
     """
     import json
     import re
@@ -879,14 +893,15 @@ def archive_previous(new_event, path="site/predictions.json",
     except Exception:
         return None
     ev = old.get("event")
-    if not ev or ev == new_event:
+    if not ev:
         return None
     slug = re.sub(r"[^a-z0-9]+", "-", str(ev).lower()).strip("-")
     dest = Path(archive_dir) / f"{slug}.json"
     dest.parent.mkdir(parents=True, exist_ok=True)
     dest.write_text(json.dumps(old, indent=1), encoding="utf-8")
     if verbose:
-        print(f"archived previous card '{ev}' -> {dest}")
+        word = "refreshed" if ev == new_event else "archived previous card"
+        print(f"{word} '{ev}' -> {dest}")
     return str(dest)
 
 
