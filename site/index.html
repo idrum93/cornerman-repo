@@ -397,6 +397,37 @@ function fmtET(iso){
       hour12:true,timeZoneName:'short'}).format(d);
   }catch(e){ return 'updated '+iso.slice(0,16)+' UTC'; }
 }
+/* A card's own date, and how many days away it is. The "updated" stamp above
+   says when the page was rebuilt, which is not the same thing and was being
+   read as if it were: a card can be regenerated every hour and still be the
+   wrong card, because the predictions rebuild off data/upcoming.txt whether or
+   not that file advanced. So show each card's date next to its name, and say
+   so outright when the upcoming card's date has already passed. */
+function dayET(ymd){
+  if(!ymd) return '';
+  const d=new Date(ymd+'T12:00:00Z'); if(isNaN(d)) return '';
+  try{
+    return new Intl.DateTimeFormat('en-US',{timeZone:'America/New_York',
+      month:'short',day:'numeric'}).format(d);
+  }catch(e){ return ymd; }
+}
+function daysFromToday(ymd){
+  // "Today" has to be today in Eastern, not in UTC. Between 8pm and midnight
+  // on the US east coast the UTC date has already rolled over, so a UTC
+  // comparison calls a card happening tonight "1 day past" — the page would
+  // cry stale during exactly the hours someone is most likely to be reading it
+  // before the fights. Card dates are ET, the rest of the page is ET, so the
+  // clock here is too.
+  if(!ymd) return null;
+  const d=new Date(ymd+'T12:00:00Z'); if(isNaN(d)) return null;
+  let todayET;
+  try{
+    todayET=new Intl.DateTimeFormat('en-CA',{timeZone:'America/New_York',
+      year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+  }catch(e){ todayET=new Date().toISOString().slice(0,10); }
+  const t=new Date(todayET+'T12:00:00Z'); if(isNaN(t)) return null;
+  return Math.round((d-t)/86400000);
+}
 /* Where the month's Odds API budget stands, read from headers the capture job
    already receives — checking it costs nothing. Amber under 100 credits, red
    under 30: a 429 in fight week would lose closing prices, the unrecoverable
@@ -991,9 +1022,14 @@ function openPast(id){
 
 function render(){
   const d=DATA;
+  const away=daysFromToday(d.date);
+  const past=away!=null&&away<0;
   document.getElementById('evline').innerHTML=
     `<span class="evname">${esc(d.event||'Upcoming card')}</span>
-     <span class="chip mono" style="color:var(--gold);border-color:var(--gold)">${esc(d.date||'')}</span>
+     <span class="chip mono" style="${past?'color:var(--red);border-color:var(--red)'
+       :'color:var(--gold);border-color:var(--gold)'}">${esc(d.date||'')}</span>
+     ${past?`<span class="chip" style="color:var(--red);border-color:var(--red)">card is
+       ${-away} day${away===-1?'':'s'} past — not refreshed</span>`:''}
      <span class="chip">${esc(d.venue||'')}</span>
      <span class="chip">${d.bouts.length} modeled</span>
      ${d.market_source?`<span class="chip">market: ${esc(d.market_source)}</span>`:''}`;
@@ -1021,6 +1057,7 @@ function render(){
     zone('z-up','z-upcoming','Upcoming card',`${esc(d.event||'')} · ${d.bouts.length} bouts modeled`,
       strip()+filt+segs)+
     zone('z-res','z-results', lc?`Last card — ${esc(lc.event)}`:'Last card',
+      (lc&&lc.date?`${dayET(lc.date)} · `:'')+
       'graded against what happened · click any fight', lastCard())+
     zone('z-hist','z-history','What usually happens','history of every fight since 2012, not predictions',
       baseRatePanel(null,null,true)+divisionTable())+`
