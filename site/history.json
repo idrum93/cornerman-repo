@@ -16,6 +16,16 @@
    "props_right": 101,
    "props_base_n": 62,
    "props_base_right": 35,
+   "card_tally": {
+    "r1_n": 8,
+    "r1_said": 1.67,
+    "r1_hit": 3,
+    "r1_base": 1.99,
+    "fin_n": 8,
+    "fin_said": 4.16,
+    "fin_hit": 4,
+    "fin_base": 3.96
+   },
    "market_n": 10,
    "market_right": 7,
    "model_closer": 6,
