@@ -1136,6 +1136,43 @@ def _grade_bout(b, row, a_is_red, base):
     return out
 
 
+def _card_tally(tally, base):
+    """Score the two card-level counts the page claims before the fights: how
+    many bouts end in round one, and how many end inside the distance.
+
+    These are the only claims the site makes about the card as a whole, so they
+    are the only ones a per-bout grader misses entirely. Publishing a number at
+    the top of the page and never scoring it is the exact habit this project
+    keeps auditing out of itself.
+
+    Scored over the graded bouts only, and the base-rate column is summed over
+    the same bouts at each one's own scheduled length — a five-round main event
+    has a different first-round rate than a three-round prelim, so a flat rate
+    times the bout count would hand the model an easier or harder target
+    depending on how many title fights the card happened to carry.
+    """
+    out = {"r1_n": 0, "r1_said": 0.0, "r1_hit": 0, "r1_base": 0.0,
+           "fin_n": 0, "fin_said": 0.0, "fin_hit": 0, "fin_base": 0.0}
+    for b, row in tally:
+        nr = b.get("rounds") or (5 if row.sched_sec >= 1500 else 3)
+        finish = row.method != "DEC"
+        if b.get("p_end_r1") is not None:
+            out["r1_n"] += 1
+            out["r1_said"] += float(b["p_end_r1"])
+            out["r1_hit"] += int(bool(finish and row.total_sec <= 300))
+            out["r1_base"] += base["ends_before"].get((nr, 2), 0.0)
+        if b.get("p_finish") is not None:
+            out["fin_n"] += 1
+            out["fin_said"] += float(b["p_finish"])
+            out["fin_hit"] += int(finish)
+            out["fin_base"] += base["itd"]
+    if not out["r1_n"] and not out["fin_n"]:
+        return None
+    for k in ("r1_said", "r1_base", "fin_said", "fin_base"):
+        out[k] = round(out[k], 2)
+    return out
+
+
 def grade_archive(fights, archive_dir="site/archive", out_path="site/history.json",
                   keep=8, verbose=True):
     """Grade archived cards against the corpus and write the history file.
@@ -1164,7 +1201,7 @@ def grade_archive(fights, archive_dir="site/archive", out_path="site/history.jso
         except Exception:
             continue
         ev_date = pd.to_datetime(card.get("date"), errors="coerce")
-        graded = []
+        graded, tally = [], []
         for b in card.get("bouts", []):
             best = None
             for i in idx.get(frozenset((_key(b["a"]), _key(b["b"]))), []):
@@ -1179,6 +1216,7 @@ def grade_archive(fights, archive_dir="site/archive", out_path="site/history.jso
             row = best[1]
             red = _key(row.bout.split(" vs. ")[0])
             graded.append(_grade_bout(b, row, _key(b["a"]) == red, base))
+            tally.append((b, row))
         if not graded:
             continue
         mk = [g for g in graded if "market" in g]
@@ -1196,6 +1234,7 @@ def grade_archive(fights, archive_dir="site/archive", out_path="site/history.jso
             "props_right": sum(g["props_right"] for g in graded),
             "props_base_n": sum(g["props_base_n"] for g in graded),
             "props_base_right": sum(g["props_base_right"] for g in graded),
+            "card_tally": _card_tally(tally, base),
             "market_n": len(mk), "market_right": sum(g["market"]["market_right"] for g in mk),
             "model_closer": sum(g["market"]["model_closer"] for g in mk),
             "disagree_n": len(dis), "disagree_model_closer": sum(g["market"]["model_closer"] for g in dis),

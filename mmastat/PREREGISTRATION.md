@@ -3232,3 +3232,23 @@ submissions **48%**.
 
 No bet is registered against this and no scoring rule changes. It is published
 as history, in the same category as the division table.
+
+## It is graded, because an ungraded claim is not a claim
+
+The panel states two numbers before the fights, so both are scored afterwards.
+`_card_tally` in `upcoming.py` runs inside `grade_archive` and the last-card
+zone reports, for each: what was said, what happened, and what the base rate
+alone would have said over the same bouts.
+
+The base-rate column is the point. Landing near three first-round finishes when
+three is simply the usual number is not a read, and without that column the
+panel would score itself against nothing and look good for being unsurprising.
+
+The comparison is restricted to the graded bouts, and the base rate is summed at
+each bout's own scheduled length rather than applied flat — a five-round main
+event has a different first-round rate than a three-round prelim, so a flat rate
+times the bout count would hand the model an easier or harder target depending
+on how many title fights the card happened to carry.
+
+Verified against a hand computation on a real nine-bout card: every field of the
+tally matches to the cent.
