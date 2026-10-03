@@ -219,6 +219,75 @@ def market_bases(fights, min_date="2012-01-01"):
             for k, v in out.items()}
 
 
+def card_shape(fights, min_date="2012-01-01"):
+    """What a whole card usually looks like: its size, and how much of it ends
+    early. One row per EVENT, not per fight.
+
+    This is the only readout on the site whose unit is the card rather than the
+    bout, which is the point of it. "Round one ends a quarter of all fights" is
+    a rate nobody can feel. "Three of tonight's twelve, and almost never none"
+    is a number a reader can hold against the card in front of them — and the
+    model can be scored on it afterwards, because the projection is just the
+    sum of the per-bout first-round probabilities it already publishes.
+
+    Summing them is only legitimate because the count behaves binomially. The
+    worry was clustering — a wild card where everyone swings — and if finishes
+    did cluster, the real spread would be wider than a sum of independents
+    implies and the readout would understate its own error. They do not: the
+    per-card variance measured 1.05x what independent bouts give, which is
+    nothing beyond chance. `overdispersion` carries that ratio so the
+    assumption is re-checked on every build instead of resting on the one time
+    somebody measured it.
+    """
+    F = fights[(fights.date >= pd.Timestamp(min_date))
+               & fights.method.isin(["KO/TKO", "SUB", "DEC"])].copy()
+    F["is_fin"] = F.method != "DEC"
+    F["is_r1"] = F.is_fin & (F.total_sec <= 300)
+
+    g = F.groupby("event").agg(bouts=("method", "size"), r1=("is_r1", "sum"),
+                               fin=("is_fin", "sum"))
+    # Under six bouts is a truncated record or a one-off show, not the kind of
+    # card a reader is holding this up against.
+    g = g[g.bouts >= 6]
+    if not len(g):
+        return None
+
+    cap = 8                      # past here is ~0.4% of cards
+    counts = g.r1.clip(upper=cap).value_counts().sort_index()
+    dist = [{"k": int(k), "share": round(float(v) / len(g), 4),
+             "plus": bool(k == cap)} for k, v in counts.items()]
+
+    p = float(F.is_r1.mean())
+    exp_var = float((g.bouts * p * (1 - p)).mean())
+
+    split = {}
+    for key, name in (("KO", "KO/TKO"), ("SUB", "SUB")):
+        s = F[F.method == name]
+        if len(s) < 200:
+            continue
+        # round index from elapsed time: a finish at 6:10 is round two
+        rounds = np.minimum((s.total_sec // 300).astype(int) + 1, 5)
+        split[key] = {"n": int(len(s)),
+                      "by_round": [round(float((rounds == i).mean()), 4)
+                                   for i in range(1, 6)]}
+
+    return {
+        "n_cards": int(len(g)), "min_date": min_date,
+        "bouts_median": int(g.bouts.median()),
+        "bouts_lo": int(g.bouts.quantile(0.25)),
+        "bouts_hi": int(g.bouts.quantile(0.75)),
+        "r1_mean": round(float(g.r1.mean()), 2), "r1_median": int(g.r1.median()),
+        "r1_p10": int(np.percentile(g.r1, 10)),
+        "r1_p90": int(np.percentile(g.r1, 90)),
+        "r1_none": round(float((g.r1 == 0).mean()), 4),
+        "r1_dist": dist,
+        "fin_mean": round(float(g.fin.mean()), 2), "fin_median": int(g.fin.median()),
+        "r1_share_of_bouts": round(p, 4),
+        "overdispersion": round(float(g.r1.var() / exp_var), 2) if exp_var else None,
+        "round_split": split,
+    }
+
+
 def write_json(fights, fighters, path="site/baserates.json", verbose=True):
     import json
     from pathlib import Path
@@ -228,6 +297,7 @@ def write_json(fights, fighters, path="site/baserates.json", verbose=True):
         {"built_utc": pd.Timestamp.now(tz="UTC").isoformat(timespec="seconds"),
          "min_cell": MIN_CELL, "conditions": tbl,
          "divisions": divisions(fights),
+         "card": card_shape(fights),
          "market_bases": market_bases(fights)}, indent=1), encoding="utf-8")
     if verbose:
         flat = sum(1 for t in tbl if t["spread"] < 0.03)

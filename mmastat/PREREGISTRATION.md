@@ -3155,3 +3155,80 @@ nothing is being re-based mid-series.
 The cost, stated plainly: a second price series that cannot be backfilled if it
 is wanted later. `mmastat/polymarket.py` stays in the tree, unimported, with
 the reason at the top.
+
+## Addendum 37: RESULT — method mix does not move by year (2026-10-03)
+
+Asked whether the KO / submission / decision split drifts year to year, so the
+site could show "this year skews toward knockouts" against last year or a
+three-year average. Measured on 6,913 decided bouts, 2012 through 2026.
+
+**It does not move.** Three independent ways of asking agree:
+
+- Homogeneity across all fifteen years: chi-square 29.8 on 28 df, **p = 0.37**.
+  No evidence the underlying mix differs by year at all.
+- The year-to-year scatter is the sample size and nothing else. Observed spread
+  against what pure binomial variation gives at ~500 bouts a year: KO **1.02x**,
+  submission **0.92x**, decision **1.20x**.
+- No trend in any of the three: KO +0.10 pts/yr (p = 0.47), submission -0.14
+  (p = 0.18), decision +0.03 (p = 0.85).
+
+## The decisive test: does recency predict?
+
+Walk-forward, base rate fitted only on years strictly before the test year,
+scored by multiclass log loss on that year's actual bouts, 2016-2026:
+
+| base rate | mean log loss |
+|---|---|
+| pooled, all prior years | **1.0179** |
+| trailing 5 years | 1.0178 |
+| trailing 3 years | 1.0187 |
+| last year only | 1.0197 |
+
+Identical to the fourth decimal, and **last year only — the version the feature
+implied — is the worst of the four.** Recency buys nothing because there is no
+signal to be recent about.
+
+## 2026 is the trap this guards against
+
+2026 sits at **37.2% KO against a 31.4% long-run rate**, which on its own tests
+at p = 0.019 and looks like a story. It is one of fifteen years examined, so the
+chance of something that extreme appearing *somewhere* in the series is about
+one in four, and the year is partial — 390 bouts and still moving. Displaying it
+would have been the single most prominent number on the site.
+
+**Not built.** The base rates stay pooled. Recorded so this is not re-litigated:
+the question is settled until the corpus roughly doubles, at which point a year
+would be large enough for a real shift to clear the noise.
+
+## Addendum 38: ADDITION — card shape panel (2026-10-03)
+
+A descriptive readout at the top of the page, in the one unit the site did not
+previously use: the whole card rather than the bout. Shows this card's projected
+count of first-round finishes and of finishes inside the distance, each against
+the same base rate scaled to the number of bouts actually modeled.
+
+Not a new model and not a new market. The projection is the sum of the
+per-bout `p_end_r1` the card already publishes; `mmastat/baserates.py:card_shape`
+supplies the historical side.
+
+## The assumption that had to be checked first
+
+Summing per-bout probabilities is only legitimate if the per-card count is
+binomial. If finishes clustered — a wild card where everyone swings — the real
+spread would exceed a sum of independents and the panel would understate its own
+error while looking precise.
+
+**Measured over 596 cards: per-card variance is 1.02x what independent bouts
+give.** No clustering. The ratio is recomputed on every build and published in
+`baserates.json` as `card.overdispersion`, so the assumption is re-tested
+continuously rather than resting on this one measurement.
+
+## What it reports
+
+A typical card is 12 bouts, of which **2.91** end in round one and **5.79**
+inside the distance. Eight cards in ten land between 1 and 5 first-round
+finishes; 2.7% have none. Of all knockouts **51%** land in round one, of all
+submissions **48%**.
+
+No bet is registered against this and no scoring rule changes. It is published
+as history, in the same category as the division table.
