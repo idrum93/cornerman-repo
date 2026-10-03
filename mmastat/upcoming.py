@@ -857,6 +857,21 @@ MARKET_SRC = {"src": None}
 TRACK = {"rec": None}
 
 
+def _card_is_over(ymd, today=None):
+    """True once the card's date is behind us. An unparseable or missing date
+    returns False: the archive stays writable, which is the recoverable side of
+    the mistake. Treating an unknown date as finished would freeze a card the
+    first time it was ever written and strand it half-built."""
+    from datetime import date, datetime
+    if not ymd:
+        return False
+    try:
+        d = datetime.strptime(str(ymd)[:10], "%Y-%m-%d").date()
+    except ValueError:
+        return False
+    return d < (today or date.today())
+
+
 def archive_previous(new_event, path="site/predictions.json",
                      archive_dir="site/archive", verbose=True):
     """Keep the outgoing card before it is overwritten.
@@ -881,6 +896,23 @@ def archive_previous(new_event, path="site/predictions.json",
     long before it is over, and later runs refresh it in place under the same
     slug. Re-archiving the same event is idempotent, so the cost is one
     rewritten file per run and a card can no longer be lost between two runs.
+
+    But writing every run has to stop the moment a card is over, or the fix
+    becomes a worse bug than the one it replaced. Predictions are rebuilt off
+    whatever data/upcoming.txt names, and `_states_after` replays the ENTIRE
+    corpus with no date cutoff — correct for a card that has not happened, since
+    every fight in the corpus is genuinely prior, and badly wrong for one that
+    has, since the fighters' ratings now contain that card's own results. Point
+    the pipeline at a finished card and it emits leaked predictions that know
+    the answer. Without this guard they would overwrite the real pre-fight
+    archive under the same slug, and the graded record would quietly start
+    scoring hindsight as foresight.
+
+    So a card's archive is frozen once its date has passed: written and
+    refreshed while it is still ahead, immutable afterwards. Freezing on the UTC
+    date errs a few hours early for a US card, which is the safe direction — the
+    snapshot stops moving around the time the fights start rather than after
+    results are in.
     """
     import json
     import re
@@ -898,6 +930,10 @@ def archive_previous(new_event, path="site/predictions.json",
     slug = re.sub(r"[^a-z0-9]+", "-", str(ev).lower()).strip("-")
     dest = Path(archive_dir) / f"{slug}.json"
     dest.parent.mkdir(parents=True, exist_ok=True)
+    if dest.exists() and _card_is_over(old.get("date")):
+        if verbose:
+            print(f"kept the frozen archive for '{ev}' ({old.get('date')}) -> {dest}")
+        return str(dest)
     dest.write_text(json.dumps(old, indent=1), encoding="utf-8")
     if verbose:
         word = "refreshed" if ev == new_event else "archived previous card"
