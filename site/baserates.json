@@ -1,5 +1,5 @@
 {
- "built_utc": "2026-10-03T15:06:44+00:00",
+ "built_utc": "2026-10-03T16:48:28+00:00",
  "min_cell": 200,
  "conditions": [
   {
@@ -895,6 +895,91 @@
    "finish": 0.386
   }
  ],
+ "card": {
+  "n_cards": 598,
+  "min_date": "2012-01-01",
+  "bouts_median": 12,
+  "bouts_lo": 11,
+  "bouts_hi": 12,
+  "r1_mean": 2.92,
+  "r1_median": 3,
+  "r1_p10": 1,
+  "r1_p90": 5,
+  "r1_none": 0.0268,
+  "r1_dist": [
+   {
+    "k": 0,
+    "share": 0.0268,
+    "plus": false
+   },
+   {
+    "k": 1,
+    "share": 0.1304,
+    "plus": false
+   },
+   {
+    "k": 2,
+    "share": 0.2759,
+    "plus": false
+   },
+   {
+    "k": 3,
+    "share": 0.2542,
+    "plus": false
+   },
+   {
+    "k": 4,
+    "share": 0.1706,
+    "plus": false
+   },
+   {
+    "k": 5,
+    "share": 0.0836,
+    "plus": false
+   },
+   {
+    "k": 6,
+    "share": 0.0435,
+    "plus": false
+   },
+   {
+    "k": 7,
+    "share": 0.0134,
+    "plus": false
+   },
+   {
+    "k": 8,
+    "share": 0.0017,
+    "plus": true
+   }
+  ],
+  "fin_mean": 5.79,
+  "fin_median": 6,
+  "r1_share_of_bouts": 0.2495,
+  "overdispersion": 1.02,
+  "round_split": {
+   "KO": {
+    "n": 2216,
+    "by_round": [
+     0.5122,
+     0.3005,
+     0.1629,
+     0.0104,
+     0.014
+    ]
+   },
+   "SUB": {
+    "n": 1247,
+    "by_round": [
+     0.4755,
+     0.328,
+     0.178,
+     0.012,
+     0.0064
+    ]
+   }
+  }
+ },
  "market_bases": {
   "td": 0.447,
   "kd": 0.1875,
