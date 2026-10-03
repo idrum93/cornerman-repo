@@ -93,6 +93,32 @@
   .noread{border:1px dashed var(--line);border-radius:4px;padding:9px 11px;
     font-size:11.5px;color:var(--dim)}
 
+  /* card-shape strip: the one readout whose unit is the whole card rather than
+     a bout. Deliberately plainer than the tiles below it — no corner colour, no
+     gauge — so it does not read as another per-fight gauge. */
+  .cshape{border:1px solid var(--line);border-radius:4px;background:var(--panel);
+    margin:10px 0 2px;padding:9px 12px}
+  .cshape-row{display:flex;align-items:baseline;gap:18px;flex-wrap:wrap}
+  .cnum{display:flex;align-items:baseline;gap:7px}
+  .cnum b{font-size:19px;font-weight:600;letter-spacing:-.01em}
+  .cnum .vs{font-size:11.5px;color:var(--mute)}
+  .cshape .more{margin-left:auto;font-size:9.5px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--mute);background:none;border:1px solid var(--line);
+    border-radius:999px;padding:3px 9px;cursor:pointer}
+  .cshape .more:hover{color:var(--bone);border-color:#3B4557}
+  .cdetail{display:none;margin-top:11px;padding-top:10px;border-top:1px solid var(--line)}
+  .cdetail.on{display:block}
+  /* the histogram: one column per possible count, this card's projection marked */
+  .chist{display:flex;align-items:flex-end;gap:4px;height:74px;margin:8px 0 2px}
+  .chist .cbar{flex:1;display:flex;flex-direction:column;justify-content:flex-end;
+    align-items:center;gap:3px;height:100%}
+  .chist .cbar i{display:block;width:100%;background:var(--soft);border-radius:2px 2px 0 0}
+  .chist .cbar.near i{background:var(--gold)}
+  .chist .cbar span{font-size:9px;color:var(--dim);font-variant-numeric:tabular-nums}
+  .cmark{position:relative;height:15px;margin-bottom:3px}
+  .cmark i{position:absolute;transform:translateX(-50%);font-size:9.5px;color:var(--gold);
+    white-space:nowrap;letter-spacing:.06em}
+
   /* detail drawer */
   .scrim{position:fixed;inset:0;background:rgba(5,7,10,.62);opacity:0;pointer-events:none;
     transition:opacity .18s;z-index:40}
@@ -348,6 +374,7 @@
       <div class="mono" id="record" style="font-size:9.5px"></div>
     </div>
   </header>
+  <div id="cardshape"></div>
   <div id="app" style="padding:4px 0 0"><div class="lbl">Loading…</div></div>
   <footer>
     Not affiliated with the UFC. Statistics from public records. Analysis tool, not betting
@@ -1020,6 +1047,85 @@ function openPast(id){
   document.getElementById('scrim').classList.add('on');
 }
 
+/* How much of THIS card ends early, against how much of a card usually does.
+   The only number on the page whose unit is the card. Everything else here is
+   per bout, and a rate like "round one ends a quarter of fights" is not
+   something a reader can hold up against the twelve fights in front of them;
+   "three of tonight's twelve, and almost never none" is.
+
+   The projection is just the sum of each bout's own first-round probability,
+   which is sound only because the per-card count is binomial — measured at
+   1.02x the variance independent bouts give, i.e. no clustering. The build
+   recomputes that ratio every run and it is printed below, so if finishes ever
+   did start arriving in bunches this panel would say so rather than quietly
+   understating its spread.
+
+   The headline compares like with like. A card with two no-reads projects over
+   ten bouts, not twelve, so the "typical" it is set against is the base rate
+   times the number of bouts actually modeled. Comparing a ten-bout projection
+   to a twelve-bout average would manufacture a lean toward the distance on
+   every card that has a no-read. */
+function cardShapeStrip(){
+  const C=BR&&BR.card, d=DATA;
+  if(!C||!d||!d.bouts) return '';
+  const have=d.bouts.filter(b=>b.p_end_r1!=null);
+  if(have.length<4) return '';                     // too little of the card read
+  const r1=have.reduce((s,b)=>s+b.p_end_r1,0);
+  const fh=d.bouts.filter(b=>b.p_finish!=null);
+  const fin=fh.reduce((s,b)=>s+b.p_finish,0);
+  const n=have.length, nAll=d.bouts.length+((d.no_read||[]).length);
+  const expR1=C.r1_share_of_bouts*n;
+  const expFin=(C.fin_mean/C.bouts_median)*fh.length;
+  const gap=v=>v>0?`+${v.toFixed(1)}`:v.toFixed(1);
+
+  const num=(v,exp,label)=>`<div class="cnum"><b class="mono">${v.toFixed(1)}</b>
+    <span>${label}</span>
+    <span class="vs mono">typical ${exp.toFixed(1)} · ${gap(v-exp)}</span></div>`;
+
+  // the histogram of real cards, with this projection marked on it
+  const ks=C.r1_dist.map(x=>x.k), k0=Math.min(...ks), kN=ks.length;
+  const mx=Math.max(...C.r1_dist.map(x=>x.share));
+  const near=Math.round(r1);
+  const bars=C.r1_dist.map(x=>`<div class="cbar${x.k===near?' near':''}">
+      <i style="height:${Math.max(2,100*x.share/mx)}%"></i>
+      <span>${x.k}${x.plus?'+':''}</span></div>`).join('');
+  const left=Math.min(99,Math.max(1,100*(r1-k0+0.5)/kN));
+  const rs=C.round_split||{};
+  const rrow=(k,name)=>rs[k]?`<tr><td>${name}</td>
+    ${rs[k].by_round.map(v=>`<td class="mono">${(100*v).toFixed(0)}%</td>`).join('')}
+    <td class="mono" style="color:var(--dim)">${rs[k].n.toLocaleString()}</td></tr>`:'';
+
+  return `<div class="cshape">
+    <div class="cshape-row">
+      ${num(r1,expR1,'first-round finishes projected')}
+      ${fh.length?num(fin,expFin,'finishes inside the distance'):''}
+      <button class="more" id="cmore" aria-expanded="false">How often ▾</button>
+    </div>
+    <div class="cdetail" id="cdet">
+      <div class="lbl">First-round finishes per card · ${C.n_cards} cards since ${C.min_date.slice(0,4)}</div>
+      <div class="cmark"><i style="left:${left.toFixed(1)}%">▼ this card ${r1.toFixed(1)}</i></div>
+      <div class="chist">${bars}</div>
+      <div class="lbl" style="text-align:center">first-round finishes on the card</div>
+      <div class="note" style="margin-top:9px">A typical card is
+        ${C.bouts_median} bouts, of which <b>${C.r1_mean}</b> end in round one and
+        <b>${C.fin_mean}</b> end inside the distance. Eight cards in ten land between
+        ${C.r1_p10} and ${C.r1_p90} first-round finishes; only ${(100*C.r1_none).toFixed(1)}%
+        have none at all. This card's figure covers the ${n} bout${n===1?'':'s'}
+        with a read${nAll>n?` of ${nAll}`:''}, and the typical beside it is scaled to
+        the same ${n}.</div>
+      <div class="lbl" style="margin-top:12px">Where a finish lands, once there is one</div>
+      <div style="overflow-x:auto"><table class="dtab" style="margin-top:5px">
+        <thead><tr><th>method</th><th>R1</th><th>R2</th><th>R3</th><th>R4</th><th>R5</th><th>n</th></tr></thead>
+        <tbody>${rrow('KO','KO/TKO')}${rrow('SUB','Submission')}</tbody></table></div>
+      <div class="note" style="margin-top:8px">Half of all knockouts arrive in the first
+        five minutes, which is most of why a quarter of every bout on the schedule is
+        already over by the end of round one. Counts per card behave like independent
+        bouts (${C.overdispersion}× the spread independence gives), so the projection
+        above is simply each fight's own first-round chance added up — there is no
+        "wild card" effect in the record to adjust for.</div>
+    </div></div>`;
+}
+
 function render(){
   const d=DATA;
   const away=daysFromToday(d.date);
@@ -1033,6 +1139,16 @@ function render(){
      <span class="chip">${esc(d.venue||'')}</span>
      <span class="chip">${d.bouts.length} modeled</span>
      ${d.market_source?`<span class="chip">market: ${esc(d.market_source)}</span>`:''}`;
+  const cs=document.getElementById('cardshape');
+  if(cs){
+    cs.innerHTML=cardShapeStrip();
+    const btn=document.getElementById('cmore'), det=document.getElementById('cdet');
+    if(btn&&det) btn.addEventListener('click',()=>{
+      const on=det.classList.toggle('on');
+      btn.setAttribute('aria-expanded',on?'true':'false');
+      btn.textContent=on?'How often ▴':'How often ▾';
+    });
+  }
   const pass=b=>!ONLY_GAPS||(b.edge!=null&&Math.abs(b.edge)>=0.05);
   const nGaps=d.bouts.filter(b=>b.edge!=null&&Math.abs(b.edge)>=0.05).length;
   const segs=SEGS.map(s=>{
