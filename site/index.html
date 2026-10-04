@@ -151,6 +151,8 @@
   .sbverd.soft{border-left-color:var(--dim)}
   .sbverd.soft b{color:var(--mute)}
   .sbverd .vs{margin-left:auto;color:var(--mute);font-size:11px}
+  .sbthin{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;
+    border:1px dashed var(--warn);color:var(--warn);border-radius:999px;padding:1px 7px}
   .sbacts{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:9px}
   .sbacts .more{background:none;border:1px solid var(--line);color:var(--mute);
     border-radius:999px;padding:4px 11px;font-size:9.5px;letter-spacing:.14em;
@@ -169,6 +171,14 @@
     border:1px solid var(--gold);color:var(--gold);border-radius:999px;padding:1px 6px}
   /* sandbox tick: inside the dial, where the market's tick never goes */
   .g-sbox{stroke:var(--gold);stroke-width:2;stroke-dasharray:2.5 2}
+  /* The sandbox badge keeps a dashed gold edge in every state, leading or not.
+     A filled badge identical to the model's would let a pasted record read as
+     the site's own call the moment it happened to be the louder number. */
+  .sbtag.len{border-style:dashed}
+  .sbtag.len.leads{background:rgba(205,164,58,.16);font-weight:700}
+  /* when the records read is further from the league rate, the model's call
+     steps back a little rather than disappearing — both stay readable */
+  .tile.sb-leads .calllead,.tile.sb-leads .callfam{opacity:.5}
 
   /* detail drawer */
   .scrim{position:fixed;inset:0;background:rgba(5,7,10,.62);opacity:0;pointer-events:none;
@@ -852,7 +862,8 @@ function thinNote(b){
 
 function tile(b){
   const mk=b.p_market!=null, hot=mk&&Math.abs(b.edge)>=0.05;
-  return `<button class="tile ${hot?'is-hot':''}" data-id="${esc(b.bout)}">
+  const sbl=sbLengthCall(b);
+  return `<button class="tile ${hot?'is-hot':''} ${sbl&&!sbl.thin&&sbl.conv>sbl.modelConv+0.01?'sb-leads':''}" data-id="${esc(b.bout)}">
     <div class="trow" style="margin-bottom:2px">
       <span class="lbl">${b.weight_class?`<b class="divc">${esc(divShort(b.weight_class))}</b> · `:''}${b.rounds===5?'5 rds':'3 rds'}${evChip(b,true)}</span>${tag(b)}</div>
     <div class="dialrow">
@@ -1801,7 +1812,11 @@ function sbR1Read(st,b){
   const ra=one(st.a_m||{},st.a_rec), rb=one(st.b_m||{},st.b_rec);
   if(ra==null&&rb==null) return null;
   const vals=[ra,rb].filter(v=>v!=null);
-  return {p:vals.reduce((x,y)=>x+y,0)/vals.length, base:b1, both:vals.length===2};
+  let p=vals.reduce((x,y)=>x+y,0)/vals.length;
+  // toward the model's own round-one number, for the same reason as the method
+  // read: one slider, every figure it claims to move.
+  if(st.blend!=null && b.p_end_r1!=null) p=(1-st.blend)*b.p_end_r1 + st.blend*p;
+  return {p:p, base:b1, both:vals.length===2};
 }
 /* How the two records alone would call the method. A fighter's method shares
    are conditional on him winning — UFC.com gives no losses-by-method — so the
@@ -1843,11 +1858,24 @@ function sbShrinkMix(m){
   ['ko','sub','dec'].forEach(k=>{out[k]=((c[k]||0)+SB_SHRINK*base[k])/(n+SB_SHRINK);});
   return out;
 }
-function sbMethodRead(ma,mb,pA){
+/* `w` blends the result toward the MODEL's own method split, so the slider
+   moves every number it ought to. Without it the slider moved only the winner
+   probability: the method read, the length call and the round call were pinned
+   at 100% records at every setting, so sliding to 0 left the badge claiming a
+   records finish while the winner number had already returned to the model's.
+   At w=0 this now returns the model exactly, which is the property that makes
+   the slider mean anything. */
+function sbMethodRead(ma,mb,pA,w,b){
   const A=sbShrinkMix(ma), B=sbShrinkMix(mb);
   if(!A||!B) return null;
   const out={};
   ['ko','sub','dec'].forEach(k=>{out[k]=pA*A[k]+(1-pA)*B[k];});
+  if(w==null||b==null||b.m_decision==null) return out;
+  const mdl={ko:(b.m_a_ko||0)+(b.m_b_ko||0), sub:(b.m_a_sub||0)+(b.m_b_sub||0),
+              dec:b.m_decision};
+  const s=mdl.ko+mdl.sub+mdl.dec;
+  if(!(s>0)) return out;
+  ['ko','sub','dec'].forEach(k=>{out[k]=(1-w)*(mdl[k]/s)+w*out[k];});
   return out;
 }
 function parseUfcBlock(text){
@@ -1995,6 +2023,7 @@ function sandboxPanel(b){
 function sbVerdict(ma,mb,pA,b,st){
   const A=sbShrinkMix(ma), B=sbShrinkMix(mb);
   if(!A||!B) return '';
+  const blended=sbMethodRead(ma,mb,pA,st.blend,b);
   const MB=(BR||{}).market_bases||{};
   const decBase=MB.dec??0.505, finBase=1-decBase;
   const nA=surname(b.a), nB=surname(b.b);
@@ -2002,7 +2031,7 @@ function sbVerdict(ma,mb,pA,b,st){
     [pA*A.ko,  nA,'KO/TKO'],   [pA*A.sub,  nA,'submission'],   [pA*A.dec,  nA,'decision'],
     [(1-pA)*B.ko,nB,'KO/TKO'], [(1-pA)*B.sub,nB,'submission'], [(1-pA)*B.dec,nB,'decision']];
   cells.sort((x,y)=>y[0]-x[0]);
-  const dec=pA*A.dec+(1-pA)*B.dec, fin=1-dec;
+  const dec=blended?blended.dec:(pA*A.dec+(1-pA)*B.dec), fin=1-dec;
 
   let head, cls;
   if(fin-finBase>=0.12){ head='Finish likely'; cls='fin'; }
@@ -2034,12 +2063,22 @@ function sbVerdict(ma,mb,pA,b,st){
     if(cond>=0.55) rnd=' · round 1';
     else if(cond<=0.30) rnd=' · later rounds';
   }
-  return `<div class="sbverd ${cls}"><b>${head}</b><span>${who}${rnd}</span>
+  /* The thin warning sits on the verdict as well as the chip, because this is
+     where someone decides whether to believe it. Three wins is the line the
+     measurement drew: the 1-2 win bucket gains +0.0235 over guessing against
+     +0.0499 for 3-5, so the reads built on the fewest fights are the ones worth
+     doubting even after shrinkage. */
+  const nw=m=>['ko','sub','dec'].reduce((t,x)=>t+(m[x+'_n']||0),0);
+  const minW=Math.min(nw(ma),nw(mb));
+  const thin = minW<3
+    ? `<span class="sbthin" title="shrinkage pulls a record this short most of the way back to the league rate, and reads built on 1-2 wins measured roughly half as useful as those on 3-5. Shown, but it cannot lead the model's call.">thin — ${minW} win${minW===1?'':'s'} on one side</span>`
+    : '';
+  return `<div class="sbverd ${cls}"><b>${head}</b><span>${who}${rnd}</span>${thin}
     <span class="vs mono">${P0(fin)}% finish · ${P0(dec)}% distance</span></div>`;
 }
 function sbMethodBlock(b,st,pA){
   const ma=st.a_m||{}, mb=st.b_m||{};
-  const read=sbMethodRead(ma,mb,pA);
+  const read=sbMethodRead(ma,mb,pA,st.blend,b);
   const mix=(ma.ko_share!=null)||(mb.ko_share!=null);
   if(!mix) return '';
   const mk=(b.m_a_ko!=null&&b.m_b_ko!=null)?{
@@ -2148,6 +2187,62 @@ function cssEsc(s){return String(s).replace(/["\\]/g,'\\$&');}
 /* What the card shows while a sandbox is on. The published probability stays
    exactly where it was — this is added beside it, marked, never in place of
    it. A tool for questioning the number must not quietly become the number. */
+/* The records read's own length-and-round call, and how far from the league
+   rate it sits next to how far the model sits.
+
+   `conv` is distance from the base rate, which is the only thing either read
+   can be compared on. It is NOT a claim about which is right, and the UI must
+   never let it become one: the records read measures +4.3% better than
+   guessing, and a thin lopsided record produces its LOUDEST numbers exactly
+   where it is least reliable — six wins all by submission reads as a huge
+   finish lean off almost no evidence. A badge that promotes whichever number
+   is further from even would therefore promote the weaker read precisely when
+   it is most overconfident. So the sandbox badge keeps its own gold dashed
+   styling whether or not it leads, says "ufc.com" in its own text, and the
+   model's call is dimmed rather than removed. */
+function sbLengthCall(b){
+  const st=SBOX[b.bout];
+  if(!st||!st.on) return null;
+  const pA=sbProb(sbCorner(b.fin.a,st.a,st.blend),sbCorner(b.fin.b,st.b,st.blend));
+  if(pA==null) return null;
+  const read=sbMethodRead(st.a_m||{}, st.b_m||{}, pA, st.blend, b);
+  if(!read) return null;
+  const MB=(BR||{}).market_bases||{};
+  const decBase=MB.dec??0.505, finBase=1-decBase;
+  const fin=1-read.dec;
+  const kind=fin>=read.dec?'finish':'distance';
+  const p=kind==='finish'?fin:read.dec;
+  const conv=kind==='finish'?fin-finBase:read.dec-decBase;
+  // the model's own distance from the same base, for an apples-to-apples look
+  let modelConv=0;
+  if(b.m_decision!=null){
+    const mf=1-b.m_decision;
+    modelConv=Math.max(mf-finBase, b.m_decision-decBase);
+  }
+  let round=null;
+  if(kind==='finish'){
+    const t=sbR1Read(st,b);
+    if(t&&fin>0.02){
+      const cond=Math.min(0.99,t.p/fin);
+      round = cond>=0.55 ? 'R1 likely' : cond<=0.30 ? 'past R1' : null;
+    }
+  }
+  /* How thin the thinner record is. Shrinkage already does most of this job —
+     k=5 scored best or near-best in every record-size bucket, and it caps a
+     one-win record at +8.4 points past the league rate, below the 12-point bar,
+     so such a record cannot make a call at all. Two wins can: +14.3 at its most
+     lopsided, enough to clear the bar and displace the model.
+     That is the gap worth closing, because the measured gain in the 1-2 win
+     bucket is +0.0235 against +0.0499 for 3-5 — the loudest thin records are
+     the least reliable ones. So under three wins the read still SHOWS, and is
+     marked thin, but it may not lead. Raising k instead would have been the
+     wrong fix: k=10 and k=20 both scored worse in nearly every bucket, so
+     shrinking harder to tame the thin end costs accuracy at the thick end. */
+  const wins=m=>['ko','sub','dec'].reduce((t,x)=>t+(m[(x)+'_n']||0),0);
+  const thin=Math.min(wins(st.a_m||{}), wins(st.b_m||{}));
+  return {kind:kind, p:p, conv:conv, modelConv:modelConv, round:round,
+          wins:thin, thin:thin<3};
+}
 function sandboxChip(b){
   const st=SBOX[b.bout];
   if(!st||!st.on||!b.fin||!DATA.win_model) return '';
@@ -2155,9 +2250,25 @@ function sandboxChip(b){
   if(p==null) return '';
   // Both sides, like every other number on this row. A lone "67%" leaves the
   // reader to work out whose it is, while the market chip beside it spells out
-  // the split — two neighbouring numbers in different formats is a worse
+  // the split — two neighboring numbers in different formats is a worse
   // problem than a slightly longer chip.
-  return `<span class="sbtag" title="the same model re-run on UFC.com inputs — not published, not graded">ufc.com ${P0(p)}/${P0(1-p)}</span>`;
+  const win=`<span class="sbtag" title="the same model re-run on UFC.com inputs — not published, not graded">ufc.com ${P0(p)}/${P0(1-p)}</span>`;
+  const L=sbLengthCall(b);
+  if(!L) return win;
+  /* The length call, with the round distinction attached. "FINISH 67%" alone
+     leaves the next question — early or late — unanswered on the one surface
+     where there is room to answer it. */
+  /* A full point clear, not a hair. Comparing the two straight made the badge
+     claim the lead at blend 0, where the records read IS the model and the two
+     distances differ only in floating-point dust — and it would flip on a tenth
+     of a point anywhere else. Same discipline as the 6-point bar on "no clear
+     favorite": a difference too small to mean anything should not change what
+     the card says. */
+  const lead=L.conv>L.modelConv+0.01 && !L.thin;
+  return win+`<span class="sbtag len ${lead?'leads':''}"
+    title="from the pasted records, not the model${lead?' — further from the league rate than the model is, which is not the same as more accurate':''}">ufc.com ${
+    L.kind==='finish'?'FINISH':'DISTANCE'} ${P0(L.p)}%${L.round?' · '+L.round:''}${
+    L.thin?` · thin ${L.wins}W`:''}</span>`;
 }
 
 function marketTabs(b,mk,rr,totals){
