@@ -3500,6 +3500,61 @@ number therefore appears only once an age or a reach is supplied on at least one
 side, and it carries the remaining assumption in its own label. Below that bar
 the method and round read still shows.
 
+### Height, as a stand-in for reach only
+
+Height is **not** a model input — `d_height` sits in `DROPPED` as "carried by
+d_reach" — so typing it buys nothing on its own. Its one use is filling a
+missing reach, which is exactly what the pipeline already does for about a
+quarter of the corpus.
+
+Measured on 2,487 fighters with both recorded:
+
+| | |
+|---|---|
+| fitted line | reach ≈ **-2.23 + 1.056 × height** |
+| R² | **0.790** |
+| residual SD | **1.95 in** |
+| within 1 in / 2 in / over 3 in | 40% / 70% / 12% |
+
+In the model's own units, `d_reach` has coefficient +0.0971 against a scale of
+3.228, so a 2-inch reach error moves the win probability by about **1.5 points**,
+and reach is **4.4%** of the model's total weight. Small — but the comparison
+that matters is not against a measured reach, it is against **no reach at all**,
+which zeroes the differential and asserts the two men are level. For a pair six
+inches apart in height that assumption is far wronger than a 2-inch estimate.
+
+Parsed by PATTERN, not position: a feet'inches token is a height by
+construction, an explicit `age`/`reach`/`height` label wins outright, and bare
+numbers fall back to the age-then-reach order that already worked. A third
+positional slot was rejected because a bare 70 is a plausible reach and a
+plausible height, so order alone cannot disambiguate.
+
+The field takes the UFC.com bio block pasted whole — label above value across
+lines (Age / 36 / Height / 71.00 / Weight / 146.00 / Octagon Debut /
+Oct. 20, 2013 / Reach / 74.00 / Leg reach / 40.00) — or a typed short form.
+Three things in that block actively bite:
+
+- **"Leg reach" contains "reach".** The plain label matched it. On the real
+  block this went unnoticed only because UFC.com prints Reach first; fed a block
+  with leg reach first, the fighter's reach became 40 inches, which then failed
+  the sanity range and was dropped, leaving **no reach at all**.
+- **"Octagon Debut Oct. 20, 2013" carries a 20.** With no Age line, the bare
+  number fallback read the debut DAY as the fighter's age and reported 20.
+- **Weight is a three-digit number in the same block.**
+
+Decoy lines are now cut from the string before anything is matched. A later fix
+was needed on top: a single global "found a label" gate skipped the fallback for
+every field at once, so `32, 6'2"` — where the feet'inches counts as a label —
+silently dropped the age. The fallback now runs per MISSING field, over a string
+with the labelled values removed as well.
+
+Ten input forms pass, including the real block, the block with leg reach printed
+first, the block with Age or Reach missing, `6'2"`, `6 ft 2` and the mixed case
+where one corner has a measured reach and the other only a height.
+
+The panel says when a reach was estimated rather than given, with the error
+size, so an estimate is never read as a measurement.
+
 ### Saying how much higher, and naming the outcome
 
 A gold fill told a reader the records read was further from the league rate but
