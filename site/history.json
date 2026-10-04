@@ -1,6 +1,2339 @@
 {
  "cards": [
   {
+   "event": "UFC 332",
+   "date": "2026-10-03",
+   "venue": "Delta Center, Salt Lake City , Utah, United States",
+   "n": 10,
+   "right": 6,
+   "method_n": 9,
+   "method_right": 2,
+   "round_n": 7,
+   "round_right": 3,
+   "props_n": 170,
+   "props_brier": 17.0723,
+   "props_base_brier": 20.1155,
+   "props_right": 118,
+   "props_base_n": 69,
+   "props_base_right": 25,
+   "card_tally": {
+    "r1_n": 9,
+    "r1_said": 1.82,
+    "r1_hit": 5,
+    "r1_base": 2.25,
+    "fin_n": 9,
+    "fin_said": 4.41,
+    "fin_hit": 7,
+    "fin_base": 4.46
+   },
+   "market_n": 7,
+   "market_right": 6,
+   "model_closer": 2,
+   "disagree_n": 5,
+   "disagree_model_closer": 1,
+   "bouts": [
+    {
+     "bout": "Nat\u00e1lia Silva vs. Wang Cong",
+     "a": "Nat\u00e1lia Silva",
+     "b": "Wang Cong",
+     "p_a": 0.6809,
+     "segment": "Main card",
+     "rounds": 5,
+     "weight_class": "Women's Flyweight",
+     "winner": "Nat\u00e1lia Silva",
+     "method": "DEC",
+     "round": 5,
+     "seconds": 1500,
+     "model_right": true,
+     "p_winner_model": 0.681,
+     "report": [
+      {
+       "kind": "method",
+       "label": "How it ended",
+       "actual": "decision",
+       "said": 0.609,
+       "top": "decision",
+       "top_p": 0.609,
+       "right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Go the distance",
+       "said": 0.609,
+       "happened": true,
+       "right": true,
+       "brier": 0.153,
+       "base": 0.504,
+       "base_brier": 0.2459,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Over 1.5 rounds",
+       "said": 0.911,
+       "happened": true,
+       "right": true,
+       "brier": 0.0079,
+       "base": 0.703,
+       "base_brier": 0.0881,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Over 2.5 rounds",
+       "said": 0.818,
+       "happened": true,
+       "right": true,
+       "brier": 0.0331,
+       "base": 0.564,
+       "base_brier": 0.1899,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Over 3.5 rounds",
+       "said": 0.732,
+       "happened": true,
+       "right": true,
+       "brier": 0.0719,
+       "base": 0.49,
+       "base_brier": 0.2597,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Over 4.5 rounds",
+       "said": 0.651,
+       "happened": true,
+       "right": true,
+       "brier": 0.1218,
+       "base": 0.43,
+       "base_brier": 0.3251,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Ends before round 2",
+       "said": 0.056,
+       "happened": false,
+       "right": true,
+       "brier": 0.0032,
+       "base": 0.216,
+       "base_brier": 0.0465,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Ends before round 3",
+       "said": 0.139,
+       "happened": false,
+       "right": true,
+       "brier": 0.0194,
+       "base": 0.375,
+       "base_brier": 0.1408,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Ends before round 4",
+       "said": 0.226,
+       "happened": false,
+       "right": true,
+       "brier": 0.051,
+       "base": 0.477,
+       "base_brier": 0.2276,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Ends before round 5",
+       "said": 0.309,
+       "happened": false,
+       "right": true,
+       "brier": 0.0954,
+       "base": 0.536,
+       "base_brier": 0.2875,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Fight starts round 2",
+       "said": 0.944,
+       "happened": true,
+       "right": true,
+       "brier": 0.0032,
+       "base": 0.784,
+       "base_brier": 0.0465,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Fight starts round 3",
+       "said": 0.861,
+       "happened": true,
+       "right": true,
+       "brier": 0.0194,
+       "base": 0.625,
+       "base_brier": 0.1408,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Fight starts round 4",
+       "said": 0.774,
+       "happened": true,
+       "right": true,
+       "brier": 0.051,
+       "base": 0.523,
+       "base_brier": 0.2276,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Fight starts round 5",
+       "said": 0.691,
+       "happened": true,
+       "right": true,
+       "brier": 0.0954,
+       "base": 0.464,
+       "base_brier": 0.2875,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Nat\u00e1lia Silva by KO/TKO/DQ",
+       "said": 0.225,
+       "happened": false,
+       "right": true,
+       "brier": 0.0504,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Nat\u00e1lia Silva by submission",
+       "said": 0.02,
+       "happened": false,
+       "right": true,
+       "brier": 0.0004,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Nat\u00e1lia Silva by decision",
+       "said": 0.436,
+       "happened": true,
+       "right": false,
+       "brier": 0.3183,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Nat\u00e1lia Silva by KO/TKO/DQ or submission",
+       "said": 0.245,
+       "happened": false,
+       "right": true,
+       "brier": 0.0601,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Wang Cong by KO/TKO/DQ",
+       "said": 0.122,
+       "happened": false,
+       "right": true,
+       "brier": 0.0148,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Wang Cong by submission",
+       "said": 0.025,
+       "happened": false,
+       "right": true,
+       "brier": 0.0006,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Wang Cong by decision",
+       "said": 0.173,
+       "happened": false,
+       "right": true,
+       "brier": 0.0299,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Wang Cong by KO/TKO/DQ or submission",
+       "said": 0.146,
+       "happened": false,
+       "right": true,
+       "brier": 0.0213,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 1",
+       "said": 0.056,
+       "happened": false,
+       "right": true,
+       "brier": 0.0032,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 2",
+       "said": 0.083,
+       "happened": false,
+       "right": true,
+       "brier": 0.0069,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 3",
+       "said": 0.086,
+       "happened": false,
+       "right": true,
+       "brier": 0.0075,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 4",
+       "said": 0.083,
+       "happened": false,
+       "right": true,
+       "brier": 0.0069,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 5",
+       "said": 0.082,
+       "happened": false,
+       "right": true,
+       "brier": 0.0068,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      }
+     ],
+     "props_n": 26,
+     "props_right": 25,
+     "props_brier": 0.7257,
+     "props_base_brier": 2.5135,
+     "props_base_n": 13,
+     "props_base_right": 9,
+     "market": {
+      "p_market": 0.6401,
+      "p_winner_market": 0.64,
+      "market_right": true,
+      "gap": 0.041,
+      "picks_differ": false,
+      "model_closer": true
+     }
+    },
+    {
+     "bout": "Deiveson Figueiredo vs. Payton Talbott",
+     "a": "Deiveson Figueiredo",
+     "b": "Payton Talbott",
+     "p_a": 0.2839,
+     "segment": "Main card",
+     "rounds": 3,
+     "weight_class": "Bantamweight",
+     "winner": "Payton Talbott",
+     "method": "KO/TKO",
+     "round": 1,
+     "seconds": 129,
+     "model_right": true,
+     "p_winner_model": 0.716,
+     "report": [
+      {
+       "kind": "method",
+       "label": "How it ended",
+       "actual": "Payton Talbott by KO/TKO",
+       "said": 0.232,
+       "top": "decision",
+       "top_p": 0.479,
+       "right": false
+      },
+      {
+       "kind": "round",
+       "label": "Round it ended",
+       "actual": "round 1",
+       "said": 0.197,
+       "top": "round 2",
+       "top_p": 0.206,
+       "right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Go the distance",
+       "said": 0.479,
+       "happened": false,
+       "right": true,
+       "brier": 0.2292,
+       "base": 0.504,
+       "base_brier": 0.2541,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Over 1.5 rounds",
+       "said": 0.712,
+       "happened": false,
+       "right": false,
+       "brier": 0.5069,
+       "base": 0.67,
+       "base_brier": 0.4492,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Over 2.5 rounds",
+       "said": 0.535,
+       "happened": false,
+       "right": false,
+       "brier": 0.2859,
+       "base": 0.544,
+       "base_brier": 0.2963,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Ends before round 2",
+       "said": 0.197,
+       "happened": true,
+       "right": false,
+       "brier": 0.6453,
+       "base": 0.254,
+       "base_brier": 0.5558,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Ends before round 3",
+       "said": 0.402,
+       "happened": true,
+       "right": false,
+       "brier": 0.3572,
+       "base": 0.409,
+       "base_brier": 0.3498,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Fight starts round 2",
+       "said": 0.803,
+       "happened": false,
+       "right": false,
+       "brier": 0.6453,
+       "base": 0.746,
+       "base_brier": 0.5558,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Fight starts round 3",
+       "said": 0.598,
+       "happened": false,
+       "right": false,
+       "brier": 0.3572,
+       "base": 0.591,
+       "base_brier": 0.3498,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Deiveson Figueiredo by KO/TKO/DQ",
+       "said": 0.108,
+       "happened": false,
+       "right": true,
+       "brier": 0.0117,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Deiveson Figueiredo by submission",
+       "said": 0.124,
+       "happened": false,
+       "right": true,
+       "brier": 0.0154,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Deiveson Figueiredo by decision",
+       "said": 0.052,
+       "happened": false,
+       "right": true,
+       "brier": 0.0027,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Deiveson Figueiredo by KO/TKO/DQ or submission",
+       "said": 0.232,
+       "happened": false,
+       "right": true,
+       "brier": 0.0539,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Payton Talbott by KO/TKO/DQ",
+       "said": 0.232,
+       "happened": true,
+       "right": false,
+       "brier": 0.5895,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Payton Talbott by submission",
+       "said": 0.057,
+       "happened": false,
+       "right": true,
+       "brier": 0.0032,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Payton Talbott by decision",
+       "said": 0.427,
+       "happened": false,
+       "right": true,
+       "brier": 0.1822,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Payton Talbott by KO/TKO/DQ or submission",
+       "said": 0.289,
+       "happened": true,
+       "right": false,
+       "brier": 0.5052,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 1",
+       "said": 0.197,
+       "happened": true,
+       "right": false,
+       "brier": 0.6453,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 2",
+       "said": 0.206,
+       "happened": false,
+       "right": true,
+       "brier": 0.0423,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 3",
+       "said": 0.119,
+       "happened": false,
+       "right": true,
+       "brier": 0.0142,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      }
+     ],
+     "props_n": 18,
+     "props_right": 9,
+     "props_brier": 3.027,
+     "props_base_brier": 2.8108,
+     "props_base_n": 7,
+     "props_base_right": 0,
+     "market": {
+      "p_market": 0.1575,
+      "p_winner_market": 0.843,
+      "market_right": true,
+      "gap": 0.126,
+      "picks_differ": false,
+      "model_closer": false
+     }
+    },
+    {
+     "bout": "King Green vs. Esteban Ribovics",
+     "a": "King Green",
+     "b": "Esteban Ribovics",
+     "p_a": 0.5092,
+     "segment": "Main card",
+     "rounds": 3,
+     "weight_class": "Lightweight",
+     "winner": "Esteban Ribovics",
+     "method": "KO/TKO",
+     "round": 1,
+     "seconds": 248,
+     "model_right": false,
+     "p_winner_model": 0.491,
+     "report": [
+      {
+       "kind": "method",
+       "label": "How it ended",
+       "actual": "Esteban Ribovics by KO/TKO",
+       "said": 0.248,
+       "top": "decision",
+       "top_p": 0.604,
+       "right": false
+      },
+      {
+       "kind": "round",
+       "label": "Round it ended",
+       "actual": "round 1",
+       "said": 0.194,
+       "top": "round 1",
+       "top_p": 0.194,
+       "right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Go the distance",
+       "said": 0.604,
+       "happened": false,
+       "right": false,
+       "brier": 0.3649,
+       "base": 0.504,
+       "base_brier": 0.2541,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Over 1.5 rounds",
+       "said": 0.742,
+       "happened": false,
+       "right": false,
+       "brier": 0.55,
+       "base": 0.67,
+       "base_brier": 0.4492,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Over 2.5 rounds",
+       "said": 0.642,
+       "happened": false,
+       "right": false,
+       "brier": 0.4119,
+       "base": 0.544,
+       "base_brier": 0.2963,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Ends before round 2",
+       "said": 0.194,
+       "happened": true,
+       "right": false,
+       "brier": 0.6493,
+       "base": 0.254,
+       "base_brier": 0.5558,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Ends before round 3",
+       "said": 0.318,
+       "happened": true,
+       "right": false,
+       "brier": 0.4658,
+       "base": 0.409,
+       "base_brier": 0.3498,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Fight starts round 2",
+       "said": 0.806,
+       "happened": false,
+       "right": false,
+       "brier": 0.6493,
+       "base": 0.746,
+       "base_brier": 0.5558,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Fight starts round 3",
+       "said": 0.682,
+       "happened": false,
+       "right": false,
+       "brier": 0.4658,
+       "base": 0.591,
+       "base_brier": 0.3498,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "King Green by KO/TKO/DQ",
+       "said": 0.084,
+       "happened": false,
+       "right": true,
+       "brier": 0.0071,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "King Green by submission",
+       "said": 0.038,
+       "happened": false,
+       "right": true,
+       "brier": 0.0014,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "King Green by decision",
+       "said": 0.387,
+       "happened": false,
+       "right": true,
+       "brier": 0.1499,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "King Green by KO/TKO/DQ or submission",
+       "said": 0.122,
+       "happened": false,
+       "right": true,
+       "brier": 0.0149,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Esteban Ribovics by KO/TKO/DQ",
+       "said": 0.248,
+       "happened": true,
+       "right": false,
+       "brier": 0.5651,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Esteban Ribovics by submission",
+       "said": 0.026,
+       "happened": false,
+       "right": true,
+       "brier": 0.0007,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Esteban Ribovics by decision",
+       "said": 0.217,
+       "happened": false,
+       "right": true,
+       "brier": 0.047,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Esteban Ribovics by KO/TKO/DQ or submission",
+       "said": 0.274,
+       "happened": true,
+       "right": false,
+       "brier": 0.5272,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 1",
+       "said": 0.194,
+       "happened": true,
+       "right": false,
+       "brier": 0.6493,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 2",
+       "said": 0.123,
+       "happened": false,
+       "right": true,
+       "brier": 0.0152,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 3",
+       "said": 0.078,
+       "happened": false,
+       "right": true,
+       "brier": 0.0061,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      }
+     ],
+     "props_n": 18,
+     "props_right": 8,
+     "props_brier": 3.557,
+     "props_base_brier": 2.8108,
+     "props_base_n": 7,
+     "props_base_right": 0,
+     "market": {
+      "p_market": 0.3494,
+      "p_winner_market": 0.651,
+      "market_right": true,
+      "gap": 0.16,
+      "picks_differ": true,
+      "model_closer": false
+     }
+    },
+    {
+     "bout": "Ateba Gautier vs. Roman Kopylov",
+     "a": "Ateba Gautier",
+     "b": "Roman Kopylov",
+     "p_a": 0.7517,
+     "segment": "Main card",
+     "rounds": 3,
+     "weight_class": "Middleweight",
+     "winner": "Roman Kopylov",
+     "method": "KO/TKO",
+     "round": 1,
+     "seconds": 192,
+     "model_right": false,
+     "p_winner_model": 0.248,
+     "report": [
+      {
+       "kind": "method",
+       "label": "How it ended",
+       "actual": "Roman Kopylov by KO/TKO",
+       "said": 0.202,
+       "top": "Ateba Gautier by KO/TKO",
+       "top_p": 0.39,
+       "right": false
+      },
+      {
+       "kind": "round",
+       "label": "Round it ended",
+       "actual": "round 1",
+       "said": 0.255,
+       "top": "round 2",
+       "top_p": 0.267,
+       "right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Go the distance",
+       "said": 0.344,
+       "happened": false,
+       "right": true,
+       "brier": 0.1185,
+       "base": 0.504,
+       "base_brier": 0.2541,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Over 1.5 rounds",
+       "said": 0.613,
+       "happened": false,
+       "right": false,
+       "brier": 0.3754,
+       "base": 0.67,
+       "base_brier": 0.4492,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Over 2.5 rounds",
+       "said": 0.409,
+       "happened": false,
+       "right": true,
+       "brier": 0.167,
+       "base": 0.544,
+       "base_brier": 0.2963,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Ends before round 2",
+       "said": 0.255,
+       "happened": true,
+       "right": false,
+       "brier": 0.5546,
+       "base": 0.254,
+       "base_brier": 0.5558,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Ends before round 3",
+       "said": 0.522,
+       "happened": true,
+       "right": true,
+       "brier": 0.2285,
+       "base": 0.409,
+       "base_brier": 0.3498,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Fight starts round 2",
+       "said": 0.745,
+       "happened": false,
+       "right": false,
+       "brier": 0.5546,
+       "base": 0.746,
+       "base_brier": 0.5558,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Fight starts round 3",
+       "said": 0.478,
+       "happened": false,
+       "right": true,
+       "brier": 0.2285,
+       "base": 0.591,
+       "base_brier": 0.3498,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Ateba Gautier by KO/TKO/DQ",
+       "said": 0.39,
+       "happened": false,
+       "right": true,
+       "brier": 0.1517,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ateba Gautier by submission",
+       "said": 0.043,
+       "happened": false,
+       "right": true,
+       "brier": 0.0018,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ateba Gautier by decision",
+       "said": 0.319,
+       "happened": false,
+       "right": true,
+       "brier": 0.1018,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ateba Gautier by KO/TKO/DQ or submission",
+       "said": 0.433,
+       "happened": false,
+       "right": true,
+       "brier": 0.1871,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Roman Kopylov by KO/TKO/DQ",
+       "said": 0.202,
+       "happened": true,
+       "right": false,
+       "brier": 0.6363,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Roman Kopylov by submission",
+       "said": 0.021,
+       "happened": false,
+       "right": true,
+       "brier": 0.0004,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Roman Kopylov by decision",
+       "said": 0.025,
+       "happened": false,
+       "right": true,
+       "brier": 0.0006,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Roman Kopylov by KO/TKO/DQ or submission",
+       "said": 0.223,
+       "happened": true,
+       "right": false,
+       "brier": 0.6034,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 1",
+       "said": 0.255,
+       "happened": true,
+       "right": false,
+       "brier": 0.5546,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 2",
+       "said": 0.267,
+       "happened": false,
+       "right": true,
+       "brier": 0.0711,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 3",
+       "said": 0.134,
+       "happened": false,
+       "right": true,
+       "brier": 0.0179,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      }
+     ],
+     "props_n": 18,
+     "props_right": 12,
+     "props_brier": 2.2271,
+     "props_base_brier": 2.8108,
+     "props_base_n": 7,
+     "props_base_right": 0,
+     "market": {
+      "p_market": 0.6698,
+      "p_winner_market": 0.33,
+      "market_right": false,
+      "gap": 0.082,
+      "picks_differ": false,
+      "model_closer": false
+     }
+    },
+    {
+     "bout": "Imanol Rodr\u00edguez vs. Alden Coria",
+     "a": "Imanol Rodr\u00edguez",
+     "b": "Alden Coria",
+     "p_a": 0.4842,
+     "segment": "Prelims",
+     "rounds": 3,
+     "weight_class": "Flyweight",
+     "winner": "Imanol Rodr\u00edguez",
+     "method": "KO/TKO",
+     "round": 1,
+     "seconds": 191,
+     "model_right": false,
+     "p_winner_model": 0.484,
+     "report": [],
+     "props_n": 0,
+     "props_right": 0,
+     "props_brier": 0,
+     "props_base_brier": 0,
+     "props_base_n": 0,
+     "props_base_right": 0
+    },
+    {
+     "bout": "Damian Pinas vs. Andrey Pulyaev",
+     "a": "Damian Pinas",
+     "b": "Andrey Pulyaev",
+     "p_a": 0.6387,
+     "segment": "Prelims",
+     "rounds": 3,
+     "weight_class": "Middleweight",
+     "winner": "Damian Pinas",
+     "method": "KO/TKO",
+     "round": 1,
+     "seconds": 75,
+     "model_right": true,
+     "p_winner_model": 0.639,
+     "report": [
+      {
+       "kind": "method",
+       "label": "How it ended",
+       "actual": "Damian Pinas by KO/TKO",
+       "said": 0.138,
+       "top": "decision",
+       "top_p": 0.407,
+       "right": false
+      },
+      {
+       "kind": "round",
+       "label": "Round it ended",
+       "actual": "round 1",
+       "said": 0.268,
+       "top": "round 1",
+       "top_p": 0.268,
+       "right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Go the distance",
+       "said": 0.407,
+       "happened": false,
+       "right": true,
+       "brier": 0.166,
+       "base": 0.504,
+       "base_brier": 0.2541,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Over 1.5 rounds",
+       "said": 0.623,
+       "happened": false,
+       "right": false,
+       "brier": 0.3875,
+       "base": 0.67,
+       "base_brier": 0.4492,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Over 2.5 rounds",
+       "said": 0.458,
+       "happened": false,
+       "right": true,
+       "brier": 0.2096,
+       "base": 0.544,
+       "base_brier": 0.2963,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Ends before round 2",
+       "said": 0.268,
+       "happened": true,
+       "right": false,
+       "brier": 0.5364,
+       "base": 0.254,
+       "base_brier": 0.5558,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Ends before round 3",
+       "said": 0.486,
+       "happened": true,
+       "right": false,
+       "brier": 0.2642,
+       "base": 0.409,
+       "base_brier": 0.3498,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Fight starts round 2",
+       "said": 0.732,
+       "happened": false,
+       "right": false,
+       "brier": 0.5364,
+       "base": 0.746,
+       "base_brier": 0.5558,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Fight starts round 3",
+       "said": 0.514,
+       "happened": false,
+       "right": false,
+       "brier": 0.2642,
+       "base": 0.591,
+       "base_brier": 0.3498,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Damian Pinas by KO/TKO/DQ",
+       "said": 0.138,
+       "happened": true,
+       "right": false,
+       "brier": 0.7434,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Damian Pinas by submission",
+       "said": 0.098,
+       "happened": false,
+       "right": true,
+       "brier": 0.0097,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Damian Pinas by decision",
+       "said": 0.403,
+       "happened": false,
+       "right": true,
+       "brier": 0.1621,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Damian Pinas by KO/TKO/DQ or submission",
+       "said": 0.236,
+       "happened": true,
+       "right": false,
+       "brier": 0.5835,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Andrey Pulyaev by KO/TKO/DQ",
+       "said": 0.266,
+       "happened": false,
+       "right": true,
+       "brier": 0.0709,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Andrey Pulyaev by submission",
+       "said": 0.09,
+       "happened": false,
+       "right": true,
+       "brier": 0.0081,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Andrey Pulyaev by decision",
+       "said": 0.005,
+       "happened": false,
+       "right": true,
+       "brier": 0.0,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Andrey Pulyaev by KO/TKO/DQ or submission",
+       "said": 0.356,
+       "happened": false,
+       "right": true,
+       "brier": 0.127,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 1",
+       "said": 0.268,
+       "happened": true,
+       "right": false,
+       "brier": 0.5364,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 2",
+       "said": 0.218,
+       "happened": false,
+       "right": true,
+       "brier": 0.0477,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 3",
+       "said": 0.106,
+       "happened": false,
+       "right": true,
+       "brier": 0.0113,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      }
+     ],
+     "props_n": 18,
+     "props_right": 10,
+     "props_brier": 2.3643,
+     "props_base_brier": 2.8108,
+     "props_base_n": 7,
+     "props_base_right": 0,
+     "market": {
+      "p_market": 0.8178,
+      "p_winner_market": 0.818,
+      "market_right": true,
+      "gap": -0.179,
+      "picks_differ": false,
+      "model_closer": false
+     }
+    },
+    {
+     "bout": "Johnny Walker vs. Mick Parkin",
+     "a": "Johnny Walker",
+     "b": "Mick Parkin",
+     "p_a": 0.4105,
+     "segment": "Early prelims",
+     "rounds": 3,
+     "weight_class": "Heavyweight",
+     "winner": "Johnny Walker",
+     "method": "KO/TKO",
+     "round": 1,
+     "seconds": 215,
+     "model_right": false,
+     "p_winner_model": 0.41,
+     "report": [
+      {
+       "kind": "method",
+       "label": "How it ended",
+       "actual": "Johnny Walker by KO/TKO",
+       "said": 0.175,
+       "top": "decision",
+       "top_p": 0.405,
+       "right": false
+      },
+      {
+       "kind": "round",
+       "label": "Round it ended",
+       "actual": "round 1",
+       "said": 0.326,
+       "top": "round 1",
+       "top_p": 0.326,
+       "right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Go the distance",
+       "said": 0.405,
+       "happened": false,
+       "right": true,
+       "brier": 0.1642,
+       "base": 0.504,
+       "base_brier": 0.2541,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Over 1.5 rounds",
+       "said": 0.569,
+       "happened": false,
+       "right": false,
+       "brier": 0.3235,
+       "base": 0.67,
+       "base_brier": 0.4492,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Over 2.5 rounds",
+       "said": 0.44,
+       "happened": false,
+       "right": true,
+       "brier": 0.1934,
+       "base": 0.544,
+       "base_brier": 0.2963,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Ends before round 2",
+       "said": 0.326,
+       "happened": true,
+       "right": false,
+       "brier": 0.4547,
+       "base": 0.254,
+       "base_brier": 0.5558,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Ends before round 3",
+       "said": 0.52,
+       "happened": true,
+       "right": true,
+       "brier": 0.23,
+       "base": 0.409,
+       "base_brier": 0.3498,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Fight starts round 2",
+       "said": 0.674,
+       "happened": false,
+       "right": false,
+       "brier": 0.4547,
+       "base": 0.746,
+       "base_brier": 0.5558,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Fight starts round 3",
+       "said": 0.48,
+       "happened": false,
+       "right": true,
+       "brier": 0.23,
+       "base": 0.591,
+       "base_brier": 0.3498,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Johnny Walker by KO/TKO/DQ",
+       "said": 0.175,
+       "happened": true,
+       "right": false,
+       "brier": 0.6805,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Johnny Walker by submission",
+       "said": 0.036,
+       "happened": false,
+       "right": true,
+       "brier": 0.0013,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Johnny Walker by decision",
+       "said": 0.199,
+       "happened": false,
+       "right": true,
+       "brier": 0.0396,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Johnny Walker by KO/TKO/DQ or submission",
+       "said": 0.211,
+       "happened": true,
+       "right": false,
+       "brier": 0.6217,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Mick Parkin by KO/TKO/DQ",
+       "said": 0.35,
+       "happened": false,
+       "right": true,
+       "brier": 0.1222,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Mick Parkin by submission",
+       "said": 0.034,
+       "happened": false,
+       "right": true,
+       "brier": 0.0011,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Mick Parkin by decision",
+       "said": 0.206,
+       "happened": false,
+       "right": true,
+       "brier": 0.0425,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Mick Parkin by KO/TKO/DQ or submission",
+       "said": 0.383,
+       "happened": false,
+       "right": true,
+       "brier": 0.1469,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 1",
+       "said": 0.326,
+       "happened": true,
+       "right": false,
+       "brier": 0.4547,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 2",
+       "said": 0.195,
+       "happened": false,
+       "right": true,
+       "brier": 0.0379,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 3",
+       "said": 0.074,
+       "happened": false,
+       "right": true,
+       "brier": 0.0055,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      }
+     ],
+     "props_n": 18,
+     "props_right": 12,
+     "props_brier": 2.0505,
+     "props_base_brier": 2.8108,
+     "props_base_n": 7,
+     "props_base_right": 0
+    },
+    {
+     "bout": "Rafael dos Anjos vs. Alexander Hernandez",
+     "a": "Rafael dos Anjos",
+     "b": "Alexander Hernandez",
+     "p_a": 0.4672,
+     "segment": "Early prelims",
+     "rounds": 3,
+     "weight_class": "Lightweight",
+     "winner": "Alexander Hernandez",
+     "method": "KO/TKO",
+     "round": 2,
+     "seconds": 492,
+     "model_right": true,
+     "p_winner_model": 0.533,
+     "report": [
+      {
+       "kind": "method",
+       "label": "How it ended",
+       "actual": "Alexander Hernandez by KO/TKO",
+       "said": 0.107,
+       "top": "decision",
+       "top_p": 0.581,
+       "right": false
+      },
+      {
+       "kind": "round",
+       "label": "Round it ended",
+       "actual": "round 2",
+       "said": 0.138,
+       "top": "round 1",
+       "top_p": 0.204,
+       "right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Go the distance",
+       "said": 0.581,
+       "happened": false,
+       "right": false,
+       "brier": 0.338,
+       "base": 0.504,
+       "base_brier": 0.2541,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Over 1.5 rounds",
+       "said": 0.726,
+       "happened": true,
+       "right": true,
+       "brier": 0.0751,
+       "base": 0.67,
+       "base_brier": 0.1088,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Over 2.5 rounds",
+       "said": 0.618,
+       "happened": false,
+       "right": false,
+       "brier": 0.3823,
+       "base": 0.544,
+       "base_brier": 0.2963,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Ends before round 2",
+       "said": 0.204,
+       "happened": false,
+       "right": true,
+       "brier": 0.0415,
+       "base": 0.254,
+       "base_brier": 0.0648,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Ends before round 3",
+       "said": 0.341,
+       "happened": true,
+       "right": false,
+       "brier": 0.434,
+       "base": 0.409,
+       "base_brier": 0.3498,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Fight starts round 2",
+       "said": 0.796,
+       "happened": true,
+       "right": true,
+       "brier": 0.0415,
+       "base": 0.746,
+       "base_brier": 0.0648,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Fight starts round 3",
+       "said": 0.659,
+       "happened": false,
+       "right": false,
+       "brier": 0.434,
+       "base": 0.591,
+       "base_brier": 0.3498,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Rafael dos Anjos by KO/TKO/DQ",
+       "said": 0.058,
+       "happened": false,
+       "right": true,
+       "brier": 0.0033,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Rafael dos Anjos by submission",
+       "said": 0.081,
+       "happened": false,
+       "right": true,
+       "brier": 0.0066,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Rafael dos Anjos by decision",
+       "said": 0.328,
+       "happened": false,
+       "right": true,
+       "brier": 0.1078,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Rafael dos Anjos by KO/TKO/DQ or submission",
+       "said": 0.139,
+       "happened": false,
+       "right": true,
+       "brier": 0.0193,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Alexander Hernandez by KO/TKO/DQ",
+       "said": 0.107,
+       "happened": true,
+       "right": false,
+       "brier": 0.7974,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Alexander Hernandez by submission",
+       "said": 0.173,
+       "happened": false,
+       "right": true,
+       "brier": 0.0299,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Alexander Hernandez by decision",
+       "said": 0.253,
+       "happened": false,
+       "right": true,
+       "brier": 0.064,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Alexander Hernandez by KO/TKO/DQ or submission",
+       "said": 0.28,
+       "happened": true,
+       "right": false,
+       "brier": 0.5187,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 1",
+       "said": 0.204,
+       "happened": false,
+       "right": true,
+       "brier": 0.0415,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 2",
+       "said": 0.138,
+       "happened": true,
+       "right": false,
+       "brier": 0.7437,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 3",
+       "said": 0.077,
+       "happened": false,
+       "right": true,
+       "brier": 0.006,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      }
+     ],
+     "props_n": 18,
+     "props_right": 11,
+     "props_brier": 1.7464,
+     "props_base_brier": 1.4884,
+     "props_base_n": 7,
+     "props_base_right": 3
+    },
+    {
+     "bout": "Marvin Vettori vs. Ismail Naurdiev",
+     "a": "Marvin Vettori",
+     "b": "Ismail Naurdiev",
+     "p_a": 0.3735,
+     "segment": "Early prelims",
+     "rounds": 3,
+     "weight_class": "Middleweight",
+     "winner": "Ismail Naurdiev",
+     "method": "DEC",
+     "round": 3,
+     "seconds": 900,
+     "model_right": true,
+     "p_winner_model": 0.627,
+     "report": [
+      {
+       "kind": "method",
+       "label": "How it ended",
+       "actual": "decision",
+       "said": 0.588,
+       "top": "decision",
+       "top_p": 0.588,
+       "right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Go the distance",
+       "said": 0.588,
+       "happened": true,
+       "right": true,
+       "brier": 0.1697,
+       "base": 0.504,
+       "base_brier": 0.2459,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Over 1.5 rounds",
+       "said": 0.768,
+       "happened": true,
+       "right": true,
+       "brier": 0.0537,
+       "base": 0.67,
+       "base_brier": 0.1088,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Over 2.5 rounds",
+       "said": 0.642,
+       "happened": true,
+       "right": true,
+       "brier": 0.1279,
+       "base": 0.544,
+       "base_brier": 0.2076,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Ends before round 2",
+       "said": 0.164,
+       "happened": false,
+       "right": true,
+       "brier": 0.027,
+       "base": 0.254,
+       "base_brier": 0.0648,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Ends before round 3",
+       "said": 0.302,
+       "happened": false,
+       "right": true,
+       "brier": 0.091,
+       "base": 0.409,
+       "base_brier": 0.1669,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Fight starts round 2",
+       "said": 0.836,
+       "happened": true,
+       "right": true,
+       "brier": 0.027,
+       "base": 0.746,
+       "base_brier": 0.0648,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Fight starts round 3",
+       "said": 0.698,
+       "happened": true,
+       "right": true,
+       "brier": 0.091,
+       "base": 0.591,
+       "base_brier": 0.1669,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Marvin Vettori by KO/TKO/DQ",
+       "said": 0.077,
+       "happened": false,
+       "right": true,
+       "brier": 0.0059,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Marvin Vettori by submission",
+       "said": 0.097,
+       "happened": false,
+       "right": true,
+       "brier": 0.0094,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Marvin Vettori by decision",
+       "said": 0.2,
+       "happened": false,
+       "right": true,
+       "brier": 0.0398,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Marvin Vettori by KO/TKO/DQ or submission",
+       "said": 0.174,
+       "happened": false,
+       "right": true,
+       "brier": 0.0302,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ismail Naurdiev by KO/TKO/DQ",
+       "said": 0.128,
+       "happened": false,
+       "right": true,
+       "brier": 0.0163,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ismail Naurdiev by submission",
+       "said": 0.11,
+       "happened": false,
+       "right": true,
+       "brier": 0.0122,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ismail Naurdiev by decision",
+       "said": 0.389,
+       "happened": true,
+       "right": false,
+       "brier": 0.3739,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ismail Naurdiev by KO/TKO/DQ or submission",
+       "said": 0.238,
+       "happened": false,
+       "right": true,
+       "brier": 0.0566,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 1",
+       "said": 0.164,
+       "happened": false,
+       "right": true,
+       "brier": 0.027,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 2",
+       "said": 0.137,
+       "happened": false,
+       "right": true,
+       "brier": 0.0189,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 3",
+       "said": 0.11,
+       "happened": false,
+       "right": true,
+       "brier": 0.0121,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      }
+     ],
+     "props_n": 18,
+     "props_right": 17,
+     "props_brier": 0.5873,
+     "props_base_brier": 1.0257,
+     "props_base_n": 7,
+     "props_base_right": 7,
+     "market": {
+      "p_market": 0.443,
+      "p_winner_market": 0.557,
+      "market_right": true,
+      "gap": -0.07,
+      "picks_differ": false,
+      "model_closer": true
+     }
+    },
+    {
+     "bout": "Court McGee vs. Eric Nolan",
+     "a": "Court McGee",
+     "b": "Eric Nolan",
+     "p_a": 0.3649,
+     "segment": "Early prelims",
+     "rounds": 3,
+     "weight_class": "Welterweight",
+     "winner": "Eric Nolan",
+     "method": "KO/TKO",
+     "round": 3,
+     "seconds": 806,
+     "model_right": true,
+     "p_winner_model": 0.635,
+     "report": [
+      {
+       "kind": "method",
+       "label": "How it ended",
+       "actual": "Eric Nolan by KO/TKO",
+       "said": 0.092,
+       "top": "decision",
+       "top_p": 0.576,
+       "right": false
+      },
+      {
+       "kind": "round",
+       "label": "Round it ended",
+       "actual": "round 3",
+       "said": 0.101,
+       "top": "round 2",
+       "top_p": 0.166,
+       "right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Go the distance",
+       "said": 0.576,
+       "happened": false,
+       "right": false,
+       "brier": 0.3313,
+       "base": 0.504,
+       "base_brier": 0.2541,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Over 1.5 rounds",
+       "said": 0.767,
+       "happened": true,
+       "right": true,
+       "brier": 0.0544,
+       "base": 0.67,
+       "base_brier": 0.1088,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Over 2.5 rounds",
+       "said": 0.624,
+       "happened": true,
+       "right": true,
+       "brier": 0.1415,
+       "base": 0.544,
+       "base_brier": 0.2076,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Ends before round 2",
+       "said": 0.158,
+       "happened": false,
+       "right": true,
+       "brier": 0.0251,
+       "base": 0.254,
+       "base_brier": 0.0648,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Ends before round 3",
+       "said": 0.324,
+       "happened": false,
+       "right": true,
+       "brier": 0.1048,
+       "base": 0.409,
+       "base_brier": 0.1669,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Fight starts round 2",
+       "said": 0.842,
+       "happened": true,
+       "right": true,
+       "brier": 0.0251,
+       "base": 0.746,
+       "base_brier": 0.0648,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Fight starts round 3",
+       "said": 0.676,
+       "happened": true,
+       "right": true,
+       "brier": 0.1048,
+       "base": 0.591,
+       "base_brier": 0.1669,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Court McGee by KO/TKO/DQ",
+       "said": 0.091,
+       "happened": false,
+       "right": true,
+       "brier": 0.0083,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Court McGee by submission",
+       "said": 0.085,
+       "happened": false,
+       "right": true,
+       "brier": 0.0072,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Court McGee by decision",
+       "said": 0.189,
+       "happened": false,
+       "right": true,
+       "brier": 0.0358,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Court McGee by KO/TKO/DQ or submission",
+       "said": 0.176,
+       "happened": false,
+       "right": true,
+       "brier": 0.0308,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Eric Nolan by KO/TKO/DQ",
+       "said": 0.092,
+       "happened": true,
+       "right": false,
+       "brier": 0.8246,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Eric Nolan by submission",
+       "said": 0.157,
+       "happened": false,
+       "right": true,
+       "brier": 0.0246,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Eric Nolan by decision",
+       "said": 0.386,
+       "happened": false,
+       "right": true,
+       "brier": 0.1492,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Eric Nolan by KO/TKO/DQ or submission",
+       "said": 0.249,
+       "happened": true,
+       "right": false,
+       "brier": 0.5643,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 1",
+       "said": 0.158,
+       "happened": false,
+       "right": true,
+       "brier": 0.0251,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 2",
+       "said": 0.166,
+       "happened": false,
+       "right": true,
+       "brier": 0.0274,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 3",
+       "said": 0.101,
+       "happened": true,
+       "right": false,
+       "brier": 0.8089,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      }
+     ],
+     "props_n": 18,
+     "props_right": 14,
+     "props_brier": 0.787,
+     "props_base_brier": 1.0339,
+     "props_base_n": 7,
+     "props_base_right": 6,
+     "market": {
+      "p_market": 0.3318,
+      "p_winner_market": 0.668,
+      "market_right": true,
+      "gap": 0.033,
+      "picks_differ": false,
+      "model_closer": false
+     }
+    }
+   ]
+  },
+  {
    "event": "UFC 331",
    "date": "2026-09-19",
    "venue": "Crypto.com Arena, Los Angeles",
@@ -12,7 +2345,7 @@
    "round_right": 2,
    "props_n": 152,
    "props_brier": 18.4361,
-   "props_base_brier": 15.1585,
+   "props_base_brier": 15.1456,
    "props_right": 101,
    "props_base_n": 62,
    "props_base_right": 35,
@@ -20,11 +2353,11 @@
     "r1_n": 8,
     "r1_said": 1.67,
     "r1_hit": 3,
-    "r1_base": 1.99,
+    "r1_base": 2.0,
     "fin_n": 8,
     "fin_said": 4.16,
     "fin_hit": 4,
-    "fin_base": 3.96
+    "fin_base": 3.97
    },
    "market_n": 10,
    "market_right": 7,
@@ -63,8 +2396,8 @@
        "happened": true,
        "right": true,
        "brier": 0.2391,
-       "base": 0.505,
-       "base_brier": 0.2454,
+       "base": 0.504,
+       "base_brier": 0.2459,
        "base_right": true
       },
       {
@@ -75,7 +2408,7 @@
        "right": true,
        "brier": 0.0256,
        "base": 0.703,
-       "base_brier": 0.0884,
+       "base_brier": 0.0881,
        "base_right": true
       },
       {
@@ -86,7 +2419,7 @@
        "right": true,
        "brier": 0.077,
        "base": 0.564,
-       "base_brier": 0.1904,
+       "base_brier": 0.1899,
        "base_right": true
       },
       {
@@ -97,7 +2430,7 @@
        "right": true,
        "brier": 0.1356,
        "base": 0.49,
-       "base_brier": 0.2605,
+       "base_brier": 0.2597,
        "base_right": false
       },
       {
@@ -107,8 +2440,8 @@
        "happened": true,
        "right": true,
        "brier": 0.203,
-       "base": 0.429,
-       "base_brier": 0.326,
+       "base": 0.43,
+       "base_brier": 0.3251,
        "base_right": false
       },
       {
@@ -119,7 +2452,7 @@
        "right": true,
        "brier": 0.0115,
        "base": 0.216,
-       "base_brier": 0.0466,
+       "base_brier": 0.0465,
        "base_right": true
       },
       {
@@ -129,8 +2462,8 @@
        "happened": false,
        "right": true,
        "brier": 0.0531,
-       "base": 0.376,
-       "base_brier": 0.1412,
+       "base": 0.375,
+       "base_brier": 0.1408,
        "base_right": true
       },
       {
@@ -140,8 +2473,8 @@
        "happened": false,
        "right": true,
        "brier": 0.1054,
-       "base": 0.478,
-       "base_brier": 0.2283,
+       "base": 0.477,
+       "base_brier": 0.2276,
        "base_right": true
       },
       {
@@ -151,8 +2484,8 @@
        "happened": false,
        "right": true,
        "brier": 0.1681,
-       "base": 0.537,
-       "base_brier": 0.2883,
+       "base": 0.536,
+       "base_brier": 0.2875,
        "base_right": false
       },
       {
@@ -163,7 +2496,7 @@
        "right": true,
        "brier": 0.0115,
        "base": 0.784,
-       "base_brier": 0.0466,
+       "base_brier": 0.0465,
        "base_right": true
       },
       {
@@ -173,8 +2506,8 @@
        "happened": true,
        "right": true,
        "brier": 0.0531,
-       "base": 0.624,
-       "base_brier": 0.1412,
+       "base": 0.625,
+       "base_brier": 0.1408,
        "base_right": true
       },
       {
@@ -184,8 +2517,8 @@
        "happened": true,
        "right": true,
        "brier": 0.1054,
-       "base": 0.522,
-       "base_brier": 0.2283,
+       "base": 0.523,
+       "base_brier": 0.2276,
        "base_right": true
       },
       {
@@ -195,8 +2528,8 @@
        "happened": true,
        "right": true,
        "brier": 0.1681,
-       "base": 0.463,
-       "base_brier": 0.2883,
+       "base": 0.464,
+       "base_brier": 0.2875,
        "base_right": false
       },
       {
@@ -346,7 +2679,7 @@
      "props_n": 26,
      "props_right": 25,
      "props_brier": 1.3565,
-     "props_base_brier": 2.5195,
+     "props_base_brier": 2.5135,
      "props_base_n": 13,
      "props_base_right": 9,
      "market": {
@@ -398,8 +2731,8 @@
        "happened": false,
        "right": false,
        "brier": 0.263,
-       "base": 0.505,
-       "base_brier": 0.2546,
+       "base": 0.504,
+       "base_brier": 0.2541,
        "base_right": false
       },
       {
@@ -409,8 +2742,8 @@
        "happened": false,
        "right": false,
        "brier": 0.5017,
-       "base": 0.671,
-       "base_brier": 0.4501,
+       "base": 0.67,
+       "base_brier": 0.4492,
        "base_right": false
       },
       {
@@ -420,8 +2753,8 @@
        "happened": false,
        "right": false,
        "brier": 0.3207,
-       "base": 0.545,
-       "base_brier": 0.2969,
+       "base": 0.544,
+       "base_brier": 0.2963,
        "base_right": false
       },
       {
@@ -432,7 +2765,7 @@
        "right": false,
        "brier": 0.6216,
        "base": 0.254,
-       "base_brier": 0.557,
+       "base_brier": 0.5558,
        "base_right": false
       },
       {
@@ -442,8 +2775,8 @@
        "happened": true,
        "right": false,
        "brier": 0.389,
-       "base": 0.408,
-       "base_brier": 0.3506,
+       "base": 0.409,
+       "base_brier": 0.3498,
        "base_right": false
       },
       {
@@ -454,7 +2787,7 @@
        "right": false,
        "brier": 0.6216,
        "base": 0.746,
-       "base_brier": 0.557,
+       "base_brier": 0.5558,
        "base_right": false
       },
       {
@@ -464,8 +2797,8 @@
        "happened": false,
        "right": false,
        "brier": 0.389,
-       "base": 0.592,
-       "base_brier": 0.3506,
+       "base": 0.591,
+       "base_brier": 0.3498,
        "base_right": false
       },
       {
@@ -593,7 +2926,7 @@
      "props_n": 18,
      "props_right": 7,
      "props_brier": 3.1066,
-     "props_base_brier": 2.8168,
+     "props_base_brier": 2.8108,
      "props_base_n": 7,
      "props_base_right": 0,
      "market": {
@@ -636,8 +2969,8 @@
        "happened": true,
        "right": false,
        "brier": 0.5259,
-       "base": 0.505,
-       "base_brier": 0.2454,
+       "base": 0.504,
+       "base_brier": 0.2459,
        "base_right": true
       },
       {
@@ -647,8 +2980,8 @@
        "happened": true,
        "right": false,
        "brier": 0.271,
-       "base": 0.671,
-       "base_brier": 0.1083,
+       "base": 0.67,
+       "base_brier": 0.1088,
        "base_right": true
       },
       {
@@ -658,8 +2991,8 @@
        "happened": true,
        "right": false,
        "brier": 0.4685,
-       "base": 0.545,
-       "base_brier": 0.2071,
+       "base": 0.544,
+       "base_brier": 0.2076,
        "base_right": true
       },
       {
@@ -670,7 +3003,7 @@
        "right": true,
        "brier": 0.1476,
        "base": 0.254,
-       "base_brier": 0.0644,
+       "base_brier": 0.0648,
        "base_right": true
       },
       {
@@ -680,8 +3013,8 @@
        "happened": false,
        "right": false,
        "brier": 0.407,
-       "base": 0.408,
-       "base_brier": 0.1664,
+       "base": 0.409,
+       "base_brier": 0.1669,
        "base_right": true
       },
       {
@@ -692,7 +3025,7 @@
        "right": true,
        "brier": 0.1476,
        "base": 0.746,
-       "base_brier": 0.0644,
+       "base_brier": 0.0648,
        "base_right": true
       },
       {
@@ -702,8 +3035,8 @@
        "happened": true,
        "right": false,
        "brier": 0.407,
-       "base": 0.592,
-       "base_brier": 0.1664,
+       "base": 0.591,
+       "base_brier": 0.1669,
        "base_right": true
       },
       {
@@ -831,7 +3164,7 @@
      "props_n": 18,
      "props_right": 12,
      "props_brier": 2.3746,
-     "props_base_brier": 1.0224,
+     "props_base_brier": 1.0257,
      "props_base_n": 7,
      "props_base_right": 7,
      "market": {
@@ -913,8 +3246,8 @@
        "happened": false,
        "right": false,
        "brier": 0.2721,
-       "base": 0.505,
-       "base_brier": 0.2546,
+       "base": 0.504,
+       "base_brier": 0.2541,
        "base_right": false
       },
       {
@@ -924,8 +3257,8 @@
        "happened": true,
        "right": true,
        "brier": 0.0569,
-       "base": 0.671,
-       "base_brier": 0.1083,
+       "base": 0.67,
+       "base_brier": 0.1088,
        "base_right": true
       },
       {
@@ -935,8 +3268,8 @@
        "happened": false,
        "right": false,
        "brier": 0.3439,
-       "base": 0.545,
-       "base_brier": 0.2969,
+       "base": 0.544,
+       "base_brier": 0.2963,
        "base_right": false
       },
       {
@@ -947,7 +3280,7 @@
        "right": true,
        "brier": 0.0261,
        "base": 0.254,
-       "base_brier": 0.0644,
+       "base_brier": 0.0648,
        "base_right": true
       },
       {
@@ -957,8 +3290,8 @@
        "happened": false,
        "right": true,
        "brier": 0.1224,
-       "base": 0.408,
-       "base_brier": 0.1664,
+       "base": 0.409,
+       "base_brier": 0.1669,
        "base_right": true
       },
       {
@@ -969,7 +3302,7 @@
        "right": true,
        "brier": 0.0261,
        "base": 0.746,
-       "base_brier": 0.0644,
+       "base_brier": 0.0648,
        "base_right": true
       },
       {
@@ -979,8 +3312,8 @@
        "happened": true,
        "right": true,
        "brier": 0.1224,
-       "base": 0.592,
-       "base_brier": 0.1664,
+       "base": 0.591,
+       "base_brier": 0.1669,
        "base_right": true
       },
       {
@@ -1108,7 +3441,7 @@
      "props_n": 18,
      "props_right": 13,
      "props_brier": 0.9699,
-     "props_base_brier": 1.1214,
+     "props_base_brier": 1.1226,
      "props_base_n": 7,
      "props_base_right": 5,
      "market": {
@@ -1151,8 +3484,8 @@
        "happened": true,
        "right": false,
        "brier": 0.4086,
-       "base": 0.505,
-       "base_brier": 0.2454,
+       "base": 0.504,
+       "base_brier": 0.2459,
        "base_right": true
       },
       {
@@ -1162,8 +3495,8 @@
        "happened": true,
        "right": true,
        "brier": 0.137,
-       "base": 0.671,
-       "base_brier": 0.1083,
+       "base": 0.67,
+       "base_brier": 0.1088,
        "base_right": true
       },
       {
@@ -1173,8 +3506,8 @@
        "happened": true,
        "right": false,
        "brier": 0.3347,
-       "base": 0.545,
-       "base_brier": 0.2071,
+       "base": 0.544,
+       "base_brier": 0.2076,
        "base_right": true
       },
       {
@@ -1185,7 +3518,7 @@
        "right": true,
        "brier": 0.0725,
        "base": 0.254,
-       "base_brier": 0.0644,
+       "base_brier": 0.0648,
        "base_right": true
       },
       {
@@ -1195,8 +3528,8 @@
        "happened": false,
        "right": false,
        "brier": 0.2744,
-       "base": 0.408,
-       "base_brier": 0.1664,
+       "base": 0.409,
+       "base_brier": 0.1669,
        "base_right": true
       },
       {
@@ -1207,7 +3540,7 @@
        "right": true,
        "brier": 0.0725,
        "base": 0.746,
-       "base_brier": 0.0644,
+       "base_brier": 0.0648,
        "base_right": true
       },
       {
@@ -1217,8 +3550,8 @@
        "happened": true,
        "right": false,
        "brier": 0.2744,
-       "base": 0.592,
-       "base_brier": 0.1664,
+       "base": 0.591,
+       "base_brier": 0.1669,
        "base_right": true
       },
       {
@@ -1346,7 +3679,7 @@
      "props_n": 18,
      "props_right": 13,
      "props_brier": 1.5741,
-     "props_base_brier": 1.0224,
+     "props_base_brier": 1.0257,
      "props_base_n": 7,
      "props_base_right": 7,
      "market": {
@@ -1419,8 +3752,8 @@
        "happened": true,
        "right": false,
        "brier": 0.3129,
-       "base": 0.505,
-       "base_brier": 0.2454,
+       "base": 0.504,
+       "base_brier": 0.2459,
        "base_right": true
       },
       {
@@ -1430,8 +3763,8 @@
        "happened": true,
        "right": true,
        "brier": 0.121,
-       "base": 0.671,
-       "base_brier": 0.1083,
+       "base": 0.67,
+       "base_brier": 0.1088,
        "base_right": true
       },
       {
@@ -1441,8 +3774,8 @@
        "happened": true,
        "right": false,
        "brier": 0.2613,
-       "base": 0.545,
-       "base_brier": 0.2071,
+       "base": 0.544,
+       "base_brier": 0.2076,
        "base_right": true
       },
       {
@@ -1453,7 +3786,7 @@
        "right": true,
        "brier": 0.0578,
        "base": 0.254,
-       "base_brier": 0.0644,
+       "base_brier": 0.0648,
        "base_right": true
       },
       {
@@ -1463,8 +3796,8 @@
        "happened": false,
        "right": true,
        "brier": 0.2093,
-       "base": 0.408,
-       "base_brier": 0.1664,
+       "base": 0.409,
+       "base_brier": 0.1669,
        "base_right": true
       },
       {
@@ -1475,7 +3808,7 @@
        "right": true,
        "brier": 0.0578,
        "base": 0.746,
-       "base_brier": 0.0644,
+       "base_brier": 0.0648,
        "base_right": true
       },
       {
@@ -1485,8 +3818,8 @@
        "happened": true,
        "right": true,
        "brier": 0.2093,
-       "base": 0.592,
-       "base_brier": 0.1664,
+       "base": 0.591,
+       "base_brier": 0.1669,
        "base_right": true
       },
       {
@@ -1614,7 +3947,7 @@
      "props_n": 18,
      "props_right": 15,
      "props_brier": 1.2294,
-     "props_base_brier": 1.0224,
+     "props_base_brier": 1.0257,
      "props_base_n": 7,
      "props_base_right": 7,
      "market": {
@@ -1666,8 +3999,8 @@
        "happened": false,
        "right": false,
        "brier": 0.4834,
-       "base": 0.505,
-       "base_brier": 0.2546,
+       "base": 0.504,
+       "base_brier": 0.2541,
        "base_right": false
       },
       {
@@ -1677,8 +4010,8 @@
        "happened": false,
        "right": false,
        "brier": 0.7066,
-       "base": 0.671,
-       "base_brier": 0.4501,
+       "base": 0.67,
+       "base_brier": 0.4492,
        "base_right": false
       },
       {
@@ -1688,8 +4021,8 @@
        "happened": false,
        "right": false,
        "brier": 0.5488,
-       "base": 0.545,
-       "base_brier": 0.2969,
+       "base": 0.544,
+       "base_brier": 0.2963,
        "base_right": false
       },
       {
@@ -1700,7 +4033,7 @@
        "right": false,
        "brier": 0.7882,
        "base": 0.254,
-       "base_brier": 0.557,
+       "base_brier": 0.5558,
        "base_right": false
       },
       {
@@ -1710,8 +4043,8 @@
        "happened": true,
        "right": false,
        "brier": 0.618,
-       "base": 0.408,
-       "base_brier": 0.3506,
+       "base": 0.409,
+       "base_brier": 0.3498,
        "base_right": false
       },
       {
@@ -1722,7 +4055,7 @@
        "right": false,
        "brier": 0.7882,
        "base": 0.746,
-       "base_brier": 0.557,
+       "base_brier": 0.5558,
        "base_right": false
       },
       {
@@ -1732,8 +4065,8 @@
        "happened": false,
        "right": false,
        "brier": 0.618,
-       "base": 0.592,
-       "base_brier": 0.3506,
+       "base": 0.591,
+       "base_brier": 0.3498,
        "base_right": false
       },
       {
@@ -1861,7 +4194,7 @@
      "props_n": 18,
      "props_right": 8,
      "props_brier": 4.5512,
-     "props_base_brier": 2.8168,
+     "props_base_brier": 2.8108,
      "props_base_n": 7,
      "props_base_right": 0,
      "market": {
@@ -1913,8 +4246,8 @@
        "happened": false,
        "right": false,
        "brier": 0.2742,
-       "base": 0.505,
-       "base_brier": 0.2546,
+       "base": 0.504,
+       "base_brier": 0.2541,
        "base_right": false
       },
       {
@@ -1924,8 +4257,8 @@
        "happened": false,
        "right": false,
        "brier": 0.5421,
-       "base": 0.671,
-       "base_brier": 0.4501,
+       "base": 0.67,
+       "base_brier": 0.4492,
        "base_right": false
       },
       {
@@ -1935,8 +4268,8 @@
        "happened": false,
        "right": false,
        "brier": 0.3305,
-       "base": 0.545,
-       "base_brier": 0.2969,
+       "base": 0.544,
+       "base_brier": 0.2963,
        "base_right": false
       },
       {
@@ -1947,7 +4280,7 @@
        "right": false,
        "brier": 0.6699,
        "base": 0.254,
-       "base_brier": 0.557,
+       "base_brier": 0.5558,
        "base_right": false
       },
       {
@@ -1957,8 +4290,8 @@
        "happened": true,
        "right": false,
        "brier": 0.3936,
-       "base": 0.408,
-       "base_brier": 0.3506,
+       "base": 0.409,
+       "base_brier": 0.3498,
        "base_right": false
       },
       {
@@ -1969,7 +4302,7 @@
        "right": false,
        "brier": 0.6699,
        "base": 0.746,
-       "base_brier": 0.557,
+       "base_brier": 0.5558,
        "base_right": false
       },
       {
@@ -1979,8 +4312,8 @@
        "happened": false,
        "right": false,
        "brier": 0.3936,
-       "base": 0.592,
-       "base_brier": 0.3506,
+       "base": 0.591,
+       "base_brier": 0.3498,
        "base_right": false
       },
       {
@@ -2108,7 +4441,7 @@
      "props_n": 18,
      "props_right": 8,
      "props_brier": 3.2738,
-     "props_base_brier": 2.8168,
+     "props_base_brier": 2.8108,
      "props_base_n": 7,
      "props_base_right": 0,
      "market": {
@@ -2123,6 +4456,6 @@
    ]
   }
  ],
- "total_graded": 10,
- "total_right": 7
+ "total_graded": 20,
+ "total_right": 13
 }
