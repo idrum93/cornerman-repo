@@ -59,7 +59,7 @@
   .tile.wide{border-color:rgba(222,140,52,.55)}
   .trow{display:flex;justify-content:space-between;align-items:center;gap:6px}
   .nm{font-size:13.5px;font-weight:700;text-transform:uppercase;letter-spacing:-.01em;
-    white-space:nowrap;max-width:100%}
+    max-width:100%;overflow-wrap:break-word;line-height:1.1}
   .nm.n1{font-size:13.5px} .nm.n2{font-size:12px} .nm.n3{font-size:10.5px}
   .nm.n4{font-size:9px;letter-spacing:-.02em}
   .pnum{font-size:14px;font-weight:800}
@@ -167,6 +167,8 @@
   /* the A/B on the card: never replaces the published number, sits beside it */
   .sbtag{font-size:9px;letter-spacing:.1em;text-transform:uppercase;
     border:1px solid var(--gold);color:var(--gold);border-radius:999px;padding:1px 6px}
+  /* sandbox tick: inside the dial, where the market's tick never goes */
+  .g-sbox{stroke:var(--gold);stroke-width:2;stroke-dasharray:2.5 2}
 
   /* detail drawer */
   .scrim{position:fixed;inset:0;background:rgba(5,7,10,.62);opacity:0;pointer-events:none;
@@ -454,6 +456,42 @@ function divRow(d){ return (BR&&BR.divisions||[]).find(x=>x.division===d); }
 function nameSize(n){
   const L=String(n).length;
   return L<=8?'n1':L<=11?'n2':L<=14?'n3':'n4';
+}
+/* Shrink each tile name until it fits the box it is actually in.
+
+   The length tiers above are a guess at width, and on a four-up desktop grid
+   the guess is badly wrong: the gauge takes 148px of a 247px row, leaving each
+   name 45px. At that width even an eight-letter name at its "n1" 13.5px needs
+   double the room, so names were spilling across the dial — ZHELEZNYAKOVA,
+   SHAHBAZYAN, MEERSCHAERT were only the ones long enough to be obvious.
+
+   Tiers cannot fix this, because the constraint is pixels and the tier knows
+   only characters: the same name fits at two-up and overflows at four-up. So
+   measure the rendered box and scale to it, which also means the next
+   fifteen-letter fighter needs no new tier. The CSS ellipsis is the floor —
+   below 7.5px a name is not worth reading anyway. */
+function fitNames(root){
+  (root||document).querySelectorAll('.tile .nm').forEach(el=>{
+    el.style.fontSize='';                       // back to the tier, then measure
+    const box=el.clientWidth;
+    if(!box) return;
+    // Measure on ONE line, then shrink to that. Measuring as-wrapped is the
+    // trap: wrapped text already "fits" its box, so the loop sees nothing to do
+    // and a seven-letter name that would fit at 11px gets broken into PEREI /
+    // RA at 13.5px instead. Shrink first, wrap only if the floor is reached —
+    // so wrapping is what happens to ZHELEZNYAKOVA, not to PEREIRA.
+    el.style.whiteSpace='nowrap';
+    // Aim a shade UNDER the box, not at it. Exiting at exactly the box width
+    // left FERREIRA a fraction over once wrapping came back on, and it broke a
+    // single letter onto a second line — the loop had technically succeeded.
+    for(let i=0;i<10;i++){
+      if(el.scrollWidth<=box-2) break;
+      const cur=parseFloat(getComputedStyle(el).fontSize);
+      if(cur<=8.5) break;
+      el.style.fontSize=Math.max(8.5, cur*0.92).toFixed(2)+'px';
+    }
+    el.style.whiteSpace='';
+  });
 }
 function surname(n){
   const t=String(n||'').trim().split(/\s+/);
@@ -786,6 +824,12 @@ function gauge(b){
     ${mk&&gap>0.005?`<path d="${arc(b.p_a,b.p_market,RB)}" class="g-bridge ${marketWould}"/>`:''}
     ${op?radial(b.p_open,R+8,R+15,'g-open'):''}
     ${mk?radial(b.p_market,R+7,R+17,'g-mkt'):''}
+    ${(()=>{ /* the sandbox, INSIDE the dial so it cannot be confused with the
+                market tick that lives outside it. Only while one is active. */
+      const st=SBOX[b.bout];
+      if(!st||!st.on||!b.fin||!DATA.win_model) return '';
+      const p=sbProb(sbCorner(b.fin.a,st.a,st.blend),sbCorner(b.fin.b,st.b,st.blend));
+      return p==null?'':radial(p,R-14,R-4,'g-sbox');})()}
     <text x="${cx}" y="${cy-20}" class="g-num" text-anchor="middle">
       <tspan class="n-a">${P0(b.p_a)}</tspan><tspan class="n-s"> / </tspan><tspan class="n-b">${P0(b.p_b)}</tspan></text>
   </svg>`;
@@ -1265,7 +1309,7 @@ function render(){
   document.querySelectorAll('[data-f]').forEach(el=>
     el.addEventListener('click',()=>{ ONLY_GAPS = el.dataset.f==='gaps'; render(); }));
   bindTabs();          // the page's own tab groups, bound after every draw
-
+  fitNames();          // names scale to their box, which only exists once drawn
 }
 
 /* ---- drawer ---- */
@@ -1634,7 +1678,27 @@ function group(title,sub,rows,priced,values){
 
    Nothing here is stored, published, or graded. It is in memory, it resets on
    reload, and the ledger never sees it. */
-const SBOX = {};                       // bout -> {a:{...}, b:{...}, blend, on}
+/* Kept across a refresh, because the alternative is re-pasting two stat blocks
+   and two records every time the page reloads, and nobody does that twice.
+   Keyed by bout, so a sandbox follows its own fight and cannot bleed onto
+   another. Entries for bouts not on the current card are dropped on load,
+   which keeps last month's pastes from lingering invisibly. Wrapped because
+   storage throws in a private window, and a saved sandbox is a convenience —
+   it must never be the reason the page fails to draw. */
+const SB_KEY='cornerman.sandbox.v1';
+function sbLoad(){
+  try{
+    const raw=localStorage.getItem(SB_KEY); if(!raw) return {};
+    const o=JSON.parse(raw)||{};
+    const live=new Set((DATA&&DATA.bouts||[]).map(b=>b.bout));
+    Object.keys(o).forEach(k=>{ if(!live.has(k)) delete o[k]; });
+    return o;
+  }catch(e){ return {}; }
+}
+function sbSave(){
+  try{ localStorage.setItem(SB_KEY, JSON.stringify(SBOX)); }catch(e){}
+}
+let SBOX = {};                         // bout -> {a:{...}, b:{...}, blend, on}
 const SB_FILL = {str_acc:'striking accuracy', slpm:'strikes landed per min',
   sapm:'strikes absorbed per min', td15:'takedowns per 15', sub15:'submissions per 15',
   str_def:'striking defense', td_def:'takedown defense'};
@@ -2056,18 +2120,20 @@ function bindSandbox(b){
       st[c+'_recraw']=ip.value;
       st[c+'_rec']=parseRecord(ip.value);
     });
-    redraw();
+    sbSave(); redraw();
   };
   const go=box.querySelector('.sbgo'); if(go) go.addEventListener('click',read);
   const cl=box.querySelector('.sbclear');
   if(cl) cl.addEventListener('click',()=>{
-    st.a={};st.b={};st.a_raw='';st.b_raw='';st.on=false;st.blend=1;redraw();
+    st.a={};st.b={};st.a_raw='';st.b_raw='';st.a_m={};st.b_m={};
+    st.a_rec=null;st.b_rec=null;st.a_recraw='';st.b_recraw='';st.on=false;st.blend=1;
+    sbSave(); redraw();
     if(typeof render==='function') render();
   });
   const rg=box.querySelector('.sbrange');
-  if(rg) rg.addEventListener('input',()=>{st.blend=(+rg.value)/100;redraw();});
+  if(rg) rg.addEventListener('input',()=>{st.blend=(+rg.value)/100;sbSave();redraw();});
   const ck=box.querySelector('.sbchip');
-  if(ck) ck.addEventListener('change',()=>{st.on=ck.checked;
+  if(ck) ck.addEventListener('change',()=>{st.on=ck.checked; sbSave();
     if(typeof render==='function') render();});
 }
 function cssEsc(s){return String(s).replace(/["\\]/g,'\\$&');}
@@ -2079,7 +2145,11 @@ function sandboxChip(b){
   if(!st||!st.on||!b.fin||!DATA.win_model) return '';
   const p=sbProb(sbCorner(b.fin.a,st.a,st.blend),sbCorner(b.fin.b,st.b,st.blend));
   if(p==null) return '';
-  return `<span class="sbtag" title="the same model re-run on UFC.com inputs — not published, not graded">ufc.com ${P0(p)}%</span>`;
+  // Both sides, like every other number on this row. A lone "67%" leaves the
+  // reader to work out whose it is, while the market chip beside it spells out
+  // the split — two neighbouring numbers in different formats is a worse
+  // problem than a slightly longer chip.
+  return `<span class="sbtag" title="the same model re-run on UFC.com inputs — not published, not graded">ufc.com ${P0(p)}/${P0(1-p)}</span>`;
 }
 
 function marketTabs(b,mk,rr,totals){
@@ -2450,8 +2520,11 @@ Promise.all([
   fetch('usage.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null)
 ]).then(([j,h,br,sc,us])=>{
   DATA=j; HIST=h; BR=br; SC=sc; USG=us;
+  SBOX=sbLoad();   // after DATA: it is what says which bouts still exist
   showUsage(); showRecord();
   document.getElementById('stamp').textContent=fmtET(j.generated_utc);
+  // the name fit depends on the box, so it has to run again when the box moves
+  let rt; addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(fitNames,120);});
   render();
 }).catch(e=>{
   document.getElementById('app').innerHTML='<div class="note"><b>Could not load predictions.</b><br>'+
