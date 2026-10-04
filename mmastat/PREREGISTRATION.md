@@ -3467,6 +3467,93 @@ column is empty, so a blank reads as a deliberate withholding rather than a
 failure. The thin-record warning still applies on top, since a short UFC record
 and a short career record are different things and a fighter can have both.
 
+## No-read bouts, and the one number that must stay withheld
+
+A no-read bout has no corpus state at all — the fighter is absent from UFCStats,
+which is why there is no tile. These entries are now openable and carry the
+panel, because the gap between "nothing" and "something from the records" is
+the largest on the card.
+
+The method and round read works here unchanged: it draws on the pasted records
+and the league base rate, and on nothing from the corpus.
+
+The WINNER read is different and is gated. Seven of the fourteen inputs have no
+source, and zeroing their differentials does not express ignorance — it asserts
+the two men are level on rating, strength of schedule, UFC mileage, chin and
+layoff. **That assumption is wrong in a predictable direction for exactly this
+population**: a fighter is no-read because he is new to the UFC, and a newcomer
+is typically young and untested against someone established. A random error
+would be tolerable; a systematic one is not.
+
+So optional age and reach fields were added, both of which sit in the bio block
+of a UFC.com fighter page. They recover the two largest missing weights:
+
+| | share of the model's weight |
+|---|---|
+| from the pasted stats block | 44.9% |
+| age alone | 18.8% |
+| reach alone | 4.4% |
+| rating, schedule, mileage, chin, layoff (no source) | 31.9% |
+
+**Assumed equal without age and reach: 55.1%. With them: 31.9%.** The winner
+number therefore appears only once an age or a reach is supplied on at least one
+side, and it carries the remaining assumption in its own label. Below that bar
+the method and round read still shows.
+
+### Saying how much higher, and naming the outcome
+
+A gold fill told a reader the records read was further from the league rate but
+not by how much or in which direction, so the chip now spells the gap out:
+"ufc.com FINISH 78% **+29 vs model**". The comparison is against the model's
+number for the SAME outcome, which is the only form of "higher" that means
+anything — a records FINISH set against a model DISTANCE would be two different
+claims. It is null on a no-read bout, where there is no model number to be
+higher than. Verified in both directions: +29 where the records run hot, and
+**-14** where the model is the more extreme of the two.
+
+A second chip names the single most likely outcome — "ufc.com VAN BY KO 50%" —
+when one corner's route is six points clear of the next, and is suppressed
+entirely otherwise. A chip is read at a glance, and a hedged chip is read as a
+call.
+
+The six corner-by-method cells and the "is it clear" test now live in shared
+helpers (`sbCells`, `sbTop`) used by both the chip and the drawer verdict. They
+were about to compute the same answer in two places, which is exactly how the
+tile and the drawer came to disagree on the Pulyaev bout.
+
+### Provenance on the card
+
+Once something is pasted, the no-read entry carries a summary — "ufc.com FINISH
+55%" in the same gold dashed styling the tiles use, under a line reading "your
+UFC.com read, not the model". Without it the work was invisible from the card
+and a reader would have had to open every no-read entry to recall which ones
+they had filled in.
+
+On these bouts the risk runs the other way from the tiles. There is no model
+number anywhere on the entry, so the danger is not that the pasted read is
+confused WITH the model's but that it is mistaken FOR it — hence the wording
+names the source rather than merely distinguishing two numbers.
+
+Two defects found getting that to work, both of the same shape — a no-read bout
+is not in `DATA.bouts`:
+
+- `sbLoad` tested membership against `DATA.bouts` alone, so **every no-read
+  sandbox was deleted on reload**, discarding exactly the pastes that cost the
+  most effort. It now tests against `no_read` as well.
+- The redraw was gated on the show-on-card flag, which a no-read bout cannot
+  have because it has no tile to show anything on, so the card summary never
+  refreshed.
+
+### A bug this surfaced twice
+
+With no winner probability, `pA` was null, and `pA*A + (1-pA)*B` collapses to
+`0*A + 1*B`: the entire read became corner B's record with corner A silently
+discarded. It rendered plausible numbers, which is why it survived the first
+pass. Fixed in `sbMethodRead` and then found again in `sbVerdict`, which builds
+its own six cells rather than reusing that output — on a test bout where corner
+A was the heavy finisher the verdict named corner B's route. No winner
+information now means EVEN weighting, in both places.
+
 ## The plain-language verdict, and the trap in it
 
 The panel heads the rows with one sentence — "Finish likely · Van by KO/TKO ·
