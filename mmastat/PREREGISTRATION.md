@@ -3445,6 +3445,28 @@ verdict ("THIN — 2 WINS ON ONE SIDE") — but it may not lead or dim the model
 call. Leading is the one place the weaker read displaces the stronger one, so
 that is the one place the record has to be thick enough to mean it.
 
+## The thin-bout case, where the panel is at its strongest
+
+The panel is also available on bouts the model marks `thin` (addendum 19: a
+fighter with 0-1 prior UFC fights). It had been unreachable there, because the
+drawer swaps the whole markets card for a winner-only card and the tab lived
+inside the card it swapped out.
+
+This is the one place the panel is not a second opinion on a number that already
+exists. On a thin bout the model publishes **no** method and **no** round —
+neither was ever tested on records that short, so it withholds them rather than
+guessing — while a UFC.com page carries the fighter's entire career, including
+bouts outside the UFC that the corpus has never held. So the usual objection
+from addendum 29 does not apply: this is not the same evidence arriving by
+another route, it is evidence the model genuinely cannot see.
+
+Two consequences in the code. "Leading" now requires a model call to outrun —
+with `m_decision` null the records read is the only read, and claiming it had
+beaten something would be false. And the method block states why its model
+column is empty, so a blank reads as a deliberate withholding rather than a
+failure. The thin-record warning still applies on top, since a short UFC record
+and a short career record are different things and a fighter can have both.
+
 ## The plain-language verdict, and the trap in it
 
 The panel heads the rows with one sentence — "Finish likely · Van by KO/TKO ·
