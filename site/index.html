@@ -863,7 +863,7 @@ function thinNote(b){
 function tile(b){
   const mk=b.p_market!=null, hot=mk&&Math.abs(b.edge)>=0.05;
   const sbl=sbLengthCall(b);
-  return `<button class="tile ${hot?'is-hot':''} ${sbl&&!sbl.thin&&sbl.conv>sbl.modelConv+0.01?'sb-leads':''}" data-id="${esc(b.bout)}">
+  return `<button class="tile ${hot?'is-hot':''} ${sbl&&!sbl.modelSilent&&!sbl.thin&&sbl.conv>sbl.modelConv+0.01?'sb-leads':''}" data-id="${esc(b.bout)}">
     <div class="trow" style="margin-bottom:2px">
       <span class="lbl">${b.weight_class?`<b class="divc">${esc(divShort(b.weight_class))}</b> · `:''}${b.rounds===5?'5 rds':'3 rds'}${evChip(b,true)}</span>${tag(b)}</div>
     <div class="dialrow">
@@ -2094,8 +2094,14 @@ function sbMethodBlock(b,st,pA){
       <span class="mono" style="color:var(--dim)">${P0(m.ko_share)}/${P0(m.sub_share)}/${P0(m.dec_share)} raw</span>
       <span class="mono">${P0(s.ko)}% KO · ${P0(s.sub)}% sub · ${P0(s.dec)}% dec</span></div>`;
   };
+  const silent=(b.m_decision==null);
   return `<div style="margin-top:14px;padding-top:11px;border-top:1px solid var(--line)">
-    <div class="lbl">How this fight ends · model vs these records</div>
+    <div class="lbl">How this fight ends · ${silent?'the records only':'model vs these records'}</div>
+    ${silent?`<div class="note" style="margin:5px 0 8px">The model publishes no method or
+      round for this bout — neither was ever tested on records this short, so it withholds
+      them rather than guessing. The column beside these rows is empty for that reason, not
+      because anything failed. What follows is the pasted records on their own, including
+      whatever happened outside the UFC, which is evidence the corpus does not hold.</div>`:''}
     ${read?sbVerdict(ma,mb,pA,b,st):''}
     ${each(surname(b.a),ma)}${each(surname(b.b),mb)}
     ${read?`<div class="sbrow" style="border:none;padding-bottom:0"><span class="sbl"
@@ -2126,7 +2132,7 @@ function sbMethodBlock(b,st,pA){
       because three wins all by submission reads as 100% submission. Shrunk it beats
       the base rate by +0.044. Both numbers are shown above — raw in gray, shrunk in
       white — so you can see how much of a thin record is noise.<br><br>
-      <b>It still does not add to the model.</b> Career KO share and submission share
+      ${silent?'<b>Here it is the only read.</b> The caution below is about adding this to a model number that exists; on this bout there is none to add to, so what is above stands on its own — with the thin-record warning doing the work instead.':'<b>It still does not add to the model.</b>'} Career KO share and submission share
       went into the method model on 1,300 held-out bouts at +0.0017 each, p = .55;
       round-one share came back negative; all four round-one targets at 0.0000
       (addendum 29). The model already carries knockdown rate, submission rate and
@@ -2214,8 +2220,8 @@ function sbLengthCall(b){
   const p=kind==='finish'?fin:read.dec;
   const conv=kind==='finish'?fin-finBase:read.dec-decBase;
   // the model's own distance from the same base, for an apples-to-apples look
-  let modelConv=0;
-  if(b.m_decision!=null){
+  let modelConv=0, modelSilent=(b.m_decision==null);
+  if(!modelSilent){
     const mf=1-b.m_decision;
     modelConv=Math.max(mf-finBase, b.m_decision-decBase);
   }
@@ -2241,7 +2247,7 @@ function sbLengthCall(b){
   const wins=m=>['ko','sub','dec'].reduce((t,x)=>t+(m[(x)+'_n']||0),0);
   const thin=Math.min(wins(st.a_m||{}), wins(st.b_m||{}));
   return {kind:kind, p:p, conv:conv, modelConv:modelConv, round:round,
-          wins:thin, thin:thin<3};
+          wins:thin, thin:thin<3, modelSilent:modelSilent};
 }
 function sandboxChip(b){
   const st=SBOX[b.bout];
@@ -2264,7 +2270,7 @@ function sandboxChip(b){
      of a point anywhere else. Same discipline as the 6-point bar on "no clear
      favorite": a difference too small to mean anything should not change what
      the card says. */
-  const lead=L.conv>L.modelConv+0.01 && !L.thin;
+  const lead=!L.modelSilent && !L.thin && L.conv>L.modelConv+0.01;
   return win+`<span class="sbtag len ${lead?'leads':''}"
     title="from the pasted records, not the model${lead?' — further from the league rate than the model is, which is not the same as more accurate':''}">ufc.com ${
     L.kind==='finish'?'FINISH':'DISTANCE'} ${P0(L.p)}%${L.round?' · '+L.round:''}${
@@ -2608,7 +2614,21 @@ function open_(id){
       ${group('Winner',mk?'market price shown':'no feed',[
         propRow(`${b.a} wins`,b.p_a,'var(--red)',mk?b.p_market:null,mk?`market ${P1(b.p_market)}%`:null,'winner_a'),
         propRow(`${b.b} wins`,b.p_b,'var(--blue)',mk?1-b.p_market:null,mk?`market ${P1(1-b.p_market)}%`:null)],mk)}
-    </div>`:`<div class="card"><div class="ghead" style="background:none;border:none;padding:0 0 8px">
+    </div>
+    ${(()=>{
+      /* The sandbox on a thin bout, where it has the strongest case it will
+         ever have. The model withholds method and round here because nothing
+         was tested on records this short — but a UFC.com page carries the
+         fighter's whole career, including fights outside the UFC that the
+         corpus has never seen. So this is the one place the panel is not a
+         second opinion on a number the model already gives: it is the only
+         read available, and it comes from evidence the model genuinely cannot
+         see rather than the same evidence by another route. */
+      const sp=sandboxPanel(b);
+      return sp?`<div class="card"><div class="ghead" style="background:none;border:none;padding:0 0 8px">
+        <span class="gname">UFC.com check</span>
+        <span class="lbl">the model withheld method and round here — this can still say something</span></div>
+        ${sp}</div>`:'';})()}`:`<div class="card"><div class="ghead" style="background:none;border:none;padding:0 0 8px">
       <span class="gname">All markets priced</span><span class="lbl">the model's number for every contract a book sells</span></div>
       ${marketTabs(b,mk,rr,totals)}
     </div>`}
