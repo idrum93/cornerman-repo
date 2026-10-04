@@ -94,7 +94,7 @@
     font-size:11.5px;color:var(--dim)}
 
   /* card-shape strip: the one readout whose unit is the whole card rather than
-     a bout. Deliberately plainer than the tiles below it — no corner colour, no
+     a bout. Deliberately plainer than the tiles below it — no corner color, no
      gauge — so it does not read as another per-fight gauge. */
   .cshape{border:1px solid var(--line);border-radius:4px;background:var(--panel);
     margin:10px 0 2px;padding:9px 12px}
@@ -124,6 +124,49 @@
   .ctally:last-of-type{border-bottom:none}
   .ctally .ctl{min-width:168px;color:var(--bone)}
   .ctally b{font-size:13.5px}
+
+  /* UFC.com sandbox */
+  .sbgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  @media(max-width:620px){.sbgrid{grid-template-columns:1fr}}
+  .sbta{display:block;width:100%;margin-top:4px;box-sizing:border-box;
+    background:var(--panel2);color:var(--bone);border:1px solid var(--line);
+    border-radius:4px;padding:6px 8px;font:11px/1.45 ui-monospace,Menlo,monospace;
+    resize:vertical}
+  .sbta:focus{outline:none;border-color:#3B4557}
+  .sbrec{display:block;width:100%;margin-top:5px;box-sizing:border-box;
+    background:var(--panel2);color:var(--bone);border:1px solid var(--line);
+    border-radius:4px;padding:5px 8px;font:11px ui-monospace,Menlo,monospace}
+  .sbrec:focus{outline:none;border-color:#3B4557}
+  /* the plain-language verdict. Bordered on one side rather than filled, so it
+     reads as a summary of the rows under it and not as another chip competing
+     with the tile's own badges. */
+  .sbverd{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;
+    margin:8px 0 10px;padding:7px 11px;border:1px solid var(--line);
+    border-left-width:3px;border-radius:4px;background:var(--panel2);font-size:12.5px}
+  .sbverd b{font-size:12.5px;letter-spacing:.04em;text-transform:uppercase}
+  .sbverd.fin{border-left-color:var(--gold)}
+  .sbverd.fin b{color:var(--gold)}
+  .sbverd.dist{border-left-color:var(--blue)}
+  .sbverd.dist b{color:var(--bluesoft)}
+  .sbverd.soft{border-left-color:var(--dim)}
+  .sbverd.soft b{color:var(--mute)}
+  .sbverd .vs{margin-left:auto;color:var(--mute);font-size:11px}
+  .sbacts{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:9px}
+  .sbacts .more{background:none;border:1px solid var(--line);color:var(--mute);
+    border-radius:999px;padding:4px 11px;font-size:9.5px;letter-spacing:.14em;
+    text-transform:uppercase;cursor:pointer}
+  .sbacts .more:hover{color:var(--bone);border-color:#3B4557}
+  .sbblend{display:flex;align-items:center;gap:7px;margin-left:auto}
+  .sbrange{width:110px;accent-color:var(--gold)}
+  .sbrow{display:flex;align-items:baseline;gap:12px;font-size:11.5px;
+    padding:4px 0;border-bottom:1px solid var(--line)}
+  .sbrow .sbl{flex:1;color:var(--mute)}
+  .sbout{display:flex;align-items:baseline;gap:20px;flex-wrap:wrap;margin-top:12px;
+    padding-top:10px;border-top:1px solid var(--line)}
+  .sbshow{display:flex;align-items:center;gap:6px;margin-left:auto;cursor:pointer}
+  /* the A/B on the card: never replaces the published number, sits beside it */
+  .sbtag{font-size:9px;letter-spacing:.1em;text-transform:uppercase;
+    border:1px solid var(--gold);color:var(--gold);border-radius:999px;padding:1px 6px}
 
   /* detail drawer */
   .scrim{position:fixed;inset:0;background:rgba(5,7,10,.62);opacity:0;pointer-events:none;
@@ -584,7 +627,7 @@ function topCall(b){
   const famP=fam?(fam==='finish'?pfin:pdec):null;
   // Round, only when the call is a finish. The round distribution is for the
   // fight, not conditioned on who wins — the model does not price per-fighter
-  // hazards — so it is stated as a share of finishes and labelled that way.
+  // hazards — so it is stated as a share of finishes and labeled that way.
   let round=null;
   if(!k.startsWith('dec_') && b.p_finish>0.02){
     const rs=Object.keys(b).filter(x=>/^p_end_r\d$/.test(x)&&b[x]!=null)
@@ -774,6 +817,7 @@ function tile(b){
       <div class="fcol r"><span class="nm nm-b ${nameSize(surname(b.b))} ${b.p_a<.5?'fav':''}" title="${esc(b.b)}">${esc(surname(b.b))}</span></div>
     </div>
     <div class="gkey">
+      ${sandboxChip(b)}
       ${mk?`<span class="k-market">market ${P0(b.p_market)}/${P0(1-b.p_market)}</span>`:'<span class="k-open-l">no market line</span>'}
       ${b.p_open!=null?`<span class="k-open-l" title="the first market price the ledger captured for this bout">line opened ${P0(b.p_open)}/${P0(1-b.p_open)}</span>`:''}
       ${mk&&b.p_open!=null&&Math.abs(b.p_market-b.p_open)>=0.005?`<span
@@ -792,7 +836,7 @@ function tile(b){
       const lbc=lengthBadge(b);
       const matches=lbc&&((lbc.kind==='finish'&&c.fam==='finish')||(lbc.kind==='distance'&&c.fam==='decision'));
       /* The family is a fact about the FIGHT, so it gets neither corner's
-         colour — it sat in the corner tint of whoever the route favoured,
+         color — it sat in the corner tint of whoever the route favoured,
          which read as though "a finish" belonged to that fighter. And it says
          "distance", not "decision": "a decision 54% · Pinas by decision 30%"
          used one word for two different claims. Its own pill, so it reads as
@@ -1564,6 +1608,480 @@ function group(title,sub,rows,priced,values){
 /* One row of tabs over a single panel area, the way a sportsbook lays its
    markets out: every category one click away instead of a long scroll. Empty
    categories are dropped rather than shown blank. */
+/* ------------------------------------------------------------------ sandbox
+   Re-run the SAME win model on numbers taken off a UFC.com fighter page, to
+   see how far the pick moves when the striking and grappling inputs come from
+   somewhere else. Not a second model and not a second opinion: the fourteen
+   coefficients and the scaler are published in predictions.json, so this
+   reproduces the real probability to eleven decimal places and then changes
+   one set of inputs. Anything that only *estimated* the effect would be a
+   model nobody registered or graded.
+
+   What it cannot do, stated here because the panel states it on screen too:
+   a UFC.com page carries seven of the fourteen inputs. The seven it does not
+   carry — career rating, strength of schedule, UFC mileage, losses by strikes,
+   reach, age and layoff — hold 55% of the model's weight and include its three
+   largest coefficients, age most of all. So no paste produces "what UFC.com's
+   numbers say"; it produces "what this model says when these seven inputs are
+   swapped and the rest are held".
+
+   And the swap is not like for like. The model's striking and takedown rates
+   are opponent-adjusted and shrunk toward a divisional prior for fighters with
+   little tape; UFC.com's are raw career averages. Dropping a raw number into a
+   slot built for an adjusted one changes what the number MEANS, not just where
+   it came from. That is the honest caveat and it is why this lives in a tab
+   marked as a check rather than feeding anything.
+
+   Nothing here is stored, published, or graded. It is in memory, it resets on
+   reload, and the ledger never sees it. */
+const SBOX = {};                       // bout -> {a:{...}, b:{...}, blend, on}
+const SB_FILL = {str_acc:'striking accuracy', slpm:'strikes landed per min',
+  sapm:'strikes absorbed per min', td15:'takedowns per 15', sub15:'submissions per 15',
+  str_def:'striking defense', td_def:'takedown defense'};
+// which published input each pasted field stands in for
+const SB_MAP = {str_acc:'str_acc', slpm:'adj_slpm', sapm:'sapm', td15:'adj_td15',
+                sub15:'sub15', str_def:'str_def', td_def:'td_def'};
+const SB_HELD = {elo:'career rating', opp_elo:'strength of schedule',
+  log_exp:'UFC mileage', ko_loss_rate:'losses by strikes', reach:'reach',
+  age:'age', log_layoff:'layoff'};
+
+const SB_SKIP = /^(%|per\s*min|per\s*15\s*min)$/i;
+const SB_NUM  = /^-?\d+(?:[.,]\d+)?%?$/;
+const SB_TIME = /^\d{1,3}:\d{2}$/;
+function sbNum(s){
+  if(SB_TIME.test(s)){const p=s.split(':').map(Number);return p[0]+p[1]/60;}
+  const v=parseFloat(String(s).replace(/[,%]/g,''));return isFinite(v)?v:null;
+}
+/* Backward first, all the way, THEN forward. Interleaving the directions by
+   distance looked symmetric and was wrong: "48 / % / Sig. Str. Defense / 58"
+   keeps its own value two lines back behind a unit line and the NEXT field's
+   value one line ahead, so the forward hit won and every percentage field read
+   its neighbor's number. Skipping a unit line must not cost a step. */
+function sbNear(L,i){
+  for(let j=i-1;j>=Math.max(0,i-4);j--){
+    const t=L[j]; if(SB_SKIP.test(t))continue;
+    if(SB_NUM.test(t)||SB_TIME.test(t))return sbNum(t); break;
+  }
+  for(let j=i+1;j<=Math.min(L.length-1,i+4);j++){
+    const t=L[j]; if(SB_SKIP.test(t))continue;
+    if(SB_NUM.test(t)||SB_TIME.test(t))return sbNum(t); break;
+  }
+  return null;
+}
+const SB_FIELDS=[
+  ['str_acc',/^striking accuracy$/i, v=>v/100],
+  ['sapm',   /^sig\.? str\.? absorbed$/i, v=>v],
+  ['slpm',   /^sig\.? str\.? landed$/i, v=>v],
+  ['td15',   /^takedown avg$/i, v=>v],
+  ['sub15',  /^submission avg$/i, v=>v],
+  ['str_def',/^sig\.? str\.? defense$/i, v=>v/100],
+  ['td_def', /^takedown defense$/i, v=>v/100]];
+/* "Win by Method" is laid out differently from the rate fields: a section
+   heading, then label/value pairs whose value carries a count AND a percent
+   ("KO/TKO" then "6 (22%)"). Parsed separately rather than bent into the rate
+   parser, which walks outward for a bare number and would read the count as
+   the percent. UFC.com rounds each share, so they are renormalized to sum to
+   one. These are WIN-side shares only — the page publishes no losses-by-method,
+   which is why the combined read below has to weight them by who wins. */
+function parseUfcMethod(text){
+  const L=String(text||'').split(/\n+/).map(s=>s.trim()).filter(Boolean);
+  const start=L.findIndex(t=>/^win by method$/i.test(t)), out={};
+  if(start<0) return out;
+  const KEY={'ko/tko':'ko','ko':'ko','dec':'dec','decision':'dec',
+             'sub':'sub','submission':'sub'};
+  for(let i=start+1;i<Math.min(L.length,start+14);i++){
+    const k=KEY[L[i].toLowerCase()]; if(!k||!L[i+1]) continue;
+    const m=L[i+1].match(/^(\d+)\s*\((\d+(?:\.\d+)?)%\)$/);
+    if(m){out[k+'_n']=+m[1]; out[k+'_share']=(+m[2])/100;}
+  }
+  const s=['ko','dec','sub'].reduce((a,k)=>a+(out[k+'_share']||0),0);
+  if(s>0)['ko','dec','sub'].forEach(k=>{if(out[k+'_share']!=null)out[k+'_share']/=s;});
+  for(let i=0;i<L.length;i++){
+    if(/^first round finishes$/i.test(L[i])){ const v=sbNear(L,i); if(v!=null) out.r1_n=v; break; }
+  }
+  return out;
+}
+function parseRecord(s){
+  const m=String(s||'').match(/(\d+)\s*-\s*(\d+)(?:\s*-\s*(\d+))?/);
+  if(!m) return null;
+  const w=+m[1], l=+m[2], dr=m[3]?+m[3]:0;
+  return (w+l+dr)>0 ? {w:w,l:l,d:dr,n:w+l+dr} : null;
+}
+/* Timing, from the one timing number a UFC.com page carries: first-round
+   finishes over total bouts.
+
+   Averaged across the corners, never summed. "Ends in round one" is a shared
+   event, so adding the two rates looks right and is badly wrong — measured on
+   6,823 bouts the summed version scores 0.638 against a 0.555 base rate, worse
+   than guessing, while the average comes in at 0.547. These are WIN-side rates
+   that already carry "and he won it"; adding them double-counts.
+
+   Honest about its size: +1.4% over the base rate, against the method read's
+   +4.3%. It earns its place only because it is the one thing the method mix
+   cannot say — when, not how. */
+function sbR1Read(st,b){
+  const base=((((BR||{}).market_bases||{}).ends_before)||{})[b.rounds===5?'5':'3'];
+  const b1=base&&base['2']!=null?base['2']:0.2533;
+  const one=(m,rec)=>{
+    if(!rec||m.r1_n==null) return null;
+    return (m.r1_n + SB_SHRINK*b1)/(rec.n + SB_SHRINK);
+  };
+  const ra=one(st.a_m||{},st.a_rec), rb=one(st.b_m||{},st.b_rec);
+  if(ra==null&&rb==null) return null;
+  const vals=[ra,rb].filter(v=>v!=null);
+  return {p:vals.reduce((x,y)=>x+y,0)/vals.length, base:b1, both:vals.length===2};
+}
+/* How the two records alone would call the method. A fighter's method shares
+   are conditional on him winning — UFC.com gives no losses-by-method — so the
+   only sound combination weights each man's own habit by his chance of being
+   the one who wins:  P(KO) = p(A)*A's KO share + p(B)*B's KO share.
+   Returns null unless both corners have a mix, because half a fight's worth of
+   record is not a read. */
+/* The league's own method mix, for shrinking toward. Weighted across divisions
+   so it tracks the corpus rather than a number typed in here. */
+function sbBaseMix(){
+  const D=(BR||{}).divisions;
+  if(D&&D.length){
+    let n=0,ko=0,sub=0;
+    D.forEach(d=>{ if(d.n){n+=d.n; ko+=d.n*(d.ko||0); sub+=d.n*(d.sub||0);} });
+    if(n){ const K=ko/n,S=sub/n; return {ko:K,sub:S,dec:Math.max(0,1-K-S)}; }
+  }
+  return {ko:0.317,sub:0.182,dec:0.501};
+}
+/* Shrunk toward that mix, because the raw shares are the worst version of this
+   number and it is not close. Scored on 6,823 bouts, as a method prediction
+   against the league base rate: raw career shares come in at 2.11 nats
+   (win-side) and 1.81 (all bouts) against the base rate's 1.02 — far WORSE
+   than saying "about half go to decision" every time. A fighter with three
+   wins all by submission reads 100% submission, and averaging two such
+   distributions produces confident nonsense.
+   Shrunk with k=5 the same mix comes in at 0.979, which BEATS the base rate by
+   +0.044. Same data, opposite conclusion: the signal is real and the raw
+   display was hiding it behind sampling noise. k=5 was the best of 0/2/5/10/
+   20/40 and the curve is flat between 2 and 10, so nothing hangs on the exact
+   value. */
+const SB_SHRINK = 5;
+function sbShrinkMix(m){
+  if(m.ko_share==null) return null;
+  const base=sbBaseMix();
+  const c={ko:m.ko_n, sub:m.sub_n, dec:m.dec_n};
+  const n=(c.ko||0)+(c.sub||0)+(c.dec||0);
+  if(!n) return {ko:m.ko_share,sub:m.sub_share,dec:m.dec_share};
+  const out={};
+  ['ko','sub','dec'].forEach(k=>{out[k]=((c[k]||0)+SB_SHRINK*base[k])/(n+SB_SHRINK);});
+  return out;
+}
+function sbMethodRead(ma,mb,pA){
+  const A=sbShrinkMix(ma), B=sbShrinkMix(mb);
+  if(!A||!B) return null;
+  const out={};
+  ['ko','sub','dec'].forEach(k=>{out[k]=pA*A[k]+(1-pA)*B[k];});
+  return out;
+}
+function parseUfcBlock(text){
+  const L=String(text||'').split(/\n+/).map(s=>s.trim()).filter(Boolean), out={};
+  SB_FIELDS.forEach(function(F){
+    const key=F[0], re=F[1], fn=F[2];
+    for(let i=0;i<L.length;i++){
+      if(!re.test(L[i])) continue;
+      // "Sig. Str. Landed" also matches the raw count heading "Sig. Strikes
+      // Landed"; the per-minute one is the one trailed by a "Per Min" marker.
+      if((key==='slpm'||key==='sapm')&&!(L[i+1]&&/per\s*min/i.test(L[i+1]))) continue;
+      const v=sbNear(L,i);
+      if(v!=null){ out[key]=fn(v); break; }
+    }
+  });
+  return out;
+}
+/* The model, re-run. Mirrors make_features() in features.py exactly. */
+function sbFeatures(a,bq){
+  const f={};
+  ['elo','opp_elo','log_exp','adj_slpm','sapm','str_acc','str_def',
+   'ko_loss_rate','reach','age','log_layoff'].forEach(k=>{f['d_'+k]=a[k]-bq[k];});
+  f.grapple_edge=a.adj_td15*(1-bq.td_def)-bq.adj_td15*(1-a.td_def);
+  f.ko_edge=a.adj_slpm*bq.ko_loss_rate-bq.adj_slpm*a.ko_loss_rate;
+  f.sub_edge=a.sub15*(1-bq.td_def)-bq.sub15*(1-a.td_def);
+  return f;
+}
+function sbProb(a,bq){
+  const M=DATA.win_model; if(!M) return null;
+  const f=sbFeatures(a,bq); let z=0;
+  for(let i=0;i<M.features.length;i++){
+    const v=f[M.features[i]];
+    if(v==null||!isFinite(v)) return null;
+    z+=M.coef[i]*((v-M.mean[i])/M.scale[i]);
+  }
+  return 1/(1+Math.exp(-z));
+}
+/* Blend at the INPUT, not at the probability. Averaging two probabilities
+   answers "split the difference between two answers"; averaging the inputs
+   answers "suppose the truth about this fighter's rate is between the two
+   sources", which is the question a disagreement over a number actually
+   raises. */
+function sbCorner(base,over,w){
+  const out={}; for(const k in base) out[k]=base[k];
+  for(const k in over){
+    const slot=SB_MAP[k]; if(!slot||over[k]==null) continue;
+    out[slot]=base[slot]*(1-w)+over[k]*w;
+  }
+  return out;
+}
+function sbState(b){
+  const k=b.bout;
+  if(!SBOX[k]) SBOX[k]={a:{},b:{},blend:1,on:false};
+  return SBOX[k];
+}
+function sbWeightShare(){
+  const M=DATA.win_model; if(!M) return null;
+  const touched=new Set(['d_adj_slpm','d_sapm','d_str_acc','d_str_def',
+                         'grapple_edge','ko_edge','sub_edge']);
+  let t=0,all=0;
+  M.features.forEach((n,i)=>{const w=Math.abs(M.coef[i]); all+=w; if(touched.has(n)) t+=w;});
+  return all?t/all:null;
+}
+function sandboxPanel(b){
+  if(!DATA.win_model||!b.fin||!b.fin.a||!b.fin.b) return '';
+  const st=sbState(b), share=sbWeightShare();
+  const nA=esc(surname(b.a)), nB=esc(surname(b.b));
+  const pBase=sbProb(b.fin.a,b.fin.b);
+  const A=sbCorner(b.fin.a,st.a,st.blend), B=sbCorner(b.fin.b,st.b,st.blend);
+  const pNew=(Object.keys(st.a).length||Object.keys(st.b).length)?sbProb(A,B):null;
+
+  const cmp=Object.keys(SB_FILL).map(k=>{
+    const slot=SB_MAP[k], ours=b.fin.a[slot], ourB=b.fin.b[slot];
+    const ga=st.a[k], gb=st.b[k];
+    if(ga==null&&gb==null) return '';
+    const fmt=v=>v==null?'—':(k==='str_acc'||k==='str_def'||k==='td_def'
+      ? P0(v)+'%' : (+v).toFixed(2));
+    return `<div class="sbrow"><span class="sbl">${SB_FILL[k]}</span>
+      <span class="mono nm-a">${fmt(ours)} → ${fmt(ga)}</span>
+      <span class="mono nm-b">${fmt(ourB)} → ${fmt(gb)}</span></div>`;
+  }).filter(Boolean).join('');
+
+  return `<div class="sbox" data-bout="${esc(b.bout)}">
+    <div class="note" style="margin:0 0 9px">Re-runs the model on numbers from a
+      UFC.com fighter page. Seven of its fourteen inputs appear there; the seven that
+      do not — ${Object.values(SB_HELD).join(', ')} — carry
+      ${share!=null?`<b>${Math.round(100*(1-share))}%</b> of the weight`:'most of the weight'}
+      and include the three largest, age above all. So this moves the pick, it does not
+      replace it. The rates here are also raw career averages where the model uses
+      opponent-adjusted, shrunk ones, so a swap changes what the number means.
+      Nothing you enter is saved, published or graded.</div>
+    <div class="sbgrid">
+      <label class="lbl">${nA} — paste the UFC.com stats block
+        <textarea class="sbta" data-c="a" rows="4" placeholder="paste here"></textarea>
+        <input class="sbrec" data-c="a" placeholder="record, e.g. 27-5-0"></label>
+      <label class="lbl">${nB} — paste the UFC.com stats block
+        <textarea class="sbta" data-c="b" rows="4" placeholder="paste here"></textarea>
+        <input class="sbrec" data-c="b" placeholder="record, e.g. 27-5-0"></label>
+    </div>
+    <div class="sbacts">
+      <button class="more sbgo">Read both</button>
+      <button class="more sbclear">Clear</button>
+      ${pNew!=null?`<label class="lbl sbblend">blend
+        <input type="range" class="sbrange" min="0" max="100" value="${Math.round(100*st.blend)}">
+        <span class="mono sbw">${Math.round(100*st.blend)}%</span> toward UFC.com</label>`:''}
+    </div>
+    ${cmp?`<div class="lbl" style="margin:11px 0 3px">what changed · ours → UFC.com</div>${cmp}`:''}
+    ${pNew!=null?`<div class="sbout">
+      <div class="cnum"><b class="mono">${P0(pBase)}%</b><span>model</span></div>
+      <div class="cnum"><b class="mono" style="color:var(--gold)">${P0(pNew)}%</b>
+        <span>with these inputs</span>
+        <span class="vs mono">${(100*(pNew-pBase)>=0?'+':'')}${(100*(pNew-pBase)).toFixed(1)} pts for ${nA}</span></div>
+      <label class="lbl sbshow"><input type="checkbox" class="sbchip" ${st.on?'checked':''}>
+        show beside the model on the card</label></div>`
+     :'<div class="note" style="margin-top:9px">Paste one or both blocks and press Read both.</div>'}
+    ${sbMethodBlock(b,st,pNew!=null?pNew:pBase)}
+  </div>`;
+}
+/* The method read, set beside the model's. This is the part worth being blunt
+   about on screen: it was pre-registered and tested, and it did not work.
+   Addendum 29 put career KO share, submission share and round-one share into
+   the method model on 1,300 held-out bouts — KO share +0.0017 at p = .55,
+   submission share +0.0017 at p = .55, round-one share NEGATIVE, and all four
+   round-one targets at 0.0000. Only own-finish-rate survived, at +0.0016, and
+   was not adopted.
+   The reason is mechanical rather than statistical: the model already carries
+   knockdown rate, submission rate and finish rate, which are the mechanisms a
+   career method mix works THROUGH. On its own the mix reaches AUC 0.62, and
+   almost all of that is already inside the model by another route. So this is
+   shown as context — which is the standing decision for the career breakdown —
+   and the blend is offered with the measurement attached rather than as a
+   second opinion of equal standing. */
+/* The verdict in a sentence, from the records read alone.
+
+   Thresholds are lifted from lengthBadge rather than invented: 12 points clear
+   of the league rate is a call, 5 to 12 is a lean, under 5 is nothing. Using a
+   second scale here would mean the same gap reads as "likely" in one place on
+   the page and "probable" in another, which is how a reader stops trusting
+   either.
+
+   The six cells — each corner by KO, by submission, by decision — are what the
+   combined read is built from, so naming the top one costs nothing extra. If
+   the top two are within 6 points it says so instead of picking, because a
+   coin-flip announced confidently is worse than no call. */
+function sbVerdict(ma,mb,pA,b,st){
+  const A=sbShrinkMix(ma), B=sbShrinkMix(mb);
+  if(!A||!B) return '';
+  const MB=(BR||{}).market_bases||{};
+  const decBase=MB.dec??0.505, finBase=1-decBase;
+  const nA=surname(b.a), nB=surname(b.b);
+  const cells=[
+    [pA*A.ko,  nA,'KO/TKO'],   [pA*A.sub,  nA,'submission'],   [pA*A.dec,  nA,'decision'],
+    [(1-pA)*B.ko,nB,'KO/TKO'], [(1-pA)*B.sub,nB,'submission'], [(1-pA)*B.dec,nB,'decision']];
+  cells.sort((x,y)=>y[0]-x[0]);
+  const dec=pA*A.dec+(1-pA)*B.dec, fin=1-dec;
+
+  let head, cls;
+  if(fin-finBase>=0.12){ head='Finish likely'; cls='fin'; }
+  else if(dec-decBase>=0.12){ head='Distance likely'; cls='dist'; }
+  else if(fin-finBase>=0.05){ head='Finish leans'; cls='soft'; }
+  else if(dec-decBase>=0.05){ head='Distance leans'; cls='soft'; }
+  else { head='No length lean'; cls='soft'; }
+
+  /* Name the best cell WITHIN the family the headline just called, not the
+     best cell overall. Those differ more often than they look like they
+     should: decision mass splits across two cells and finish mass across four,
+     so a fight that is 59% finish can still have a single decision cell on top.
+     Taking the overall leader produced "Finish leans — by decision", which is
+     the same contradiction the tile had on the Pulyaev bout, in a new place. */
+  const fam = cls==='soft' && head==='No length lean' ? null
+            : (head.indexOf('Finish')===0 ? 'fin' : 'dec');
+  const pool = fam==null ? cells
+             : cells.filter(c=> fam==='dec' ? c[2]==='decision' : c[2]!=='decision');
+  const top=pool[0], second=pool[1];
+  const clear = top && (!second || (top[0]-second[0])>=0.06);
+  let who = clear ? `${esc(top[1])} by ${top[2]}`
+                  : `no clear favorite — ${fam==='dec'?'decision':fam==='fin'?'finish':(dec>fin?'decision':'finish')}`;
+
+  // round, only when a finish is the call and the timing read says something
+  let rnd='';
+  const t=sbR1Read(st,b);
+  if(t && fin>0.02 && top[2]!=='decision'){
+    const cond=Math.min(0.99,t.p/fin);
+    if(cond>=0.55) rnd=' · round 1';
+    else if(cond<=0.30) rnd=' · later rounds';
+  }
+  return `<div class="sbverd ${cls}"><b>${head}</b><span>${who}${rnd}</span>
+    <span class="vs mono">${P0(fin)}% finish · ${P0(dec)}% distance</span></div>`;
+}
+function sbMethodBlock(b,st,pA){
+  const ma=st.a_m||{}, mb=st.b_m||{};
+  const read=sbMethodRead(ma,mb,pA);
+  const mix=(ma.ko_share!=null)||(mb.ko_share!=null);
+  if(!mix) return '';
+  const mk=(b.m_a_ko!=null&&b.m_b_ko!=null)?{
+    ko:(b.m_a_ko+b.m_b_ko), sub:(b.m_a_sub+b.m_b_sub), dec:(b.m_decision)}:null;
+  const row=(lab,v,w)=>`<div class="sbrow"><span class="sbl">${lab}</span>
+    <span class="mono">${v==null?'—':P0(v)+'%'}</span>
+    <span class="mono" style="color:var(--gold);min-width:52px;text-align:right">${w==null?'—':P0(w)+'%'}</span></div>`;
+  const each=(nm,m)=>{
+    if(m.ko_share==null) return '';
+    const s=sbShrinkMix(m), n=(m.ko_n||0)+(m.sub_n||0)+(m.dec_n||0);
+    return `<div class="sbrow"><span class="sbl">${esc(nm)} wins by
+      <span style="color:var(--dim)">${n} win${n===1?'':'s'}</span></span>
+      <span class="mono" style="color:var(--dim)">${P0(m.ko_share)}/${P0(m.sub_share)}/${P0(m.dec_share)} raw</span>
+      <span class="mono">${P0(s.ko)}% KO · ${P0(s.sub)}% sub · ${P0(s.dec)}% dec</span></div>`;
+  };
+  return `<div style="margin-top:14px;padding-top:11px;border-top:1px solid var(--line)">
+    <div class="lbl">How this fight ends · model vs these records</div>
+    ${read?sbVerdict(ma,mb,pA,b,st):''}
+    ${each(surname(b.a),ma)}${each(surname(b.b),mb)}
+    ${read?`<div class="sbrow" style="border:none;padding-bottom:0"><span class="sbl"
+        style="color:var(--bone)">combined, weighted by who wins</span>
+      <span class="mono" style="color:var(--dim)">model</span>
+      <span class="mono" style="color:var(--gold);min-width:52px;text-align:right">records</span></div>
+      ${row('ends by KO/TKO',mk?mk.ko:null,read.ko)}
+      ${row('ends by submission',mk?mk.sub:null,read.sub)}
+      ${row('goes to decision',mk?mk.dec:null,read.dec)}
+      ${row('ends inside the distance',mk?(1-mk.dec):null,1-read.dec)}
+      ${(()=>{
+        /* Timing. P(round one) stands on its own; P(round one GIVEN a finish)
+           is the two reads divided, which is the "if it finishes, how early"
+           question and the only form in which this number is worth much. */
+        const t=sbR1Read(st,b); if(!t) return '';
+        const fin=1-read.dec;
+        const cond=fin>0.02?t.p/fin:null;
+        return row('ends in round one',b.p_end_r1,t.p)
+          + (cond!=null?row('round one, given it finishes',
+              (b.p_end_r1!=null&&b.p_finish>0.02)?b.p_end_r1/b.p_finish:null,
+              Math.min(0.99,cond)):'')
+          + (t.both?'':'<div class="note" style="margin:4px 0 0">Round-one figure uses one corner only — add the other record for both.</div>');
+      })()}`
+     :'<div class="note" style="margin-top:6px">Both corners need a Win by Method block before the two can be combined.</div>'}
+    <div class="note" style="margin-top:9px">Shares are shrunk toward the league
+      mix before being combined. Raw, they are worse than useless: scored on 6,823
+      bouts the unshrunk career mix lands at 2.11 nats against the base rate's 1.02,
+      because three wins all by submission reads as 100% submission. Shrunk it beats
+      the base rate by +0.044. Both numbers are shown above — raw in gray, shrunk in
+      white — so you can see how much of a thin record is noise.<br><br>
+      <b>It still does not add to the model.</b> Career KO share and submission share
+      went into the method model on 1,300 held-out bouts at +0.0017 each, p = .55;
+      round-one share came back negative; all four round-one targets at 0.0000
+      (addendum 29). The model already carries knockdown rate, submission rate and
+      finish rate, which are what a method mix works through. It beats guessing; it
+      does not beat the model, which is why this is context rather than an opinion
+      to average in.</div>
+  </div>`;
+}
+
+/* Re-renders the panel in place after any change, so the numbers on screen are
+   always the ones the current inputs produce. Re-binding after the redraw is
+   not optional: the old nodes are gone with their listeners. */
+function bindSandbox(b){
+  const box=document.querySelector('.sbox[data-bout="'+cssEsc(b.bout)+'"]');
+  if(!box) return;
+  const st=sbState(b);
+  const redraw=()=>{
+    const host=box.parentNode;
+    host.innerHTML=sandboxPanel(b);
+    bindSandbox(b);
+    if(typeof render==='function' && st.on) render();
+  };
+  box.querySelectorAll('.sbta').forEach(ta=>{
+    ta.value=st[ta.getAttribute('data-c')+'_raw']||'';
+  });
+  box.querySelectorAll('.sbrec').forEach(ip=>{
+    ip.value=st[ip.getAttribute('data-c')+'_recraw']||'';
+  });
+  const read=()=>{
+    box.querySelectorAll('.sbta').forEach(ta=>{
+      const c=ta.getAttribute('data-c');
+      st[c+'_raw']=ta.value;
+      st[c]=parseUfcBlock(ta.value);
+      st[c+'_m']=parseUfcMethod(ta.value);
+    });
+    box.querySelectorAll('.sbrec').forEach(ip=>{
+      const c=ip.getAttribute('data-c');
+      st[c+'_recraw']=ip.value;
+      st[c+'_rec']=parseRecord(ip.value);
+    });
+    redraw();
+  };
+  const go=box.querySelector('.sbgo'); if(go) go.addEventListener('click',read);
+  const cl=box.querySelector('.sbclear');
+  if(cl) cl.addEventListener('click',()=>{
+    st.a={};st.b={};st.a_raw='';st.b_raw='';st.on=false;st.blend=1;redraw();
+    if(typeof render==='function') render();
+  });
+  const rg=box.querySelector('.sbrange');
+  if(rg) rg.addEventListener('input',()=>{st.blend=(+rg.value)/100;redraw();});
+  const ck=box.querySelector('.sbchip');
+  if(ck) ck.addEventListener('change',()=>{st.on=ck.checked;
+    if(typeof render==='function') render();});
+}
+function cssEsc(s){return String(s).replace(/["\\]/g,'\\$&');}
+/* What the card shows while a sandbox is on. The published probability stays
+   exactly where it was — this is added beside it, marked, never in place of
+   it. A tool for questioning the number must not quietly become the number. */
+function sandboxChip(b){
+  const st=SBOX[b.bout];
+  if(!st||!st.on||!b.fin||!DATA.win_model) return '';
+  const p=sbProb(sbCorner(b.fin.a,st.a,st.blend),sbCorner(b.fin.b,st.b,st.blend));
+  if(p==null) return '';
+  return `<span class="sbtag" title="the same model re-run on UFC.com inputs — not published, not graded">ufc.com ${P0(p)}%</span>`;
+}
+
 function marketTabs(b,mk,rr,totals){
   const cats=[
     ['method','Winning Method',
@@ -1578,7 +2096,7 @@ function marketTabs(b,mk,rr,totals){
       +(()=>{
         /* Ranked, not grouped by corner. Six rows is short enough that the
            order can carry the meaning — first, second, third most likely — and
-           the colour already says whose contract each one is. The combo tab
+           the color already says whose contract each one is. The combo tab
            stays grouped by fighter, where twenty rows would be unreadable any
            other way. */
         const mv=[[`${b.a} by KO/TKO/DQ`,b.m_a_ko,'var(--red)','ko_a'],
@@ -1675,6 +2193,7 @@ function marketTabs(b,mk,rr,totals){
         '<div class="note" style="padding:6px 11px">A single fight\'s stat line is mostly noise, so the spread is an 80% range. The middle of that range is a median and the count above is a mean — they answer different questions, which is why they differ.</div>']):'')
 
       +formulaNote(b,'knockdown','knockdown','a three-input formula matched the 46-input model it replaced, so the one you can check won')],
+    ['ufc','UFC.com check', sandboxPanel(b)],
   ].filter(c=>c[2]);
   if(!cats.length) return '';
   return `<div class="mtabs">${cats.map((c,i)=>
@@ -1837,7 +2356,7 @@ function open_(id){
   // Polymarket US sells "ends before round N", DraftKings sells "over/under
   // 2.5 rounds". Both are real contracts, and they are NOT the same claim —
   // over 1.5 rounds means past 7:30 of round two, not past round one — so
-  // each is labelled with the wording its own book uses.
+  // each is labeled with the wording its own book uses.
   const TB=((BR||{}).market_bases||{}).totals||{};
   const TBr=TB[b.rounds===5?'5':'3']||{};
   const totals=b.totals?Object.keys(b.totals).map(k=>{
@@ -1909,6 +2428,7 @@ function open_(id){
       ${baseRatePanel(b.bands,b)}</div>`:''}
     `;
   bindTabs();
+  bindSandbox(b);
   document.getElementById('xb').addEventListener('click',close_);
   document.getElementById('draw').classList.add('on');
   document.getElementById('draw').setAttribute('aria-hidden','false');
