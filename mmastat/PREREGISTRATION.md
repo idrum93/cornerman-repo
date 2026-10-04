@@ -3409,6 +3409,42 @@ divided.
 No per-round curve is possible from this source — UFC.com publishes a
 first-round count and nothing for rounds two through five.
 
+## Does shrinkage already handle thin records? Mostly, and k=5 is the right k
+
+Gain over the base rate, bucketed by the THINNER corner's win count:
+
+| wins | n | k=2 | k=5 | k=10 | k=20 |
+|---|---|---|---|---|---|
+| 1-2 | 2122 | +0.0089 | **+0.0235** | +0.0204 | +0.0140 |
+| 3-5 | 1455 | +0.0422 | **+0.0499** | +0.0429 | +0.0308 |
+| 6-10 | 701 | +0.0225 | +0.0340 | **+0.0348** | +0.0288 |
+| 11-20 | 63 | **+0.0988** | +0.0932 | +0.0829 | +0.0663 |
+
+**k=5 is best or near-best in every bucket, and nothing goes negative.**
+Shrinking harder is not the fix: k=10 and k=20 both score worse nearly
+everywhere, so taming the thin end that way costs accuracy at the thick end.
+
+The ceiling each record size can reach, at its most lopsided (all wins inside
+the distance), against the 49.5% league rate:
+
+| wins | finish % | points past | clears the 12-point bar |
+|---|---|---|---|
+| 1 | 58.2 | +8.4 | no |
+| 2 | 64.2 | +14.3 | yes |
+| 3 | 68.7 | +18.8 | yes |
+| 20 | 90.0 | +40.1 | yes |
+
+So a **one-win record cannot make a call at all** — shrinkage caps it below the
+bar. Two wins can, at +14.3, which is enough to clear the bar and displace the
+model's call, while that bucket's measured gain is less than half the 3-5
+bucket's.
+
+**The fix is a gate, not more shrinkage.** Under three wins on either side the
+read still shows and is marked thin — on the chip ("thin 2W") and on the drawer
+verdict ("THIN — 2 WINS ON ONE SIDE") — but it may not lead or dim the model's
+call. Leading is the one place the weaker read displaces the stronger one, so
+that is the one place the record has to be thick enough to mean it.
+
 ## The plain-language verdict, and the trap in it
 
 The panel heads the rows with one sentence — "Finish likely · Van by KO/TKO ·
