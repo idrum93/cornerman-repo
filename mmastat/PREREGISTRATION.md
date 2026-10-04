@@ -3252,3 +3252,181 @@ on how many title fights the card happened to carry.
 
 Verified against a hand computation on a real nine-bout card: every field of the
 tally matches to the cent.
+
+## Addendum 39: RESULT — stance (2026-10-04)
+
+Asked again whether an open-stance matchup carries an edge. `d_southpaw` was
+dropped from the feature set long ago as "no measurable effect" and H1 (leg
+kicks x stance mismatch) failed in addendum 1 at beta -0.0513 with the wrong
+sign, but neither is quite the plain question, so it was measured directly on
+5,963 bouts with both stances known.
+
+- **Raw: southpaws beat orthodox 1,013 of 1,923 = 52.7%**, 95% CI
+  [50.4%, 54.9%], p = 0.020.
+- Open-stance bouts finish slightly more often, 51.6% vs 49.2%, p = 0.084.
+
+## Conditional on the model, which is the test that decides it
+
+Trained to 2024-01-01, tested on 1,468 later bouts:
+
+| | out-of-sample log loss |
+|---|---|
+| model as frozen | 0.61665 |
+| + signed stance matchup | 0.61562 |
+
+**-0.00104, P(helps) = 0.934, bootstrap 95% CI [-0.00246, +0.00035].** The
+residual in open-stance bouts leans to the southpaw by +0.041 at p = 0.172.
+
+Below the bar, interval crosses zero, and an order of magnitude smaller than
+addendum 30's championship-minutes candidate at +0.0091. Most of the raw 52.7%
+is southpaws being slightly stronger fighters, which `d_elo` already carries.
+
+**No change made.** Forward candidate alongside 30, 31 and 34. The registered
+holdout is spent, so it could not be confirmed now in any case.
+
+## Addendum 40: TOOL — the UFC.com sandbox (2026-10-04)
+
+A drawer tab that re-runs the win model on striking and grappling numbers
+pasted from a UFC.com fighter page, to see how far the pick moves when those
+inputs come from elsewhere.
+
+`win_model` (the fourteen coefficients and the scaler) and a per-bout `fin`
+block (the fourteen per-corner inputs) are now published in predictions.json,
+so the page reproduces the real probability and then changes inputs. Verified:
+the browser's recompute matches every published `p_a` to the four decimals
+`p_a` is published at, and the feature rebuild matches `make_features` exactly
+on 300 random corner pairs.
+
+## Why it is a sensitivity test and not a second opinion
+
+A UFC.com page carries seven of the fourteen inputs. The seven it does not —
+career rating, strength of schedule, UFC mileage, losses by strikes, reach, age
+and layoff — hold **55% of the model's weight** and include the three largest
+coefficients, age above all. No paste can produce "what UFC.com's numbers say".
+
+The swap is also not like for like: the model's rates are opponent-adjusted and
+shrunk toward a divisional prior for fighters with little tape, while UFC.com's
+are raw career averages. A raw number in a slot built for an adjusted one
+changes what the number means, not only its source. Both facts are on screen in
+the panel, not only here.
+
+**Nothing it produces is stored, published or graded.** It is in memory, resets
+on reload, and the ledger never sees it. When shown on a card it sits beside the
+published probability and never replaces it: a tool for questioning the number
+must not quietly become the number.
+
+## The method read, and why it is context rather than a second opinion
+
+The panel also parses "Win by Method" and sets a records-only method read beside
+the model's. Those shares are conditional on winning — a UFC.com page publishes
+no losses-by-method — so the only sound combination weights each man's own habit
+by his chance of being the one who wins:
+P(KO) = p(A) x A's KO share + p(B) x B's KO share, and likewise for submission
+and decision. Verified to sum to one.
+
+It is displayed, not averaged in, and the panel says why on screen. Addendum 29
+registered this exact question and tested it on 1,300 held-out bouts: career KO
+share **+0.0017 at p = .55**, submission share **+0.0017 at p = .55**, round-one
+share **negative**, and all four round-one targets at **0.0000**. Only own finish
+rate survived at +0.0016 and was not adopted.
+
+The reason is mechanical rather than statistical, which is why no amount of
+fresh data from a second source changes it: the model already carries knockdown
+rate, submission rate and finish rate, and those are the mechanisms a career
+method mix works through. Measured alone the mix reaches AUC 0.62 and nearly all
+of it is already inside the model by another route. Pasting the same quantity
+from UFC.com instead of UFCStats supplies a different *number*, not a different
+*signal*.
+
+So the standing decision from 29 holds — the career breakdown is shown beside
+the projection, not folded into it — and the sandbox carries the measurement at
+the point of use rather than leaving a reader to discover it here.
+
+## Would the W-L record close the gap? Measured: no, and shrinkage matters far more
+
+The win-side shares are missing the loss side, so the question was whether
+pasting the record as a proxy would recover it. Scored as a method prediction on
+6,823 bouts, leakage-safe (each fighter's record as it stood before the bout),
+against the league base rate at 1.0236 nats:
+
+| | raw | shrunk, k=5 |
+|---|---|---|
+| win-side mix (all UFC.com can give) | 2.1098 | **0.9794** |
+| all-bouts mix (the corpus, with losses) | 1.8061 | **0.9770** |
+
+Two findings, and the second is the one that mattered.
+
+**The loss side is worth +0.0024.** Adding the record recovers almost nothing;
+it is not the limiting factor. The idea was sound and the gap it closes is
+negligible.
+
+**Shrinkage is worth +1.13.** Raw career shares are not merely weak, they are
+far worse than the base rate — three wins all by submission reads as 100%
+submission, and averaging two such distributions produces confident nonsense.
+Shrunk toward the league mix the same data BEATS the base rate by +0.044. The
+panel had been displaying the raw version, which was the worst form of the
+number; it now shrinks with k=5 and shows the raw figure in grey beside it so a
+thin record is visibly thin. k=5 was best of 0/2/5/10/20/40 and the curve is
+flat from 2 to 10, so nothing hangs on the exact constant.
+
+None of this changes addendum 29's verdict. The mix beats guessing and does not
+beat the model, because the model already carries the mechanisms it works
+through. It is better context than it was, and still context.
+
+## Timing: average the two corners, never sum them
+
+With a record field supplying a denominator, first-round finishes over total
+bouts gives the one timing number a UFC.com page carries. "Ends in round one" is
+a shared event — either man can cause it — so summing the two rates looks right.
+It is badly wrong. Measured on 6,823 bouts against a 0.5550 base rate:
+
+| | sum | average |
+|---|---|---|
+| ends in round one, k=5 | 0.6380 | **0.5496** |
+| ends inside the distance, k=5 | 1.1290 | **0.6917** |
+
+Summing is worse than guessing in both. These are WIN-side rates that already
+carry "and he won it", so adding them double-counts. Averaging wins, and it is
+what shipped.
+
+## What each piece is worth, on one scale
+
+Best achievable as a standalone read, relative to its own base rate:
+
+| read | better than guessing |
+|---|---|
+| win-by-method, shrunk | **4.3%** |
+| first-round proxy, averaged | 1.4% |
+| finish proxy, averaged | 1.0% |
+
+The finish proxy is not built: the method read already implies it (KO + SUB
+against DEC) and is four times stronger, so a separate number would be a second
+and worse answer to a question already answered. The first-round proxy is built
+despite being thin, because it is the only thing in the block that speaks to
+WHEN rather than HOW, and P(round one | it finishes) falls out of the two reads
+divided.
+
+No per-round curve is possible from this source — UFC.com publishes a
+first-round count and nothing for rounds two through five.
+
+## The plain-language verdict, and the trap in it
+
+The panel heads the rows with one sentence — "Finish likely · Van by KO/TKO ·
+round 1". Thresholds are lifted from `lengthBadge` rather than invented: 12
+points clear of the league rate is a call, 5 to 12 a lean, under 5 nothing. A
+second scale would mean the same gap reads as "likely" in one place on the page
+and "probable" in another, which is how a reader stops trusting both.
+
+The trap, caught in testing on a balanced pair: the sentence named the largest
+of the six corner-by-method cells, and that is **not** reliably in the family the
+headline just called. Decision mass splits across two cells and finish mass
+across four, so a fight at 59% finish can still have a single decision cell on
+top — and it printed "Finish leans · by decision". That is precisely the
+contradiction the tile carried on the Pulyaev bout, reappearing somewhere new.
+
+Fixed the same way as the original: the named outcome is the best cell *within
+the called family*, and when the top two in that family are within 6 points it
+says "no clear favourite" rather than picking one. Five fight shapes checked —
+submission grappler against a point-fighter, two knockout artists, two decision
+grinders, a mild tilt and a dead-even pair — with an assertion that no headline
+names an outcome from the other family.

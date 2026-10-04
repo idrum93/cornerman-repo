@@ -41,9 +41,23 @@ from .projections import (FEATS as PROJ_FEATS, RANGE_TARGETS, EVENT_TARGETS,
                           MEAN_TARGETS, fit_mean)
 from .projections import FORMULAS, FormulaModel, fit_finish_formula, finish_row
 FORMULA_INFO = {}
+WIN_MODEL = {}
 OTHER = {"list": []}
 
 MIN_PRIOR = 2
+
+# Everything the 14 win features are built from, per corner. make_features()
+# needs exactly these to reproduce the model's probability, so the page can
+# swap one value and recompute rather than guess at the effect.
+#
+# Seven of them appear on a UFC.com fighter page and seven do not. The seven
+# that do not — elo, opp_elo, log_exp, ko_loss_rate, reach, age, log_layoff —
+# include the three largest coefficients in the model, age above all. That is
+# why the sandbox built on these is a sensitivity test and not a second
+# opinion: no paste can replace most of what decides the pick.
+SANDBOX_KEYS = ["elo", "opp_elo", "log_exp", "adj_slpm", "sapm", "str_acc",
+                "str_def", "adj_td15", "td_def", "sub15", "ko_loss_rate",
+                "reach", "age", "log_layoff"]
 
 
 def _key(s):
@@ -452,6 +466,20 @@ def predict_card(path, fights, fighters, verbose=True):
         sa["elo"], sb["elo"] = elo_eff(A, as_of), elo_eff(B, as_of)
         _snap[na], _snap[nb] = sa, sb
 
+        if not WIN_MODEL:
+            # Shipped so the page can re-run the model on substituted inputs.
+            # It is a plain logistic with no intercept, so fourteen coefficients
+            # and the scaler reproduce it exactly in a browser.
+            # Ten decimals, not six: at six the recomputed probability drifts
+            # ~1e-6 from the published one, which is immaterial to a reader but
+            # means the sandbox and the tile can print different last digits for
+            # the same inputs. A tool for checking the model should not disagree
+            # with the model.
+            WIN_MODEL.update(features=list(WIN_FEATURES),
+                             coef=[round(float(c), 10) for c in win.coef_[0]],
+                             mean=[round(float(m), 10) for m in sc.mean_],
+                             scale=[round(float(s), 10) for s in sc.scale_])
+
         fv = make_features(sa, sb)
         x = pd.DataFrame([fv])[WIN_FEATURES]
         p_a = float(win.predict_proba(sc.transform(x))[0, 1])
@@ -482,7 +510,7 @@ def predict_card(path, fights, fighters, verbose=True):
                     "sub15": round(S["sub15"], 2), "ctrl": round(S["ctrl_share"], 3),
                     "kd15": round(S["kd15"], 2), "kd_against15": round(S["kd_against15"], 2),
                     "ko_loss": round(S["ko_loss_rate"], 3),
-                    # shown, not modelled: average fight time tested well
+                    # shown, not modeled: average fight time tested well
                     # (addendum 31) but the holdout is spent, so it is a
                     # forward candidate and stays out of the projection
                     "avg_time": None}
@@ -533,6 +561,15 @@ def predict_card(path, fights, fighters, verbose=True):
                 d["parts"] = {"a": round(float(pa), 2), "b": round(float(pb), 2), "how": how}
             drv.append(d)
         r["drivers"] = drv
+        # The exact inputs the 14 win features are built from, per corner, so a
+        # reader can substitute one and the page can recompute the probability
+        # rather than approximate it. Published because the alternative — a
+        # sandbox that estimates what the model "would" say — is a second model
+        # nobody registered or scored. These fourteen numbers plus the
+        # coefficients below reproduce p_a exactly.
+        r["fin"] = {c: {k: (None if s.get(k) is None else round(float(s[k]), 6))
+                        for k in SANDBOX_KEYS}
+                    for c, s in (("a", sa), ("b", sb))}
         hit = market.get(frozenset((_key(na), _key(nb))))
         if hit:
             src, pm, nbooks = hit
@@ -883,7 +920,7 @@ def archive_previous(new_event, path="site/predictions.json",
     and "card is still the current file", which is frequently empty. Archiving
     removes the race entirely.
 
-    Archiving ONLY on event change was the earlier behaviour and it lost whole
+    Archiving ONLY on event change was the earlier behavior and it lost whole
     cards. It assumed the one way a card leaves is by being replaced with the
     next one, so the outgoing event name differs. It does not: data/upcoming.txt
     can also be rolled BACKWARD — restored from an older copy of the repo, say —
@@ -1292,6 +1329,7 @@ def write_json(out, skipped, unresolved, path="site/predictions.json",
         "market_source": MARKET_SRC.get("src"),
         "track_record": TRACK.get("rec"),
         "formulas": FORMULA_INFO,
+        "win_model": WIN_MODEL or None,
     }
     Path(path).parent.mkdir(parents=True, exist_ok=True)
     Path(path).write_text(json.dumps(clean(payload), indent=1, allow_nan=False),

@@ -89,7 +89,7 @@ def fires(p_model, implied_with_vig, rule):
     """Does the pre-registered bet trigger? Favorites only, edge over the
     price you would actually pay (vig included), not the devigged estimate."""
     r = rule["rule"]
-    if r.get("favourites_only") and implied_with_vig < r["min_implied"]:
+    if r.get("favorites_only") and implied_with_vig < r["min_implied"]:
         return False
     return (p_model - implied_with_vig) > r["min_edge"]
 
@@ -420,7 +420,7 @@ def _model_prob(bout_payload, market):
 
     "Fight ends before Round 4 begins" is the sum of the per-round finish
     probabilities below that round; "Method of Finish: KO/TKO/DQ" is both
-    fighters' KO probabilities added. Per-fighter decision is not modelled
+    fighters' KO probabilities added. Per-fighter decision is not modeled
     separately, so those markets are captured with no model number rather than
     given a fabricated one.
     """

@@ -30,7 +30,7 @@
  "l2": 25.0,
  "rule": {
   "min_edge": 0.02,
-  "favourites_only": true,
+  "favorites_only": true,
   "min_implied": 0.5,
   "stake": "flat 1 unit",
   "success": "ROI > +2% over >=300 bets"
