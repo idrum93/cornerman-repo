@@ -1819,13 +1819,73 @@ function parseUfcMethod(text){
    than pasted. They are optional and they matter: age carries 18.8% of the
    model's weight on its own and reach 4.4%, so supplying them drops what a
    no-read bout has to assume equal from 55.1% to 31.9%. */
+/* Parsed by PATTERN rather than position, because a third positional number
+   would be ambiguous: a bare 70 is a plausible reach in inches and a plausible
+   height in inches, and guessing by slot breaks the moment someone types them
+   in a different order. So: a feet'inches token is a height by construction, an
+   explicit label wins outright, and bare numbers fall back to the old
+   age-then-reach order that already worked.
+
+   Height is NOT a model input — `d_height` was dropped from the feature set as
+   "carried by d_reach". Its only job here is to stand in for a missing reach,
+   which the pipeline already does for a quarter of the corpus using the same
+   fitted line. */
+const SB_REACH_FROM_HEIGHT = {a:-2.23, b:1.056};   // reach ~ a + b*height, R2 0.79
 function parseBio(s){
-  const n=String(s||'').match(/-?\d+(?:\.\d+)?/g);
-  if(!n||!n.length) return null;
-  const age=parseFloat(n[0]), reach=n.length>1?parseFloat(n[1]):null;
-  const out={};
-  if(age>=15&&age<=60) out.age=age;
-  if(reach!=null&&reach>=50&&reach<=90) out.reach=reach;
+  let txt=String(s||''); const out={};
+  /* The UFC.com bio block is label-above-value across lines:
+       Age / 36 / Height / 71.00 / Weight / 146.00 /
+       Octagon Debut / Oct. 20, 2013 / Reach / 74.00 / Leg reach / 40.00
+     Three things in there actively bite, and two of them bit in testing:
+
+     "Leg reach" contains "reach". The plain label matched it, and on a block
+     where leg reach came first the fighter's real reach became 40 inches —
+     which then failed the sanity range and was dropped, leaving NO reach at
+     all. It only ever worked because UFC.com happens to print Reach first.
+
+     "Octagon Debut Oct. 20, 2013" carries a 20. With no Age line the bare
+     number fallback read the debut DAY as the fighter's age and reported 20.
+
+     Weight is a three-digit number sitting in the same block.
+
+     So: cut the decoy lines out of the string first, and only fall back to
+     bare numbers when the paste carries no labels at all. */
+  txt=txt.replace(/\bleg\s*reach\s*:?\s*-?\d+(?:\.\d+)?/ig,' ')
+         .replace(/\bweight\s*:?\s*-?\d+(?:\.\d+)?/ig,' ')
+         .replace(/\boctagon\s*debut[\s\S]{0,24}?\d{4}/ig,' ');
+
+  // 6'2" / 6' 2 / 6ft2
+  const fi=txt.match(/(\d)\s*(?:'|\u2019|ft|feet)\s*(\d{1,2})/i);
+  if(fi) out.height=(+fi[1])*12+(+fi[2]);
+  const lab=re=>{const m=txt.match(re); return m?parseFloat(m[1]):null;};
+  const la=lab(/\bage\s*:?\s*(\d{2}(?:\.\d+)?)/i);
+  const lr=lab(/\breach\s*:?\s*(\d{2}(?:\.\d+)?)/i);
+  const lh=lab(/\bheight\s*:?\s*(\d{2}(?:\.\d+)?)/i);
+  if(la!=null) out.age=la;
+  if(lr!=null) out.reach=lr;
+  if(lh!=null&&out.height==null) out.height=lh;
+  /* Per MISSING field, not all-or-nothing. A single global "found a label"
+     gate skipped the fallback for every field at once, so "32, 6'2\"" — where
+     the feet'inches counts as a label — silently dropped the age. The scan runs
+     over a string with the labelled values removed as well as the decoys, so a
+     reach already claimed cannot be re-read as something else. */
+  if(out.age==null||out.reach==null){
+    const rest=txt.replace(/(\d)\s*(?:'|\u2019|ft|feet)\s*(\d{1,2})\s*"?/ig,' ')
+                  .replace(/\b(?:age|reach|height)\s*:?\s*\d+(?:\.\d+)?/ig,' ');
+    const n=(rest.match(/\d+(?:\.\d+)?/g)||[]).map(parseFloat);
+    if(out.age==null){const a=n.find(v=>v>=15&&v<=60); if(a!=null) out.age=a;}
+    if(out.reach==null){const r=n.find(v=>v>=55&&v<=90&&v!==out.age); if(r!=null) out.reach=r;}
+  }
+  if(out.height!=null&&(out.height<58||out.height>84)) delete out.height;
+  if(out.age!=null&&(out.age<15||out.age>60)) delete out.age;
+  if(out.reach!=null&&(out.reach<55||out.reach>90)) delete out.reach;
+  // height earns its place only when reach is missing; d_height is not a model
+  // input, it was dropped as "carried by d_reach"
+  if(out.reach==null&&out.height!=null){
+    out.reach=SB_REACH_FROM_HEIGHT.a+SB_REACH_FROM_HEIGHT.b*out.height;
+    out.reachFromHeight=true;
+  }
+  delete out.height;
   return Object.keys(out).length?out:null;
 }
 function parseRecord(s){
@@ -1971,6 +2031,7 @@ function sbProb(a,bq){
 function sbCorner(base,over,w){
   const out={}; for(const k in base) out[k]=base[k];
   for(const k in over){
+    if(k==='reachFromHeight') continue;      // a provenance flag, not a value
     const slot=SB_MAP[k]; if(!slot||over[k]==null) continue;
     out[slot]=base[slot]*(1-w)+over[k]*w;
   }
@@ -2053,6 +2114,13 @@ function sandboxPanel(b){
   const canWin=!b.noRead||bio;
   const pNew=(canWin&&(Object.keys(st.a).length||Object.keys(st.b).length))?sbProb(A,B):null;
 
+  const est=(st.a.reachFromHeight||st.b.reachFromHeight)
+    ? `<div class="note" style="margin-top:7px">Reach estimated from height where it was
+       not given — the same line the pipeline uses for the quarter of the corpus with no
+       measured reach (reach ≈ ${SB_REACH_FROM_HEIGHT.a} + ${SB_REACH_FROM_HEIGHT.b} × height,
+       R² 0.79, typical error about 2 in). Reach is 4.4% of the model's weight, so a 2-inch
+       miss moves the win probability by roughly 1.5 points — better than leaving the two
+       level, which is what happens with neither.</div>` : '';
   const cmp=Object.keys(SB_FILL).map(k=>{
     const slot=SB_MAP[k], ours=b.fin.a[slot], ourB=b.fin.b[slot];
     const ga=st.a[k], gb=st.b[k];
@@ -2077,11 +2145,11 @@ function sandboxPanel(b){
       <label class="lbl">${nA} — paste the UFC.com stats block
         <textarea class="sbta" data-c="a" rows="4" placeholder="paste here"></textarea>
         <input class="sbrec" data-c="a" placeholder="record, e.g. 10-3-0 (W-L-D)">
-        <input class="sbrec sbbio" data-c="a" placeholder="age, reach in. — optional"></label>
+        <input class="sbrec sbbio" data-c="a" placeholder="paste the Age/Height/Reach block, or type 32, 74"></label>
       <label class="lbl">${nB} — paste the UFC.com stats block
         <textarea class="sbta" data-c="b" rows="4" placeholder="paste here"></textarea>
         <input class="sbrec" data-c="b" placeholder="record, e.g. 10-3-0 (W-L-D)">
-        <input class="sbrec sbbio" data-c="b" placeholder="age, reach in. — optional"></label>
+        <input class="sbrec sbbio" data-c="b" placeholder="paste the Age/Height/Reach block, or type 32, 74"></label>
     </div>
     <div class="sbacts">
       <button class="more sbgo">Read both</button>
@@ -2090,7 +2158,7 @@ function sandboxPanel(b){
         <input type="range" class="sbrange" min="0" max="100" value="${Math.round(100*st.blend)}">
         <span class="mono sbw">${Math.round(100*st.blend)}%</span> toward UFC.com</label>`:''}
     </div>
-    ${cmp?`<div class="lbl" style="margin:11px 0 3px">what changed · ours → UFC.com</div>${cmp}`:''}
+    ${cmp?`<div class="lbl" style="margin:11px 0 3px">what changed · ours → UFC.com</div>${cmp}`:''}${est}
     ${b.noRead&&!canWin?`<div class="note" style="margin-top:9px">A winner number is held back
       until an age or a reach is given for at least one corner. Without them this bout has no
       rating, age, reach, mileage or chin on either side, so a probability would be asserting the
