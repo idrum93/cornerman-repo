@@ -91,7 +91,9 @@
   .pp.strong b{font-weight:800}
 
   .noread{border:1px dashed var(--line);border-radius:4px;padding:9px 11px;
-    font-size:11.5px;color:var(--dim)}
+    font-size:11.5px;color:var(--dim);background:none;width:100%;text-align:left;
+    font-family:inherit;cursor:pointer;display:block}
+  .noread:hover{border-color:#3B4557;color:var(--mute)}
 
   /* card-shape strip: the one readout whose unit is the whole card rather than
      a bout. Deliberately plainer than the tiles below it — no corner color, no
@@ -176,6 +178,7 @@
      the site's own call the moment it happened to be the louder number. */
   .sbtag.len{border-style:dashed}
   .sbtag.len.leads{background:rgba(205,164,58,.16);font-weight:700}
+  .sbtag.len.pick{border-style:solid;background:rgba(205,164,58,.1)}
   /* when the records read is further from the league rate, the model's call
      steps back a little rather than disappearing — both stay readable */
   .tile.sb-leads .calllead,.tile.sb-leads .callfam{opacity:.5}
@@ -1288,8 +1291,27 @@ function render(){
     return `<div class="seg"><div class="seghd"><h2>${esc(s)}</h2>
         <span class="lbl">${bs.length} bout${bs.length===1?'':'s'}${nr.length?` · ${nr.length} no read`:''}</span></div>
       <div class="grid">${bs.map(tile).join('')}
-        ${nr.map(n=>`<div class="noread"><b>${esc(n.a)}</b> vs. <b>${esc(n.b)}</b>
-          <div class="lbl" style="margin-top:4px">No read — ${esc(n.reason)}</div></div>`).join('')}</div></div>`;
+        ${nr.map(n=>{
+          /* Once something has been pasted, say so here. Otherwise the work is
+             invisible from the card and a reader would have to open every
+             no-read entry to remember which ones they had filled in.
+             Everything in this summary is gold and dashed and says "ufc.com",
+             the same provenance marking the tiles use — on a no-read bout there
+             is no model number anywhere, so the risk is not that this gets
+             confused WITH the model but that it gets mistaken FOR it. */
+          const key=n.a+' vs. '+n.b, st=SBOX[key];
+          let sum='';
+          if(st&&(st.a_m&&st.a_m.ko_share!=null||st.b_m&&st.b_m.ko_share!=null)){
+            const L=sbLengthCall(Object.assign(sbSynthetic(n),{noRead:true}),st);
+            if(L) sum=`<div style="margin-top:6px"><span class="sbtag len">ufc.com ${
+              L.kind==='finish'?'FINISH':'DISTANCE'} ${P0(L.p)}%${L.round?' · '+L.round:''}${
+              L.thin?` · thin ${L.wins}W`:''}</span>${L.top?`<span class="sbtag len pick"
+              style="margin-left:5px">ufc.com ${esc(L.top.name)} by ${
+              L.top.how==='KO/TKO'?'KO':L.top.how==='submission'?'SUB':'DEC'} ${P0(L.top.p)}%</span>`:''}</div>`;
+          }
+          return `<button class="noread nr-open" data-nr="${esc(key)}"><b>${esc(n.a)}</b> vs. <b>${esc(n.b)}</b>
+          <div class="lbl" style="margin-top:4px">No read — ${esc(n.reason)} · ${sum?'your UFC.com read, not the model':'add UFC.com stats'}</div>${sum}</button>`;
+        }).join('')}</div></div>`;
   }).join('');
   const filt=`<div class="filt">
       <button class="fb ${ONLY_GAPS?'':'on'}" data-f="all">All ${d.bouts.length} bouts</button>
@@ -1315,6 +1337,8 @@ function render(){
     </div>`;
   document.querySelectorAll('[data-id]').forEach(el=>
     el.addEventListener('click',()=>open_(el.dataset.id)));
+  document.querySelectorAll('[data-nr]').forEach(el=>
+    el.addEventListener('click',()=>openNoRead(el.dataset.nr)));
   document.querySelectorAll('[data-past]').forEach(el=>
     el.addEventListener('click',()=>openPast(el.dataset.past)));
   document.querySelectorAll('[data-f]').forEach(el=>
@@ -1701,7 +1725,12 @@ function sbLoad(){
   try{
     const raw=localStorage.getItem(SB_KEY); if(!raw) return {};
     const o=JSON.parse(raw)||{};
-    const live=new Set((DATA&&DATA.bouts||[]).map(b=>b.bout));
+    // no-read bouts are NOT in DATA.bouts — they live in DATA.no_read — so a
+    // membership test against bouts alone deleted every no-read sandbox on
+    // reload, silently discarding the pastes that take the most effort.
+    const live=new Set([].concat(
+      (DATA&&DATA.bouts||[]).map(b=>b.bout),
+      (DATA&&DATA.no_read||[]).map(n=>n.a+' vs. '+n.b)));
     Object.keys(o).forEach(k=>{ if(!live.has(k)) delete o[k]; });
     return o;
   }catch(e){ return {}; }
@@ -1715,7 +1744,8 @@ const SB_FILL = {str_acc:'striking accuracy', slpm:'strikes landed per min',
   str_def:'striking defense', td_def:'takedown defense'};
 // which published input each pasted field stands in for
 const SB_MAP = {str_acc:'str_acc', slpm:'adj_slpm', sapm:'sapm', td15:'adj_td15',
-                sub15:'sub15', str_def:'str_def', td_def:'td_def'};
+                sub15:'sub15', str_def:'str_def', td_def:'td_def',
+                age:'age', reach:'reach'};
 const SB_HELD = {elo:'career rating', opp_elo:'strength of schedule',
   log_exp:'UFC mileage', ko_loss_rate:'losses by strikes', reach:'reach',
   age:'age', log_layoff:'layoff'};
@@ -1784,6 +1814,20 @@ function parseUfcMethod(text){
    the dashes, a "Record:" prefix, a trailing "1 NC", a two-part "10-3", and the
    label written ahead of the numbers. A 0-0-0 debut returns null rather than a
    zero denominator. */
+/* "32, 72" or "32 / 72" or just "32". Age and reach sit in the bio block on a
+   UFC.com fighter page rather than the stats block, so they are typed rather
+   than pasted. They are optional and they matter: age carries 18.8% of the
+   model's weight on its own and reach 4.4%, so supplying them drops what a
+   no-read bout has to assume equal from 55.1% to 31.9%. */
+function parseBio(s){
+  const n=String(s||'').match(/-?\d+(?:\.\d+)?/g);
+  if(!n||!n.length) return null;
+  const age=parseFloat(n[0]), reach=n.length>1?parseFloat(n[1]):null;
+  const out={};
+  if(age>=15&&age<=60) out.age=age;
+  if(reach!=null&&reach>=50&&reach<=90) out.reach=reach;
+  return Object.keys(out).length?out:null;
+}
 function parseRecord(s){
   const m=String(s||'').match(/(\d+)\s*-\s*(\d+)(?:\s*-\s*(\d+))?/);
   if(!m) return null;
@@ -1868,6 +1912,12 @@ function sbShrinkMix(m){
 function sbMethodRead(ma,mb,pA,w,b){
   const A=sbShrinkMix(ma), B=sbShrinkMix(mb);
   if(!A||!B) return null;
+  /* No winner probability means EVEN, not zero. A null pA made the weighting
+     collapse to `0*A + 1*B` — the whole method read became corner B's record
+     with corner A silently discarded, and it looked plausible enough to miss.
+     Shows up on a no-read bout, which is the one case where there may be no
+     winner number at all. */
+  if(pA==null||!isFinite(pA)) pA=0.5;
   const out={};
   ['ko','sub','dec'].forEach(k=>{out[k]=pA*A[k]+(1-pA)*B[k];});
   if(w==null||b==null||b.m_decision==null) return out;
@@ -1939,13 +1989,69 @@ function sbWeightShare(){
   M.features.forEach((n,i)=>{const w=Math.abs(M.coef[i]); all+=w; if(touched.has(n)) t+=w;});
   return all?t/all:null;
 }
+/* A no-read bout has no corpus state at all — the fighter is not in UFCStats,
+   which is why there is no tile. The method and round read needs nothing from
+   the corpus, so it works here exactly as it does anywhere. The WINNER read
+   does not: seven of the fourteen inputs have no source, and zeroing their
+   differentials asserts the two men are level on rating, strength of schedule,
+   UFC mileage, chin and layoff.
+   That assumption is not neutral for this population. A fighter is no-read
+   because he is new to the UFC, and a newcomer is usually young and untested
+   against someone established — so "assume level" is wrong in a predictable
+   direction, not at random. Hence: age and reach can be typed in, which pulls
+   the assumed-equal share from 55.1% down to 31.9%, and the winner number is
+   withheld entirely until at least one of them is supplied. */
+function openNoRead(key){
+  const n=(DATA.no_read||[]).find(x=>(x.a+' vs. '+x.b)===key);
+  if(!n) return;
+  const b=sbSynthetic(n);
+  const panel=sandboxPanel(b);
+  document.getElementById('drawin').innerHTML=`
+    <button class="xbtn" id="xb">close ✕</button>
+    <div class="lbl">${esc(n.segment||'')} · no read</div>
+    <div style="font-size:19px;font-weight:800;text-transform:uppercase;letter-spacing:-.02em;margin:4px 0 10px">
+      ${esc(n.a)} <span style="color:var(--dim)">vs</span> ${esc(n.b)}</div>
+    <div class="card" style="border-left:3px solid var(--warn)">
+      <div class="ghead" style="background:none;border:none;padding:0 0 4px">
+        <span class="gname" style="color:var(--warn)">No read — ${esc(n.reason)}</span></div>
+      <div class="note">The model has no number for this bout at all: ${esc(n.reason)}, so there is
+        no rating, no age, no reach and no prior output to work from. Nothing below comes from the
+        model — it is built entirely from what you paste.</div>
+    </div>
+    ${panel?`<div class="card"><div class="ghead" style="background:none;border:none;padding:0 0 8px">
+      <span class="gname">UFC.com check</span>
+      <span class="lbl">the only read available for this bout</span></div>${panel}</div>`
+     :'<div class="note">The win model is not present in this build, so nothing can be computed here.</div>'}`;
+  bindSandbox(b);
+  const xb=document.getElementById('xb'); if(xb) xb.addEventListener('click',close_);
+  document.getElementById('draw').classList.add('on');
+  document.getElementById('draw').setAttribute('aria-hidden','false');
+  document.getElementById('scrim').classList.add('on');
+}
+function sbSynthetic(n){
+  const zero={}; SB_KEYS.forEach(k=>{zero[k]=0;});
+  return {bout:n.a+' vs. '+n.b, a:n.a, b:n.b, rounds:3, noRead:true,
+          fin:{a:Object.assign({},zero), b:Object.assign({},zero)},
+          m_decision:null, p_end_r1:null, p_finish:null};
+}
+const SB_KEYS=['elo','opp_elo','log_exp','adj_slpm','sapm','str_acc','str_def',
+               'adj_td15','td_def','sub15','ko_loss_rate','reach','age','log_layoff'];
 function sandboxPanel(b){
   if(!DATA.win_model||!b.fin||!b.fin.a||!b.fin.b) return '';
   const st=sbState(b), share=sbWeightShare();
   const nA=esc(surname(b.a)), nB=esc(surname(b.b));
-  const pBase=sbProb(b.fin.a,b.fin.b);
+  const pBase=b.noRead?null:sbProb(b.fin.a,b.fin.b);
   const A=sbCorner(b.fin.a,st.a,st.blend), B=sbCorner(b.fin.b,st.b,st.blend);
-  const pNew=(Object.keys(st.a).length||Object.keys(st.b).length)?sbProb(A,B):null;
+  /* On a no-read bout every corpus input is zero, so a winner number asserts
+     the two men are level on rating, schedule, mileage, chin and layoff — 55%
+     of the model's weight, and wrong in a predictable direction for newcomers.
+     Supplying age or reach pulls that to 31.9%, so the number appears only once
+     at least one of them is given, on at least one side. Below that bar the
+     method and round read still shows: it needs nothing from the corpus and is
+     not affected by any of this. */
+  const bio=['age','reach'].some(k=>st.a[k]!=null||st.b[k]!=null);
+  const canWin=!b.noRead||bio;
+  const pNew=(canWin&&(Object.keys(st.a).length||Object.keys(st.b).length))?sbProb(A,B):null;
 
   const cmp=Object.keys(SB_FILL).map(k=>{
     const slot=SB_MAP[k], ours=b.fin.a[slot], ourB=b.fin.b[slot];
@@ -1970,10 +2076,12 @@ function sandboxPanel(b){
     <div class="sbgrid">
       <label class="lbl">${nA} — paste the UFC.com stats block
         <textarea class="sbta" data-c="a" rows="4" placeholder="paste here"></textarea>
-        <input class="sbrec" data-c="a" placeholder="record, e.g. 10-3-0 (W-L-D)"></label>
+        <input class="sbrec" data-c="a" placeholder="record, e.g. 10-3-0 (W-L-D)">
+        <input class="sbrec sbbio" data-c="a" placeholder="age, reach in. — optional"></label>
       <label class="lbl">${nB} — paste the UFC.com stats block
         <textarea class="sbta" data-c="b" rows="4" placeholder="paste here"></textarea>
-        <input class="sbrec" data-c="b" placeholder="record, e.g. 10-3-0 (W-L-D)"></label>
+        <input class="sbrec" data-c="b" placeholder="record, e.g. 10-3-0 (W-L-D)">
+        <input class="sbrec sbbio" data-c="b" placeholder="age, reach in. — optional"></label>
     </div>
     <div class="sbacts">
       <button class="more sbgo">Read both</button>
@@ -1983,13 +2091,21 @@ function sandboxPanel(b){
         <span class="mono sbw">${Math.round(100*st.blend)}%</span> toward UFC.com</label>`:''}
     </div>
     ${cmp?`<div class="lbl" style="margin:11px 0 3px">what changed · ours → UFC.com</div>${cmp}`:''}
+    ${b.noRead&&!canWin?`<div class="note" style="margin-top:9px">A winner number is held back
+      until an age or a reach is given for at least one corner. Without them this bout has no
+      rating, age, reach, mileage or chin on either side, so a probability would be asserting the
+      two are level on 55% of what decides the pick — and a fighter is in this list because he is
+      new, which makes "level" wrong in one direction rather than at random. The method and round
+      read below needs none of that and stands on its own.</div>`:''}
     ${pNew!=null?`<div class="sbout">
-      <div class="cnum"><b class="mono">${P0(pBase)}%</b><span>model</span></div>
+      ${pBase!=null?`<div class="cnum"><b class="mono">${P0(pBase)}%</b><span>model</span></div>`
+        :'<div class="cnum"><span>no model number for this bout</span></div>'}
       <div class="cnum"><b class="mono" style="color:var(--gold)">${P0(pNew)}%</b>
         <span>with these inputs</span>
-        <span class="vs mono">${(100*(pNew-pBase)>=0?'+':'')}${(100*(pNew-pBase)).toFixed(1)} pts for ${nA}</span></div>
-      <label class="lbl sbshow"><input type="checkbox" class="sbchip" ${st.on?'checked':''}>
-        show beside the model on the card</label></div>`
+        ${pBase!=null?`<span class="vs mono">${(100*(pNew-pBase)>=0?'+':'')}${(100*(pNew-pBase)).toFixed(1)} pts for ${nA}</span>`
+          :`<span class="vs mono">assumes level on rating, schedule, mileage, chin and layoff</span>`}</div>
+      ${b.noRead?'':`<label class="lbl sbshow"><input type="checkbox" class="sbchip" ${st.on?'checked':''}>
+        show beside the model on the card</label>`}</div>`
      :'<div class="note" style="margin-top:9px">Paste one or both blocks and press Read both.</div>'}
     ${sbMethodBlock(b,st,pNew!=null?pNew:pBase)}
   </div>`;
@@ -2023,14 +2139,18 @@ function sandboxPanel(b){
 function sbVerdict(ma,mb,pA,b,st){
   const A=sbShrinkMix(ma), B=sbShrinkMix(mb);
   if(!A||!B) return '';
+  /* Same guard as sbMethodRead, and it had to be repeated because this builds
+     its own six cells rather than reusing that function's output. With pA null
+     every A cell multiplied to zero and every B cell to full weight, so the
+     verdict named corner B's route on a bout where corner A was the finisher.
+     It read plausibly, which is what made it worth catching. */
+  if(pA==null||!isFinite(pA)) pA=0.5;
   const blended=sbMethodRead(ma,mb,pA,st.blend,b);
   const MB=(BR||{}).market_bases||{};
   const decBase=MB.dec??0.505, finBase=1-decBase;
   const nA=surname(b.a), nB=surname(b.b);
-  const cells=[
-    [pA*A.ko,  nA,'KO/TKO'],   [pA*A.sub,  nA,'submission'],   [pA*A.dec,  nA,'decision'],
-    [(1-pA)*B.ko,nB,'KO/TKO'], [(1-pA)*B.sub,nB,'submission'], [(1-pA)*B.dec,nB,'decision']];
-  cells.sort((x,y)=>y[0]-x[0]);
+  const cells=sbCells(ma,mb,pA,nA,nB);
+  if(!cells) return '';
   const dec=blended?blended.dec:(pA*A.dec+(1-pA)*B.dec), fin=1-dec;
 
   let head, cls;
@@ -2048,11 +2168,9 @@ function sbVerdict(ma,mb,pA,b,st){
      the same contradiction the tile had on the Pulyaev bout, in a new place. */
   const fam = cls==='soft' && head==='No length lean' ? null
             : (head.indexOf('Finish')===0 ? 'fin' : 'dec');
-  const pool = fam==null ? cells
-             : cells.filter(c=> fam==='dec' ? c[2]==='decision' : c[2]!=='decision');
-  const top=pool[0], second=pool[1];
-  const clear = top && (!second || (top[0]-second[0])>=0.06);
-  let who = clear ? `${esc(top[1])} by ${top[2]}`
+  const best=sbTop(cells,fam);
+  const clear = best && best.clear;
+  let who = clear ? `${esc(best.name)} by ${best.how}`
                   : `no clear favorite — ${fam==='dec'?'decision':fam==='fin'?'finish':(dec>fin?'decision':'finish')}`;
 
   // round, only when a finish is the call and the timing read says something
@@ -2153,13 +2271,18 @@ function bindSandbox(b){
     const host=box.parentNode;
     host.innerHTML=sandboxPanel(b);
     bindSandbox(b);
-    if(typeof render==='function' && st.on) render();
+    // a no-read bout has no tile and therefore no show-on-card switch, so the
+    // card summary would never refresh if the redraw waited on that flag
+    if(typeof render==='function' && (st.on||b.noRead)) render();
   };
   box.querySelectorAll('.sbta').forEach(ta=>{
     ta.value=st[ta.getAttribute('data-c')+'_raw']||'';
   });
-  box.querySelectorAll('.sbrec').forEach(ip=>{
+  box.querySelectorAll('.sbrec:not(.sbbio)').forEach(ip=>{
     ip.value=st[ip.getAttribute('data-c')+'_recraw']||'';
+  });
+  box.querySelectorAll('.sbbio').forEach(ip=>{
+    ip.value=st[ip.getAttribute('data-c')+'_bioraw']||'';
   });
   const read=()=>{
     box.querySelectorAll('.sbta').forEach(ta=>{
@@ -2168,10 +2291,17 @@ function bindSandbox(b){
       st[c]=parseUfcBlock(ta.value);
       st[c+'_m']=parseUfcMethod(ta.value);
     });
-    box.querySelectorAll('.sbrec').forEach(ip=>{
+    box.querySelectorAll('.sbrec:not(.sbbio)').forEach(ip=>{
       const c=ip.getAttribute('data-c');
       st[c+'_recraw']=ip.value;
       st[c+'_rec']=parseRecord(ip.value);
+    });
+    box.querySelectorAll('.sbbio').forEach(ip=>{
+      const c=ip.getAttribute('data-c');
+      st[c+'_bioraw']=ip.value;
+      const bio=parseBio(ip.value);
+      // merged into the same override bag the stats use, so one code path
+      st[c]=Object.assign({}, st[c]||{}, bio||{});
     });
     sbSave(); redraw();
   };
@@ -2206,9 +2336,31 @@ function cssEsc(s){return String(s).replace(/["\\]/g,'\\$&');}
    it is most overconfident. So the sandbox badge keeps its own gold dashed
    styling whether or not it leads, says "ufc.com" in its own text, and the
    model's call is dimmed rather than removed. */
-function sbLengthCall(b){
-  const st=SBOX[b.bout];
-  if(!st||!st.on) return null;
+/* The six corner-by-method cells, and the best one inside a chosen family.
+   Shared so the chip badge and the drawer verdict cannot drift apart — they
+   were about to compute the same answer twice, which is how the tile and the
+   drawer ended up disagreeing on the Pulyaev bout in the first place. */
+function sbCells(ma,mb,pA,a,bb){
+  const A=sbShrinkMix(ma), B=sbShrinkMix(mb);
+  if(!A||!B) return null;
+  if(pA==null||!isFinite(pA)) pA=0.5;
+  return [[pA*A.ko,a,'KO/TKO'],   [pA*A.sub,a,'submission'],   [pA*A.dec,a,'decision'],
+          [(1-pA)*B.ko,bb,'KO/TKO'],[(1-pA)*B.sub,bb,'submission'],[(1-pA)*B.dec,bb,'decision']]
+         .sort((x,y)=>y[0]-x[0]);
+}
+function sbTop(cells,fam){
+  const pool = fam==null ? cells
+    : cells.filter(c=> fam==='dec' ? c[2]==='decision' : c[2]!=='decision');
+  const top=pool[0], second=pool[1];
+  if(!top) return null;
+  return {name:top[1], how:top[2], p:top[0],
+          clear:(!second||(top[0]-second[0])>=0.06)};
+}
+function sbLengthCall(b,stIn){
+  // stIn lets the no-read summary ask without the bout being "on" a tile:
+  // there is no tile to switch on, so the show-on-card flag cannot gate it.
+  const st=stIn||SBOX[b.bout];
+  if(!st||(!stIn&&!st.on)) return null;
   const pA=sbProb(sbCorner(b.fin.a,st.a,st.blend),sbCorner(b.fin.b,st.b,st.blend));
   if(pA==null) return null;
   const read=sbMethodRead(st.a_m||{}, st.b_m||{}, pA, st.blend, b);
@@ -2246,8 +2398,20 @@ function sbLengthCall(b){
      shrinking harder to tame the thin end costs accuracy at the thick end. */
   const wins=m=>['ko','sub','dec'].reduce((t,x)=>t+(m[(x)+'_n']||0),0);
   const thin=Math.min(wins(st.a_m||{}), wins(st.b_m||{}));
+  /* The gap against the model on the SAME outcome, which is the only form of
+     "higher than the model" that means anything — comparing a records FINISH
+     to a model DISTANCE would be two different claims. Null on a no-read bout,
+     where the model says nothing to be higher than. */
+  let delta=null;
+  if(!modelSilent){
+    const mp = kind==='finish' ? 1-b.m_decision : b.m_decision;
+    delta = p-mp;
+  }
+  const cells=sbCells(st.a_m||{}, st.b_m||{}, pA, surname(b.a), surname(b.b));
+  const top=cells?sbTop(cells, kind==='finish'?'fin':'dec'):null;
   return {kind:kind, p:p, conv:conv, modelConv:modelConv, round:round,
-          wins:thin, thin:thin<3, modelSilent:modelSilent};
+          wins:thin, thin:thin<3, modelSilent:modelSilent, delta:delta,
+          top:(top&&top.clear)?top:null};
 }
 function sandboxChip(b){
   const st=SBOX[b.bout];
@@ -2271,10 +2435,22 @@ function sandboxChip(b){
      favorite": a difference too small to mean anything should not change what
      the card says. */
   const lead=!L.modelSilent && !L.thin && L.conv>L.modelConv+0.01;
-  return win+`<span class="sbtag len ${lead?'leads':''}"
-    title="from the pasted records, not the model${lead?' — further from the league rate than the model is, which is not the same as more accurate':''}">ufc.com ${
-    L.kind==='finish'?'FINISH':'DISTANCE'} ${P0(L.p)}%${L.round?' · '+L.round:''}${
+  /* The gap is spelled out rather than left to the fill colour. "Higher than
+     the model" is the thing being asked of this badge, and a shade of gold
+     does not say by how much or in which direction. */
+  const dp=L.delta==null?'':` ${L.delta>=0?'+':''}${Math.round(100*L.delta)} vs model`;
+  const len=`<span class="sbtag len ${lead?'leads':''}"
+    title="from the pasted records, not the model${L.delta!=null?` — the model has this outcome at ${P0(L.p-L.delta)}%`:''}">ufc.com ${
+    L.kind==='finish'?'FINISH':'DISTANCE'} ${P0(L.p)}%${dp}${L.round?' · '+L.round:''}${
     L.thin?` · thin ${L.wins}W`:''}</span>`;
+  /* The single most-likely outcome, named, when one corner's route is clear of
+     the next by six points. Suppressed otherwise rather than printed with a
+     hedge, because a chip is read at a glance and a hedged chip is read as a
+     call. */
+  const pick=L.top?`<span class="sbtag len pick"
+    title="the clearest single outcome in the pasted records">ufc.com ${esc(L.top.name)} by ${
+    L.top.how==='KO/TKO'?'KO':L.top.how==='submission'?'SUB':'DEC'} ${P0(L.top.p)}%</span>`:'';
+  return win+len+pick;
 }
 
 function marketTabs(b,mk,rr,totals){
