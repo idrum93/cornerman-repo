@@ -1765,6 +1765,14 @@ function parseUfcMethod(text){
   }
   return out;
 }
+/* UFC.com writes the record as "10-3-0 (W-L-D)", so the pattern has to survive a
+   trailing label made of the same dashes. It does, because it anchors on DIGITS
+   either side of each dash and the label has none — the first match in the
+   string is the record itself wherever the label sits. Verified against the
+   live format and thirteen variants: no space before the bracket, spaces around
+   the dashes, a "Record:" prefix, a trailing "1 NC", a two-part "10-3", and the
+   label written ahead of the numbers. A 0-0-0 debut returns null rather than a
+   zero denominator. */
 function parseRecord(s){
   const m=String(s||'').match(/(\d+)\s*-\s*(\d+)(?:\s*-\s*(\d+))?/);
   if(!m) return null;
@@ -1934,10 +1942,10 @@ function sandboxPanel(b){
     <div class="sbgrid">
       <label class="lbl">${nA} — paste the UFC.com stats block
         <textarea class="sbta" data-c="a" rows="4" placeholder="paste here"></textarea>
-        <input class="sbrec" data-c="a" placeholder="record, e.g. 27-5-0"></label>
+        <input class="sbrec" data-c="a" placeholder="record, e.g. 10-3-0 (W-L-D)"></label>
       <label class="lbl">${nB} — paste the UFC.com stats block
         <textarea class="sbta" data-c="b" rows="4" placeholder="paste here"></textarea>
-        <input class="sbrec" data-c="b" placeholder="record, e.g. 27-5-0"></label>
+        <input class="sbrec" data-c="b" placeholder="record, e.g. 10-3-0 (W-L-D)"></label>
     </div>
     <div class="sbacts">
       <button class="more sbgo">Read both</button>
