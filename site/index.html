@@ -350,6 +350,32 @@
   .brsent{display:block;font-size:11px;color:var(--mute);margin-top:3px;line-height:1.5}
   .brsent b{color:var(--bone)}
   .brrow{padding:6px 0;border-top:1px solid var(--soft)}
+  .ckstrip{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:0 0 10px}
+  .ckstrip.thin{opacity:.72}
+  .ckhd{display:flex;flex-wrap:wrap;gap:8px;align-items:baseline;margin-bottom:8px}
+  .ckcols{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px}
+  .ckcol{border:1px solid var(--line);border-radius:8px;padding:6px 8px}
+  .ckcol.lead{border-color:var(--gold)}
+  .ckcol.lead .ckbig{color:var(--gold)}
+  .cklab{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
+  .ckbig{font-size:20px;font-weight:800;line-height:1.2}
+  .cksub{font-size:10.5px;color:var(--dim)}
+  .cknote{font-size:11px;color:var(--dim);margin-top:7px}
+  .cktab{width:100%;border-collapse:collapse;font-size:12px;margin-top:4px}
+  .cktab th{text-align:left;font-size:10px;letter-spacing:.05em;text-transform:uppercase;
+    color:var(--mute);font-weight:600;padding:4px 6px;border-bottom:1px solid var(--line)}
+  .cktab td{padding:5px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+  .ckwin{font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--gold)}
+  .ckends{margin-top:10px;border-top:1px solid var(--line);padding-top:8px}
+  .ckendtab td:first-child{color:var(--mute)}
+  .ckbest{color:var(--gold);font-weight:700}
+  .ckm{display:inline-block;min-width:15px;text-align:center;font-size:10px;font-weight:800;
+    border-radius:3px;padding:1px 3px;margin-right:2px;border:1px solid var(--line)}
+  .ckm.hit{color:var(--gold);border-color:var(--gold)}
+  .ckm.miss{color:var(--dim)}
+  .ckna{color:var(--dim);font-size:11px}
+  .ckonly{font-size:8.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--dim);
+    border:1px solid var(--line);border-radius:3px;padding:0 3px;white-space:nowrap}
   .brrow.flat{opacity:.62}
   /* brhead is a column, so the badge would land on a third line of its own.
      Pinned to the title line instead; it drops back into flow under 560px
@@ -1348,10 +1374,11 @@ function render(){
   const lc=HIST&&HIST.cards&&HIST.cards[0];
   document.getElementById('app').innerHTML=nav+
     zone('z-up','z-upcoming','Upcoming card',`${esc(d.event||'')} · ${d.bouts.length} bouts modeled`,
-      strip()+filt+segs)+
+      ckStrip()+strip()+filt+segs)+
     zone('z-res','z-results', lc?`Last card — ${esc(lc.event)}`:'Last card',
       (lc&&lc.date?`${dayET(lc.date)} · `:'')+
-      'graded against what happened · click any fight', lastCard())+
+      'graded against what happened · click any fight',
+      lastCard()+(lc?ckCardPanel(lc.event):''))+
     zone('z-hist','z-history','What usually happens','history of every fight since 2012, not predictions',
       baseRatePanel(null,null,true)+divisionTable())+`
     <div class="note" style="margin-top:16px;max-width:900px">
@@ -1762,6 +1789,250 @@ function sbLoad(){
 }
 function sbSave(){
   try{ localStorage.setItem(SB_KEY, JSON.stringify(SBOX)); }catch(e){}
+  ckCapture();
+}
+
+/* ---------------------------------------------------------------- check ledger
+
+   The running record of whether the UFC.com check, the model or the market
+   called a card better. It has to survive two things the sandbox does not.
+
+   SBOX is PRUNED on every load to the bouts on the current card, so the moment
+   a new card lands every pasted read is deleted - which is correct for the
+   inputs (they belong to that card) and fatal for a track record. So the
+   derived READ is written to its own key that is never pruned. Inputs stay
+   disposable; the claim they made becomes permanent the moment it is made.
+
+   Grading then needs no export and no server. history.json already carries the
+   graded truth for every archived bout - the model's probability, the market's
+   where one was quoted, the actual winner, method and round - and its `bout`
+   field is the SAME key the sandbox stores against. So the browser joins its
+   own stored reads to the Python-side grading and the whole thing runs on its
+   own: paste, let the card resolve, and the next page load scores it.
+
+   THE SUBSET RULE, which is the one that decides whether these numbers mean
+   anything. A read only exists where you chose to paste one, and the bouts
+   worth pasting are the ones you found interesting or doubtful - not a random
+   sample. Comparing the check's record on ITS bouts against the model's record
+   on ALL bouts would compare two different populations and flatter whichever
+   got the easier fights. Every column here is scored on the identical bout
+   set, and n is always shown. */
+const CK_KEY='cornerman.checkreads.v1';
+let CKR={};
+function ckLoad(){ try{ return JSON.parse(localStorage.getItem(CK_KEY)||'{}')||{}; }catch(e){ return {}; } }
+function ckCapture(){
+  if(!DATA||!DATA.bouts) return;
+  const by={}; DATA.bouts.forEach(b=>by[b.bout]=b);
+  let dirty=false;
+  Object.keys(SBOX||{}).forEach(k=>{
+    const b=by[k], st=SBOX[k]; if(!b||!b.fin||!st) return;
+    const pA=sbProb(sbCorner(b.fin.a,st.a,st.blend), sbCorner(b.fin.b,st.b,st.blend));
+    if(pA==null||!isFinite(pA)) return;
+    const read=sbMethodRead(st.a_m||{}, st.b_m||{}, pA, st.blend, b);
+    if(!read) return;
+    const t=sbR1Read(st,b);
+    const wins=m=>['ko','sub','dec'].reduce((x,y)=>x+(m[y+'_n']||0),0);
+    CKR[k]={p_a:+pA.toFixed(4), dec:+read.dec.toFixed(4),
+      a_ko:+(read.a_ko||0).toFixed(4), a_sub:+(read.a_sub||0).toFixed(4),
+      b_ko:+(read.b_ko||0).toFixed(4), b_sub:+(read.b_sub||0).toFixed(4),
+      r1:t?+t.p.toFixed(4):null, blend:st.blend,
+      thin:Math.min(wins(st.a_m||{}),wins(st.b_m||{})), ts:Date.now()};
+    dirty=true;
+  });
+  if(dirty) try{ localStorage.setItem(CK_KEY, JSON.stringify(CKR)); }catch(e){}
+}
+/* Join stored reads to the graded cards. Returns per-bout rows plus totals,
+   every total computed over the SAME bouts (see the subset rule above). */
+/* Top-of-page standing record. Only ever win/loss: the market quotes a
+   moneyline and nothing else here, so it is the one claim all three make. */
+function ckStrip(){
+  const G=ckGrade(); if(!G) return '';
+  const CK_MIN=12;   // registered floor, same spirit as the 300-bet betting bar
+  const pc=x=>(x*100).toFixed(0)+'%';
+  const col=(nm,right,n,brier,lead)=>`<div class="ckcol${lead?' lead':''}">
+    <div class="cklab">${nm}</div><div class="ckbig mono">${n?pc(right/n):'--'}</div>
+    <div class="cksub mono">${right}/${n}${brier!=null?` · brier ${brier.toFixed(3)}`:''}</div></div>`;
+  const S=G.mkt||G.win, three=!!G.mkt;
+  const best=Math.min(S.check_brier, S.model_brier, three?S.market_brier:9);
+  const thin=G.n<CK_MIN;
+  return `<div class="ckstrip${thin?' thin':''}">
+    <div class="ckhd"><b>Who has been closer</b>
+      <span class="lbl">win/loss on the ${S.n} graded bout${S.n===1?'':'s'} where you
+        entered a UFC.com check${three?' and a market price existed':''} — all three
+        scored on the same bouts</span></div>
+    <div class="ckcols">
+      ${three?col('market',S.market_right,S.n,S.market_brier,S.market_brier===best):''}
+      ${col('model',S.model_right,S.n,S.model_brier,S.model_brier===best)}
+      ${col('ufc.com check',S.check_right,S.n,S.check_brier,S.check_brier===best)}
+    </div>
+    ${ckEndsBlock(G)}
+    ${thin?`<div class="cknote">Too few to rank — ${G.n} of ${CK_MIN}. Shown so it is
+      visible that it is accumulating, not so it can be read as a verdict.</div>`
+      :`<div class="cknote">Lower Brier is better and is what ranks the win/loss row; the
+      percentage alone treats a 51% call and a 95% call as the same claim.</div>`}</div>`;
+}
+/* "How this fight ends", split into the claims that are actually separate.
+   One combined "called the finish" number hid too much: a read can be right
+   that it ends early and wrong about who or how, and those are different
+   skills. No market column — no book here quotes these. */
+function ckEndsBlock(G){
+  const r=[];
+  if(G.len)   r.push(['ends early or goes the distance', G.len.n, G.len.check, G.len.model]);
+  if(G.mtype) r.push(['finish type (KO / SUB / decision)', G.mtype.n, G.mtype.check, G.mtype.model]);
+  if(G.method)r.push(['full call — fighter and method', G.method.n, G.method.check, G.method.model]);
+  if(G.rnd)   r.push(['round one, or past it', G.rnd.n, G.rnd.check, G.rnd.model]);
+  if(G.rexact)r.push(['exact round named', G.rexact.n, null, G.rexact.model]);
+  if(!r.length) return '';
+  const pc=(x,n)=>n?`${(x/n*100).toFixed(0)}%`:'--';
+  return `<div class="ckends"><div class="cklab" style="margin-bottom:5px">how the fight ends</div>
+    <table class="cktab ckendtab"><thead><tr><th>claim</th><th>graded</th><th>model</th><th>ufc.com check</th></tr></thead>
+    <tbody>${r.map(([lab,n,c,m])=>`<tr><td>${lab}${c==null?' <span class="ckonly">model only</span>':''}</td>
+      <td class="mono">${n}</td>
+      <td class="mono${c!=null&&m>c?' ckbest':''}">${pc(m,n)} <span class="cksub">${m}/${n}</span></td>
+      <td class="mono${c!=null&&c>m?' ckbest':''}">${c==null?'<span class="ckna">n/a</span>':
+        pc(c,n)+' <span class="cksub">'+c+'/'+n+'</span>'}</td></tr>`).join('')}
+    </tbody></table>
+    <div class="cknote">Round is scored as "round one or later" for both, because that is
+      the only round claim the check makes — grading it against a modal round the check
+      never names would be scoring it on a question it was not asked. The exact-round row
+      is the model's sharper claim, scored on its own terms with no check column, so the
+      head-to-head above stays like for like.</div></div>`;
+}
+/* Per-bout, on the last card: who actually called this one. Method and round
+   have no market price, so the comparison there is check vs model vs base rate
+   - which is the same yardstick the card-shape strip already uses. */
+function ckCardPanel(ev){
+  const G=ckGrade(); if(!G) return '';
+  const rows=G.rows.filter(r=>r.event===ev); if(!rows.length) return '';
+  const pc=x=>(x*100).toFixed(0)+'%';
+  // one cell per claim: who got it, as a pair of marks rather than prose
+  const mark=(cr,mr)=>{
+    if(cr==null&&mr==null) return '<span class="ckna">--</span>';
+    const t=(ok,who)=>ok==null?'':`<span class="ckm ${ok?'hit':'miss'}">${who}</span>`;
+    return t(mr,'M')+t(cr,'C');
+  };
+  const body=rows.map(r=>{
+    const w=[['model',r.win.model],['check',r.win.check]];
+    if(r.win.market!=null) w.push(['market',r.win.market]);
+    const top=w.reduce((x,y)=>y[1]>x[1]?y:x)[0];
+    return `<tr><td>${esc(r.a)} vs ${esc(r.b)}<div class="lbl">${esc(r.winner)} by ${
+      esc(r.method)}${r.method!=='DEC'?' R'+r.round:''}${r.thin<3?' · thin record':''}</div></td>
+      <td class="mono">${pc(r.win.model)}</td><td class="mono">${pc(r.win.check)}</td>
+      <td class="mono">${r.win.market!=null?pc(r.win.market):'--'}</td>
+      <td class="ckwin">${top}</td>
+      <td>${mark(r.len?r.len.check_right:null, r.len?r.len.model_right:null)}</td>
+      <td>${mark(r.mtype?r.mtype.check_right:null, r.mtype?r.mtype.model_right:null)}</td>
+      <td>${mark(r.mfull?r.mfull.check_right:null, r.mfull?r.mfull.model_right:null)}</td>
+      <td>${mark(r.rnd?r.rnd.check_right:null, r.rnd?r.rnd.model_right:null)}</td>
+      <td title="${r.rexact?esc('model said '+r.rexact.model_call+', it was '+r.rexact.actual):''}">${
+        r.rexact?mark(null,r.rexact.model_right):'<span class="ckna">--</span>'}</td></tr>`;}).join('');
+  return `<div class="seg ckcard"><div class="seghd"><h2>Model vs your UFC.com check</h2>
+    <span class="lbl">probability each put on the fighter who actually won, then each claim about
+      how it ended · ${rows.length} graded · <b class="ckm hit">M</b>/<b class="ckm hit">C</b> = model
+      and check, gold when right</span></div>
+    <table class="cktab"><thead><tr><th>bout</th><th>model</th><th>check</th>
+      <th>market</th><th>closer</th><th>early/<br>distance</th><th>finish<br>type</th>
+      <th>fighter<br>+ method</th><th>R1 or<br>past</th>
+      <th title="the model names a modal round; the check has no equivalent claim">exact rd<br><span class="ckonly">model</span></th></tr></thead><tbody>${body}</tbody></table></div>`;
+}
+function ckGrade(){
+  if(!HIST||!HIST.cards) return null;
+  const rows=[];
+  HIST.cards.forEach(c=>(c.bouts||[]).forEach(g=>{
+    const r=CKR[g.bout]; if(!r) return;
+    const aWon = g.winner===g.a;
+    const brier=(p,y)=>Math.pow(p-(y?1:0),2);
+    const row={event:c.event, date:c.date, bout:g.bout, a:g.a, b:g.b,
+      winner:g.winner, method:g.method, round:g.round, thin:r.thin, blend:r.blend,
+      win:{check:aWon?r.p_a:1-r.p_a, model:g.p_winner_model,
+           market:g.market?g.market.p_winner_market:null},
+      wb:{check:brier(r.p_a,aWon), model:brier(g.p_a,aWon),
+          market:g.market?brier(g.market.p_market,aWon):null}};
+    /* How it ended, broken into the three claims that are actually separate.
+       "Called the finish" alone hid too much: a read can be right that it ends
+       early and wrong about who or how, and those are different skills. Each
+       is scored for check and model on the same bout. */
+    const cells={decision:r.dec, a_ko:r.a_ko, a_sub:r.a_sub, b_ko:r.b_ko, b_sub:r.b_sub};
+    const fin=g.method!=='DEC';
+    const actual = g.method==='DEC' ? 'decision'
+      : (g.method==='KO/TKO'||g.method==='SUB')
+        ? (aWon?'a':'b')+(g.method==='KO/TKO'?'_ko':'_sub') : null;
+    const top=Object.keys(cells).reduce((x,y)=>cells[y]>cells[x]?y:x);
+    const fam=k=>k==='decision'?'DEC':k.endsWith('_ko')?'KO':'SUB';
+    const dr=(g.report||[]).find(x=>x.kind==='prop'&&x.label==='Go the distance');
+    const mrep=(g.report||[]).find(x=>x.kind==='method');
+
+    // 1. LENGTH - does it end early or go the distance. The call the check leads with.
+    if(dr){
+      row.len={actual: fin?'finish':'distance',
+        check_call: r.dec>=0.5?'distance':'finish', model_call: dr.said>=0.5?'distance':'finish',
+        check_b:brier(1-r.dec,fin), model_b:brier(1-dr.said,fin), base_b:brier(1-dr.base,fin)};
+      row.len.check_right=row.len.check_call===row.len.actual;
+      row.len.model_right=row.len.model_call===row.len.actual;
+    }
+    // 2. METHOD - the finish TYPE (KO vs SUB vs decision), and separately the
+    //    full claim including WHICH fighter. A read can get the type right and
+    //    the corner wrong; scoring only the pair would hide that.
+    if(actual){
+      row.mtype={actual:fam(actual), check:fam(top), model:mrep?null:null,
+                 check_right:fam(top)===fam(actual)};
+      if(mrep){
+        const mt=/KO/.test(mrep.top)?'KO':/submission/i.test(mrep.top)?'SUB':'DEC';
+        row.mtype.model=mt; row.mtype.model_right=mt===fam(actual);
+      }
+      row.mfull={check_right:top===actual, model_right:mrep?!!mrep.right:null,
+                 check_said:cells[actual], model_said:mrep?mrep.said:null};
+      row.mcmp=row.mfull;   // kept: the card panel's existing column reads this
+    }
+    // 3. ROUND - only meaningful on a finish, and the check only ever claims
+    //    "round one or later", so both sides are scored on that same split
+    //    rather than on a modal round the check never names.
+    /* The model also names a MODAL round, which the check cannot - its only
+       round number is P(ends in round one). Tracked separately and labelled
+       model-only, so the sharper claim is still scored without grading the
+       check on a question it was never asked. */
+    const rex=(g.report||[]).find(x=>x.kind==='round');
+    if(fin&&rex) row.rexact={model_right:!!rex.right, model_call:rex.top, actual:'round '+g.round};
+    const r1p=(g.report||[]).find(x=>x.kind==='prop'&&x.label==='Ends before round 2');
+    if(fin&&r.r1!=null){
+      const wasR1=g.round===1;
+      row.rnd={actual:wasR1?'R1':'after R1', check_call:r.r1>=0.5?'R1':'after R1',
+               check_b:brier(r.r1,wasR1)};
+      row.rnd.check_right=row.rnd.check_call===row.rnd.actual;
+      if(r1p){ row.rnd.model_call=r1p.said>=0.5?'R1':'after R1';
+               row.rnd.model_b=brier(r1p.said,wasR1);
+               row.rnd.model_right=row.rnd.model_call===row.rnd.actual; }
+    }
+    rows.push(row);
+  }));
+  if(!rows.length) return null;
+  const mk=rows.filter(r=>r.win.market!=null);
+  const sum=(a,f)=>a.reduce((t,x)=>t+f(x),0);
+  const meth=rows.filter(r=>r.mcmp);
+  const len=rows.filter(r=>r.len);
+  const mty=rows.filter(r=>r.mtype&&r.mtype.model!=null);
+  const rnd=rows.filter(r=>r.rnd&&r.rnd.model_right!=null);
+  const rex=rows.filter(r=>r.rexact);
+  return {rows:rows, n:rows.length,
+    win:{n:rows.length,
+      check_right:sum(rows,r=>r.win.check>0.5?1:0), model_right:sum(rows,r=>r.win.model>0.5?1:0),
+      check_brier:sum(rows,r=>r.wb.check)/rows.length, model_brier:sum(rows,r=>r.wb.model)/rows.length},
+    mkt:mk.length?{n:mk.length,
+      check_right:sum(mk,r=>r.win.check>0.5?1:0), model_right:sum(mk,r=>r.win.model>0.5?1:0),
+      market_right:sum(mk,r=>r.win.market>0.5?1:0),
+      check_brier:sum(mk,r=>r.wb.check)/mk.length, model_brier:sum(mk,r=>r.wb.model)/mk.length,
+      market_brier:sum(mk,r=>r.wb.market)/mk.length}:null,
+    method:meth.length?{n:meth.length, check:sum(meth,r=>r.mcmp.check_right?1:0),
+      model:sum(meth,r=>r.mcmp.model_right?1:0)}:null,
+    len:len.length?{n:len.length,
+      check:sum(len,r=>r.len.check_right?1:0), model:sum(len,r=>r.len.model_right?1:0),
+      check_b:sum(len,r=>r.len.check_b)/len.length, model_b:sum(len,r=>r.len.model_b)/len.length,
+      base_b:sum(len,r=>r.len.base_b)/len.length}:null,
+    mtype:mty.length?{n:mty.length, check:sum(mty,r=>r.mtype.check_right?1:0),
+      model:sum(mty,r=>r.mtype.model_right?1:0)}:null,
+    rnd:rnd.length?{n:rnd.length, check:sum(rnd,r=>r.rnd.check_right?1:0),
+      model:sum(rnd,r=>r.rnd.model_right?1:0)}:null,
+    rexact:rex.length?{n:rex.length, model:sum(rex,r=>r.rexact.model_right?1:0)}:null};
 }
 let SBOX = {};                         // bout -> {a:{...}, b:{...}, blend, on}
 const SB_FILL = {str_acc:'striking accuracy', slpm:'strikes landed per min',
@@ -2940,6 +3211,9 @@ Promise.all([
 ]).then(([j,h,br,sc,us])=>{
   DATA=j; HIST=h; BR=br; SC=sc; USG=us;
   SBOX=sbLoad();   // after DATA: it is what says which bouts still exist
+  // The ledger loads BEFORE the capture, and is never pruned by card: SBOX is,
+  // which is exactly why the derived read needs a store of its own.
+  CKR=ckLoad(); ckCapture();
   showUsage(); showRecord();
   document.getElementById('stamp').textContent=fmtET(j.generated_utc);
   // the name fit depends on the box, so it has to run again when the box moves
