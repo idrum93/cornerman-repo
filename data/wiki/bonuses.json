@@ -2319,6 +2319,19 @@
    "status": "ok",
    "title": "UFC 331"
   },
+  "UFC 332: Silva vs. Wang ": {
+   "date": "2026-10-03",
+   "fotn": [],
+   "none_awarded": false,
+   "potn": [
+    "Roman Kopylov",
+    "Imanol Rodr\u00edguez",
+    "Damian Pinas",
+    "Johnny Walker"
+   ],
+   "status": "ok",
+   "title": "UFC 332"
+  },
   "UFC Fight Night 56: Shogun vs Saint Preux ": {
    "date": "2014-11-08",
    "fotn": [
@@ -6285,6 +6298,6 @@
   }
  },
  "parser": 5,
- "updated_utc": "2026-09-28T15:00:46+00:00",
+ "updated_utc": "2026-10-05T15:37:22+00:00",
  "version": 1
 }
