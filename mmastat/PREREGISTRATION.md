@@ -3576,6 +3576,33 @@ helpers (`sbCells`, `sbTop`) used by both the chip and the drawer verdict. They
 were about to compute the same answer in two places, which is exactly how the
 tile and the drawer came to disagree on the Pulyaev bout.
 
+### The same three tiers as the model
+
+The chip printed a bare "ufc.com FINISH 71%" at every strength. The model's own
+length badge has used three tiers since it shipped — 12 points clear of the
+league rate is a call, 5 to 12 a lean, under 5 neither — so a 71% from the
+records read sat beside a model badge that would have called the identical
+number LIKELY, and the two looked like different kinds of claim when they were
+the same claim. The drawer verdict was already tiered correctly; only the chip
+was not, which is the tile-and-drawer disagreement again in a new place.
+
+The chip now carries the tier in the wording and in the weight: FINISH LIKELY
+in gold, FINISH LEANS in the muted colour, FINISH - NO LEAN dimmed. The
+thresholds are read from the same two constants as the model badge rather than
+restated, so they cannot drift apart. Conviction is measured as distance from
+the league base rate, not from 50% - a 55% finish call on a division that
+finishes 56% of the time is no lean at all, and the old wording would have
+printed it as a finish.
+
+The round qualifier was reworded at the same time. "FINISH LIKELY ... R1 LIKELY"
+used one word for two different claims in a single badge; it now reads "in R1" /
+"after R1", which says where the finish lands without repeating the strength
+word that already applies to the finish itself.
+
+Verified across four hand-built shapes - heavy finishers, a mild tilt, a
+league-average pair and decision grinders - with the drawer and chip agreeing on
+the tier in every one.
+
 ### Provenance on the card
 
 Once something is pasted, the no-read entry carries a summary — "ufc.com FINISH
