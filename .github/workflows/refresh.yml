@@ -5,6 +5,20 @@ on:
   schedule:
     - cron: "0 11 * * *"
   workflow_dispatch:
+
+# Two files uploaded one after the other are two pushes, so two runs start and
+# race each other to deploy-pages. GitHub allows only ONE live deployment to
+# the github-pages environment, so whichever gets there second fails - which is
+# why a manual re-run right afterwards always works: by then nothing else is in
+# flight. This serialises them.
+#
+# cancel-in-progress stays false so a deployment already running is allowed to
+# finish. GitHub skips every QUEUED run except the newest, so a three-file
+# upload still ends with one deploy carrying the latest state, not three.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
 permissions:
   contents: write
   pages: write
@@ -35,7 +49,9 @@ jobs:
           git config user.email "bot@users.noreply.github.com"
           git add data/upcoming.txt site/ || true
           if ! git diff --staged --quiet; then
-            git commit -m "refresh"
+            # [skip ci] so the bot's own commit does not trigger a further run
+            # on top of the one that is already running.
+            git commit -m "refresh [skip ci]"
             for attempt in 1 2 3; do
               if git push; then break; fi
               git pull --rebase --no-edit
