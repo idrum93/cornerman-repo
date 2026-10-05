@@ -233,7 +233,8 @@
   .prow.feat{background:rgba(236,232,224,.045);box-shadow:inset 2px 0 0 rgba(236,232,224,.4)}
   .featdot{color:var(--bone);font-size:7px;opacity:.7;width:10px;text-align:center}
   .fo{width:52px;text-align:right;font-size:11px;color:var(--gold)}
-  .rec{width:132px;text-align:right;font-size:9px;letter-spacing:.06em;text-transform:uppercase}
+  .rec{width:96px;flex:none;text-align:right;font-size:9px;letter-spacing:.06em;
+    text-transform:uppercase;overflow:hidden;white-space:nowrap}
   .rec.none{color:#454D5B} .rec.good{color:var(--good)} .rec.bad{color:var(--warn)}
   .drv{display:flex;align-items:center;gap:9px;padding:5px 0}
   .drv .dt{flex:1;position:relative;height:7px}
@@ -374,6 +375,30 @@
   .ckm.hit{color:var(--gold);border-color:var(--gold)}
   .ckm.miss{color:var(--dim)}
   .ckna{color:var(--dim);font-size:11px}
+  .abgrid{display:grid;grid-template-columns:34px 1fr 1fr;gap:1px 6px;align-items:center;
+    margin-top:6px;padding:5px 6px;border:1px solid var(--line);border-radius:7px}
+  .abgrid.hasdiff{border-color:rgba(222,140,52,.45)}
+  .abh{font-size:8px;letter-spacing:.07em;text-transform:uppercase;color:var(--dim);
+    padding-bottom:2px;border-bottom:1px solid var(--soft);margin-bottom:2px}
+  .abh:nth-child(3){color:var(--gold)}
+  .abl{font-size:8.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--dim);
+    white-space:nowrap;align-self:start;padding-top:2px}
+  /* Wrap rather than clip. At four-up a tile is ~279px and the check column
+     ran to "FINISH LIKELY 78…", which hides the number that matters; two short
+     lines cost a few pixels of height and keep every value readable. */
+  .abc{font-size:10px;font-weight:600;color:var(--mute);padding:1px 0;
+    line-height:1.25;overflow-wrap:anywhere}
+  .abc.lit{color:var(--bone);font-weight:800}
+  .abc.dim{color:var(--dim);font-weight:500}
+  .abgrid .abc:nth-child(3n){color:var(--gold);opacity:.8}
+  .abgrid .abc.lit:nth-child(3n){opacity:1;color:var(--gold)}
+  .abs{color:var(--dim);margin:0 1px}
+  .abr{color:var(--gold);margin-left:3px;font-size:9px}
+  .abnone{color:var(--dim);font-weight:400}
+  .abx{color:var(--warn);margin-left:3px;font-weight:800}
+  .nrdial{margin:6px 0 2px;border:1px dashed var(--gold);border-radius:8px;padding:2px 0;
+    display:flex;justify-content:center}
+  .nrdial .gauge-svg{max-width:148px}
   .ckonly{font-size:8.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--dim);
     border:1px solid var(--line);border-radius:3px;padding:0 3px;white-space:nowrap}
   .brrow.flat{opacity:.62}
@@ -700,6 +725,15 @@ const MOV=b=>[['dec_a',b.m_a_dec,`${surname(b.a)} by decision`],
               ['sub_b',b.m_b_sub,`${surname(b.b)} by submission`]]
              .filter(x=>x[1]!=null).sort((x,y)=>y[1]-x[1]);
 const movLabel=(b,key)=>(MOV(b).find(x=>x[0]===key)||[,,key])[2];
+/* Chip-only abbreviation. The check already prints "by KO / by SUB / by DEC",
+   so the model printing "by decision" beside it made the same claim look like a
+   different kind of claim, and "Van by decision 48%" next to "Van by KO 50%"
+   is exactly the comparison the paired grid exists to make. The drawer and the
+   market tabs keep the long form - they have the room, and there the words are
+   doing the work rather than lining up against a neighbour. */
+const shortMethod=l=>String(l).replace(/\bby KO\/TKO\b/,'by KO')
+                              .replace(/\bby submission\b/,'by SUB')
+                              .replace(/\bby decision\b/,'by DEC');
 function topCall(b){
   const m=MOV(b); if(m.length<2) return null;
   /* Finish or decision FIRST, then the route inside it. Taking the argmax over
@@ -907,6 +941,7 @@ function thinNote(b){
 function tile(b){
   const mk=b.p_market!=null, hot=mk&&Math.abs(b.edge)>=0.05;
   const sbl=sbLengthCall(b);
+  const ab=abGrid(b);          // null unless a check is active on this bout
   return `<button class="tile ${hot?'is-hot':''} ${sbl&&!sbl.modelSilent&&!sbl.thin&&sbl.conv>sbl.modelConv+0.01?'sb-leads':''}" data-id="${esc(b.bout)}">
     <div class="trow" style="margin-bottom:2px">
       <span class="lbl">${b.weight_class?`<b class="divc">${esc(divShort(b.weight_class))}</b> · `:''}${b.rounds===5?'5 rds':'3 rds'}${evChip(b,true)}</span>${tag(b)}</div>
@@ -916,14 +951,14 @@ function tile(b){
       <div class="fcol r"><span class="nm nm-b ${nameSize(surname(b.b))} ${b.p_a<.5?'fav':''}" title="${esc(b.b)}">${esc(surname(b.b))}</span></div>
     </div>
     <div class="gkey">
-      ${sandboxChip(b)}
+      ${ab?'':sandboxChip(b)}
       ${mk?`<span class="k-market">market ${P0(b.p_market)}/${P0(1-b.p_market)}</span>`:'<span class="k-open-l">no market line</span>'}
       ${b.p_open!=null?`<span class="k-open-l" title="the first market price the ledger captured for this bout">line opened ${P0(b.p_open)}/${P0(1-b.p_open)}</span>`:''}
       ${mk&&b.p_open!=null&&Math.abs(b.p_market-b.p_open)>=0.005?`<span
         class="${b.p_market>b.p_open?'k-lean-a':'k-lean-b'}">moved +${(Math.abs(b.p_market-b.p_open)*100).toFixed(0)}
         ${esc(surname(b.p_market>b.p_open?b.a:b.b))}</span>`:''}
     </div>
-    ${(()=>{const c=b.thin?null:topCall(b); if(!c) return '';
+    ${ab||(()=>{const c=b.thin?null:topCall(b); if(!c) return '';
       const v=c.verdict;
       /* The badge beside this chip already states the family and the same
          percentage. Printing "a finish 65%" next to "FINISH 65%" is the
@@ -947,7 +982,7 @@ function tile(b){
               ?'the fight ends inside the distance, by any route'
               :'the fight goes to the judges'}">${
             c.fam==='finish'?'finish':'distance'} <b>${P0(c.famP)}%</b></span>`:'');
-      const route=c.routeClear?`${head?' · ':''}${esc(c.label)}${
+      const route=c.routeClear?`${head?' · ':''}${esc(shortMethod(c.label))}${
         c.round?` <span style="color:var(--gold)">R${c.round.n}</span>`:''} ${P0(c.p)}%`:'';
       if(!head&&!route) return '';
       return `<div class="callchip ${c.side==='a'?'ca':'cb'}">${head}${route}${
@@ -1349,7 +1384,20 @@ function render(){
              is no model number anywhere, so the risk is not that this gets
              confused WITH the model but that it gets mistaken FOR it. */
           const key=n.a+' vs. '+n.b, st=SBOX[key];
-          let sum='';
+          let sum='', dial='';
+          /* A gauge once there is something to draw. The no-read entry was the
+             only place on the card carrying a read without the picture of it,
+             so the split had to be opened to be seen. Built from the check's
+             own probability with no market tick and no model radial - there is
+             no model number on this bout - and wrapped in the same gold dashed
+             border the rest of the check's output uses, so it cannot be
+             mistaken for a modelled tile at a glance. */
+          if(st&&st.a&&st.b){
+            const syn=sbSynthetic(n);
+            const pA=sbProb(sbCorner(syn.fin.a,st.a,st.blend), sbCorner(syn.fin.b,st.b,st.blend));
+            if(pA!=null&&isFinite(pA))
+              dial=`<div class="nrdial">${gauge({a:n.a,b:n.b,p_a:pA,p_b:1-pA,bout:key})}</div>`;
+          }
           if(st&&(st.a_m&&st.a_m.ko_share!=null||st.b_m&&st.b_m.ko_share!=null)){
             const L=sbLengthCall(Object.assign(sbSynthetic(n),{noRead:true}),st);
             if(L){ const w=L.tier==='flat'?(L.kind==='finish'?'FINISH':'DISTANCE')+' — NO LEAN'
@@ -1361,7 +1409,7 @@ function render(){
               L.top.how==='KO/TKO'?'KO':L.top.how==='submission'?'SUB':'DEC'} ${P0(L.top.p)}%</span>`:''}</div>`; }
           }
           return `<button class="noread nr-open" data-nr="${esc(key)}"><b>${esc(n.a)}</b> vs. <b>${esc(n.b)}</b>
-          <div class="lbl" style="margin-top:4px">No read — ${esc(n.reason)} · ${sum?'your UFC.com read, not the model':'add UFC.com stats'}</div>${sum}</button>`;
+          <div class="lbl" style="margin-top:4px">No read — ${esc(n.reason)} · ${sum||dial?'your UFC.com read, not the model':'add UFC.com stats'}</div>${dial}${sum}</button>`;
         }).join('')}</div></div>`;
   }).join('');
   const filt=`<div class="filt">
@@ -1481,17 +1529,25 @@ function propRow(name,p,col,marker,note,mkey,base){
     color:var(--gold);font-size:10px;line-height:1">◆</div>`;
   const faint=(base!=null&&Math.abs(p-base)<0.06)?' faint':'';
   return `<div class="prow${faint} ${mkey&&FEATURED.has(mkey)?'feat':''}">
-    <div style="width:146px;flex:none;font-size:11.5px;color:var(--mute)">${esc(name)}
+    <div style="width:134px;flex:0 1 134px;min-width:92px;font-size:11.5px;color:var(--mute)">${esc(name)}
       ${note?`<span class="lbl" style="display:block;margin-top:1px">${note}</span>`:''}</div>
-    <div style="flex:1;position:relative;height:8px">
+    <div style="flex:1 1 auto;min-width:96px;position:relative;height:8px">
       <div style="position:absolute;inset:0;background:var(--soft);border-radius:4px"></div>
       <div style="position:absolute;left:0;top:0;height:8px;border-radius:4px;
         width:${Math.max(0,Math.min(100,p*100)).toFixed(2)}%;background:${col}"></div>${mk}</div>
     <div class="mono" style="width:48px;text-align:right;font-size:12px;font-weight:600">${P1(p)}%</div>
     <div class="mono fo" title="fair price implied by this probability">${fairOdds(p).us}</div>
     ${mkey&&FEATURED.has(mkey)?'<span class="featdot" title="this is the line shown on the fight\'s tile">●</span>':''}
-    ${mkey?(()=>{const r=marketRecord(mkey); if(!r) return '';
-      return `<span class="rec ${r.cls}" title="${r.n} graded claims for this market">${esc(r.txt)}</span>`;})():'<span class="rec none"></span>'}
+    ${/* The placeholder has to be emitted on EVERY row, not just the no-key
+          branch. When a row had a market key but no graded record yet this
+          returned an empty string while its sibling returned a 132px span, and
+          since the bar track is flex:1 it swallowed the difference: on the
+          winner-only drawer one fighter's track measured 190px and the other's
+          49px, so the 90% bar and the 9% bar looked the same length and the
+          likely winner appeared to have the shorter bar. */
+      (()=>{const r=mkey?marketRecord(mkey):null;
+        return r?`<span class="rec ${r.cls}" title="${r.n} graded claims for this market">${esc(r.txt)}</span>`
+                :'<span class="rec none"></span>';})()}
     </div>`;
 }
 /* Ranges need a shared axis per stat and an explicit label, or the reader is
@@ -2540,7 +2596,12 @@ function sbVerdict(ma,mb,pA,b,st){
   // round, only when a finish is the call and the timing read says something
   let rnd='';
   const t=sbR1Read(st,b);
-  if(t && fin>0.02 && top[2]!=='decision'){
+  /* `top` was never declared in this function. It silently resolved to the
+     BROWSER GLOBAL window.top, whose [2] is undefined, so the guard
+     `top[2]!=='decision'` was always true and a round was appended to decision
+     calls - "Kamaka by decision · round 1", which cannot happen. Gate on the
+     cell actually named instead, and only when the headline called a finish. */
+  if(t && fin>0.02 && cls==='fin' && best && best.how!=='decision'){
     const cond=Math.min(0.99,t.p/fin);
     if(cond>=0.55) rnd=' · round 1';
     else if(cond<=0.30) rnd=' · later rounds';
@@ -2602,7 +2663,7 @@ function sbMethodBlock(b,st,pA){
         const fin=1-read.dec;
         const cond=fin>0.02?t.p/fin:null;
         return row('ends in round one',b.p_end_r1,t.p)
-          + (cond!=null?row('round one, given it finishes',
+          + (cond!=null?row('of the finishes, in round one',
               (b.p_end_r1!=null&&b.p_finish>0.02)?b.p_end_r1/b.p_finish:null,
               Math.min(0.99,cond)):'')
           + (t.both?'':'<div class="note" style="margin:4px 0 0">Round-one figure uses one corner only — add the other record for both.</div>');
@@ -2826,6 +2887,84 @@ function sandboxChip(b){
     title="the clearest single outcome in the pasted records">ufc.com ${esc(L.top.name)} by ${
     L.top.how==='KO/TKO'?'KO':L.top.how==='submission'?'SUB':'DEC'} ${P0(L.top.p)}%</span>`:'';
   return win+len+pick;
+}
+
+/* ------------------------------------------------------ model vs check, paired
+
+   Once a UFC.com check exists on most bouts the old stack put up to six badge
+   rows on one tile - three from the model, three from the check - and left the
+   reader to match them up by reading. They are answers to the SAME three
+   questions, so they belong in two columns, one question per row.
+
+   Per row the more decisive side is lit and the other recedes, so the eye
+   lands on whichever read is making the stronger claim. A row where the two
+   name different outcomes is marked, because that disagreement is the only
+   thing on the tile the model alone could not tell you. */
+function abGrid(b){
+  const st=SBOX[b.bout];
+  if(!st||!st.on||!b.fin||!DATA.win_model) return null;
+  const pc=sbProb(sbCorner(b.fin.a,st.a,st.blend),sbCorner(b.fin.b,st.b,st.blend));
+  if(pc==null||!isFinite(pc)) return null;
+  const L=sbLengthCall(b);
+  const lb=lengthBadge(b), c=b.thin?null:topCall(b);
+  const MB=(BR||{}).market_bases||{};
+  const decBase=MB.dec??0.505, finBase=1-decBase;
+
+  const cell=(txt,lit,dim)=>`<div class="abc ${lit?'lit':''} ${dim?'dim':''}">${txt}</div>`;
+  const rows=[];
+
+  // 1. WINNER. Decisiveness is distance from an even split, not the raw number.
+  const mDec=Math.abs(b.p_a-0.5), cDec=Math.abs(pc-0.5);
+  const split=(x)=>`${P0(x)}<span class="abs">/</span>${P0(1-x)}`;
+  const sideDiff=(b.p_a>=0.5)!==(pc>=0.5);
+  rows.push(['winner',
+    cell(split(b.p_a), mDec>cDec+0.005, mDec<cDec-0.005),
+    cell(split(pc),    cDec>mDec+0.005, cDec<mDec-0.005), sideDiff]);
+
+  // 2. HOW IT ENDS. Conviction is distance from the league rate, which is what
+  //    both badges already use, so the two are on the same footing.
+  let mTxt='<span class="abnone">no lean</span>', mConv=0, mKind=null;
+  if(lb){ mKind=lb.kind; mConv=lb.p-(lb.kind==='finish'?finBase:decBase);
+          mTxt=`${lb.kind==='finish'?'FINISH':'DISTANCE'} ${P0(lb.p)}%`; }
+  else if(b.m_decision!=null){
+    const f=1-b.m_decision; mKind=f>=b.m_decision?'finish':'distance';
+    mConv=Math.max(f-finBase,b.m_decision-decBase);
+    mTxt=`${mKind==='finish'?'finish':'distance'} ${P0(mKind==='finish'?f:b.m_decision)}%`;
+  }
+  if(L){
+    const w=L.tier==='flat'?'NO LEAN':(L.kind==='finish'?'FINISH':'DISTANCE')+(L.tier==='likely'?' LIKELY':'');
+    const cTxt=`${w==='NO LEAN'?(L.kind==='finish'?'finish':'distance')+' '+P0(L.p)+'%':w+' '+P0(L.p)+'%'}${L.round?`<span class="abr"> ${L.round}</span>`:''}`;
+    rows.push(['ends',
+      cell(mTxt, mConv>L.conv+0.01, mConv<L.conv-0.01),
+      cell(cTxt, L.conv>mConv+0.01, L.conv<mConv-0.01),
+      mKind&&L.kind&&mKind!==L.kind]);
+  }
+
+  // 3. THE SINGLE LIKELIEST OUTCOME, where either side names one clearly.
+  /* Normalised to "surname|KO|SUB|DEC" on both sides before comparing. The two
+     arrive in different wordings - the model says "Van by decision", the check
+     says name + "KO/TKO" - so comparing the raw strings, or only the fighter,
+     missed "Van by decision" against "Van by KO", which is a real disagreement
+     about how the fight ends and exactly what this row exists to surface. */
+  const norm=(name,how)=>`${String(name).trim().split(/\s+/).pop().toLowerCase()}|${
+    /ko|tko/i.test(how)?'KO':/sub/i.test(how)?'SUB':'DEC'}`;
+  const mHow=c&&c.label?(c.label.split(/\sby\s/i)[1]||''):'';
+  const mPick=c&&c.routeClear?{t:`${esc(shortMethod(c.label))}${c.round?' R'+c.round.n:''} ${P0(c.p)}%`,
+                               p:c.p,k:norm(c.label.split(/\sby\s/i)[0],mHow)}:null;
+  const cPick=L&&L.top?{t:`${esc(L.top.name)} by ${L.top.how==='KO/TKO'?'KO':L.top.how==='submission'?'SUB':'DEC'} ${P0(L.top.p)}%`,
+                        p:L.top.p,k:norm(L.top.name,L.top.how)}:null;
+  if(mPick||cPick){
+    const differ = !!(mPick&&cPick&&mPick.k!==cPick.k);
+    rows.push(['pick',
+      cell(mPick?mPick.t:'<span class="abnone">—</span>', mPick&&cPick&&mPick.p>cPick.p+0.01, mPick&&cPick&&mPick.p<cPick.p-0.01),
+      cell(cPick?cPick.t:'<span class="abnone">—</span>', mPick&&cPick&&cPick.p>mPick.p+0.01, mPick&&cPick&&cPick.p<mPick.p-0.01),
+      differ]);
+  }
+  const anyDiff=rows.some(r=>r[3]);
+  return `<div class="abgrid${anyDiff?' hasdiff':''}" title="the model and the UFC.com check, answering the same questions side by side">
+    <div class="abh"></div><div class="abh">model</div><div class="abh">ufc.com check</div>
+    ${rows.map(([lab,m,cc,d])=>`<div class="abl">${lab}${d?'<span class="abx" title="the two name different outcomes">\u2260</span>':''}</div>${m}${cc}`).join('')}
+  </div>`;
 }
 
 function marketTabs(b,mk,rr,totals){
