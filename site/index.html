@@ -177,6 +177,10 @@
      A filled badge identical to the model's would let a pasted record read as
      the site's own call the moment it happened to be the louder number. */
   .sbtag.len{border-style:dashed}
+  /* the badge's weight tracks its wording, so a lean cannot look like a call */
+  .sbtag.len.t-likely{color:var(--gold);border-color:var(--gold)}
+  .sbtag.len.t-leans{color:var(--mute);border-color:var(--line)}
+  .sbtag.len.t-flat{color:var(--dim);border-color:var(--line)}
   .sbtag.len.leads{background:rgba(205,164,58,.16);font-weight:700}
   .sbtag.len.pick{border-style:solid;background:rgba(205,164,58,.1)}
   /* when the records read is further from the league rate, the model's call
@@ -1303,11 +1307,13 @@ function render(){
           let sum='';
           if(st&&(st.a_m&&st.a_m.ko_share!=null||st.b_m&&st.b_m.ko_share!=null)){
             const L=sbLengthCall(Object.assign(sbSynthetic(n),{noRead:true}),st);
-            if(L) sum=`<div style="margin-top:6px"><span class="sbtag len">ufc.com ${
-              L.kind==='finish'?'FINISH':'DISTANCE'} ${P0(L.p)}%${L.round?' · '+L.round:''}${
+            if(L){ const w=L.tier==='flat'?(L.kind==='finish'?'FINISH':'DISTANCE')+' — NO LEAN'
+              :(L.kind==='finish'?'FINISH':'DISTANCE')+(L.tier==='likely'?' LIKELY':' LEANS');
+            sum=`<div style="margin-top:6px"><span class="sbtag len t-${L.tier}">ufc.com ${
+              w} ${P0(L.p)}%${L.round?' · '+L.round:''}${
               L.thin?` · thin ${L.wins}W`:''}</span>${L.top?`<span class="sbtag len pick"
               style="margin-left:5px">ufc.com ${esc(L.top.name)} by ${
-              L.top.how==='KO/TKO'?'KO':L.top.how==='submission'?'SUB':'DEC'} ${P0(L.top.p)}%</span>`:''}</div>`;
+              L.top.how==='KO/TKO'?'KO':L.top.how==='submission'?'SUB':'DEC'} ${P0(L.top.p)}%</span>`:''}</div>`; }
           }
           return `<button class="noread nr-open" data-nr="${esc(key)}"><b>${esc(n.a)}</b> vs. <b>${esc(n.b)}</b>
           <div class="lbl" style="margin-top:4px">No read — ${esc(n.reason)} · ${sum?'your UFC.com read, not the model':'add UFC.com stats'}</div>${sum}</button>`;
@@ -2450,7 +2456,10 @@ function sbLengthCall(b,stIn){
     const t=sbR1Read(st,b);
     if(t&&fin>0.02){
       const cond=Math.min(0.99,t.p/fin);
-      round = cond>=0.55 ? 'R1 likely' : cond<=0.30 ? 'past R1' : null;
+      // "FINISH LIKELY ... R1 LIKELY" used the same word for two different
+      // claims in one badge. "IN R1" / "AFTER R1" says where without repeating
+      // the strength word that already applies to the finish itself.
+      round = cond>=0.55 ? 'in R1' : cond<=0.30 ? 'after R1' : null;
     }
   }
   /* How thin the thinner record is. Shrinkage already does most of this job —
@@ -2477,9 +2486,15 @@ function sbLengthCall(b,stIn){
   }
   const cells=sbCells(st.a_m||{}, st.b_m||{}, pA, surname(b.a), surname(b.b));
   const top=cells?sbTop(cells, kind==='finish'?'fin':'dec'):null;
+  /* The same three tiers the model's own badge uses — 12 points clear of the
+     league rate is a call, 5 to 12 a lean, under 5 neither. The chip had been
+     printing a bare "FINISH 71%" at every strength, so a number the model would
+     have called FINISH LIKELY read here as an unqualified fact, and a 51% coin
+     flip read exactly the same way. Wording and weight now track the gap. */
+  const tier = conv>=0.12 ? 'likely' : conv>=0.05 ? 'leans' : 'flat';
   return {kind:kind, p:p, conv:conv, modelConv:modelConv, round:round,
           wins:thin, thin:thin<3, modelSilent:modelSilent, delta:delta,
-          top:(top&&top.clear)?top:null};
+          tier:tier, top:(top&&top.clear)?top:null};
 }
 function sandboxChip(b){
   const st=SBOX[b.bout];
@@ -2507,9 +2522,11 @@ function sandboxChip(b){
      the model" is the thing being asked of this badge, and a shade of gold
      does not say by how much or in which direction. */
   const dp=L.delta==null?'':` ${L.delta>=0?'+':''}${Math.round(100*L.delta)} vs model`;
-  const len=`<span class="sbtag len ${lead?'leads':''}"
-    title="from the pasted records, not the model${L.delta!=null?` — the model has this outcome at ${P0(L.p-L.delta)}%`:''}">ufc.com ${
-    L.kind==='finish'?'FINISH':'DISTANCE'} ${P0(L.p)}%${dp}${L.round?' · '+L.round:''}${
+  const word = L.tier==='flat' ? (L.kind==='finish'?'FINISH':'DISTANCE')+' — NO LEAN'
+             : (L.kind==='finish'?'FINISH':'DISTANCE')+(L.tier==='likely'?' LIKELY':' LEANS');
+  const len=`<span class="sbtag len t-${L.tier} ${lead?'leads':''}"
+    title="from the pasted records, not the model — ${L.tier==='likely'?'12 or more points':L.tier==='leans'?'5 to 12 points':'under 5 points'} clear of the league rate${L.delta!=null?`; the model has this outcome at ${P0(L.p-L.delta)}%`:''}">ufc.com ${
+    word} ${P0(L.p)}%${dp}${L.round?' · '+L.round:''}${
     L.thin?` · thin ${L.wins}W`:''}</span>`;
   /* The single most-likely outcome, named, when one corner's route is clear of
      the next by six points. Suppressed otherwise rather than printed with a
