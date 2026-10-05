@@ -351,6 +351,17 @@
   .brsent b{color:var(--bone)}
   .brrow{padding:6px 0;border-top:1px solid var(--soft)}
   .brrow.flat{opacity:.62}
+  /* brhead is a column, so the badge would land on a third line of its own.
+     Pinned to the title line instead; it drops back into flow under 560px
+     where there is no room beside the heading. */
+  .brhead{position:relative;padding-right:150px}
+  .brscore{position:absolute;right:0;top:0;font-size:10px;letter-spacing:.04em;
+    text-transform:uppercase;color:var(--mute);border:1px solid var(--line);
+    border-radius:999px;padding:2px 8px;white-space:nowrap}
+  @media(max-width:560px){
+    .brhead{padding-right:0}
+    .brscore{position:static;align-self:flex-start;margin-top:4px}
+  }
   .brlab{font-size:11.5px;color:var(--bone);line-height:1.3}
   .brqs{display:flex;gap:4px}
   .brq{flex:1;text-align:center}
@@ -974,10 +985,17 @@ function baseRatePanel(here,bout,inZone){
   if(!BR||!BR.conditions) return '';
   const byId={}; BR.conditions.forEach(c=>byId[c.id]=c);
   const groups=BR_GROUPS.map(g=>{
+    // Counted as the rows are built, so the header states the denominator the
+    // reader needs: "2 of 4 measurements showed a pattern". Without it there is
+    // no way to tell a panel that tested four things from one that tested forty
+    // and kept the winners - which is the same selection-on-outcome the
+    // no-pattern rows are kept to prevent.
+    let nTested=0, nFound=0;
     const rows=g.ids.filter(id=>byId[id]).map(id=>{
       const c=byId[id], {base,cells}=brCells(c);
       const nsig=cells.filter(q=>Math.abs(q.rate-base)>q.ci).length;
       const verdict = nsig>=3?['clear pattern','v-strong']:nsig>=1?['weak pattern','v-weak']:['no pattern','v-none'];
+      nTested++; if(nsig>=1) nFound++;
       const top=Math.max(base,...cells.map(q=>q.rate))*1.2||1;
       const mk=here?here[id]:null;
       const lo=cells[0], hi=cells[cells.length-1];
@@ -1014,7 +1032,8 @@ function baseRatePanel(here,bout,inZone){
     return {id:g.title.toLowerCase().replace(/[^a-z]+/g,'-'), title:g.title,
       html:`<div class="brgroup">
       <div class="brhead"><span class="brtitle">${esc(g.title)}</span>
-        <span class="lbl">${base0!=null?`happens in ${(base0*100).toFixed(0)}% of fights overall`:''} · measured for ${esc(g.scope)}</span></div>
+        <span class="lbl">${base0!=null?`happens in ${(base0*100).toFixed(0)}% of fights overall`:''} · measured for ${esc(g.scope)}</span>
+        <span class="brscore" title="How many of the measurements tried in this group separated from the overall rate by more than chance. Every measurement tried is listed below, including the ones that found nothing - that denominator is what the rest means anything against.">${nFound} of ${nTested} showed a pattern</span></div>
       ${rows}</div>`};});
   const key=here&&bout
     ? `<span style="color:var(--red)">▲ ${esc(bout.a)}</span> · <span style="color:var(--blue)">▲ ${esc(bout.b)}</span> · <span style="color:var(--gold)">▲ this fight</span>`
