@@ -238,54 +238,66 @@ def r1_curve(fights, min_date="2010-01-01", min_fights=8):
     What survives is a league regularity indexed by the reliable quantity:
     heavier finishers finish earlier. Over 3,623 three-round finishes the
     round-one share climbs from .402 in the lowest finish-rate bucket to .569 in
-    the highest (r = +.100, p = 1.7e-9). That curve is what the round read is
-    built from. Five-round fights spread the same finishes across more rounds
-    (.517 against .376 in round one), so the whole curve is scaled by that ratio
-    rather than re-estimated on the 362 five-round finishes available.
+    the highest (r = +.100, p = 1.7e-9).
+
+    SCHEMA. The corpus carries no "round" column - the ending round is derived
+    from `total_sec`, exactly as the KO/SUB round split below it does - and no
+    "n_rounds" for the bout, which is `sched_sec`. The first version of this
+    function asked for `round` and `n_rounds`, got None for every row, and
+    returned a table of zeros that the site then multiplied through, showing a
+    0% round-one read on every bout. Hence the guard at the end: a degenerate
+    curve returns None so the caller uses its own fallback, because a function
+    that quietly yields zeros is worse than one that yields nothing.
     """
+    import numpy as np
     import pandas as pd
 
-    f = fights[fights.date >= min_date].copy()
-    if f.empty:
+    need = {"method", "total_sec", "r_id", "b_id", "date"}
+    if not need.issubset(set(fights.columns)):
         return None
-    fin = f.method.isin(["KO/TKO", "SUB"]) if "method" in f else None
-    if fin is None:
+    F = fights[fights.method.isin(["KO/TKO", "SUB", "DEC"])].copy()
+    F["date"] = pd.to_datetime(F.date)
+    F = F[F.date >= pd.Timestamp(min_date)]
+    if F.empty:
         return None
-    f["is_fin"] = fin
+    F["is_fin"] = F.method != "DEC"
+    # round index from elapsed time: a finish at 6:10 is round two
+    F["rnd"] = np.minimum((F.total_sec // 300).astype(int) + 1, 5)
+    F["sched5"] = (F.sched_sec.fillna(900) >= 1500) if "sched_sec" in F else False
 
-    # each fighter's own finish rate, over fights in either direction
-    parts = f.bout.str.split(" vs. ", n=1, expand=True)
     long = pd.concat([
-        pd.DataFrame({"f": parts[0], "is_fin": f.is_fin, "rnd": f.get("round"),
-                      "sched": f.get("n_rounds")}),
-        pd.DataFrame({"f": parts[1], "is_fin": f.is_fin, "rnd": f.get("round"),
-                      "sched": f.get("n_rounds")})], ignore_index=True)
+        F[["r_id", "is_fin", "rnd", "sched5"]].rename(columns={"r_id": "f"}),
+        F[["b_id", "is_fin", "rnd", "sched5"]].rename(columns={"b_id": "f"}),
+    ], ignore_index=True)
     g = long.groupby("f").agg(n=("is_fin", "size"), fr=("is_fin", "mean"))
     g = g[g.n >= min_fights]
     if g.empty:
         return None
     J = long[long.is_fin].merge(g[["fr"]], left_on="f", right_index=True)
-    J = J[J.sched.fillna(3) == 3]
-    if len(J) < 400:
+    J3 = J[~J.sched5]
+    if len(J3) < 400:
         return None
 
     EDGES = [0.0, 0.30, 0.45, 0.60, 0.75, 1.01]   # fixed in advance
     out = []
     for lo, hi in zip(EDGES[:-1], EDGES[1:]):
-        c = J[(J.fr >= lo) & (J.fr < hi)]
+        c = J3[(J3.fr >= lo) & (J3.fr < hi)]
         if len(c) < 60:
             continue
         out.append({"lo": round(lo, 2), "hi": round(hi, 2),
                     "p": round(float((c.rnd == 1).mean()), 4), "n": int(len(c))})
-    if len(out) < 3:
-        return None
 
-    five = J  # scale factor, measured once rather than fitted per bucket
-    f5 = f[(f.is_fin) & (f.get("n_rounds") == 5)]
-    f3 = f[(f.is_fin) & (f.get("n_rounds") == 3)]
-    scale = (float((f5["round"] == 1).mean()) / float((f3["round"] == 1).mean())
-             if len(f5) >= 100 and len(f3) >= 100 else 0.727)
-    return {"buckets": out, "n": int(len(J)), "five_round_scale": round(scale, 4)}
+    J5 = J[J.sched5]
+    scale = (float((J5.rnd == 1).mean()) / float((J3.rnd == 1).mean())
+             if len(J5) >= 100 and float((J3.rnd == 1).mean()) > 0 else 0.727)
+
+    # A curve is only usable if it actually says something. Every bucket must
+    # carry a plausible round-one share; all-zero, all-one or missing rows mean
+    # the inputs were not what this function thought they were.
+    if len(out) < 3 or any(not (0.15 <= b["p"] <= 0.85) for b in out):
+        return None
+    return {"buckets": out, "n": int(len(J3)),
+            "five_round_scale": round(float(scale), 4)}
 
 
 def decision_curve(fights, min_date="2012-01-01", min_wins=2):
