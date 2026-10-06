@@ -1220,6 +1220,16 @@ function divisionTable(){
     <tbody>${rows}</tbody></table></div></div>`;
 }
 
+/* The four claims this tool actually makes: who wins, how it ends, which round
+   if it finishes, and whether it goes the distance. Everything else the grader
+   produces - over/under rounds, "ends before round N", "fight starts round N" -
+   is the SAME event resolved under a different book's wording, so listing them
+   per bout padded the drawer with a dozen rows carrying one fight's worth of
+   evidence and none of it lined up with the model/check comparison the card is
+   built around. They are still graded and still feed the forward ledger; they
+   are simply not what this drawer is for. */
+const distProp=g=>(g.report||[]).find(r=>r.kind==='prop'&&r.label==='Go the distance');
+
 function lastCard(){
   const c=HIST&&HIST.cards&&HIST.cards[0];
   if(!c) return `<div class="note" style="padding:6px 0 2px">Results appear here the morning after
@@ -1237,17 +1247,19 @@ function lastCard(){
     ${c.round_n?stat(`${c.round_right}/${c.round_n}`,'finish round — top pick',
       `${pct(c.round_right,c.round_n)} · <span class="nomk">no market line</span>`):''}
     ${(()=>{
-      /* Brier skill, not the count of "right sides". Verified on held-out
-         fights: on a long-shot market the base rate, a real model and a
-         forecaster saying 2% to everything all score identically on the
-         threshold measure, because none of them crosses 50%. Brier tells them
-         apart, so it is the headline. */
-      if(!c.props_base_brier) return stat(`${c.props_right}/${c.props_n}`,
-        `props on the right side, across ${c.n} bouts`,'no base rate to compare against');
-      const sk=100*(1-c.props_brier/c.props_base_brier);
-      return stat(`<span class="${sk>0?'up':sk<0?'dn':''}">${sk>0?'+':''}${sk.toFixed(1)}%</span>`,
-        'sharper than the usual outcome',
-        `over ${c.props_base_n} props across ${c.n} bouts · ${c.props_right}/${c.props_n} on the right side`);})()}
+      /* Distance-or-finish, the fourth of the four claims this tool makes,
+         replacing the old "sharper than the usual outcome" figure. That one was
+         Brier skill across EVERY graded contract - over/under rounds, every
+         "ends before round N" - which is a different and much broader claim
+         than anything the card shows, and the headline should measure what the
+         card is for. Brier skill over the same four claims is kept in the
+         subtitle, so nothing is lost, only re-aimed. */
+      const ds=c.bouts.map(distProp).filter(Boolean);
+      if(!ds.length) return '';
+      const right=ds.filter(d=>d.right).length;
+      const base=ds.filter(d=>d.base_right).length;
+      return stat(`${right}/${ds.length}`,'distance or finish',
+        `${pct(right,ds.length)} · <b class="vs">usual outcome ${base}/${ds.length}</b>`);})()}
     ${c.market_n?stat(`${c.model_closer}/${c.market_n}`,'closer than the market',
       c.disagree_n?`in ${c.disagree_n} disagreements: ${c.disagree_model_closer}`:'no big disagreements'):''}
   </div>`;
@@ -1262,7 +1274,8 @@ function lastCard(){
         <span class="lbl">def. ${esc(surname(g.winner===g.a?g.b:g.a))}</span></div>
       <div class="rchips">
         ${m?`<span class="rc ${m.right?'ok':'no'}">${m.right?'✓':'✗'} method</span>`:''}
-        <span class="rc">${g.props_right}/${g.props_n} props</span>
+        ${(()=>{const d=distProp(g); return d?`<span class="rc ${d.right?'ok':'no'}">${
+          d.right?'✓':'✗'} ${d.happened?'distance':'finish'}</span>`:'';})()}
         ${mk?`<span class="rc ${mk.model_closer?'ok':'no'}">${mk.model_closer?'beat':'lost to'} market</span>`:''}
       </div></button>`;}).join('');
   /* The two counts the strip at the top of the page claimed before the fights,
@@ -1295,12 +1308,14 @@ function lastCard(){
     <div class="grid">${tiles}</div>`;
 }
 
+
 function openPast(id){
   const c=HIST&&HIST.cards&&HIST.cards[0]; if(!c) return;
   const g=c.bouts.find(x=>x.bout===id); if(!g) return;
   const t=Math.floor(g.seconds/60)+':'+String(g.seconds%60).padStart(2,'0');
   const mk=g.market;
-  const how=g.report.filter(r=>r.kind!=='prop'), props=g.report.filter(r=>r.kind==='prop');
+  const how=g.report.filter(r=>r.kind!=='prop');
+  const dp=distProp(g);
   const tick=ok=>`<span class="edgeTag ${ok?'hit':'miss'}">${ok?'✓':'✗'}</span>`;
   document.getElementById('drawin').innerHTML=`
     <button class="xbtn" id="xb">close ✕</button>
@@ -1316,24 +1331,20 @@ function openPast(id){
       <div class="pline"><span>market's pick</span><b>${esc(surname(mk.p_market>=.5?g.a:g.b))} ${P0(Math.max(mk.p_market,1-mk.p_market))}%</b>${tick(mk.market_right)}</div>
       <div class="note" style="margin-top:6px">${mk.picks_differ?'They picked different winners.':'They picked the same winner'}${Math.abs(mk.gap)>=.05?`, ${(Math.abs(mk.gap)*100).toFixed(0)} points apart.`:', close to each other.'}
       "Closer" means more probability on the fighter who actually won.</div></div>`:''}
-    ${how.length?`<div class="card"><div class="ghead" style="background:none;border:none;padding:0 0 6px">
-      <span class="gname">How and when</span><span class="lbl">top pick vs what happened</span></div>
+    ${how.length||dp?`<div class="card"><div class="ghead" style="background:none;border:none;padding:0 0 6px">
+      <span class="gname">How and when</span><span class="lbl">what was claimed vs what happened</span></div>
+      ${dp?`<div class="pline"><span>Distance or finish</span>
+        <b>${dp.happened?'went the distance':'finished'}</b>
+        <span class="mono ps">model gave the distance ${P0(dp.said)}%${
+          dp.base!=null?` · usual ${P0(dp.base)}%`:''}</span>${tick(dp.right)}</div>`:''}
       ${how.map(r=>`<div class="pline"><span>${esc(r.label)}</span>
         <b>${esc(r.actual)}</b><span class="mono ps">model gave it ${P0(r.said)}% · top pick ${esc(r.top)}</span>${tick(r.right)}</div>`).join('')}
       <div class="note" style="margin-top:6px">Top pick is the single likeliest of five endings. A decision
         can be the likeliest one ending even when a finish of some kind is likelier overall.</div></div>`:''}
-    <div class="card"><div class="ghead" style="background:none;border:none;padding:0 0 6px">
-      <span class="gname">Every prop</span><span class="lbl">${
-        g.props_base_brier?`${(100*(1-g.props_brier/g.props_base_brier)).toFixed(1)}% sharper than the usual outcome · `:''
-        }${g.props_right}/${g.props_n} on the right side</span></div>
-      <div class="note" style="margin:0 0 7px">These resolve together, not separately: once this fight
-        went ${g.method==='DEC'?'to a decision':`to a ${g.method==='SUB'?'submission':'knockout'} in round ${g.round}`},
-        the distance market, every "ends before round" and every method contract were settled by the
-        same event. ${g.props_n} rows here, but one fight's worth of evidence.</div>
-      ${props.map(r=>`<div class="pline"><span>${esc(r.label)}</span>
-        <span class="mono ps">said ${P0(r.said)}%</span><b>${r.happened?'happened':'did not'}</b>${tick(r.right)}</div>`).join('')}
-      <div class="note" style="margin-top:6px">Right side means the model said over 50% and it happened, or
-        under 50% and it did not. The comparison is what you would have got by always guessing the usual outcome.</div></div>`;
+    <div class="note" style="margin-top:10px">The other contracts this fight settled — over/under rounds,
+      "ends before round N", "fight starts round N" — all resolved on the SAME event as the rows above and
+      are still graded into the card totals and the forward ledger. They are left off here because a dozen
+      restatements of one result is not a dozen pieces of evidence.</div>`;
   document.getElementById('xb').addEventListener('click',close_);
   document.getElementById('draw').classList.add('on');
   document.getElementById('draw').setAttribute('aria-hidden','false');
