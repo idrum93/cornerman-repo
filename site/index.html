@@ -375,7 +375,7 @@
   .ckm.hit{color:var(--gold);border-color:var(--gold)}
   .ckm.miss{color:var(--dim)}
   .ckna{color:var(--dim);font-size:11px}
-  .abgrid{display:grid;grid-template-columns:34px 1fr 1fr;gap:1px 6px;align-items:center;
+  .abgrid{display:grid;grid-template-columns:auto minmax(0,1fr) minmax(0,1fr);gap:1px 6px;align-items:center;
     margin-top:6px;padding:5px 6px;border:1px solid var(--line);border-radius:7px}
   .abgrid.hasdiff{border-color:rgba(222,140,52,.45)}
   .abh{font-size:8px;letter-spacing:.07em;text-transform:uppercase;color:var(--dim);
@@ -395,6 +395,12 @@
   .abs{color:var(--dim);margin:0 1px}
   .abr{color:var(--gold);margin-left:3px;font-size:9px}
   .abnone{color:var(--dim);font-weight:400}
+  .dsrc{text-transform:uppercase;letter-spacing:.06em}
+  .dsrc.ck{color:var(--gold)}
+  .dcard.fromck{border-color:rgba(205,164,58,.5)}
+  .edgeTag.fromck{border-color:var(--gold)}
+  .ppsrc{font-size:8px;letter-spacing:.07em;text-transform:uppercase;color:var(--dim);
+    align-self:center;margin-right:1px}
   .abx{color:var(--warn);margin-left:3px;font-weight:800}
   .nrdial{margin:6px 0 2px;border:1px dashed var(--gold);border-radius:8px;padding:2px 0;
     display:flex;justify-content:center}
@@ -670,6 +676,15 @@ function gap(b){ return b.edge==null?null:Math.abs(b.edge); }
    more and color it by the size of the gap, so on the same tile the badge
    named one fighter in orange while the dial's bridge named the other in his
    own color. Both were true and they pointed at opposite men. */
+/* The check's win probability for a bout, or null. Shared by the strip, the
+   tile badge and the paired grid so all three agree on what the check says. */
+function ckP(b){
+  const st=SBOX[b.bout];
+  if(!st||!st.on||!b.fin||!DATA||!DATA.win_model) return null;
+  const p=sbProb(sbCorner(b.fin.a,st.a,st.blend),sbCorner(b.fin.b,st.b,st.blend));
+  return (p==null||!isFinite(p))?null:p;
+}
+
 function tag(b){
   if(b.edge==null) return '<span class="edgeTag agree">no line</span>';
   const e=Math.abs(b.edge);
@@ -678,8 +693,14 @@ function tag(b){
   // yardstick. The badge says how far the model sits from the line and on
   // whom, in that fighter's color, and the dial's bridge is the same claim
   // drawn — the territory the model gives him beyond the market.
-  const toA=b.edge>0;
-  return `<span class="edgeTag ${toA?'lean-a':'lean-b'}">model +${(e*100).toFixed(0)} ${esc(surname(toA?b.a:b.b))}</span>`;
+  const cp=ckP(b);
+  const ce=cp==null?null:cp-b.p_market;
+  const useCheck = ce!=null && Math.abs(ce)>e+0.005;
+  const edge = useCheck?ce:b.edge, src=useCheck?'check':'model';
+  const toA=edge>0, ee=Math.abs(edge);
+  return `<span class="edgeTag ${toA?'lean-a':'lean-b'}${useCheck?' fromck':''}"
+    title="${src==='check'?'the UFC.com check is further from the line than the model on this bout'
+      :'the model against the market line'}">${src} +${(ee*100).toFixed(0)} ${esc(surname(toA?b.a:b.b))}</span>`;
 }
 
 /* the model-vs-market strip, first thing on the page */
@@ -688,23 +709,35 @@ function tag(b){
    Leading with that is the only way the rest of the numbers mean anything. */
 
 function strip(){
-  const w=DATA.bouts.filter(b=>b.edge!=null).sort((x,y)=>Math.abs(y.edge)-Math.abs(x.edge));
-  if(!w.length) return `<div class="note" style="padding:10px 0">No market prices in this
-    build — add <span class="mono">ODDS_API_KEY</span> and the model-vs-market comparison appears here.</div>`;
-  const top=w.slice(0,5);
+  /* Both reads compete for the same five slots. A card where the check sits 20
+     points off the line and the model sits 4 should lead with the check, and
+     each entry says which one it is rather than leaving the reader to assume
+     the model. Only reads at least 5 points clear of the line are eligible,
+     the same bar the card's disagreement filter uses. */
+  const rows=[];
+  DATA.bouts.forEach(b=>{
+    if(b.edge==null) return;
+    rows.push({b, src:'model', edge:b.edge, p:b.p_a});
+    const cp=ckP(b);
+    if(cp!=null && Math.abs(cp-b.p_market)>=0.05) rows.push({b, src:'check', edge:cp-b.p_market, p:cp});
+  });
+  rows.sort((x,y)=>Math.abs(y.edge)-Math.abs(x.edge));
+  if(!rows.length) return `<div class="note" style="padding:10px 0">No market prices in this
+    build — add <span class="mono">ODDS_API_KEY</span> and the comparison against the market appears here.</div>`;
+  const top=rows.slice(0,5);
   return `<div class="totals" style="border-color:rgba(205,164,58,.24);background:rgba(205,164,58,.04)">
-    <div class="lbl tothd">model vs market · widest disagreements on this card</div>
-    <div class="strip">${top.map(b=>{
-    const e=Math.abs(b.edge), toA=b.edge>0;
-    const who=toA?b.a:b.b;                    // the fighter the model rates above the line
-    const mine=toA?b.p_a:b.p_b, theirs=toA?b.p_market:1-b.p_market;
-    return `<button class="dcard ${e>=0.05?'':'calm'}" data-id="${esc(b.bout)}">
-      <div class="lbl">model above the line on</div>
+    <div class="lbl tothd">vs market · widest disagreements on this card</div>
+    <div class="strip">${top.map(({b,src,edge,p})=>{
+    const e=Math.abs(edge), toA=edge>0;
+    const who=toA?b.a:b.b;
+    const mine=toA?p:1-p, theirs=toA?b.p_market:1-b.p_market;
+    return `<button class="dcard ${e>=0.05?'':'calm'} ${src==='check'?'fromck':''}" data-id="${esc(b.bout)}">
+      <div class="lbl"><span class="${src==='check'?'dsrc ck':'dsrc'}">${src}</span> above the line on</div>
       <div style="display:flex;align-items:baseline;gap:8px;margin:3px 0 2px">
         <span class="dgap mono ${toA?'to-a':'to-b'}">+${(e*100).toFixed(1)}</span>
         <span class="nm ${toA?'nm-a':'nm-b'} fav" style="max-width:130px" title="${esc(who)}">${esc(surname(who))}</span></div>
       <div class="mono" style="font-size:10.5px;color:var(--mute)">
-        model <b style="color:var(--bone)">${P1(mine)}%</b> ·
+        ${src} <b style="color:var(--bone)">${P1(mine)}%</b> ·
         market <span style="color:var(--gold)">${P1(theirs)}%</span></div>
     </button>`;}).join('')}</div></div>`;
 }
@@ -987,7 +1020,9 @@ function tile(b){
       if(!head&&!route) return '';
       return `<div class="callchip ${c.side==='a'?'ca':'cb'}">${head}${route}${
         v?`<span class="${v.agrees?'cagree':'cdis'}">${v.agrees?'market agrees':'market differs'}</span>`:''}</div>`;})()}
-    ${b.thin?`<div class="props"><span class="pp" style="color:var(--warn);border-color:rgba(222,140,52,.4)">winner only · ${Math.min((b.evidence||{}).a??9,(b.evidence||{}).b??9)===0?'debut':'1 prior UFC fight'}</span></div>`:propChips(b)}
+    ${b.thin?`<div class="props"><span class="pp" style="color:var(--warn);border-color:rgba(222,140,52,.4)">winner only · ${Math.min((b.evidence||{}).a??9,(b.evidence||{}).b??9)===0?'debut':'1 prior UFC fight'}</span></div>`
+      :(()=>{const pc=propChips(b); if(!pc) return '';
+        return ab?pc.replace('<div class="props">','<div class="props"><span class="ppsrc">model</span>'):pc;})()}
   </button>`;
 }
 
@@ -1398,15 +1433,31 @@ function render(){
             if(pA!=null&&isFinite(pA))
               dial=`<div class="nrdial">${gauge({a:n.a,b:n.b,p_a:pA,p_b:1-pA,bout:key})}</div>`;
           }
+          /* The same paired block the tiles use, so a no-read entry is read the
+             same way as everything else on the card. The model column is empty
+             by definition here - that is the whole meaning of "no read" - and
+             saying so in the grid is clearer than omitting the column, which
+             would make this look like a different kind of card. */
           if(st&&(st.a_m&&st.a_m.ko_share!=null||st.b_m&&st.b_m.ko_share!=null)){
-            const L=sbLengthCall(Object.assign(sbSynthetic(n),{noRead:true}),st);
-            if(L){ const w=L.tier==='flat'?(L.kind==='finish'?'FINISH':'DISTANCE')+' — NO LEAN'
-              :(L.kind==='finish'?'FINISH':'DISTANCE')+(L.tier==='likely'?' LIKELY':' LEANS');
-            sum=`<div style="margin-top:6px"><span class="sbtag len t-${L.tier}">ufc.com ${
-              w} ${P0(L.p)}%${L.round?' · '+L.round:''}${
-              L.thin?` · thin ${L.wins}W`:''}</span>${L.top?`<span class="sbtag len pick"
-              style="margin-left:5px">ufc.com ${esc(L.top.name)} by ${
-              L.top.how==='KO/TKO'?'KO':L.top.how==='submission'?'SUB':'DEC'} ${P0(L.top.p)}%</span>`:''}</div>`; }
+            const syn=sbSynthetic(n);
+            const L=sbLengthCall(Object.assign(syn,{noRead:true}),st);
+            if(L){
+              const w=L.tier==='flat'?(L.kind==='finish'?'finish':'distance')+' '+P0(L.p)+'%'
+                :(L.kind==='finish'?'FINISH':'DISTANCE')+(L.tier==='likely'?' LIKELY ':' ')+P0(L.p)+'%';
+              const pA=sbProb(sbCorner(syn.fin.a,st.a,st.blend),sbCorner(syn.fin.b,st.b,st.blend));
+              const none='<span class="abnone">no model read</span>';
+              sum=`<div class="abgrid" style="margin-top:6px">
+                <div class="abh"></div><div class="abh">model</div><div class="abh">ufc.com check</div>
+                ${pA!=null&&isFinite(pA)?`<div class="abl">winner</div><div class="abc dim">${none}</div>
+                  <div class="abc lit">${P0(pA)}<span class="abs">/</span>${P0(1-pA)}</div>`:''}
+                <div class="abl">ends</div><div class="abc dim">${none}</div>
+                <div class="abc lit">${w}${L.round?`<span class="abr"> ${L.round}</span>`:''}${
+                  L.thin?` · thin ${L.wins}W`:''}</div>
+                ${L.top?`<div class="abl">pick</div><div class="abc dim">${none}</div>
+                  <div class="abc lit">${esc(L.top.name)} by ${
+                  L.top.how==='KO/TKO'?'KO':L.top.how==='submission'?'SUB':'DEC'} ${P0(L.top.p)}%</div>`:''}
+              </div>`;
+            }
           }
           return `<button class="noread nr-open" data-nr="${esc(key)}"><b>${esc(n.a)}</b> vs. <b>${esc(n.b)}</b>
           <div class="lbl" style="margin-top:4px">No read — ${esc(n.reason)} · ${sum||dial?'your UFC.com read, not the model':'add UFC.com stats'}</div>${dial}${sum}</button>`;
@@ -2932,6 +2983,7 @@ function abGrid(b){
     mTxt=`${mKind==='finish'?'finish':'distance'} ${P0(mKind==='finish'?f:b.m_decision)}%`;
   }
   if(L){
+    if(b.thin) mTxt='<span class="abnone">not tested this thin</span>', mConv=-9;
     const w=L.tier==='flat'?'NO LEAN':(L.kind==='finish'?'FINISH':'DISTANCE')+(L.tier==='likely'?' LIKELY':'');
     const cTxt=`${w==='NO LEAN'?(L.kind==='finish'?'finish':'distance')+' '+P0(L.p)+'%':w+' '+P0(L.p)+'%'}${L.round?`<span class="abr"> ${L.round}</span>`:''}`;
     rows.push(['ends',
@@ -2953,10 +3005,11 @@ function abGrid(b){
                                p:c.p,k:norm(c.label.split(/\sby\s/i)[0],mHow)}:null;
   const cPick=L&&L.top?{t:`${esc(L.top.name)} by ${L.top.how==='KO/TKO'?'KO':L.top.how==='submission'?'SUB':'DEC'} ${P0(L.top.p)}%`,
                         p:L.top.p,k:norm(L.top.name,L.top.how)}:null;
-  if(mPick||cPick){
+  if(mPick||cPick||b.thin){
     const differ = !!(mPick&&cPick&&mPick.k!==cPick.k);
     rows.push(['pick',
-      cell(mPick?mPick.t:'<span class="abnone">—</span>', mPick&&cPick&&mPick.p>cPick.p+0.01, mPick&&cPick&&mPick.p<cPick.p-0.01),
+      cell(mPick?mPick.t:`<span class="abnone">${b.thin?'not tested this thin':'—'}</span>`,
+           mPick&&cPick&&mPick.p>cPick.p+0.01, mPick&&cPick&&mPick.p<cPick.p-0.01),
       cell(cPick?cPick.t:'<span class="abnone">—</span>', mPick&&cPick&&cPick.p>mPick.p+0.01, mPick&&cPick&&cPick.p<mPick.p-0.01),
       differ]);
   }
