@@ -1767,8 +1767,7 @@ function render(){
                 <div class="abc lit">${w}${L.round?`<span class="abr"> ${L.round}</span>`:''}${
                   L.thin?` · thin ${L.wins}W`:''}</div>
                 ${L.top?`<div class="abl">pick</div><div class="abc dim">${none}</div>
-                  <div class="abc lit">${esc(L.top.name)} by ${
-                  L.top.how==='KO/TKO'?'KO':L.top.how==='submission'?'SUB':'DEC'} ${P0(L.top.p)}%</div>`:''}
+                  <div class="abc lit">${sbNameShort(L.top)} ${P0(L.top.p)}%</div>`:''}
               </div>`;
             }
           }
@@ -3360,7 +3359,7 @@ function sbVerdict(ma,mb,pA,b,st){
             : (head.indexOf('Finish')===0 ? 'fin' : 'dec');
   const best=sbTop(cells,fam);
   const clear = best && best.clear;
-  let who = clear ? `${esc(best.name)} by ${best.how}`
+  let who = clear ? sbName(best)
                   : `no clear favorite — ${fam==='dec'?'decision':fam==='fin'?'finish':(dec>fin?'decision':'finish')}`;
 
   // round, only when a finish is the call and the timing read says something
@@ -3401,7 +3400,7 @@ function sbVerdict(ma,mb,pA,b,st){
               b_ko:`${esc(nB)} by KO/TKO`, b_sub:`${esc(nB)} by submission`};
     return {k:k, p:c[k], t:nm[k]};})();
   const bk = (!best||!best.clear) ? null
-    : best.how==='decision' ? 'decision'
+    : (best.how==='decision'||!best.name) ? 'decision'
     : (best.name===nA?'a':'b')+(/KO/.test(best.how)?'_ko':'_sub');
   const over = (ov&&bk&&ov.k!==bk)
     ? `<div class="sbover">Likeliest single ending is <b>${ov.t}</b> at ${P0(ov.p)}% —
@@ -3712,10 +3711,25 @@ function sbCells(ma,mb,pA,a,bb){
   const A=sbShrinkMix(ma), B=sbShrinkMix(mb);
   if(!A||!B) return null;
   if(pA==null||!isFinite(pA)) pA=0.5;
-  return [[pA*A.ko,a,'KO/TKO'],   [pA*A.sub,a,'submission'],   [pA*A.dec,a,'decision'],
-          [(1-pA)*B.ko,bb,'KO/TKO'],[(1-pA)*B.sub,bb,'submission'],[(1-pA)*B.dec,bb,'decision']]
+  /* FIVE cells, with decision combined - the same claim set the model
+     publishes (m_a_ko, m_a_sub, m_b_ko, m_b_sub, m_decision) and the same one
+     ckGrade scores. This split decision by corner into six, which quietly made
+     three parts of the page disagree about what the check had picked: on one
+     bout the chip advertised "Gatto by KO 23%", the drawer said "no clear
+     favourite", and the grader was going to score the check as having called a
+     decision - three answers, none of them wrong under its own rule, and no
+     rule shared between them. A decision cell carries no fighter because the
+     model's does not either; consumers render it by name-less `how`. */
+  return [[pA*A.ko,a,'KO/TKO'],     [pA*A.sub,a,'submission'],
+          [(1-pA)*B.ko,bb,'KO/TKO'],[(1-pA)*B.sub,bb,'submission'],
+          [pA*A.dec+(1-pA)*B.dec,null,'decision']]
          .sort((x,y)=>y[0]-x[0]);
 }
+/* "Gatto by KO" / "decision" - the decision cell names no fighter. */
+const sbName=t=>!t?'':(t.name?`${esc(t.name)} by ${t.how}`:'decision');
+const sbNameShort=t=>!t?'':(t.name
+  ? `${esc(t.name)} by ${t.how==='KO/TKO'?'KO':t.how==='submission'?'SUB':'DEC'}`
+  : 'by DEC');
 function sbTop(cells,fam){
   const pool = fam==null ? cells
     : cells.filter(c=> fam==='dec' ? c[2]==='decision' : c[2]!=='decision');
@@ -3779,13 +3793,20 @@ function sbLengthCall(b,stIn){
     delta = p-mp;
   }
   const cells=sbCells(st.a_m||{}, st.b_m||{}, pA, surname(b.a), surname(b.b));
-  const top=cells?sbTop(cells, kind==='finish'?'fin':'dec'):null;
   /* The same three tiers the model's own badge uses — 12 points clear of the
      league rate is a call, 5 to 12 a lean, under 5 neither. The chip had been
      printing a bare "FINISH 71%" at every strength, so a number the model would
      have called FINISH LIKELY read here as an unqualified fact, and a 51% coin
      flip read exactly the same way. Wording and weight now track the gap. */
   const tier = conv>=0.12 ? 'likely' : conv>=0.05 ? 'leans' : 'flat';
+  /* The route is named INSIDE the family the badge just claimed - but only
+     when the badge claimed one. The chip was choosing its family by which side
+     of 50% the number fell on, while the drawer verdict chose by whether the
+     badge leaned at all, so on a fight sitting near the line the two named
+     different things: the chip "Gatto by KO 23%", the verdict "no clear
+     favourite". One rule, the verdict's, because it is the one tied to what
+     the reader is actually being told. */
+  const top=cells?sbTop(cells, tier==='flat'?null:(kind==='finish'?'fin':'dec')):null;
   return {kind:kind, p:p, conv:conv, modelConv:modelConv, round:round,
           wins:thin, thin:thin<3, modelSilent:modelSilent, delta:delta,
           tier:tier, top:(top&&top.clear)?top:null};
@@ -3827,8 +3848,8 @@ function sandboxChip(b){
      hedge, because a chip is read at a glance and a hedged chip is read as a
      call. */
   const pick=L.top?`<span class="sbtag len pick"
-    title="the clearest single outcome in the pasted records">ufc.com ${esc(L.top.name)} by ${
-    L.top.how==='KO/TKO'?'KO':L.top.how==='submission'?'SUB':'DEC'} ${P0(L.top.p)}%</span>`:'';
+    title="the clearest single outcome in the pasted records">ufc.com ${
+    sbNameShort(L.top)} ${P0(L.top.p)}%</span>`:'';
   return win+len+pick;
 }
 
@@ -3896,13 +3917,20 @@ function abGrid(b){
      says name + "KO/TKO" - so comparing the raw strings, or only the fighter,
      missed "Van by decision" against "Van by KO", which is a real disagreement
      about how the fight ends and exactly what this row exists to surface. */
-  const norm=(name,how)=>`${String(name).trim().split(/\s+/).pop().toLowerCase()}|${
-    /ko|tko/i.test(how)?'KO':/sub/i.test(how)?'SUB':'DEC'}`;
+  const norm=(name,how)=>{
+    const fam=/ko|tko/i.test(how)?'KO':/sub/i.test(how)?'SUB':'DEC';
+    /* A decision is one claim, not two. Neither side attributes it to a corner
+       - the model publishes a single m_decision and the check's cells combine
+       it - so keying it by fighter would have made "model: Van by decision"
+       and "check: decision" read as a disagreement about how the fight ends
+       when they say exactly the same thing. */
+    if(fam==='DEC') return '|DEC';
+    return `${String(name||'').trim().split(/\s+/).pop().toLowerCase()}|${fam}`;};
   const mHow=c&&c.label?(c.label.split(/\sby\s/i)[1]||''):'';
   const mPick=c&&c.routeClear?{t:`${esc(shortMethod(c.label))}${c.round?' R'+c.round.n:''} ${P0(c.p)}%`,
                                p:c.p,k:norm(c.label.split(/\sby\s/i)[0],mHow)}:null;
-  const cPick=L&&L.top?{t:`${esc(L.top.name)} by ${L.top.how==='KO/TKO'?'KO':L.top.how==='submission'?'SUB':'DEC'} ${P0(L.top.p)}%`,
-                        p:L.top.p,k:norm(L.top.name,L.top.how)}:null;
+  const cPick=L&&L.top?{t:`${sbNameShort(L.top)} ${P0(L.top.p)}%`,
+                        p:L.top.p,k:norm(L.top.name||'',L.top.how)}:null;
   const differ = !!(mPick&&cPick&&mPick.k!==cPick.k);
   rows.push(['pick',
     cell(mPick?mPick.t:`<span class="abnone">${b.thin?'not tested this thin':'no clear pick'}</span>`,
