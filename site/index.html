@@ -386,6 +386,20 @@
   .ckm.miss{color:var(--dim)}
   .ckna{color:var(--dim);font-size:11px}
   .rc.ck{border-style:dashed}
+  .pastg{margin-top:6px}
+  /* The mark sits against its OWN value, not at the far edge of the column.
+     Pushed right, the model's tick landed a few pixels from the check's number
+     and read as the check's - the one misreading this grid exists to prevent. */
+  .pastg .abc{display:block;overflow-wrap:normal}
+  .pastg .pm{display:inline;margin-left:1px}
+  .pastg .abc:nth-child(3n){padding-left:7px;border-left:1px solid var(--soft)}
+  .pm{font-weight:800;font-size:11px;flex:none}
+  .pm.ok{color:var(--good)} .pm.no{color:var(--warn)}
+  .pline.col{display:block}
+  .pr2{display:flex;align-items:center;gap:7px;font-size:11px;padding:2px 0 2px 2px;color:var(--mute)}
+  .pr2.ok .mono{color:var(--bone)} .pr2.no .mono{color:var(--dim)}
+  .pr2w{width:46px;flex:none;font-size:8.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--dim)}
+  .pr2 .mono{flex:1;min-width:0}
   .abgrid{display:grid;grid-template-columns:auto minmax(0,1fr) minmax(0,1fr);gap:1px 6px;align-items:center;
     margin-top:6px;padding:5px 6px;border:1px solid var(--line);border-radius:7px}
   .abgrid.hasdiff{border-color:rgba(222,140,52,.45)}
@@ -809,6 +823,13 @@ const movLabel=(b,key)=>(MOV(b).find(x=>x[0]===key)||[,,key])[2];
 const shortMethod=l=>String(l).replace(/\bby KO\/TKO\b/,'by KO')
                               .replace(/\bby submission\b/,'by SUB')
                               .replace(/\bby decision\b/,'by DEC');
+/* "Van by DEC" from the model and a bare "decision" from the check are the same
+   claim written two ways, which makes the two columns look less alike than they
+   are. One shape for both: surname plus family, and "by DEC" where the source
+   names no fighter - which the check's decision cell genuinely does not. */
+const pickShort=l=>{ if(l==null) return null;
+  const t=shortMethod(String(l)), x=/^(.*)\s(by (?:KO|SUB|DEC))$/.exec(t);
+  return x?`${surname(x[1])} ${x[2]}`:'by DEC'; };
 function topCall(b){
   const m=MOV(b); if(m.length<2) return null;
   /* Finish or decision FIRST, then the route inside it. Taking the argmax over
@@ -1260,6 +1281,37 @@ function ckByBout(){
 }
 const ckRow=key=>ckByBout()[key]||null;
 
+/* The result tile, in the same two-column shape the upcoming chips use, with a
+   tick or a cross on each read. Before this the tiles carried loose chips and
+   the upcoming card carried a grid, so the same fight changed layout once it
+   had happened - and the thing you most want at a glance on a settled card,
+   "which read got it", took reading rather than scanning. */
+function pastGrid(g){
+  const cr=ckRow(g.bout), dp=distProp(g);
+  const m=(g.report||[]).find(r=>r.kind==='method');
+  /* One dash for a cell with nothing in it, not a dash for the value and a
+     second for the missing mark - which read as two separate blanks. */
+  const cell=(txt,ok)=>`<div class="abc">${txt==null?'<span class="abnone">—</span>'
+    :txt+(ok==null?'':`&nbsp;<span class="pm ${ok?'ok':'no'}">${ok?'✓':'✗'}</span>`)}</div>`;
+  /* Both columns show the probability the source put on WHAT HAPPENED, not on
+     what it called. A cell reading 38% with a cross says the same thing twice
+     over and in the right order: it called the other way, and not by much. Had
+     each column shown its own call instead, the two would not be comparable. */
+  const rows=[];
+  rows.push(['winner', cell(`${P0(g.p_winner_model)}%`, g.model_right),
+                       cell(cr?`${P0(cr.win.check)}%`:null, cr?cr.win.check>0.5:null)]);
+  if(dp) rows.push(['ends', cell(`${P0(dp.happened?dp.said:1-dp.said)}%`, dp.right),
+                            cell(cr&&cr.len?`${P0(cr.len.actual==='distance'?cr.len.check_dec:1-cr.len.check_dec)}%`:null,
+                                 cr&&cr.len?cr.len.check_right:null)]);
+  if(m) rows.push(['pick', cell(esc(pickShort(m.top)), !!m.right),
+                           cell(cr&&cr.mfull?esc(pickShort(cr.mfull.check_top)):null,
+                                cr&&cr.mfull?cr.mfull.check_right:null)]);
+  return `<div class="abgrid pastg">
+    <div class="abh"></div><div class="abh">model</div><div class="abh${cr?'':' off'}">ufc.com check</div>
+    ${rows.map(([l,a,b])=>`<div class="abl">${l}</div>${a}${b}`).join('')}
+  </div>`;
+}
+
 function lastCard(){
   const c=HIST&&HIST.cards&&HIST.cards[0];
   if(!c) return `<div class="note" style="padding:6px 0 2px">Results appear here the morning after
@@ -1302,18 +1354,19 @@ function lastCard(){
         <span class="edgeTag ${g.model_right?'hit':'miss'}">${g.model_right?'✓':'✗'} winner</span></div>
       <div class="rname" title="${esc(g.winner)}">${esc(surname(g.winner))}
         <span class="lbl">def. ${esc(surname(g.winner===g.a?g.b:g.a))}</span></div>
+      ${pastGrid(g)}
       <div class="rchips">
-        ${m?`<span class="rc ${m.right?'ok':'no'}">${m.right?'✓':'✗'} method</span>`:''}
-        ${(()=>{const d=distProp(g); return d?`<span class="rc ${d.right?'ok':'no'}">${
-          d.right?'✓':'✗'} ${d.happened?'distance':'finish'}</span>`:'';})()}
-        ${(()=>{const r=ckRow(g.bout); if(!r) return '';
-          /* Only where a check exists. "Closer" is more probability on the
-             fighter who actually won - the same test used against the market,
-             so the three are judged alike. */
-          const better=r.win.check>r.win.model+0.005, worse=r.win.check<r.win.model-0.005;
-          return `<span class="rc ck ${better?'ok':worse?'no':''}">${
-            better?'check beat model':worse?'model beat check':'check level'}</span>`;})()}
         ${mk?`<span class="rc ${mk.model_closer?'ok':'no'}">${mk.model_closer?'beat':'lost to'} market</span>`:''}
+        ${(()=>{const r=ckRow(g.bout); if(!r) return '';
+          /* "model beat check" was printed in red on bouts where NEITHER read
+             called the winner, which made a shared miss look like a result.
+             The colour now tracks whether the winner was called at all; which
+             of the two was nearer is said plainly and left uncoloured. */
+          const better=r.win.check>r.win.model+0.005, worse=r.win.check<r.win.model-0.005;
+          const bothNo=r.win.check<=0.5&&r.win.model<=0.5, bothYes=r.win.check>0.5&&r.win.model>0.5;
+          const lab=better?'check closer':worse?'model closer':'model and check level';
+          return `<span class="rc ck ${bothNo?'no':bothYes?'ok':''}">${
+            bothNo?'both missed · ':''}${lab}</span>`;})()}
       </div></button>`;}).join('');
   /* The two counts the strip at the top of the page claimed before the fights,
      against what the card actually produced — and against the base rate over
@@ -1382,26 +1435,62 @@ function openPast(id){
       <div class="pline"><span>model</span><b>${P0(cr.win.model)}% on ${esc(surname(g.winner))}</b>${tick(cr.win.model>0.5)}</div>
       <div class="pline"><span>ufc.com check</span><b style="color:var(--gold)">${P0(cr.win.check)}% on ${
         esc(surname(g.winner))}</b>${tick(cr.win.check>0.5)}</div>
-      <div class="note" style="margin-top:6px">Probability each put on the fighter who actually won. The
-        <b>${cr.win.check>cr.win.model?'check':'model'}</b> was closer on this bout.</div></div>`:''}
+      <div class="note" style="margin-top:6px">Probability each put on the fighter who actually won.
+        ${(()=>{
+          /* "The model was closer" on its own was read as the model having got
+             something right, in a bout where both reads had the other fighter.
+             Who called it comes first; closer is a second, lesser claim and now
+             says so. */
+          const mw=cr.win.model>0.5, cw=cr.win.check>0.5, lose=surname(g.winner===g.a?g.b:g.a);
+          const closer=cr.win.check>cr.win.model?'check':'model';
+          const lead = mw&&cw ? 'Both called it.'
+            : (!mw&&!cw) ? `<b>Neither called it</b> — both had ${esc(lose)}.`
+            : `The <b>${mw?'model':'check'}</b> called it; the ${mw?'check':'model'} had ${esc(lose)}.`;
+          const near = !mw&&!cw&&Math.max(cr.win.model,cr.win.check)>=0.47
+            ? ' Close enough to even that it was barely a call either way.' : '';
+          return `${lead} Of the two the <b>${closer}</b> was closer.${near}`;})()}</div></div>`:''}
     ${how.length||dp?`<div class="card"><div class="ghead" style="background:none;border:none;padding:0 0 6px">
       <span class="gname">How and when</span><span class="lbl">what was claimed vs what happened</span></div>
-      ${dp?`<div class="pline"><span>Distance or finish</span>
-        <b>${dp.happened?'went the distance':'finished'}</b>
-        <span class="mono ps">model gave the distance ${P0(dp.said)}%${
-          dp.base!=null?` · usual ${P0(dp.base)}%`:''}</span>${
-          cr&&cr.len?mk2(cr.len.model_right,cr.len.check_right):tick(dp.right)}</div>`:''}
-      ${how.map(r=>{
-        const isM=r.kind==='method', isR=r.kind==='round';
-        const pair = cr&&isM&&cr.mfull ? mk2(cr.mfull.model_right, cr.mfull.check_right)
-                   : cr&&isR&&cr.rnd   ? mk2(cr.rnd.model_right,   cr.rnd.check_right)
-                   : tick(r.right);
-        return `<div class="pline"><span>${esc(r.label)}${
-          isR&&cr&&cr.rnd?'<span class="lbl" style="display:block">round one or later</span>':''}</span>
-        <b>${esc(r.actual)}</b><span class="mono ps">model gave it ${P0(r.said)}% · top pick ${esc(r.top)}</span>${pair}</div>`;}).join('')}
+      ${(()=>{
+        /* Both reads spelled out on every row. The marks alone said who was
+           right; they could not say whether the check was a point ahead or
+           thirty, which is the difference between a lucky call and a better
+           read - and it is the whole reason for keeping the check at all. */
+        const say=(who,txt,ok)=>`<div class="pr2 ${ok==null?'':ok?'ok':'no'}">
+          <span class="pr2w">${who}</span><span class="mono">${txt}</span>${
+          ok==null?'':`<span class="ckm ${ok?'hit':'miss'}">${ok?'✓':'✗'}</span>`}</div>`;
+        const out=[];
+        if(dp) out.push(`<div class="pline col"><span>Distance or finish</span>
+          <b>${dp.happened?'went the distance':'finished'}</b>
+          ${say('model',`${P0(dp.said)}% distance${dp.base!=null?` · usual ${P0(dp.base)}%`:''}`,dp.right)}
+          ${cr&&cr.len?say('check',`${P0(cr.len.check_dec)}% distance`,cr.len.check_right):''}</div>`);
+        how.forEach(r=>{
+          const isM=r.kind==='method', isR=r.kind==='round';
+          /* Label and outcome on one line, the qualifier beneath it. Slotted
+             between the two it split the heading in half and the row read as
+             three unrelated lines. */
+          out.push(`<div class="pline col"><span>${esc(r.label)}${
+            isR&&cr?' — exact round':''}</span>
+            <b>${esc(r.actual)}</b>${
+            isR&&cr?'<div class="lbl">the model names a round; the check never does</div>':''}
+            ${say('model',`${P0(r.said)}% · top pick ${esc(isM?pickShort(r.top):shortMethod(r.top))}`,r.right)}
+            ${isM&&cr&&cr.mfull?say('check',`${P0(cr.mfull.check_said)}% · top pick ${
+                esc(pickShort(cr.mfull.check_top)||'—')}`,cr.mfull.check_right):''}</div>`);
+          /* The round-one split gets its own row rather than sharing the one
+             above. On that row the model's mark answered "was the exact round
+             right" and the check's answered "was it round one" - two different
+             questions under one heading, with the marks sitting side by side as
+             though they meant the same thing. Here both answer the same one. */
+          if(isR&&cr&&cr.rnd&&cr.rnd.model_call!=null)
+            out.push(`<div class="pline col"><span>Round one or later</span>
+              <b>${esc(cr.rnd.actual==='R1'?'round one':'after round one')}</b>
+              ${say('model',`${P0(cr.rnd.model_p)}% round one · called ${esc(cr.rnd.model_call)}`,cr.rnd.model_right)}
+              ${say('check',`${P0(cr.rnd.check_p)}% round one · called ${esc(cr.rnd.check_call)}`,cr.rnd.check_right)}</div>`);
+        });
+        return out.join('');})()}
       <div class="note" style="margin-top:6px">Top pick is the single likeliest of five endings. A decision
         can be the likeliest one ending even when a finish of some kind is likelier overall.${
-        cr?' <b class="ckm hit">M</b> and <b class="ckm hit">C</b> are the model and your UFC.com check, gold when right. The round row is scored as "round one or later" for both, because that is the only round claim the check makes.':''}</div></div>`:''}
+        cr?' The exact-round row is the model on its own — the check\'s only round claim is "round one or later", which is scored for both on the row beneath it.':''}</div></div>`:''}
     ${(()=>{const pb=pastBout(g);
       /* The same sandbox the upcoming card uses, on a settled fight. This is
          how a card that happened before the check existed gets its read in;
@@ -2259,8 +2348,13 @@ function ckGrade(){
 
     // 1. LENGTH - does it end early or go the distance. The call the check leads with.
     if(dr){
+      /* The probabilities themselves, not just who was right. A drawer row that
+         says only "✓/✗" leaves the reader unable to see whether the check was
+         barely ahead or miles clear, which is the difference between a lucky
+         call and a better read. */
       row.len={actual: fin?'finish':'distance',
         check_call: r.dec>=0.5?'distance':'finish', model_call: dr.said>=0.5?'distance':'finish',
+        check_dec:r.dec, model_dec:dr.said, base_dec:dr.base,
         check_b:brier(1-r.dec,fin), model_b:brier(1-dr.said,fin), base_b:brier(1-dr.base,fin)};
       row.len.check_right=row.len.check_call===row.len.actual;
       row.len.model_right=row.len.model_call===row.len.actual;
@@ -2275,8 +2369,12 @@ function ckGrade(){
         const mt=/KO/.test(mrep.top)?'KO':/submission/i.test(mrep.top)?'SUB':'DEC';
         row.mtype.model=mt; row.mtype.model_right=mt===fam(actual);
       }
+      const nm={decision:'decision', a_ko:`${g.a} by KO`, a_sub:`${g.a} by SUB`,
+                b_ko:`${g.b} by KO`, b_sub:`${g.b} by SUB`};
       row.mfull={check_right:top===actual, model_right:mrep?!!mrep.right:null,
-                 check_said:cells[actual], model_said:mrep?mrep.said:null};
+                 check_said:cells[actual], model_said:mrep?mrep.said:null,
+                 check_top:nm[top], check_top_p:cells[top],
+                 model_top:mrep?mrep.top:null, model_top_p:mrep?mrep.top_p:null};
       row.mcmp=row.mfull;   // kept: the card panel's existing column reads this
     }
     // 3. ROUND - only meaningful on a finish, and the check only ever claims
@@ -2292,10 +2390,10 @@ function ckGrade(){
     if(fin&&r.r1!=null){
       const wasR1=g.round===1;
       row.rnd={actual:wasR1?'R1':'after R1', check_call:r.r1>=0.5?'R1':'after R1',
-               check_b:brier(r.r1,wasR1)};
+               check_p:r.r1, check_b:brier(r.r1,wasR1)};
       row.rnd.check_right=row.rnd.check_call===row.rnd.actual;
       if(r1p){ row.rnd.model_call=r1p.said>=0.5?'R1':'after R1';
-               row.rnd.model_b=brier(r1p.said,wasR1);
+               row.rnd.model_p=r1p.said; row.rnd.model_b=brier(r1p.said,wasR1);
                row.rnd.model_right=row.rnd.model_call===row.rnd.actual; }
     }
     rows.push(row);
