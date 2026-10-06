@@ -386,12 +386,16 @@
   .ckm.miss{color:var(--dim)}
   .ckna{color:var(--dim);font-size:11px}
   .rc.ck{border-style:dashed}
+  .sbover{font-size:10.5px;color:var(--dim);line-height:1.45;margin:5px 0 0;padding-left:9px;
+    border-left:2px solid var(--soft)}
+  .sbover b{color:var(--mute)} .sbover i{font-style:normal;color:var(--mute)}
   .ckdis{display:flex;flex-wrap:wrap;gap:4px 14px;align-items:baseline}
   .ckd b{color:var(--bone);font-weight:700;text-transform:uppercase;letter-spacing:.05em;font-size:9px}
   .rrl{display:block;margin-bottom:3px}
   .rrk{text-transform:none;letter-spacing:.02em;font-size:10px;color:var(--dim)}
   .rrk b{font-weight:700;text-transform:uppercase;letter-spacing:.05em;font-size:9px}
   .rrk b.model{color:var(--mute)} .rrk b.check{color:var(--gold)} .rrk b.market{color:var(--mute)}
+  .rrl{margin-top:7px}
   .rrk b:first-child,.rrk>b.model:first-of-type{}
   .pastg{margin-top:6px}
   /* The mark sits against its OWN value, not at the far edge of the column.
@@ -1321,17 +1325,22 @@ function pastGrid(g){
      over and in the right order: it called the other way, and not by much. Had
      each column shown its own call instead, the two would not be comparable. */
   const rows=[];
-  {const mv=g.p_winner_model, cv=cr?cr.win.check:null, n=near(mv,cv);
-   rows.push(['winner', cell(pc(mv), g.model_right, n[0]),
-                        cell(cv==null?null:pc(cv), cv==null?null:cv>0.5, n[1])]);}
-  if(dp){const mv=dp.happened?dp.said:1-dp.said,
-         cv=cr&&cr.len?(cr.len.actual==='distance'?cr.len.check_dec:1-cr.len.check_dec):null, n=near(mv,cv);
-   rows.push(['ends', cell(pc(mv), dp.right, n[0]),
-                      cell(cv==null?null:pc(cv), cr&&cr.len?cr.len.check_right:null, n[1])]);}
-  if(m){const mv=m.said, cv=cr&&cr.mfull?cr.mfull.check_said:null, n=near(mv,cv);
-   rows.push(['pick', cell(esc(pickShort(m.top)), !!m.right, n[0]),
-                      cell(cr&&cr.mfull?esc(pickShort(cr.mfull.check_top)):null,
-                           cr&&cr.mfull?cr.mfull.check_right:null, n[1])]);}
+  /* Each row records whether either side was right, so the summary beneath can
+     count claims rather than rank on one of them. */
+  const put=(l,av,aok,bv,bok)=>{const n=near(av,bv);
+    rows.push({l:l, okA:aok, okB:bok,
+      a:cell(av==null?null:(typeof av==='number'?pc(av):av), aok, n[0]),
+      b:cell(bv==null?null:(typeof bv==='number'?pc(bv):bv), bok, n[1])});};
+  {const mv=g.p_winner_model, cv=cr?cr.win.check:null;
+   put('winner', mv, g.model_right, cv, cv==null?null:cv>0.5);}
+  if(dp) put('ends', dp.happened?dp.said:1-dp.said, dp.right,
+             cr&&cr.len?(cr.len.actual==='distance'?cr.len.check_dec:1-cr.len.check_dec):null,
+             cr&&cr.len?cr.len.check_right:null);
+  if(m){const n2=near(m.said, cr&&cr.mfull?cr.mfull.check_said:null);
+   rows.push({l:'pick', okA:!!m.right, okB:cr&&cr.mfull?cr.mfull.check_right:null,
+     a:cell(esc(pickShort(m.top)), !!m.right, n2[0]),
+     b:cell(cr&&cr.mfull?esc(pickShort(cr.mfull.check_top)):null,
+            cr&&cr.mfull?cr.mfull.check_right:null, n2[1])});}
   /* Round, but only the claim both sides actually make. The model also names a
      modal round and the check never does, so putting the exact-round call here
      would print two marks answering two different questions side by side - the
@@ -1342,14 +1351,32 @@ function pastGrid(g){
     const one=g.round===1;
     const mv=r1p?(one?r1p.said:1-r1p.said):null;
     const cv=cr&&cr.rnd?(one?cr.rnd.check_p:1-cr.rnd.check_p):null;
-    if(mv!=null||cv!=null){const n=near(mv,cv);
-      rows.push(['round one', cell(mv==null?null:pc(mv), r1p?(r1p.said>=0.5)===one:null, n[0]),
-                              cell(cv==null?null:pc(cv), cr&&cr.rnd?cr.rnd.check_right:null, n[1])]);}
+    if(mv!=null||cv!=null)
+      put('round one', mv, r1p?(r1p.said>=0.5)===one:null, cv, cr&&cr.rnd?cr.rnd.check_right:null);
   }
+  /* Ranking on the winner alone put a read first that could have missed every
+     other claim on the card, which is the opposite of "closer". The summary
+     counts the claims each side actually got right. The winner line stays
+     separate underneath because the market prices that one and nothing else,
+     so it cannot be ranked against the others on equal terms. */
+  const tot=f=>rows.filter(r=>r[f]!=null).length, hit=f=>rows.filter(r=>r[f]===true).length;
+  const sides=[{n:'model',r:hit('okA'),t:tot('okA')}];
+  if(cr) sides.push({n:'check',r:hit('okB'),t:tot('okB')});
+  sides.sort((x,y)=>(y.r/(y.t||1))-(x.r/(x.t||1)));
+  const called=sides.length>1
+    ? `<span class="lbl rrl">claims called</span><span class="rc rrk">${
+        sides.map(x=>`<b class="${x.n}">${x.n}</b> ${x.r}/${x.t}`).join(' › ')}</span>` : '';
+  const mkt=g.market, who=[{n:'model',p:g.p_winner_model}];
+  if(cr) who.push({n:'check',p:cr.win.check});
+  if(mkt) who.push({n:'market',p:mkt.p_winner_market});
+  who.sort((x,y)=>y.p-x.p);
+  const winline=who.length>1
+    ? `<span class="lbl rrl">on the winner</span><span class="rc rrk">${
+        who.map(x=>`<b class="${x.n}">${x.n}</b> ${P0(x.p)}%`).join(' › ')}</span>` : '';
   return `<div class="abgrid pastg">
     <div class="abh"></div><div class="abh">model</div><div class="abh${cr?'':' off'}">ufc.com check</div>
-    ${rows.map(([l,a,b])=>`<div class="abl">${l}</div>${a}${b}`).join('')}
-  </div>`;
+    ${rows.map(r=>`<div class="abl">${r.l}</div>${r.a}${r.b}`).join('')}
+  </div>${called}${winline}`;
 }
 
 function lastCard(){
@@ -1393,28 +1420,7 @@ function lastCard(){
       <div class="trow" style="margin-bottom:5px"><span class="lbl">${g.weight_class?`<b class="divc">${esc(divShort(g.weight_class))}</b> · `:''}${esc(g.method)} · R${g.round} · ${t}</span></div>
       <div class="rname" title="${esc(g.winner)}">${esc(surname(g.winner))}
         <span class="lbl">def. ${esc(surname(g.winner===g.a?g.b:g.a))}</span></div>
-      ${pastGrid(g)}
-      <div class="rchips">
-        ${(()=>{
-          /* Green and red mean ONE thing on this tile: was the call right. The
-             chips below are comparisons, which is a different question with a
-             different answer - a read can call the winner and still sit nearer
-             the line than the market. Painted red, "lost to market" sat beside
-             a green tick on the same fight and the two looked like a
-             contradiction. Comparisons are now unpainted and say who was
-             nearer instead of who won or lost. */
-          /* All three chips asked one question - who put most on the fighter
-             who won - so they are one ranking rather than two or three separate
-             verdicts. Shorter, and it says outright what a pair of "beat /
-             lost to" chips left the reader to work out. */
-          const r=ckRow(g.bout), who=[{n:'model',p:g.p_winner_model}];
-          if(r) who.push({n:'check',p:r.win.check});
-          if(mk) who.push({n:'market',p:mk.p_winner_market});
-          if(who.length<2) return '';
-          who.sort((x,y)=>y.p-x.p);
-          return `<span class="lbl rrl">nearest on the winner</span><span class="rc rrk">${
-            who.map(x=>`<b class="${x.n}">${x.n}</b> ${P0(x.p)}%`).join(' › ')}</span>`;})()}
-      </div></button>`;}).join('');
+      ${pastGrid(g)}</button>`;}).join('');
   /* The two counts the strip at the top of the page claimed before the fights,
      against what the card actually produced — and against the base rate over
      the same bouts, because landing near 3 when 3 is simply the usual number is
@@ -3049,8 +3055,30 @@ function sbVerdict(ma,mb,pA,b,st){
   const thin = minW<3
     ? `<span class="sbthin" title="shrinkage pulls a record this short most of the way back to the league rate, and reads built on 1-2 wins measured roughly half as useful as those on 3-5. Shown, but it cannot lead the model's call.">thin — ${minW} win${minW===1?'':'s'} on one side</span>`
     : '';
+  /* The route named above is the best cell WITHIN the family the headline
+     called - "if it finishes, this is how". The chip grades the best cell
+     OVERALL, and those differ whenever decision mass concentrates in one cell
+     while finish mass splits across four. Both are right; read side by side
+     they looked like a contradiction, so where they differ the overall leader
+     is printed here rather than left for the reader to reconcile. */
+  const ov=(()=>{
+    if(!blended||blended.a_ko==null) return null;
+    const c={decision:blended.dec, a_ko:blended.a_ko, a_sub:blended.a_sub,
+             b_ko:blended.b_ko, b_sub:blended.b_sub};
+    const k=Object.keys(c).reduce((x,y)=>c[y]>c[x]?y:x);
+    const nm={decision:'a decision', a_ko:`${esc(nA)} by KO/TKO`, a_sub:`${esc(nA)} by submission`,
+              b_ko:`${esc(nB)} by KO/TKO`, b_sub:`${esc(nB)} by submission`};
+    return {k:k, p:c[k], t:nm[k]};})();
+  const bk = (!best||!best.clear) ? null
+    : best.how==='decision' ? 'decision'
+    : (best.name===nA?'a':'b')+(/KO/.test(best.how)?'_ko':'_sub');
+  const over = (ov&&bk&&ov.k!==bk)
+    ? `<div class="sbover">Likeliest single ending is <b>${ov.t}</b> at ${P0(ov.p)}% —
+       the route above is the likeliest one <i>given a finish</i>, which is the
+       claim the headline makes. The chip scores the single likeliest ending.</div>`
+    : '';
   return `<div class="sbverd ${cls}"><b>${head}</b><span>${who}${rnd}</span>${thin}
-    <span class="vs mono">${P0(fin)}% finish · ${P0(dec)}% distance</span></div>`;
+    <span class="vs mono">${P0(fin)}% finish · ${P0(dec)}% distance</span></div>${over}`;
 }
 function sbMethodBlock(b,st,pA){
   const ma=st.a_m||{}, mb=st.b_m||{};
