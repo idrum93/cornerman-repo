@@ -391,6 +391,7 @@
   .abh{font-size:8px;letter-spacing:.07em;text-transform:uppercase;color:var(--dim);
     padding-bottom:2px;border-bottom:1px solid var(--soft);margin-bottom:2px}
   .abh:nth-child(3){color:var(--gold)}
+  .abh.off{color:var(--dim)}
   .abl{font-size:8.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--dim);
     white-space:nowrap;align-self:start;padding-top:2px}
   /* Wrap rather than clip. At four-up a tile is ~279px and the check column
@@ -1948,6 +1949,42 @@ function sbLoad(){
     const live=new Set([].concat(
       (DATA&&DATA.bouts||[]).map(b=>b.bout),
       (DATA&&DATA.no_read||[]).map(n=>n.a+' vs. '+n.b)));
+    /* A corner-order correction renames the bout. The key is "A vs. B", so
+       pinning Camilo ahead of Herbert in data/corner_order.txt turned
+       "Jai Herbert vs. Matheus Camilo" into "Matheus Camilo vs. Jai Herbert"
+       and every pasted stat for that fight was orphaned and then deleted by the
+       prune below — the work lost silently, which is the worst way to lose it.
+
+       So before pruning, look for a stored key whose two names match a live
+       bout in the other order and move it across, SWAPPING the corners with
+       it: the inputs are per-corner, so re-keying alone would have handed
+       Herbert's numbers to Camilo. */
+    let moved=false;
+    const pair=k=>k.split(' vs. ').map(x=>x.trim().toLowerCase()).sort().join(' :: ');
+    const byPair={}; live.forEach(k=>byPair[pair(k)]=k);
+    Object.keys(o).forEach(k=>{
+      if(live.has(k)) return;
+      const want=byPair[pair(k)];
+      if(!want||o[want]) return;
+      /* Swap by PREFIX, not by an enumerated list. The state carries a, a_m,
+         a_raw, a_rec, a_bio and gains more over time; a hand-written list
+         would silently stop swapping whichever field was added last, and the
+         symptom - one corner's pasted text attached to the other - is the kind
+         that looks plausible on screen. */
+      const st=o[k], out={};
+      Object.keys(st).forEach(f=>{
+        const m=/^([ab])(_.*)?$/.exec(f);
+        out[m ? (m[1]==='a'?'b':'a')+(m[2]||'') : f] = st[f];
+      });
+      o[want]=out;
+      delete o[k];
+      moved=true;
+    });
+    /* Persist immediately. The migration is idempotent, so leaving the old key
+       in storage would have worked - but it would sit there until the next
+       edit, and anything else reading storage directly would still see the
+       stale name. Write it back once, here, where we know it changed. */
+    if(moved) try{ localStorage.setItem(SB_KEY, JSON.stringify(o)); }catch(e){}
     Object.keys(o).forEach(k=>{ if(!live.has(k)) delete o[k]; });
     return o;
   }catch(e){ return {}; }
@@ -2603,13 +2640,13 @@ function sandboxPanel(b){
       opponent-adjusted, shrunk ones, so a swap changes what the number means.
       Nothing you enter is saved, published or graded.</div>
     <div class="sbgrid">
-      <label class="lbl">${nA} — paste the UFC.com stats block
-        <textarea class="sbta" data-c="a" rows="4" placeholder="paste here"></textarea>
+      <label class="lbl">${nA}
         <input class="sbrec" data-c="a" placeholder="record, e.g. 10-3-0 (W-L-D)">
+        <textarea class="sbta" data-c="a" rows="4" placeholder="paste the UFC.com stats block"></textarea>
         <input class="sbrec sbbio" data-c="a" placeholder="paste the Age/Height/Reach block, or type 32, 74"></label>
-      <label class="lbl">${nB} — paste the UFC.com stats block
-        <textarea class="sbta" data-c="b" rows="4" placeholder="paste here"></textarea>
+      <label class="lbl">${nB}
         <input class="sbrec" data-c="b" placeholder="record, e.g. 10-3-0 (W-L-D)">
+        <textarea class="sbta" data-c="b" rows="4" placeholder="paste the UFC.com stats block"></textarea>
         <input class="sbrec sbbio" data-c="b" placeholder="paste the Age/Height/Reach block, or type 32, 74"></label>
     </div>
     <div class="sbacts">
@@ -3041,11 +3078,14 @@ function sandboxChip(b){
    name different outcomes is marked, because that disagreement is the only
    thing on the tile the model alone could not tell you. */
 function abGrid(b){
-  const st=SBOX[b.bout];
-  if(!st||!st.on||!b.fin||!DATA.win_model) return null;
-  const pc=sbProb(sbCorner(b.fin.a,st.a,st.blend),sbCorner(b.fin.b,st.b,st.blend));
-  if(pc==null||!isFinite(pc)) return null;
-  const L=sbLengthCall(b);
+  /* Rendered on EVERY bout now, with or without a check. Chips without one
+     fell back to the old single-line call chip, so the card mixed two layouts
+     and a fight read differently depending on whether stats had been pasted
+     into it. The check column shows a dash until there is something to put in
+     it, and the layout never changes shape. */
+  const pc=ckP(b);                       // null when no check is active
+  const L=pc==null?null:sbLengthCall(b);
+  if(b.p_a==null) return null;
   const lb=lengthBadge(b), c=b.thin?null:topCall(b);
   const MB=(BR||{}).market_bases||{};
   const decBase=MB.dec??0.505, finBase=1-decBase;
@@ -3054,12 +3094,14 @@ function abGrid(b){
   const rows=[];
 
   // 1. WINNER. Decisiveness is distance from an even split, not the raw number.
-  const mDec=Math.abs(b.p_a-0.5), cDec=Math.abs(pc-0.5);
+  const none='<span class="abnone">—</span>';
   const split=(x)=>`${P0(x)}<span class="abs">/</span>${P0(1-x)}`;
-  const sideDiff=(b.p_a>=0.5)!==(pc>=0.5);
+  const mDec=Math.abs(b.p_a-0.5), cDec=pc==null?null:Math.abs(pc-0.5);
+  const sideDiff = pc!=null && (b.p_a>=0.5)!==(pc>=0.5);
   rows.push(['winner',
-    cell(split(b.p_a), mDec>cDec+0.005, mDec<cDec-0.005),
-    cell(split(pc),    cDec>mDec+0.005, cDec<mDec-0.005), sideDiff]);
+    cell(split(b.p_a), cDec!=null&&mDec>cDec+0.005, cDec!=null&&mDec<cDec-0.005),
+    cell(pc==null?none:split(pc), cDec!=null&&cDec>mDec+0.005, cDec!=null&&cDec<mDec-0.005),
+    sideDiff]);
 
   // 2. HOW IT ENDS. Conviction is distance from the league rate, which is what
   //    both badges already use, so the two are on the same footing.
@@ -3071,15 +3113,16 @@ function abGrid(b){
     mConv=Math.max(f-finBase,b.m_decision-decBase);
     mTxt=`${mKind==='finish'?'finish':'distance'} ${P0(mKind==='finish'?f:b.m_decision)}%`;
   }
+  if(b.thin) mTxt='<span class="abnone">not tested this thin</span>', mConv=-9;
+  let cTxt=none;
   if(L){
-    if(b.thin) mTxt='<span class="abnone">not tested this thin</span>', mConv=-9;
     const w=L.tier==='flat'?'NO LEAN':(L.kind==='finish'?'FINISH':'DISTANCE')+(L.tier==='likely'?' LIKELY':'');
-    const cTxt=`${w==='NO LEAN'?(L.kind==='finish'?'finish':'distance')+' '+P0(L.p)+'%':w+' '+P0(L.p)+'%'}${L.round?`<span class="abr"> ${L.round}</span>`:''}`;
-    rows.push(['ends',
-      cell(mTxt, mConv>L.conv+0.01, mConv<L.conv-0.01),
-      cell(cTxt, L.conv>mConv+0.01, L.conv<mConv-0.01),
-      mKind&&L.kind&&mKind!==L.kind]);
+    cTxt=`${w==='NO LEAN'?(L.kind==='finish'?'finish':'distance')+' '+P0(L.p)+'%':w+' '+P0(L.p)+'%'}${L.round?`<span class="abr"> ${L.round}</span>`:''}`;
   }
+  rows.push(['ends',
+    cell(mTxt, !!L&&mConv>L.conv+0.01, !!L&&mConv<L.conv-0.01),
+    cell(cTxt, !!L&&L.conv>mConv+0.01, !!L&&L.conv<mConv-0.01),
+    !!(L&&mKind&&L.kind&&mKind!==L.kind)]);
 
   // 3. THE SINGLE LIKELIEST OUTCOME, where either side names one clearly.
   /* Normalised to "surname|KO|SUB|DEC" on both sides before comparing. The two
@@ -3094,17 +3137,15 @@ function abGrid(b){
                                p:c.p,k:norm(c.label.split(/\sby\s/i)[0],mHow)}:null;
   const cPick=L&&L.top?{t:`${esc(L.top.name)} by ${L.top.how==='KO/TKO'?'KO':L.top.how==='submission'?'SUB':'DEC'} ${P0(L.top.p)}%`,
                         p:L.top.p,k:norm(L.top.name,L.top.how)}:null;
-  if(mPick||cPick||b.thin){
-    const differ = !!(mPick&&cPick&&mPick.k!==cPick.k);
-    rows.push(['pick',
-      cell(mPick?mPick.t:`<span class="abnone">${b.thin?'not tested this thin':'—'}</span>`,
-           mPick&&cPick&&mPick.p>cPick.p+0.01, mPick&&cPick&&mPick.p<cPick.p-0.01),
-      cell(cPick?cPick.t:'<span class="abnone">—</span>', mPick&&cPick&&cPick.p>mPick.p+0.01, mPick&&cPick&&cPick.p<mPick.p-0.01),
-      differ]);
-  }
+  const differ = !!(mPick&&cPick&&mPick.k!==cPick.k);
+  rows.push(['pick',
+    cell(mPick?mPick.t:`<span class="abnone">${b.thin?'not tested this thin':'no clear pick'}</span>`,
+         mPick&&cPick&&mPick.p>cPick.p+0.01, mPick&&cPick&&mPick.p<cPick.p-0.01),
+    cell(cPick?cPick.t:none, mPick&&cPick&&cPick.p>mPick.p+0.01, mPick&&cPick&&cPick.p<mPick.p-0.01),
+    differ]);
   const anyDiff=rows.some(r=>r[3]);
   return `<div class="abgrid${anyDiff?' hasdiff':''}" title="the model and the UFC.com check, answering the same questions side by side">
-    <div class="abh"></div><div class="abh">model</div><div class="abh">ufc.com check</div>
+    <div class="abh"></div><div class="abh">model</div><div class="abh${pc==null?' off':''}">ufc.com check</div>
     ${rows.map(([lab,m,cc,d])=>`<div class="abl">${lab}${d?'<span class="abx" title="the two name different outcomes">\u2260</span>':''}</div>${m}${cc}`).join('')}
   </div>`;
 }
