@@ -3284,6 +3284,564 @@ is southpaws being slightly stronger fighters, which `d_elo` already carries.
 **No change made.** Forward candidate alongside 30, 31 and 34. The registered
 holdout is spent, so it could not be confirmed now in any case.
 
+---
+
+# Addendum 41: RESULT - ape index, standalone and interacted (2026-10-04)
+
+Asked whether reach relative to frame - (reach - height), the ape index -
+predicts outcome, "if not standalone possibly in relation to other
+factors/metrics". The examples offered were Jones, McGregor and Volkanovski,
+all of whom do carry large positive ape indices.
+
+Standalone was already answered: addendum 12 tested it as F3 and got +0.0001,
+p = .505, failing BH. This re-tests it on the current corpus and then does the
+part addendum 12 never did - interactions.
+
+## The raw effect is real
+
+On 9,626 mirrored rows with both corners' reach actually measured, win rate
+rises monotonically with the ape-index edge:
+
+| ape-index edge | bouts | win rate |
+|---|---|---|
+| -4in or worse | 789 | 45.5% |
+| -4 to -2 | 1,915 | 48.3% |
+| -2 to -0.5 | 1,344 | 49.9% |
+| even | 1,530 | 50.0% |
+| +0.5 to +2 | 2,471 | 50.5% |
+| +2 to +4 | 1,202 | 52.9% |
+| +4in or better | 375 | 56.3% |
+
+Point-biserial r = +0.0474, p < 0.001. The intuition is not wrong at the
+surface.
+
+## But plain reach carries it, and carries more
+
+r = +0.0727 for `d_reach` against +0.0474 for ape index, and the two correlate
+at +0.666. Fitted together with nothing else in the model:
+
+| fitted | d_reach | d_ape |
+|---|---|---|
+| ape alone | - | **+0.0949** |
+| reach alone | +0.1461 | - |
+| both | +0.1485 | **-0.0036** |
+
+**Put reach beside it and 96% of the ape coefficient is absorbed.** Nearly all
+of the raw ape-index effect is long-armed fighters winning, which `d_reach`
+already holds. This is the same finding that put `d_height` in `DROPPED` as
+"carried by d_reach", now measured rather than asserted.
+
+Conditional on the frozen 14, trained to 2024-01-01 and tested on 1,872 later
+rows: **-0.00060** all bouts, **-0.00049** measured-reach-only, P(helps) 0.14
+and 0.16. It makes the model slightly worse.
+
+## Interacted: zero of five
+
+Registered family, BH at FDR 0.10, each with a stated mechanism:
+
+| candidate | gain | 95% CI | p | BH |
+|---|---|---|---|---|
+| B1 ape x striking accuracy | -0.00061 | [-0.00181,+0.00062] | .313 | .020 |
+| B3 long arms on a short frame | -0.00075 | [-0.00243,+0.00086] | .366 | .040 |
+| B4 ape x takedown defense | -0.00040 | [-0.00135,+0.00056] | .407 | .060 |
+| B2 ape x striking volume | -0.00077 | [-0.00262,+0.00101] | .411 | .080 |
+| B5 ape x absorbed strikes | -0.00005 | [-0.00329,+0.00293] | .945 | .100 |
+
+**Zero of five, every gain negative.** B3 was the Volkanovski shape explicitly -
+long arms on a short frame - and it is the second worst of the five.
+
+Ape index also does not predict the method. Among finishes, winners with a +2in
+or better ape edge scored KO/TKO in 63.7% of them against 68.3% for winners at
+-2in or worse: the wrong direction, p = 0.189.
+
+## A structural trap worth recording
+
+The first interaction family returned **identical gains to five decimals for
+four different formulas**, which is a bug signature, not a result. Cause: every
+model feature is antisymmetric, and the product of two antisymmetric
+differentials is *symmetric* - it takes the same value in both orientations
+while y flips. Under `fit_intercept=False` on a mirrored corpus its coefficient
+is provably zero. Four candidates were structurally incapable of contributing
+and would have been reported as null findings.
+
+Interactions must be built from per-corner LEVELS and differenced, the way
+`grapple_edge` already is: `a_ape * a_str_acc - b_ape * b_str_acc`. Verified
+equal-and-opposite across orientations before the family was re-run. **Any
+future interaction candidate in this project has to clear this check first.**
+
+## As a knockdown component, which is the one place it had standing
+
+Asked separately whether ape index belongs in the knockdown aggregation rather
+than the win model. This is a better question than it looks. `PANEL_OWN`
+already carries reach AND height, so in a LINEAR model ape index is exactly
+collinear with features already present - it could not contribute by
+construction. But the event targets are fit with `HistGradientBoostingClassifier`,
+and a tree cannot build `reach - height` from axis-aligned splits. Handing a
+tree the difference explicitly is genuinely new information even when both
+components are already inputs.
+
+Tested on the projection panel, 7,270 train / 1,282 test rows, `own_ape` and
+`opp_ape` added to `FEATS`:
+
+| target | AUC as shipped | + ape index | change | P(helps) |
+|---|---|---|---|---|
+| **knockdown** (>=1) | 0.6818 | 0.6788 | **-0.0030** | 0.316 |
+| takedown (>=1), control | 0.7327 | 0.7325 | -0.0002 | 0.463 |
+
+95% CI on the knockdown AUC change [-0.0159, +0.0090]. Brier and log loss agree.
+The takedown row is a control: a limb-length measure should do nothing there,
+and it does nothing, which says the test can tell the difference.
+
+**No.** The one structural argument for ape index - that a tree cannot
+construct it - was tested on the model where it applies, and it still does not
+help.
+
+## Everywhere else it could go
+
+Asked whether it fits anywhere else - the takedown aggregation, the other
+projections. Swept across every remaining target in the codebase rather than
+answering one at a time. Panel split 7,270 train / 1,282 test; survival model
+split on the same 0.85 date quantile it uses in production.
+
+| model | target | metric | as shipped | + ape index | change |
+|---|---|---|---|---|---|
+| event (tree) | knockdown >=1 | AUC | 0.6818 | 0.6788 | **-0.0030** |
+| event (tree) | takedown >=1 | AUC | 0.7327 | 0.7325 | -0.0002 |
+| mean (tree) | strikes per min | MAE | 2.0525 | 2.0641 | -0.0117 |
+| mean (tree) | takedowns per 15 | MAE | 1.4697 | 1.4654 | **+0.0044** |
+| mean (tree) | control time sec/min | MAE | 8.6135 | 8.6203 | -0.0068 |
+| mean (tree) | knockdowns per 15 | MAE | 1.6184 | 1.6317 | -0.0132 |
+| competing risks | method + round, per interval | multiclass log loss | 0.21989 | 0.22037 | -0.00048 |
+
+For MAE, positive change = ape index helps. The single positive row is takedowns
+at +0.0044 with P(helps) = 0.758, nowhere near the bar and the weakest possible
+reading of a four-target sweep.
+
+The competing-risks test is the one that deserved its own shot. That model takes
+`WIN_FEATURES` plus SYMMETRIC sums over `PANEL_OWN`, so ape index enters twice
+and in two different roles: `d_ape` for who, and `sum_ape` - both fighters' arms
+against both frames - for whether and when. The hypothesis was specific and
+reasonable: two long-armed fighters fight at range, trade less cleanly and go to
+decision more often. It is also a tree, so the collinearity argument does not
+apply. It came back **-0.00048**.
+
+## The count so far
+
+Ten tests, across every model in this project:
+
+- win model, standalone: **-0.00060**
+- win model, five interactions under BH: **0 of 5**, all negative
+- knockdown event, takedown event: both negative
+- four continuous projection targets: three negative, one +0.0044 at P = 0.758
+- competing risks (method and round): **-0.00048**
+- method among finishes, descriptive: wrong direction, p = 0.189
+
+**The question is closed.** Ape index is not a missing input to this model in
+any of the places it could have been one.
+
+## On the champions
+
+Jones, McGregor and Volkanovski all have large positive ape indices, and this
+is selection on the outcome: champions are picked because they are champions,
+and the corpus contains long-armed fighters at every level of success. The
++4in bucket wins 56.3% of the time, which is a real edge and also 3.9% of
+bouts - and `d_reach` already prices most of it.
+
+**No change made.** Not a forward candidate either: unlike stance (39) or
+championship minutes (30), it points the wrong way standalone and in all five
+interactions.
+
+
+---
+
+# Addendum 42: PILOT - leg reach and the intermembral index (2026-10-04)
+
+Asked whether arm length relative to LEG length correlates with outcome, and
+then whether it could be backtested cheaply before committing to collection.
+Both answered here. **Registered before any backfill exists**, so the eventual
+test cannot be reverse-fitted to it.
+
+## The corpus cannot answer this at all
+
+UFCStats carries `HEIGHT, WEIGHT, REACH, STANCE, DOB` and nothing else. The one
+leg-ish column in the stats file is HEAD/BODY/LEG strike targets, not
+anthropometry. There is **no leg-reach data anywhere in the corpus**, for any
+fighter, in any year. Unlike ape index this is not measured-and-null, it is
+unmeasurable with what we hold.
+
+UFC.com does publish it, and keeps pages after a fighter leaves: Ben Rothwell,
+last fought 2021, still lists leg reach 43.00.
+
+## Why a 42-fighter pilot can decide this
+
+Ape index failed for a specific, diagnosable reason: it is a linear combination
+of reach and height, so `R2(ape ~ height + reach) = 1.000` BY CONSTRUCTION and
+`d_reach` absorbed 96% of its coefficient. That failure mode is testable on a
+small sample, because it is about redundancy, not effect size. If leg reach is
+similarly determined by what we already hold, the backfill is wasted before it
+starts.
+
+42 fighters collected from UFC.com, deliberately spanning flyweight to
+heavyweight and both men's and women's divisions (height 64-77in, leg reach
+36.0-46.0in). The pilot rows were not retained - see the result below.
+
+| | result |
+|---|---|
+| `R2(leg_reach ~ height + reach)` | **0.739**, bootstrap 95% CI [0.540, 0.891] |
+| residual SD - the genuinely new variation | **1.50 in** |
+| `R2(intermembral ~ height + reach)` | **0.347** |
+| corr(leg reach, height) - measurement sanity | **+0.858** |
+| corr(intermembral, ape index) | +0.587 |
+
+**The precondition passes.** Leg reach is NOT determined by height and reach:
+roughly a quarter of its variance is new, worth 1.50in of per-fighter spread
+against the 1.97in that real measured ape index carried - an input the corpus
+demonstrably could resolve, since ape index produced a visible 45.5% -> 56.3%
+raw gradient. The intermembral index is only 35% explained by what we hold,
+where ape index was 100%. The +0.858 correlation with height says the
+measurement behaves like a real body measurement rather than noise.
+
+## What the pilot does NOT establish
+
+It tests whether the input is NEW, not whether it PREDICTS. Ape index also had
+a real raw gradient and still failed ten tests. Passing here earns the
+collection, nothing more.
+
+Three live risks:
+
+1. **n = 42 and all of them ranked or champion-tier**, because recognisable
+   names were needed to be sure of the URL slugs. The full roster may carry a
+   different relationship.
+2. **The CI on R2 is wide**, [0.540, 0.891]. At the pessimistic end the new
+   variation falls to about 1.0in.
+3. **Outliers may be bad data rather than real build variation.** Miocic reads
+   77in tall with a 39.0in leg reach, 5.4in below prediction; Ankalaev reads
+   75in with 46.0in, 3.0in above. A 7in gap on 2in of height is either genuine
+   or inconsistent measurement, and the pilot cannot tell the two apart. If it
+   is noise, it inflates the apparent new variation and the backfill buys
+   nothing.
+
+## Stage 2: a RANDOM sample, which is what the elite one could not tell us
+
+The 42 were ranked fighters picked for slug-guessability, and the residual test
+exposed how biased that is: the model under-predicts them by **+0.152** on
+average, because champions over-perform by construction. A residual slope on
+that sample came back -0.0025 win-prob per SD of index, cluster-bootstrapped by
+fighter (36 clusters, not 504 rows) at 95% CI [-0.0323, +0.0247] - a null, but
+an underpowered null on a skewed sample, so it decides nothing.
+
+So 21 fighters were drawn at RANDOM from corpus fighters with >=6 bouts. Two
+pages could not be read (robots.txt on one, HTTP 429 on another) and were
+dropped rather than guessed. Of the 19 read:
+
+| | |
+|---|---|
+| leg reach present | **15 of 19 (79%)** |
+| missing | Hester, Brilz, Coleman, Simpson |
+
+**The missingness is entirely era-based, and it separates perfectly.** Last
+corpus appearance of the fighters WITH leg reach: 2016, 2019, 2019, 2020, 2021,
+2022, and ten in 2026. Without: 2010, 2011, 2013, 2014. No overlap at all.
+
+This is the single most useful thing the pilot found, and it is good news.
+Era-based missingness is **not outcome-based** - it does not preferentially drop
+losers, it just truncates the usable corpus to roughly 2016 onward:
+
+| window | mirrored rows | fighters |
+|---|---|---|
+| 2012+ (full) | 8,382 | 1,488 |
+| **2016+ (usable)** | **6,682** | **1,258** |
+| 2018+ | 5,534 | 1,104 |
+
+Restricting to 2016+ keeps **68%** of the corpus and costs only **1.21x** in
+minimum detectable effect against the ape-index test. That is an acceptable
+price, and far better than the selection-on-success that was feared.
+
+## The elite-bias risk is retired
+
+R2 re-estimated on all **57** fighters, now including fifteen journeymen and
+women's-division fighters drawn at random:
+
+| sample | R2(leg ~ height+reach) | residual SD |
+|---|---|---|
+| 42 elite only | 0.739 | 1.50 in |
+| **57 incl. random journeymen** | **0.709** | **1.46 in** |
+
+Barely moved. Risk 1 from stage 1 is closed: the relationship is not an artifact
+of sampling champions.
+
+## Collection constraints, measured
+
+- `ufc.com/robots.txt` does **not** disallow `/athlete/`, but sets
+  **crawl-delay: 15**. At 15s, 1,258 fighters is ~5.2 hours - too long for one
+  Action run. Chunked at ~120 per daily run it is **~11 days**, and polite.
+- `/athletes/all?*` IS disallowed, so the roster index cannot be crawled to
+  enumerate fighters. Slugs must be built from names.
+- Slug construction `first-last` lowercased and hyphenated resolved on **21 of
+  21** attempts; the two failures were fetch-layer (robots, 429), not wrong
+  URLs. Duplicate common names may take a `-1` suffix on UFC.com and will need
+  handling.
+- Corpus-side name matching hit **41 of 42**; the miss was Zhang Weili
+  (surname-first), the exact failure mode `aliases.txt` exists for.
+
+## Verdict after two stages
+
+**Proceed, scoped to 2016+.** The precondition that killed ape index does not
+hold here (R2 0.709, not 1.000), the elite-sampling worry is measured and gone,
+and the missingness is benign. One risk stays open and cannot be closed without
+collecting: whether outliers like Miocic's 39.0in leg reach at 77in tall are
+real build variation or inconsistent measurement.
+
+## Registered bars, fixed now
+
+If the backfill proceeds, the test is the same shape as every other candidate
+and must clear the same bar:
+
+- Entered as `d_intermembral` (directional) and `sum_intermembral` (symmetric)
+  built from LEVELS, per addendum 41's antisymmetry trap.
+- Win model: out-of-sample log-loss gain with bootstrap 95% CI excluding zero.
+- Projections and competing risks: the sweep in addendum 41, BH at FDR 0.10.
+- Window is **2016-01-01 onward** (6,682 rows), fixed now by the era finding,
+  not chosen later from results.
+- **Coverage must reach 2,500 usable BOUTS** before any result is reported;
+  below that, coverage is reported first and the test is not run. See the
+  amendment below for why this replaced a fighter-count bar.
+
+### Amendment, 2026-10-05: the bar is bouts, not fighters
+
+The original bar read "80% of the 1,258 fighters". That was the wrong unit. The
+feature is a DIFFERENTIAL, so a bout is only usable when BOTH corners are
+collected, and fighter coverage and bout coverage are not proportional: the
+most active fighters are heavily interconnected, because fighters face others
+in their own division and era.
+
+| fighters collected | usable bouts | share of window | fetch time |
+|---|---|---|---|
+| 100 | 542 | 8% | 0.4h |
+| **400** | **3,144** | **47%** | **1.7h** |
+| 600 | 4,568 | 68% | 2.5h |
+| 1,258 | 6,682 | 100% | 5.2h |
+
+At 3,144 rows the smallest detectable correlation is **r = 0.035**, below the
+**r = 0.047** ape index showed. So 400 fighters is already a decisive test, not
+a hint, at a third of the collection cost. `targets()` now returns fighters
+most-active-first so the collection can be stopped at any point and what exists
+is the most useful subset rather than an arbitrary one.
+
+**This amends a bar registered yesterday, which deserves saying plainly.** It
+is legitimate here only because the change was made BEFORE any leg-reach data
+existed, for a reason with no connection to any result - the unit was simply
+wrong - and because the new bar is stated in advance and is *harder* in the way
+that matters: 2,500 usable bouts is a real power floor, where "80% of fighters"
+was a proxy that could have been satisfied while leaving the test underpowered.
+A bar moved after seeing results would not be defensible and this one must not
+be cited as precedent for that.
+- Fighters whose leg reach departs more than 4in from the height+reach
+  prediction are flagged and the test is reported with and without them.
+
+### Amendment, 2026-10-05: an externally supplied dataset must pass a control
+
+The user offered to furnish leg reach from another assistant rather than wait
+for the crawl. That is fine for SPEED and dangerous for VALIDITY, and the
+difference is whether the numbers were read off ufc.com or recalled. Leg reach
+is an obscure field; a language model asked for 400 of them from memory will
+produce plausible, well-shaped, entirely invented values - and this whole
+candidate rests on the claim that leg reach carries 1.46in of real variation
+that height and reach do not explain. Confabulated numbers would manufacture
+exactly that variation out of nothing, and could produce a spurious positive.
+
+So the request list of 400 (the most active since 2016, 3,144 usable bouts)
+deliberately includes **60 fighters whose real UFC.com values are already in
+`legreach_pilot.csv`**, mixed in unmarked. They are the control.
+
+**Acceptance criteria, fixed now, before any data is seen:**
+
+1. **Mean absolute error on the 60 controls < 1.0 inch.** UFC.com reports to
+   0.5in, so a reading source should land near-exact; 1.0in allows for
+   transcription slips without admitting guesswork.
+2. **At least 80% of controls within +/-1.0 inch** of the known value.
+3. **"unknown" is not penalised.** A source that declines on fighters it cannot
+   read is behaving correctly, and the era finding predicts genuine gaps.
+   Coverage below the 2,500-bout bar simply means the crawl still runs.
+4. A returned set with **suspiciously few unknowns** - near-total coverage where
+   the random sample found 79% - is itself a warning sign, not a success.
+
+If the controls fail, the dataset is discarded whole, not patched, and
+`legreach.yml` collects it properly. **A failed control is not a reason to
+lower the bar**; it is the bar doing its job.
+
+---
+
+## Addendum 42: RESULT - intermembral index (2026-10-05)
+
+Collected the same day it was registered. 374 fighters, **2,698 usable bouts**
+in the 2016+ window, clearing the 2,500 bar. Data furnished from UFC.com via a
+second assistant and verified against the control set throughout: **42 of 43
+exact, mean error 0.035 inches**. Two disagreements the control flagged
+(Blanchfield, Prochazka) were checked by the user directly on ufc.com and the
+supplied values were wrong; both were corrected to the verified figures before
+the test ran. The control did exactly the job it was registered to do.
+
+**The data and the collector were then removed from the repo.** Leg reach is
+not retrieved by any source the pipeline already pulls, and a measurement that
+predicts nothing is not worth a daily crawl, a cache file or a module to
+maintain. The numbers below ARE the result; they do not need the rows kept
+behind them. If anyone revisits this, collection starts from scratch - which is
+cheap, and avoids a stale file quietly rotting in the tree.
+
+### The precondition held, and this is the part worth keeping
+
+| | pilot (57) | full set (374) |
+|---|---|---|
+| R2(leg ~ height + reach) | 0.709 | **0.775** |
+| residual SD | 1.46 in | **1.29 in** |
+
+Leg reach is genuinely not derivable from what the corpus holds. And unlike ape
+index, intermembral index is **not absorbed by reach** - it is a suppressor:
+
+| fitted | d_reach | d_intermembral |
+|---|---|---|
+| intermembral alone | - | -0.0527 |
+| reach alone | +0.1556 | - |
+| **both** | **+0.1846** | **-0.1040** |
+
+Its coefficient roughly DOUBLES next to reach, and reach's grows too. Ape index
+collapsed from +0.0949 to -0.0036 in the same test. So this candidate cleared
+the exact hurdle that killed the previous one.
+
+### It still does not predict
+
+| test | effect | p | BH threshold | |
+|---|---|---|---|---|
+| control time (MAE) | **-0.2274** | .000 | .017 | significantly WORSE |
+| strikes per min (MAE) | +0.0418 | .067 | .033 | misses |
+| knockdown >=1 (AUC) | +0.0148 | .197 | .050 | misses |
+| win model (log loss) | +0.0023 | .256 | .067 | misses |
+| competing risks (log loss) | -0.0023 | .300 | .083 | misses |
+| takedown >=1 (AUC) | +0.0002 | .948 | .100 | misses |
+
+**Zero of six supported, BH at FDR 0.10.** The win-model gain was +0.00226 all
+bouts and +0.00303 with the five >4in outliers removed, 95% CI
+[-0.00184, +0.00618] and [-0.00226, +0.00827] - both crossing zero.
+
+Raw, the gradient runs the WRONG way: fighters with a much lower intermembral
+index won 54.3%, much higher 45.7%, r = -0.0264 at p = 0.170. The direction the
+original intuition predicted is not there even descriptively.
+
+Control time is this family's kinetic-power row - the smallest p-value in the
+set attached to a significantly NEGATIVE effect. A "keep whatever is
+significant" search would have promoted a feature that makes projections worse.
+
+`sum_intermembral` contributed exactly nothing to the win model, to five
+decimal places. That is addendum 41's antisymmetry trap behaving as documented:
+a symmetric feature has a provably zero coefficient on a mirrored corpus under
+`fit_intercept=False`. It was carried into the competing-risks model, where
+symmetric terms do act, and the pair still came back at -0.00234.
+
+### What this null is, and is not
+
+Ape index failed because it was redundant. Intermembral index is **not**
+redundant and still fails, which is a cleaner and more informative result: arm
+length relative to leg length is real, measurable, independent information
+about a fighter's build that does not predict who wins, how, or when.
+
+Scope: fighters active roughly 2016 onward, since the era-based missingness
+documented above excludes earlier ones. Not a claim about the sport across all
+time.
+
+**No change made.** Not a forward candidate: six tests, one marginal positive
+that misses its corrected threshold, one significant negative.
+
+---
+
+**Original plan, for the record. No change made. Collection not started** - ~1,258 pages at a 15s crawl delay,
+about 11 days of chunked daily runs, and the decision to spend that is the
+user's.
+
+
+---
+
+# Addendum 43: why the fortitude cluster was null - the two preconditions (2026-10-05)
+
+A proposal arrived for a "Late-Fight Performance Retention" / fatigue-resistance
+index: round-by-round output retention, efficiency retention, a weighted
+work-rate index with a slope across rounds, the opponent's decline as a relative
+measure, and five-round fights as the natural experiment.
+
+It is a good proposal and it is **almost exactly addendum 4**, which registered
+and tested the same six ideas:
+
+| proposed | addendum 4 feature |
+|---|---|
+| output retention (LFPR) | `d_late_volume_ret` |
+| efficiency retention | `d_late_acc_delta` |
+| grappling work retention | `d_ctrl_retention` |
+| the opponent's decline | `d_induced_decay` |
+| five-round experience | `d_deep_experience` |
+
+**Zero of six supported, five of six carrying the wrong sign**, whole cluster
+-0.0016 log loss. What addendum 4 did NOT do is explain why, beyond noting that
+round-1 accuracy (0.462) and late accuracy (0.458) were close. Two preconditions
+were measured now, and both fail.
+
+## 1. There is no fade to measure. Output RISES.
+
+Round totals are only comparable when every round is the full five minutes, so
+this is decision fights only - 4,100 fights, 26,254 fighter-rounds. Measuring
+fade on all fights is confounded: a round one that ended at 1:30 has fewer
+attempts because it was shorter, not because anyone was fresh.
+
+| round | sig-strike attempts | vs round 1 | accuracy |
+|---|---|---|---|
+| 1 | 36.6 | 100% | 0.431 |
+| 2 | 39.3 | 107% | 0.439 |
+| 3 | 41.1 | **113%** | 0.436 |
+| 4 | 41.5 | 113% | 0.451 |
+| 5 | 42.9 | **117%** | 0.450 |
+
+Fighters throw **more** as the fight goes on, not less, and land at the same or
+better rate. The premise the whole family rests on - that output decays and the
+decay rate is informative - does not hold in aggregate. There is no league-wide
+fade for individual variation to sit inside.
+
+## 2. Retention is mostly fight-specific noise, not a fighter trait.
+
+Split-half reliability: each fighter's round-3/round-1 retention computed
+separately over their odd-numbered and even-numbered fights, for the 817
+fighters with four or more measurable fights.
+
+| quantity | split-half r | Spearman-Brown |
+|---|---|---|
+| **R3/R1 retention** | +0.159 | **0.274** |
+| R1 volume itself (control) | +0.405 | **0.577** |
+
+Retention is **less than half as reliable** as the raw volume it is built from.
+It is not zero - p < 0.001, the trait faintly exists - but at 0.27 most of what
+any such index measures is what happened in that particular fight, which is the
+proposal's own stated worry (tactics, fight state, damage, who is ahead) showing
+up as a number.
+
+The control matters: the same method on R1 volume returns 0.577, so the test can
+detect a real fighter trait when one is there. It is the retention that is thin,
+not the method.
+
+## What this does and does not rule out
+
+The one refinement the proposal raises that addendum 4 did not try is
+**conditioning on fight state** - a fighter ahead on the cards coasts, a fighter
+behind pushes. That is a genuine confound and it is not controlled anywhere.
+
+But it would be refining a quantity with 0.27 reliability, against an outcome
+the unrefined version got wrong in five of six directions, in a sport with no
+aggregate fade to explain. De-confounding cannot add reliability that is not
+there. **Not pursued, and not a forward candidate.**
+
+Scope note: restricting to decisions is itself a selection - fights that go the
+distance are more competitive by construction - but it is the right sample for
+this question, since round-3 output cannot be observed in a fight that ended in
+round one.
+
+
 ## Addendum 40: TOOL — the UFC.com sandbox (2026-10-04)
 
 A drawer tab that re-runs the win model on striking and grappling numbers

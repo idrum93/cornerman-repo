@@ -80,6 +80,52 @@ def display_name(n):
     return _DISPLAY_CACHE["map"].get(str(n).strip().lower(), n)
 
 
+_CORNER_CACHE = {}
+
+
+def load_corner_order(path="data/corner_order.txt"):
+    """Bouts whose corner order Wikipedia gets the other way round from UFC.com.
+
+    data/upcoming.txt is regenerated from Wikipedia on every refresh, so editing
+    it by hand does not survive the next run. Wikipedia's bout tables do not
+    always list the red corner first - "Jai Herbert vs. Matheus Camilo" where
+    UFC.com and the broadcast both say "Matheus Camilo vs. Jai Herbert" - and
+    the corner decides which fighter is drawn red and left on the card.
+
+    It changes nothing about the model: every win feature is antisymmetric and
+    the fit has no intercept, so P(A beats B) = 1 - P(B beats A) exactly. This
+    is purely so the page matches what is on the screen on fight night.
+
+    One bout per line, written in the CORRECT order, blank lines and # comments
+    ignored. Matching is on the pair, so order in the file is what wins.
+    """
+    from pathlib import Path          # imported locally, as elsewhere in this file
+    out = {}
+    pp = Path(path)
+    if not pp.exists():
+        return out
+    for line in pp.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        m = re.split(r"\s+vs\.?\s+", line, maxsplit=1, flags=re.I)
+        if len(m) == 2:
+            a, b = m[0].strip(), m[1].strip()
+            out[frozenset((_key(a), _key(b)))] = (a, b)
+    return out
+
+
+def corner_order(a, b):
+    """(a, b) in the pinned order when the pair is listed, else unchanged."""
+    if "map" not in _CORNER_CACHE:
+        _CORNER_CACHE["map"] = load_corner_order()
+    want = _CORNER_CACHE["map"].get(frozenset((_key(a), _key(b))))
+    if not want:
+        return a, b
+    # the file holds display names; match by key so either spelling works
+    return (a, b) if _key(want[0]) == _key(a) else (b, a)
+
+
 def parse_card(path):
     """Returns (meta, [(name_a, name_b, rounds, segment)]).
 
@@ -114,6 +160,7 @@ def parse_card(path):
         if len(m) == 2:
             a, b = m[0].strip(), m[1].strip()
             a, b = display_name(a), display_name(b)
+            a, b = corner_order(a, b)
             bouts.append((a, b, rounds, segment))
             if wc:
                 meta.setdefault("weights", {})[(a, b)] = wc
