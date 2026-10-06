@@ -385,6 +385,7 @@
   .ckm.hit{color:var(--gold);border-color:var(--gold)}
   .ckm.miss{color:var(--dim)}
   .ckna{color:var(--dim);font-size:11px}
+  .rc.ck{border-style:dashed}
   .abgrid{display:grid;grid-template-columns:auto minmax(0,1fr) minmax(0,1fr);gap:1px 6px;align-items:center;
     margin-top:6px;padding:5px 6px;border:1px solid var(--line);border-radius:7px}
   .abgrid.hasdiff{border-color:rgba(222,140,52,.45)}
@@ -1229,6 +1230,18 @@ function divisionTable(){
    built around. They are still graded and still feed the forward ledger; they
    are simply not what this drawer is for. */
 const distProp=g=>(g.report||[]).find(r=>r.kind==='prop'&&r.label==='Go the distance');
+/* The check's graded row for one bout. ckGrade() already joins every stored
+   read to the graded cards and scores all four claims; nothing new is computed
+   here, it was simply never surfaced fight by fight. Memoised because the
+   result-tile list calls it once per bout on every render. */
+let _CKBY=null;
+function ckByBout(){
+  if(_CKBY) return _CKBY;
+  const G=ckGrade(); _CKBY={};
+  if(G) G.rows.forEach(r=>{_CKBY[r.bout]=r;});
+  return _CKBY;
+}
+const ckRow=key=>ckByBout()[key]||null;
 
 function lastCard(){
   const c=HIST&&HIST.cards&&HIST.cards[0];
@@ -1276,6 +1289,13 @@ function lastCard(){
         ${m?`<span class="rc ${m.right?'ok':'no'}">${m.right?'✓':'✗'} method</span>`:''}
         ${(()=>{const d=distProp(g); return d?`<span class="rc ${d.right?'ok':'no'}">${
           d.right?'✓':'✗'} ${d.happened?'distance':'finish'}</span>`:'';})()}
+        ${(()=>{const r=ckRow(g.bout); if(!r) return '';
+          /* Only where a check exists. "Closer" is more probability on the
+             fighter who actually won - the same test used against the market,
+             so the three are judged alike. */
+          const better=r.win.check>r.win.model+0.005, worse=r.win.check<r.win.model-0.005;
+          return `<span class="rc ck ${better?'ok':worse?'no':''}">${
+            better?'check beat model':worse?'model beat check':'check level'}</span>`;})()}
         ${mk?`<span class="rc ${mk.model_closer?'ok':'no'}">${mk.model_closer?'beat':'lost to'} market</span>`:''}
       </div></button>`;}).join('');
   /* The two counts the strip at the top of the page claimed before the fights,
@@ -1316,6 +1336,13 @@ function openPast(id){
   const mk=g.market;
   const how=g.report.filter(r=>r.kind!=='prop');
   const dp=distProp(g);
+  const cr=ckRow(g.bout);
+  /* M and C marks on every claim, the same pair the scorecard panel uses, so a
+     single fight can be read the same way the running record is. The check mark
+     is omitted where no read exists rather than drawn as a miss - it did not
+     get the question wrong, it was never asked. */
+  const mk2=(mRight,cRight)=>`${mRight==null?'':`<span class="ckm ${mRight?'hit':'miss'}" title="model">M</span>`}${
+    cRight==null?'':`<span class="ckm ${cRight?'hit':'miss'}" title="ufc.com check">C</span>`}`;
   const tick=ok=>`<span class="edgeTag ${ok?'hit':'miss'}">${ok?'✓':'✗'}</span>`;
   document.getElementById('drawin').innerHTML=`
     <button class="xbtn" id="xb">close ✕</button>
@@ -1329,18 +1356,35 @@ function openPast(id){
       <span class="gname">Winner vs the market</span></div>
       <div class="pline"><span>model's pick</span><b>${esc(surname(g.p_a>=.5?g.a:g.b))} ${P0(Math.max(g.p_a,1-g.p_a))}%</b>${tick(g.model_right)}</div>
       <div class="pline"><span>market's pick</span><b>${esc(surname(mk.p_market>=.5?g.a:g.b))} ${P0(Math.max(mk.p_market,1-mk.p_market))}%</b>${tick(mk.market_right)}</div>
+      ${cr?`<div class="pline"><span>ufc.com check</span><b style="color:var(--gold)">${
+        P0(cr.win.check)}% on ${esc(surname(g.winner))}</b>${tick(cr.win.check>0.5)}</div>`:''}
       <div class="note" style="margin-top:6px">${mk.picks_differ?'They picked different winners.':'They picked the same winner'}${Math.abs(mk.gap)>=.05?`, ${(Math.abs(mk.gap)*100).toFixed(0)} points apart.`:', close to each other.'}
       "Closer" means more probability on the fighter who actually won.</div></div>`:''}
+    ${!mk&&cr?`<div class="card"><div class="ghead" style="background:none;border:none;padding:0 0 6px">
+      <span class="gname">Winner — model vs check</span></div>
+      <div class="pline"><span>model</span><b>${P0(cr.win.model)}% on ${esc(surname(g.winner))}</b>${tick(cr.win.model>0.5)}</div>
+      <div class="pline"><span>ufc.com check</span><b style="color:var(--gold)">${P0(cr.win.check)}% on ${
+        esc(surname(g.winner))}</b>${tick(cr.win.check>0.5)}</div>
+      <div class="note" style="margin-top:6px">Probability each put on the fighter who actually won. The
+        <b>${cr.win.check>cr.win.model?'check':'model'}</b> was closer on this bout.</div></div>`:''}
     ${how.length||dp?`<div class="card"><div class="ghead" style="background:none;border:none;padding:0 0 6px">
       <span class="gname">How and when</span><span class="lbl">what was claimed vs what happened</span></div>
       ${dp?`<div class="pline"><span>Distance or finish</span>
         <b>${dp.happened?'went the distance':'finished'}</b>
         <span class="mono ps">model gave the distance ${P0(dp.said)}%${
-          dp.base!=null?` · usual ${P0(dp.base)}%`:''}</span>${tick(dp.right)}</div>`:''}
-      ${how.map(r=>`<div class="pline"><span>${esc(r.label)}</span>
-        <b>${esc(r.actual)}</b><span class="mono ps">model gave it ${P0(r.said)}% · top pick ${esc(r.top)}</span>${tick(r.right)}</div>`).join('')}
+          dp.base!=null?` · usual ${P0(dp.base)}%`:''}</span>${
+          cr&&cr.len?mk2(cr.len.model_right,cr.len.check_right):tick(dp.right)}</div>`:''}
+      ${how.map(r=>{
+        const isM=r.kind==='method', isR=r.kind==='round';
+        const pair = cr&&isM&&cr.mfull ? mk2(cr.mfull.model_right, cr.mfull.check_right)
+                   : cr&&isR&&cr.rnd   ? mk2(cr.rnd.model_right,   cr.rnd.check_right)
+                   : tick(r.right);
+        return `<div class="pline"><span>${esc(r.label)}${
+          isR&&cr&&cr.rnd?'<span class="lbl" style="display:block">round one or later</span>':''}</span>
+        <b>${esc(r.actual)}</b><span class="mono ps">model gave it ${P0(r.said)}% · top pick ${esc(r.top)}</span>${pair}</div>`;}).join('')}
       <div class="note" style="margin-top:6px">Top pick is the single likeliest of five endings. A decision
-        can be the likeliest one ending even when a finish of some kind is likelier overall.</div></div>`:''}
+        can be the likeliest one ending even when a finish of some kind is likelier overall.${
+        cr?' <b class="ckm hit">M</b> and <b class="ckm hit">C</b> are the model and your UFC.com check, gold when right. The round row is scored as "round one or later" for both, because that is the only round claim the check makes.':''}</div></div>`:''}
     <div class="note" style="margin-top:10px">The other contracts this fight settled — over/under rounds,
       "ends before round N", "fight starts round N" — all resolved on the SAME event as the rows above and
       are still graded into the card totals and the forward ledger. They are left off here because a dozen
@@ -2052,7 +2096,8 @@ function ckCapture(){
       thin:Math.min(wins(st.a_m||{}),wins(st.b_m||{})), ts:Date.now()};
     dirty=true;
   });
-  if(dirty) try{ localStorage.setItem(CK_KEY, JSON.stringify(CKR)); }catch(e){}
+  if(dirty){ _CKBY=null;   // a new read invalidates the per-bout grading cache
+    try{ localStorage.setItem(CK_KEY, JSON.stringify(CKR)); }catch(e){} }
 }
 /* Join stored reads to the graded cards. Returns per-bout rows plus totals,
    every total computed over the SAME bouts (see the subset rule above). */
