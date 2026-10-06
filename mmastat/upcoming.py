@@ -1200,6 +1200,14 @@ def _grade_bout(b, row, a_is_red, base):
     out = {"bout": b["bout"], "a": a, "b": bb, "p_a": b["p_a"],
            "segment": b.get("segment"), "rounds": n_rounds,
            "weight_class": b.get("weight_class"),
+           # Carried so a graded bout can be re-read in the UFC.com sandbox
+           # after the fact. `fin` is the fourteen per-corner inputs; it is
+           # absent from cards archived before that block existed, and the page
+           # falls back to the same neutral baseline the no-read bouts use, so
+           # an old card is still enterable - it simply cannot blend toward
+           # model inputs that were never saved.
+           "m_decision": b.get("m_decision"), "p_end_r1": b.get("p_end_r1"),
+           "fin": b.get("fin"),
            "winner": a if a_won else bb, "method": meth, "round": rnd,
            "seconds": int(row.total_sec), "model_right": bool((b["p_a"] > 0.5) == a_won),
            "p_winner_model": round(p_win_model, 3), "report": rep,
