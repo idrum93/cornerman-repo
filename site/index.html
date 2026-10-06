@@ -391,6 +391,9 @@
   .ckwarn.soft{background:rgba(222,140,52,.06);border-color:rgba(222,140,52,.28)}
   .ckwarn.soft b{color:var(--gold)}
   .ckstrip.posthoc .ckbig{opacity:.75}
+  .sbmis{color:var(--warn);background:rgba(200,68,47,.07);border-left:2px solid rgba(200,68,47,.45);
+    padding:5px 8px;margin:3px 0 5px;line-height:1.45}
+  .sbmis b{color:var(--red)}
   .sbover{font-size:10.5px;color:var(--dim);line-height:1.45;margin:5px 0 0;padding-left:9px;
     border-left:2px solid var(--soft)}
   .sbover b{color:var(--mute)} .sbover i{font-style:normal;color:var(--mute)}
@@ -2633,15 +2636,34 @@ const SB_FIELDS=[
    one. These are WIN-side shares only — the page publishes no losses-by-method,
    which is why the combined read below has to weight them by who wins. */
 function parseUfcMethod(text){
-  const L=String(text||'').split(/\n+/).map(s=>s.trim()).filter(Boolean);
+  /* Tabs split like newlines. A copy from UFC.com can arrive with the label and
+     its value on one tab-separated line - "KO/TKO\t5 (45%)" - and the old
+     parser, which only ever looked at the NEXT line, returned nothing at all
+     from such a paste. Silently: no counts, no method read, no warning.
+
+     The thirteen-line window after the heading is also gone. Anything between
+     the heading and the counts - a breakdown chart, a legend - pushed the last
+     method out of range, and the one that fell off was simply absent from the
+     totals. A fighter with 11 wins came out with 9 and every share was computed
+     off the wrong denominator. Scanning to the end and keeping the FIRST value
+     found for each method is anchored just as well by the heading, and cannot
+     lose a row to a layout change. */
+  const L=String(text||'').replace(/\t/g,'\n').split(/\n+/)
+          .map(s=>s.trim()).filter(Boolean);
   const start=L.findIndex(t=>/^win by method$/i.test(t)), out={};
   if(start<0) return out;
-  const KEY={'ko/tko':'ko','ko':'ko','dec':'dec','decision':'dec',
+  const KEY={'ko/tko':'ko','ko':'ko','ko/tko/dq':'ko','dec':'dec','decision':'dec',
              'sub':'sub','submission':'sub'};
-  for(let i=start+1;i<Math.min(L.length,start+14);i++){
-    const k=KEY[L[i].toLowerCase()]; if(!k||!L[i+1]) continue;
-    const m=L[i+1].match(/^(\d+)\s*\((\d+(?:\.\d+)?)%\)$/);
-    if(m){out[k+'_n']=+m[1]; out[k+'_share']=(+m[2])/100;}
+  const VAL=/^(\d+)\s*\((\d+(?:\.\d+)?)%\)$/;
+  for(let i=start+1;i<L.length;i++){
+    const k=KEY[L[i].toLowerCase()]; if(!k||out[k+'_n']!=null) continue;
+    let n=null, pct=null;
+    const m=L[i+1]?VAL.exec(L[i+1]):null;
+    if(m){ n=+m[1]; pct=+m[2]; }
+    else if(L[i+1]&&/^\d+$/.test(L[i+1])&&L[i+2]&&/^\((\d+(?:\.\d+)?)%\)$/.test(L[i+2])){
+      n=+L[i+1]; pct=+/^\((\d+(?:\.\d+)?)%\)$/.exec(L[i+2])[1];   // count and percent split
+    }
+    if(n!=null){ out[k+'_n']=n; out[k+'_share']=pct/100; }
   }
   const s=['ko','dec','sub'].reduce((a,k)=>a+(out[k+'_share']||0),0);
   if(s>0)['ko','dec','sub'].forEach(k=>{if(out[k+'_share']!=null)out[k+'_share']/=s;});
@@ -3016,9 +3038,17 @@ function espnDerive(h){
   const fin=sw(x=>x.fam!=='dec');
   const r1 =sw(x=>x.fam!=='dec'&&x.rnd===1);
   return {
-    // the existing contract
+    // the existing contract - these are TIER-WEIGHTED, which is why they are
+    // not integers and why they do not match a UFC.com percentage directly
     ko_n:ko, sub_n:sub, dec_n:dec,
     ko_share:ko/wtot, sub_share:sub/wtot, dec_share:dec/wtot,
+    /* The same counts unweighted, kept only so the panel can show a number that
+       reconciles against the record and against UFC.com. Nothing computes from
+       these. */
+    wins_n:wins.length,
+    ko_raw:wins.filter(x=>x.fam==='ko').length,
+    sub_raw:wins.filter(x=>x.fam==='sub').length,
+    dec_raw:wins.filter(x=>x.fam==='dec').length,
     r1_n:sw(x=>x.res==='W'&&x.fam!=='dec'&&x.rnd===1),
     // what only fight-level rows can give
     espn:true, n_fights:R.length, w_total:tot,
@@ -3362,13 +3392,47 @@ function sbMethodBlock(b,st,pA){
   const row=(lab,v,w)=>`<div class="sbrow"><span class="sbl">${lab}</span>
     ${hasM?`<span class="mono">${v==null?'—':P0(v)+'%'}</span>`:''}
     <span class="mono" style="color:var(--gold);min-width:52px;text-align:right">${w==null?'—':P0(w)+'%'}</span></div>`;
-  const each=(nm,m)=>{
+  /* Says where the counts came from and whether they reconcile.
+
+     Two different numbers were being shown under one unlabelled heading. From a
+     UFC.com paste the counts are plain career wins and should match the record
+     exactly. From a fight history they are TIER-WEIGHTED - a regional win
+     counts 0.5 - so they are deliberately smaller than the record and will not
+     match a UFC.com percentage. Both were printed as "N wins ... raw", which
+     makes a correct weighted figure look like a wrong career figure, and would
+     hide a genuinely truncated paste just as well.
+
+     So: the source is named, weighted counts are labelled weighted and shown
+     beside the plain ones, and a count that does not reconcile with the record
+     is called out rather than left to be noticed. */
+  const each=(nm,m,rec)=>{
     if(m.ko_share==null) return '';
-    const s=sbShrinkMix(m), n=(m.ko_n||0)+(m.sub_n||0)+(m.dec_n||0);
+    const s=sbShrinkMix(m);
+    const wn=(m.ko_n||0)+(m.sub_n||0)+(m.dec_n||0);
+    const plain=m.espn?m.wins_n:wn;
+    const raw=m.espn
+      ? [m.ko_raw,m.sub_raw,m.dec_raw].map(x=>plain?Math.round(100*x/plain):0)
+      /* A method absent from the paste has no share at all, and P0(undefined)
+         printed "NaN" in the middle of the row - which looks like a crash
+         rather than the missing row it actually is. */
+      : [m.ko_share,m.sub_share,m.dec_share].map(x=>x==null?0:P0(x));
+    /* A UFC.com block must reconcile exactly - it is the same career from the
+       same page. A fight history legitimately differs by a fight or two: rows on
+       or after the card are dropped, and a record typed from a different source
+       may count a bout the table does not. So one slack win there, none here,
+       rather than a warning that cries wolf on every history paste. */
+    const slack=m.espn?1.5:0.5;
+    const off=(rec&&plain!=null&&Math.abs(plain-rec.w)>slack)?Math.abs(plain-rec.w):0;
     return `<div class="sbrow"><span class="sbl">${esc(nm)} wins by
-      <span style="color:var(--dim)">${n} win${n===1?'':'s'}</span></span>
-      <span class="mono" style="color:var(--dim)">${P0(m.ko_share)}/${P0(m.sub_share)}/${P0(m.dec_share)} raw</span>
-      <span class="mono">${P0(s.ko)}% KO · ${P0(s.sub)}% sub · ${P0(s.dec)}% dec</span></div>`;
+        <span style="color:var(--dim)">${plain} win${plain===1?'':'s'}${
+          m.espn?` · ${Math.round(wn*10)/10} weighted`:''}</span></span>
+      <span class="mono" style="color:var(--dim)">${raw.join('/')} ${m.espn?'actual':'raw'}</span>
+      <span class="mono">${P0(s.ko)}% KO · ${P0(s.sub)}% sub · ${P0(s.dec)}% dec</span></div>${
+      off?`<div class="note sbmis">${esc(nm)} — the method counts add to <b>${plain}</b> wins but the
+        record says <b>${rec.w}</b>. ${m.espn
+          ? 'Rows dated on or after this card are dropped on purpose, so a small gap is expected; a large one means the history is short.'
+          : 'A UFC.com Win-by-Method block should match the record exactly, so this paste is incomplete — re-copy it and press Read both again.'}
+        The shares above are computed from what was read, not from the record.</div>`:''}`;
   };
   const silent=(b.m_decision==null);
   const partial=!silent&&!hasM;
@@ -3383,7 +3447,7 @@ function sbMethodBlock(b,st,pA){
       because anything failed. What follows is the pasted records on their own, including
       whatever happened outside the UFC, which is evidence the corpus does not hold.</div>`:''}
     ${read?sbVerdict(ma,mb,pA,b,st):''}
-    ${each(surname(b.a),ma)}${each(surname(b.b),mb)}
+    ${each(surname(b.a),ma,st.a_rec)}${each(surname(b.b),mb,st.b_rec)}
     ${read?`<div class="sbrow" style="border:none;padding-bottom:0"><span class="sbl"
         style="color:var(--bone)">combined, weighted by who wins</span>
       ${hasM?'<span class="mono" style="color:var(--dim)">model</span>':''}
@@ -3441,8 +3505,14 @@ function sbMethodBlock(b,st,pA){
          shrunk; this table is the unshrunk picture of why the quantity is
          informative, and mixing the two would misplace the marker. */
       const C=(BR||{}).decision_curve; if(!C||!C.buckets) return '';
-      const raw=m=>{const t=['ko','sub','dec'].reduce((x,k)=>x+(m[k+'_n']||0),0);
-                    return t?(m.dec_n||0)/t:null;};
+      /* Genuinely raw. The _n fields are tier-weighted once a fight history is
+         pasted, and this curve was built on unweighted career shares - feeding
+         weighted ones in would place the marker on a curve that was never
+         estimated from them. */
+      const raw=m=>{
+        if(m&&m.espn) return m.wins_n?(m.dec_raw||0)/m.wins_n:null;
+        const t=['ko','sub','dec'].reduce((x,k)=>x+(m[k+'_n']||0),0);
+        return t?(m.dec_n||0)/t:null;};
       const ra=raw(ma), rb=raw(mb);
       const mine=(ra!=null&&rb!=null)?(ra+rb)/2:null;
       return `<div class="dcurve"><div class="lbl" style="margin-bottom:4px">
