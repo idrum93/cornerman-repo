@@ -4522,3 +4522,39 @@ matched as whole tokens against an explicit list.
 No qualifying read exists, so nothing accumulated is affected. The estimator,
 the tier weighting, the as-of rule, the hypotheses, the bars and the stopping
 rule are all unchanged.
+
+## Addendum 45, amendment 4: the decision curve's marker is placed on the axis it was built from (2026-10-06)
+
+Display only - the curve feeds no probability, it is the evidence shown beneath
+the check's length read. Recorded because misplacing the marker misrepresents
+that evidence.
+
+`decision_curve()` accumulates each fighter's wins and decision wins from corpus
+rows alone, so its x-axis is **decision share over UFC bouts only, unweighted**.
+The marker was being computed from the whole professional record. For a fighter
+whose career is mostly regional those are not the same number, and regional
+records run early-finish heavy, so the marker drifted left into buckets
+predicting a higher finish rate than the UFC record supports.
+
+Measured on a constructed pair with two UFC wins and six regional wins:
+
+| | career share | UFC-only share | bucket's finish rate |
+|---|---|---|---|
+| regional-heavy prospect | 13% | 50% | 70% vs 47% |
+| established fighter | 18% | 17% | unchanged |
+
+A 23-point error in the finish rate the table implies, for exactly the fighters
+the check exists to read, and none at all for fighters with long UFC careers -
+which is why it was invisible until fight histories made the UFC/non-UFC split
+knowable.
+
+Now: with a fight history, the marker uses UFC-tier wins only, and is withheld
+unless both corners have at least two of them, matching the curve's own floor.
+From a UFC.com Win-by-Method block the split is unknowable - that block is
+career-wide and does not say which wins were in the UFC - so the marker stays
+career-based there and the caption says so rather than implying a match.
+
+The tier weighting is deliberately NOT applied here. The curve's axis carries no
+weighting, so a weighted share would sit on a curve that was never estimated
+from weighted shares. Weighting belongs in the read; the axis belongs to the
+corpus.
