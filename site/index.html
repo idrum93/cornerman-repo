@@ -3074,6 +3074,15 @@ function espnDerive(h){
     ko_raw:wins.filter(x=>x.fam==='ko').length,
     sub_raw:wins.filter(x=>x.fam==='sub').length,
     dec_raw:wins.filter(x=>x.fam==='dec').length,
+    /* UFC-TIER ONLY, unweighted. The decision curve's x-axis is a fighter's
+       decision share over his UFC bouts and nothing else - that is the only
+       population the corpus holds - so placing a man on it by his whole
+       professional record compares two different quantities. Regional records
+       run early-finish heavy, which drags a prospect's career share left into
+       buckets predicting a higher finish rate than his UFC record supports.
+       These are the fields that let the marker match the axis. */
+    u_wins:wins.filter(x=>x.w===1).length,
+    u_dec:wins.filter(x=>x.w===1&&x.fam==='dec').length,
     r1_n:sw(x=>x.res==='W'&&x.fam!=='dec'&&x.rnd===1),
     // what only fight-level rows can give
     espn:true, n_fights:R.length, w_total:tot,
@@ -3546,12 +3555,20 @@ function sbMethodBlock(b,st,pA){
          pasted, and this curve was built on unweighted career shares - feeding
          weighted ones in would place the marker on a curve that was never
          estimated from them. */
+      /* Matched to the axis where it can be, and labelled where it cannot.
+         With a fight history the UFC-only share is available and is the right
+         quantity. From a UFC.com Win-by-Method block it is NOT: that block is
+         career-wide and does not say which wins were in the UFC, so the marker
+         is career-based there and is flagged rather than quietly misplaced.
+         Two UFC wins per corner, matching the curve's own floor. */
       const raw=m=>{
-        if(m&&m.espn) return m.wins_n?(m.dec_raw||0)/m.wins_n:null;
+        if(m&&m.espn) return (m.u_wins>=2)?(m.u_dec||0)/m.u_wins:null;
         const t=['ko','sub','dec'].reduce((x,k)=>x+(m[k+'_n']||0),0);
         return t?(m.dec_n||0)/t:null;};
+      const onAxis=(ma&&ma.espn&&mb&&mb.espn);
       const ra=raw(ma), rb=raw(mb);
       const mine=(ra!=null&&rb!=null)?(ra+rb)/2:null;
+      const thinUFC=onAxis&&mine==null;
       return `<div class="dcurve"><div class="lbl" style="margin-bottom:4px">
         how often fights finish, by the pair's average career decision share
         <span style="color:var(--dim)">· ${C.n.toLocaleString()} bouts since 2012 · r ${C.r}</span></div>
@@ -3563,10 +3580,13 @@ function sbMethodBlock(b,st,pA){
             <span class="mono dcv">${P0(x.finish)}%</span>
             <span class="dcn">n=${x.n}</span></div>`;}).join('')}
         <div class="note" style="margin-top:5px">${mine!=null
-          ? `This pair averages <b style="color:var(--gold)">${P0(mine)}%</b> decisions on raw career
-             records, which is the marked row.`
-          : 'Paste both Win by Method blocks to see where this pair sits.'}
-          Raw career shares, not the shrunk numbers above — shrinkage is right for a read and
+          ? `This pair averages <b style="color:var(--gold)">${P0(mine)}%</b> decisions on
+             ${onAxis?'their <b>UFC</b> records':'raw career records'}, which is the marked row.${
+             onAxis?' Measured over UFC bouts only, because that is the only population this curve was built from — a career share including regional fights would sit on a part of the axis the corpus never estimated.':''}`
+          : thinUFC
+            ? 'Neither corner has two UFC wins yet, so this pair cannot be placed on the curve — it is built from UFC records and cannot speak to a career it cannot see. The length read above does not depend on this table.'
+            : 'Paste both Win by Method blocks to see where this pair sits.'}
+          Unshrunk shares, not the shrunk numbers above — shrinkage is right for a read and
           would flatten this table into its middle two rows.${
           (st.a_m&&st.a_m.espn)||(st.b_m&&st.b_m.espn)
             ? ` Expect a gap: this figure is raw and unweighted, while the decision number in the
