@@ -585,7 +585,11 @@ function nameSize(n){
    fifteen-letter fighter needs no new tier. The CSS ellipsis is the floor —
    below 7.5px a name is not worth reading anyway. */
 function fitNames(root){
-  (root||document).querySelectorAll('.tile .nm').forEach(el=>{
+  /* `.noread` too, not just `.tile`. The no-read entry grew a dial with names
+     beside it and was never in this selector, so nothing shrank them and
+     KAMAKA broke its last letter onto a second line in a box with room for it.
+     Any surface that draws a name next to a gauge belongs here. */
+  (root||document).querySelectorAll('.tile .nm, .noread .nm').forEach(el=>{
     el.style.fontSize='';                       // back to the tier, then measure
     const box=el.clientWidth;
     if(!box) return;
