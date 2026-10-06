@@ -174,6 +174,21 @@
   .sbrow{display:flex;align-items:baseline;gap:12px;font-size:11.5px;
     padding:4px 0;border-bottom:1px solid var(--line)}
   .sbrow .sbl{flex:1;color:var(--mute)}
+  .sbsplit{align-items:center}
+  .spcol{flex:0 0 auto;min-width:0;display:flex;flex-direction:column;gap:4px}
+  .spline{display:flex;align-items:center;gap:7px}
+  .spw{font-size:8.5px;letter-spacing:.06em;text-transform:uppercase;width:44px;flex:none;text-align:right}
+  .spw.m{color:var(--dim)} .spw.r{color:var(--gold)}
+  /* One track, filled from the left by the finish share. Where the fill stops
+     IS the decision share, so the two numbers cannot drift apart. */
+  .spbar{position:relative;width:120px;height:7px;flex:none;border-radius:4px;
+    background:rgba(90,140,200,.30);overflow:hidden}
+  .spbar i{position:absolute;left:0;top:0;bottom:0;background:var(--gold);border-radius:4px 0 0 4px}
+  .spline .spw.m ~ .spbar i{background:#7f8da3}
+  .spn{font-size:10px;color:var(--dim);white-space:nowrap}
+  .spn b{color:var(--bone)}
+  @media(max-width:520px){ .sbsplit{align-items:flex-start;flex-direction:column;gap:5px}
+    .spbar{width:96px} .spn{font-size:9.5px} }
   .sbout{display:flex;align-items:baseline;gap:20px;flex-wrap:wrap;margin-top:12px;
     padding-top:10px;border-top:1px solid var(--line)}
   .sbshow{display:flex;align-items:center;gap:6px;margin-left:auto;cursor:pointer}
@@ -3464,8 +3479,20 @@ function sbMethodBlock(b,st,pA){
       <span class="mono" style="color:var(--gold);min-width:52px;text-align:right">records</span></div>
       ${row('ends by KO/TKO',mk?mk.ko:null,read.ko)}
       ${row('ends by submission',mk?mk.sub:null,read.sub)}
-      ${row('goes to decision',mk?mk.dec:null,read.dec)}
-      ${row('ends inside the distance',mk?(1-mk.dec):null,1-read.dec)}
+      ${(()=>{
+        /* "Goes to decision" and "ends inside the distance" are the same claim
+           written twice - they summed to 100 on every bout, so one of the two
+           rows carried no information at all and the reader had to notice that
+           for himself. One split bar per source says it once, and the thing
+           that actually matters here is which side of the middle the boundary
+           falls on, which a number pair does not show at a glance. */
+        const bar=(nm,fin,cls)=>fin==null?'':`<div class="spline">
+          <span class="spw ${cls}">${nm}</span>
+          <span class="spbar"><i style="width:${(100*fin).toFixed(1)}%"></i></span>
+          <span class="spn mono"><b>${P0(fin)}%</b> finish · ${P0(1-fin)}% distance</span></div>`;
+        return `<div class="sbrow sbsplit"><span class="sbl">distance or finish</span>
+          <div class="spcol">${bar('model',mk?1-mk.dec:null,'m')}${bar('records',1-read.dec,'r')}</div></div>`;
+      })()}
       ${(()=>{
         /* Timing. P(round one) stands on its own; P(round one GIVEN a finish)
            is the two reads divided, which is the "if it finishes, how early"
