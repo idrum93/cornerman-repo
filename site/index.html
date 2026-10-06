@@ -2249,6 +2249,10 @@ function ckCapture(){
     CKR[k]={p_a:+pA.toFixed(4), dec:+read.dec.toFixed(4),
       a_ko:+(read.a_ko||0).toFixed(4), a_sub:+(read.a_sub||0).toFixed(4),
       b_ko:+(read.b_ko||0).toFixed(4), b_sub:+(read.b_sub||0).toFixed(4),
+      /* Guards the bug above from coming back silently: if the five cells ever
+         stop summing to one, the read is wrong and is not worth storing. */
+      cells_ok:Math.abs((read.a_ko||0)+(read.a_sub||0)+(read.b_ko||0)
+                        +(read.b_sub||0)+read.dec-1)<0.02,
       r1:t?+t.p.toFixed(4):null, blend:st.blend,
       thin:Math.min(wins(st.a_m||{}),wins(st.b_m||{})), ts:Date.now()};
     dirty=true;
@@ -2393,7 +2397,13 @@ function ckGrade(){
     // 2. METHOD - the finish TYPE (KO vs SUB vs decision), and separately the
     //    full claim including WHICH fighter. A read can get the type right and
     //    the corner wrong; scoring only the pair would hide that.
-    if(actual){
+    /* A stored read whose five cells do not sum to one has a broken method
+       split, so its method claims are not scored at all. The winner and length
+       claims are built from p_a and dec, which that failure does not touch, so
+       they still count. Written the day the corner cells were found to have
+       been zero since they were introduced: a wrong number that grades is far
+       worse than a missing one that does not. */
+    if(actual && r.cells_ok!==false){
       row.mtype={actual:fam(actual), check:fam(top), model:mrep?null:null,
                  check_right:fam(top)===fam(actual)};
       if(mrep){
@@ -2700,12 +2710,26 @@ function sbMethodRead(ma,mb,pA,w,b){
   if(pA==null||!isFinite(pA)) pA=0.5;
   const out={};
   ['ko','sub','dec'].forEach(k=>{out[k]=pA*A[k]+(1-pA)*B[k];});
+  /* The five mutually exclusive endings, not just the three families. These
+     were never returned, and the caller stored `read.a_ko||0` - so every check
+     ever entered recorded all four corner cells as ZERO, the argmax over the
+     five fell to "decision" on every bout, and the check was graded as though
+     it had picked a decision every time. The aggregate ko/sub/dec above were
+     right throughout, which is why the length column was unaffected and the
+     error survived this long. These are joint probabilities and sum to one
+     with `dec`, matching the model's own m_a_ko / m_b_ko convention. */
+  out.a_ko=pA*A.ko;      out.a_sub=pA*A.sub;
+  out.b_ko=(1-pA)*B.ko;  out.b_sub=(1-pA)*B.sub;
   if(w==null||b==null||b.m_decision==null) return out;
   const mdl={ko:(b.m_a_ko||0)+(b.m_b_ko||0), sub:(b.m_a_sub||0)+(b.m_b_sub||0),
               dec:b.m_decision};
   const s=mdl.ko+mdl.sub+mdl.dec;
   if(!(s>0)) return out;
   ['ko','sub','dec'].forEach(k=>{out[k]=(1-w)*(mdl[k]/s)+w*out[k];});
+  /* Blended cell by cell against the model's own split, over the same
+     normaliser, so the four corners still add up to the three families. */
+  ['a_ko','a_sub','b_ko','b_sub'].forEach(k=>{
+    out[k]=(1-w)*((b['m_'+k]||0)/s)+w*out[k];});
   return out;
 }
 function parseUfcBlock(text){
