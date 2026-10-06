@@ -431,9 +431,9 @@
   .ppsrc{font-size:8px;letter-spacing:.07em;text-transform:uppercase;color:var(--dim);
     align-self:center;margin-right:1px}
   .abx{color:var(--warn);margin-left:3px;font-weight:800}
-  .nrdial{margin:6px 0 2px;border:1px dashed var(--gold);border-radius:8px;padding:2px 0;
-    display:flex;justify-content:center}
+  .nrdial{margin:6px 0 2px;border:1px dashed var(--gold);border-radius:8px;padding:4px 8px}
   .nrdial .gauge-svg{max-width:148px}
+  .nrdial .dialrow{width:100%}
   .ckonly{font-size:8.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--dim);
     border:1px solid var(--line);border-radius:3px;padding:0 3px;white-space:nowrap}
   .brrow.flat{opacity:.62}
@@ -1467,7 +1467,19 @@ function render(){
             const syn=sbSynthetic(n);
             const pA=sbProb(sbCorner(syn.fin.a,st.a,st.blend), sbCorner(syn.fin.b,st.b,st.blend));
             if(pA!=null&&isFinite(pA))
-              dial=`<div class="nrdial">${gauge({a:n.a,b:n.b,p_a:pA,p_b:1-pA,bout:key})}</div>`;
+              /* Names flanking the dial, exactly as a tile draws them. Without
+                 them the gauge was two numbers with no corners attached, and
+                 the only place the fighters appeared was the small heading
+                 above - so the one entry on the card that most needs to look
+                 like the others looked least like them. Same .dialrow/.fcol
+                 structure, so the favourite highlights and the name-fitting
+                 behave the same way here too. */
+              dial=`<div class="nrdial"><div class="dialrow">
+                <div class="fcol"><span class="nm nm-a ${nameSize(surname(n.a))} ${pA>=.5?'fav':''}"
+                  title="${esc(n.a)}">${esc(surname(n.a))}</span></div>
+                ${gauge({a:n.a,b:n.b,p_a:pA,p_b:1-pA,bout:key})}
+                <div class="fcol r"><span class="nm nm-b ${nameSize(surname(n.b))} ${pA<.5?'fav':''}"
+                  title="${esc(n.b)}">${esc(surname(n.b))}</span></div></div></div>`;
           }
           /* The same paired block the tiles use, so a no-read entry is read the
              same way as everything else on the card. The model column is empty
