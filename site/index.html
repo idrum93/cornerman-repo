@@ -2804,8 +2804,16 @@ function sbCardMs(b){
 const R1_CURVE_FALLBACK=[[0,.30,.402],[.30,.45,.441],[.45,.60,.455],
                          [.60,.75,.510],[.75,1.01,.569]];
 function r1GivenFinish(fr, rounds){
-  const C=((BR||{}).r1_curve)||null;
-  const rows=(C&&C.buckets)||R1_CURVE_FALLBACK.map(x=>({lo:x[0],hi:x[1],p:x[2]}));
+  /* A published curve is used only if it says something. The first version of
+     r1_curve() in baserates.py read two columns the corpus does not have, so
+     every bucket came back 0.0 - and the page multiplied that straight through
+     and showed a 0% round-one read on every bout, with no sign anything had
+     failed. A share outside .15-.85 is not a round-one rate, it is a broken
+     computation, and the measured fallback is better than a confident zero. */
+  const C=((typeof BR!=='undefined'&&BR)?BR.r1_curve:null)||null;
+  const ok=C&&Array.isArray(C.buckets)&&C.buckets.length>=3
+           &&C.buckets.every(b=>typeof b.p==='number'&&b.p>=0.15&&b.p<=0.85);
+  const rows=ok?C.buckets:R1_CURVE_FALLBACK.map(x=>({lo:x[0],hi:x[1],p:x[2]}));
   const f=Math.max(0,Math.min(1,fr==null?0.5:fr));
   let hit=null;
   rows.forEach(r=>{const lo=r.lo!=null?r.lo:r[0], hi=r.hi!=null?r.hi:r[1];
@@ -2815,7 +2823,9 @@ function r1GivenFinish(fr, rounds){
      0.517 of three-round finishes land in round one against 0.376 of
      five-round ones, so the curve is scaled by that ratio rather than
      re-estimated on 362 bouts. */
-  return rounds===5 ? hit*(0.376/0.517) : hit;
+  const sc=(ok&&typeof C.five_round_scale==='number'&&C.five_round_scale>0.3
+            &&C.five_round_scale<1.2)?C.five_round_scale:(0.376/0.517);
+  return rounds===5 ? hit*sc : hit;
 }
 function sbR1Read(st,b,pFin){
   const base=((((BR||{}).market_bases||{}).ends_before)||{})[b.rounds===5?'5':'3'];
@@ -3530,7 +3540,13 @@ function sbMethodBlock(b,st,pA){
              records, which is the marked row.`
           : 'Paste both Win by Method blocks to see where this pair sits.'}
           Raw career shares, not the shrunk numbers above — shrinkage is right for a read and
-          would flatten this table into its middle two rows.</div></div>`;})()}
+          would flatten this table into its middle two rows.${
+          (st.a_m&&st.a_m.espn)||(st.b_m&&st.b_m.espn)
+            ? ` Expect a gap: this figure is raw and unweighted, while the decision number in the
+               table above is shrunk toward the league's 50% on a <i>tier-weighted</i> count — a
+               record built largely outside the UFC carries fewer effective fights, so it shrinks
+               harder and lands nearer the league rate. Both are correct; they are answering
+               different questions.` : ''}</div></div>`;})()}
     <div class="note" style="margin-top:9px">Shares are shrunk toward the league
       mix before being combined. Raw, they are worse than useless: scored on 6,823
       bouts the unshrunk career mix lands at 2.11 nats against the base rate's 1.02,
