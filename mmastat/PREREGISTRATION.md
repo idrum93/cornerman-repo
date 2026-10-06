@@ -4215,3 +4215,137 @@ says "no clear favourite" rather than picking one. Five fight shapes checked —
 submission grappler against a point-fighter, two knockout artists, two decision
 grinders, a mild tilt and a dead-even pair — with an assertion that no headline
 names an outcome from the other family.
+
+# Addendum 44: the UFC.com check against the model - registered before any clean data exists (2026-10-06)
+
+Written deliberately on a day when the usable sample size is **zero**. Every
+check read entered so far was pasted after its card had finished and is
+disqualified (see "Disqualified data" below), so there is nothing yet to peek
+at. That is the only condition under which registering this is worth anything.
+
+## What the check is
+
+A second read of a bout built only from public fighter pages, standing beside
+the model rather than inside it. As of this addendum it takes:
+
+- the UFC.com rate block: strikes landed and absorbed per minute, striking
+  accuracy and defence, takedowns per 15, takedown defence, submissions per 15
+- the professional record
+- the ESPN fight-history table: every bout with date, opponent, result, method,
+  round, finish time and promotion
+
+It does not see, and will never see, the seven inputs the model holds that the
+public pages do not publish: career rating, strength of schedule, UFC mileage,
+losses by strikes, reach, age and layoff - which together carry about 55% of the
+model's weight. The check is therefore not a competitor to the model; it is a
+differently-informed witness, and the question is whether it carries anything
+the model does not.
+
+**The check is frozen as of this addendum.** Its inputs are not to be changed
+while this test runs. The ESPN history was added on the same day precisely so
+that the frozen version is the one worth measuring - a mid-test change makes
+every card before it worthless for this comparison.
+
+## Registered weighting, declared not fitted
+
+A fight at UFC, Contender Series or The Ultimate Fighter counts 1.0; a fight at
+any other promotion counts 0.5, in every quantity derived from the history.
+
+The rationale is stated in advance: a large share of a prospect's finishing
+record is built on regional cards, and counting a regional knockout as equal
+evidence to a UFC knockout is what makes a padded record read as finishing
+power. In the first history examined (Gautier, 12 prior fights) six of the
+twelve were outside the UFC.
+
+**0.5 is a judgement, not a fitted parameter.** It is not to be adjusted after
+seeing which value helps. Any later change to it is a new addendum with its own
+bar and its own data, not a revision of this one.
+
+## Disqualified data
+
+A read is excluded from every test here if any of the following hold:
+
+1. **Entered after its card.** A UFC.com page and an ESPN history are updated
+   once a fight is over: the record, the rate stats, the method counts and the
+   history's first row then contain the fight being predicted. Such a read is
+   not a forecast. Operationally: entry timestamp at or after midday UTC on the
+   day following the card date. The site enforces this - settled bouts no longer
+   accept a read at all, and the entry timestamp is frozen at first entry rather
+   than rewritten on reload.
+2. **Any history row dated on or after the card.** Dropped at parse time.
+3. **Blended.** A read mixed with the model's own numbers is not an independent
+   witness. The blend control has been removed; reads are pure.
+4. **Method cells that do not sum to one.** Guards the specific failure where
+   the four per-corner cells were stored as zero and the check was silently
+   graded as having predicted a decision on every bout.
+
+## Hypotheses
+
+**H1, primary.** On bouts where the model and the check call the length
+differently, the check is nearer the outcome more often than chance.
+
+Length is the primary because the two disagree about it far more than about the
+winner - roughly five bouts a card against two - so it accumulates power two to
+three times faster than anything else here.
+
+**H2, secondary.** The same, for the winner.
+
+**H3, secondary.** The same, for the round-one split.
+
+**H4, secondary.** The same, for finish type.
+
+**H5, mechanism.** The check's edge, if any, is concentrated in bouts where a
+fighter's professional record extends well beyond his UFC record - that is,
+where the history carries fights the model's corpus does not hold. Tested as an
+interaction between the check's advantage and (total professional fights minus
+UFC fights), summed over both corners.
+
+H5 is the hypothesis worth having. H1-H4 can only say *that* the check differs;
+H5 says *why*, and it is the only one of the five that would change the model
+rather than merely rank two readers of it. If H1 passes and H5 fails, the
+finding is that the check is better for a reason not yet identified, which is a
+weaker and less actionable result, and it must be reported as such.
+
+## Statistics
+
+- **Primary test:** paired Brier difference on the length claim over
+  disagreement bouts, with a bias-corrected bootstrap CI (10,000 resamples).
+  Brier rather than a sign test because it uses the magnitude - a 51% call and a
+  95% call are not the same claim.
+- **Secondary tests:** the same, under Benjamini-Hochberg FDR at 0.10 across
+  H2-H5. H1 is not part of the correction; it is the registered primary.
+- **Bar:** H1 passes if the bootstrap CI on the paired Brier difference excludes
+  zero in the check's favour.
+- **Minimum n:** 40 length disagreements, roughly eight clean cards. Nothing is
+  reported as a result before that, whatever the interim numbers look like.
+- **Stopping rule:** the test runs to 40 disagreements and stops. It does not
+  stop early on a favourable interim, and it does not continue past 40 hoping
+  for one. If the bar is missed at 40 the finding is null and is recorded as
+  null.
+
+## Known limitation that no statistic fixes
+
+A check exists only where a read was pasted, and the bouts worth pasting are the
+interesting or doubtful ones - not a random sample of a card. Every column is
+scored on an identical bout set, so model-against-check-against-market is fair;
+but "the check went 8 of 10" describes the chosen bouts and not the card. The
+only remedy is pasting every bout on a card rather than the interesting ones,
+and until that happens the generalisation is to bouts like these, not to bouts.
+
+## What was fixed on the way to this addendum
+
+Recorded because each of these silently corrupted a number that was being shown
+as evidence:
+
+- The four per-corner method cells were stored as zero from the day they were
+  introduced, because `sbMethodRead` returned only aggregate `{ko, sub, dec}`
+  and the caller read `read.a_ko || 0`. The argmax over five cells therefore
+  fell to "decision" on every bout, and the check was graded as having predicted
+  a decision every time. The aggregate `dec` was correct throughout, which is
+  why the length claim was unaffected and the error survived.
+- The entry timestamp recorded the last recompute rather than the first entry,
+  because the read object is rebuilt on every page load. The first load after a
+  card resolved would have restamped every pre-fight read as post-hoc.
+- The round estimator was round-one **wins** over **all** fights, so a fighter
+  repeatedly stopped early scored zero in the numerator and counted in the
+  denominator, and read as a slow starter. Replaced by the fight-level share.
