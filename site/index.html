@@ -1234,6 +1234,23 @@ const distProp=g=>(g.report||[]).find(r=>r.kind==='prop'&&r.label==='Go the dist
    read to the graded cards and scores all four claims; nothing new is computed
    here, it was simply never surfaced fight by fight. Memoised because the
    result-tile list calls it once per bout on every render. */
+/* A graded result, shaped like an upcoming bout so the sandbox can run on it.
+   Used to backfill the check on a card that has already happened - going
+   forward the read is entered before the fight and simply carries through, but
+   the first card needs a way in, and a fight the model has already been graded
+   on is the only place the three can be compared on settled facts.
+
+   `fin` is absent on cards archived before that block existed. The zeroed
+   baseline is the same one the no-read bouts use, and it costs nothing at the
+   default blend of 1, where the pasted numbers supply everything the paste can
+   supply and the rest is assumed level. */
+function pastBout(g){
+  const zero={}; SB_KEYS.forEach(k=>{zero[k]=0;});
+  return {bout:g.bout, a:g.a, b:g.b, rounds:g.rounds||3,
+          fin:g.fin||{a:Object.assign({},zero), b:Object.assign({},zero)},
+          noRead:!g.fin, past:true,
+          m_decision:g.m_decision??null, p_end_r1:g.p_end_r1??null, p_finish:null};
+}
 let _CKBY=null;
 function ckByBout(){
   if(_CKBY) return _CKBY;
@@ -1385,10 +1402,23 @@ function openPast(id){
       <div class="note" style="margin-top:6px">Top pick is the single likeliest of five endings. A decision
         can be the likeliest one ending even when a finish of some kind is likelier overall.${
         cr?' <b class="ckm hit">M</b> and <b class="ckm hit">C</b> are the model and your UFC.com check, gold when right. The round row is scored as "round one or later" for both, because that is the only round claim the check makes.':''}</div></div>`:''}
+    ${(()=>{const pb=pastBout(g);
+      /* The same sandbox the upcoming card uses, on a settled fight. This is
+         how a card that happened before the check existed gets its read in;
+         from the next card on, the read is entered before the fight and simply
+         carries through to here. */
+      return `<div class="card"><div class="ghead" style="background:none;border:none;padding:0 0 6px">
+        <span class="gname">UFC.com check — after the fact</span>
+        <span class="lbl">${cr?'entered · scored above':'enter it to score it against the model'}</span></div>
+        ${pb.noRead?`<div class="note" style="margin:0 0 7px">This card was archived before the model's
+          per-corner inputs were saved, so the blend slider has nothing to blend toward — the read is the
+          pasted records on their own, which is what the check is at its default setting anyway.</div>`:''}
+        ${sandboxPanel(pb)}</div>`;})()}
     <div class="note" style="margin-top:10px">The other contracts this fight settled — over/under rounds,
       "ends before round N", "fight starts round N" — all resolved on the SAME event as the rows above and
       are still graded into the card totals and the forward ledger. They are left off here because a dozen
       restatements of one result is not a dozen pieces of evidence.</div>`;
+  bindSandbox(pastBout(g));
   document.getElementById('xb').addEventListener('click',close_);
   document.getElementById('draw').classList.add('on');
   document.getElementById('draw').setAttribute('aria-hidden','false');
@@ -2003,7 +2033,11 @@ function sbLoad(){
     // reload, silently discarding the pastes that take the most effort.
     const live=new Set([].concat(
       (DATA&&DATA.bouts||[]).map(b=>b.bout),
-      (DATA&&DATA.no_read||[]).map(n=>n.a+' vs. '+n.b)));
+      (DATA&&DATA.no_read||[]).map(n=>n.a+' vs. '+n.b),
+      // the last card's graded bouts too: entering a check there is the whole
+      // point of the backfill, and the prune would have thrown it away on the
+      // next reload exactly as it did for the no-read bouts once before
+      (HIST&&HIST.cards&&HIST.cards[0]&&HIST.cards[0].bouts||[]).map(g=>g.bout)));
     /* A corner-order correction renames the bout. The key is "A vs. B", so
        pinning Camilo ahead of Herbert in data/corner_order.txt turned
        "Jai Herbert vs. Matheus Camilo" into "Matheus Camilo vs. Jai Herbert"
@@ -2080,6 +2114,9 @@ function ckLoad(){ try{ return JSON.parse(localStorage.getItem(CK_KEY)||'{}')||{
 function ckCapture(){
   if(!DATA||!DATA.bouts) return;
   const by={}; DATA.bouts.forEach(b=>by[b.bout]=b);
+  // and the last card, so a backfilled read is graded like any other
+  ((HIST&&HIST.cards&&HIST.cards[0]&&HIST.cards[0].bouts)||[])
+    .forEach(g=>{ if(!by[g.bout]) by[g.bout]=pastBout(g); });
   let dirty=false;
   Object.keys(SBOX||{}).forEach(k=>{
     const b=by[k], st=SBOX[k]; if(!b||!b.fin||!st) return;
@@ -2926,6 +2963,18 @@ function bindSandbox(b){
   if(!box) return;
   const st=sbState(b);
   const redraw=()=>{
+    /* On a settled fight the panel is not the only thing that changes: the M/C
+       marks and the winner card above it are scored from the read, so redrawing
+       the panel alone would leave the comparison showing the previous answer.
+       Re-open the whole drawer instead. */
+    if(b.past){
+      _CKBY=null;
+      // the result TILES are built by render(), not by the drawer, so without
+      // this the "check beat model" chip only appeared after a reload
+      if(typeof render==='function') render();
+      openPast(b.bout);
+      return;
+    }
     const host=box.parentNode;
     host.innerHTML=sandboxPanel(b);
     bindSandbox(b);
