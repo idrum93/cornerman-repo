@@ -219,6 +219,75 @@ def market_bases(fights, min_date="2012-01-01"):
             for k, v in out.items()}
 
 
+def r1_curve(fights, min_date="2010-01-01", min_fights=8):
+    """P(the finish lands in round one | it finishes), by the pair's finish rate.
+
+    Replaces reading a fighter's round-one tendency off his own handful of
+    finishes, which does not replicate. Split-half reliability, measured
+    2026-10-06 on 7,177 UFC bouts (addendum 45):
+
+        P(round one | finish)         0.21 at 8+ fights, 0.05 at 12+
+        P(ends by round 2 | finish)  -0.02 at 8+ fights
+        P(finish at all)  CONTROL     0.54 at 10+, 0.60 at 16+
+
+    The control RISES as the sample grows, which is what a real trait does; the
+    round quantities fall toward zero, which is what noise does. So WHEN a
+    fighter finishes is not a property of the fighter that can be measured from
+    his record, while WHETHER he finishes plainly is.
+
+    What survives is a league regularity indexed by the reliable quantity:
+    heavier finishers finish earlier. Over 3,623 three-round finishes the
+    round-one share climbs from .402 in the lowest finish-rate bucket to .569 in
+    the highest (r = +.100, p = 1.7e-9). That curve is what the round read is
+    built from. Five-round fights spread the same finishes across more rounds
+    (.517 against .376 in round one), so the whole curve is scaled by that ratio
+    rather than re-estimated on the 362 five-round finishes available.
+    """
+    import pandas as pd
+
+    f = fights[fights.date >= min_date].copy()
+    if f.empty:
+        return None
+    fin = f.method.isin(["KO/TKO", "SUB"]) if "method" in f else None
+    if fin is None:
+        return None
+    f["is_fin"] = fin
+
+    # each fighter's own finish rate, over fights in either direction
+    parts = f.bout.str.split(" vs. ", n=1, expand=True)
+    long = pd.concat([
+        pd.DataFrame({"f": parts[0], "is_fin": f.is_fin, "rnd": f.get("round"),
+                      "sched": f.get("n_rounds")}),
+        pd.DataFrame({"f": parts[1], "is_fin": f.is_fin, "rnd": f.get("round"),
+                      "sched": f.get("n_rounds")})], ignore_index=True)
+    g = long.groupby("f").agg(n=("is_fin", "size"), fr=("is_fin", "mean"))
+    g = g[g.n >= min_fights]
+    if g.empty:
+        return None
+    J = long[long.is_fin].merge(g[["fr"]], left_on="f", right_index=True)
+    J = J[J.sched.fillna(3) == 3]
+    if len(J) < 400:
+        return None
+
+    EDGES = [0.0, 0.30, 0.45, 0.60, 0.75, 1.01]   # fixed in advance
+    out = []
+    for lo, hi in zip(EDGES[:-1], EDGES[1:]):
+        c = J[(J.fr >= lo) & (J.fr < hi)]
+        if len(c) < 60:
+            continue
+        out.append({"lo": round(lo, 2), "hi": round(hi, 2),
+                    "p": round(float((c.rnd == 1).mean()), 4), "n": int(len(c))})
+    if len(out) < 3:
+        return None
+
+    five = J  # scale factor, measured once rather than fitted per bucket
+    f5 = f[(f.is_fin) & (f.get("n_rounds") == 5)]
+    f3 = f[(f.is_fin) & (f.get("n_rounds") == 3)]
+    scale = (float((f5["round"] == 1).mean()) / float((f3["round"] == 1).mean())
+             if len(f5) >= 100 and len(f3) >= 100 else 0.727)
+    return {"buckets": out, "n": int(len(J)), "five_round_scale": round(scale, 4)}
+
+
 def decision_curve(fights, min_date="2012-01-01", min_wins=2):
     """Average the pair's career decision share; how often does the fight finish?
 
@@ -356,6 +425,7 @@ def write_json(fights, fighters, path="site/baserates.json", verbose=True):
          "divisions": divisions(fights),
          "card": card_shape(fights),
          "decision_curve": decision_curve(fights),
+         "r1_curve": r1_curve(fights),
          "market_bases": market_bases(fights)}, indent=1), encoding="utf-8")
     if verbose:
         flat = sum(1 for t in tbl if t["spread"] < 0.03)

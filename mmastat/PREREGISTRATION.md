@@ -4349,3 +4349,176 @@ as evidence:
 - The round estimator was round-one **wins** over **all** fights, so a fighter
   repeatedly stopped early scored zero in the numerator and counted in the
   denominator, and read as a slow starter. Replaced by the fight-level share.
+
+# Addendum 45: AMENDMENT to addendum 44 - the round claim is as sharp as it can be, and no sharper (2026-10-06)
+
+Recorded the same day as addendum 44, before any clean read exists, so nothing
+here was chosen after seeing data it would affect.
+
+## The question
+
+Addendum 44 froze the check with a round claim of "round one, or later". The
+obvious next step was an exact modal round, matching the sharper claim the model
+makes, so that no part of the comparison is coarser than the rest. The ESPN
+history makes it mechanically possible: every row carries the round its fight
+ended in.
+
+**Tested before building.** The precondition is the same one that closed the
+fortitude cluster in addendum 43: if a quantity does not replicate within a
+fighter, there is nothing fighter-specific in it to extract.
+
+## Measurement
+
+7,177 UFC bouts, 2010-2026. Each fighter's fights ordered by date and split in
+half; the quantity computed in each half and correlated across fighters, then
+Spearman-Browned to full length.
+
+| quantity | min fights | n | r | p | reliability |
+|---|---|---|---|---|---|
+| P(round one \| finish) | 8 | 223 | +0.120 | 0.073 | **0.214** |
+| P(round one \| finish) | 12 | 71 | +0.025 | 0.836 | **0.049** |
+| P(ends by round 2 \| finish) | 8 | 223 | -0.010 | 0.882 | **-0.020** |
+| P(finish at all) — CONTROL | 10 | 479 | +0.372 | 4.0e-17 | **0.542** |
+| P(finish at all) — CONTROL | 16 | 167 | +0.427 | 8.7e-09 | **0.598** |
+
+The control **rises** as the sample grows, which is what a real trait does. The
+round quantities **fall toward zero**, which is what noise does. Reliability
+0.21 falling to 0.05 is the same shape as the retention cluster's 0.274 against
+its control of 0.577, and it is read the same way.
+
+**Finding: WHEN a fighter finishes is not a measurable property of the fighter.
+WHETHER he finishes is.**
+
+An exact-round claim for the check is therefore not built. It is not a matter of
+engineering effort; the information is not in the record. A per-fighter modal
+round would be a precise-looking number with a reliability of 0.275, and
+publishing it would make the round column look stronger while making it weaker.
+
+## What survives, and the amendment
+
+One regularity does replicate, because it is a league property indexed by a
+reliable fighter quantity: **heavier finishers finish earlier.** Over 3,623
+three-round finishes:
+
+| pair's finish rate | n | P(R1 \| finish) | P(R2 \| finish) | P(R3 \| finish) |
+|---|---|---|---|---|
+| 0-30% | 219 | .402 | .333 | .196 |
+| 30-45% | 739 | .441 | .327 | .185 |
+| 45-60% | 958 | .455 | .317 | .166 |
+| 60-75% | 1,081 | .510 | .295 | .130 |
+| 75-100% | 626 | .569 | .272 | .104 |
+
+Monotone, r = +0.100, p = 1.7e-9. Five-round fights spread the same finishes
+further out - .376 in round one against .517 - so the curve is scaled by that
+ratio rather than re-estimated on 362 bouts. Bucket edges were fixed before the
+table was computed and are not to be moved.
+
+**AMENDMENT to addendum 44.** The check's round estimator becomes
+
+    P(ends in round one) = P(this fight finishes) x P(round one | finish, pair finish rate)
+
+replacing the per-fighter round-one share that addendum 44's frozen version
+used. Both inputs are reliable; the quantity replaced was not.
+
+This is a change to a check that addendum 44 declared frozen, made the same day
+and before a single qualifying read exists, so no accumulated data is
+invalidated. The freeze stands from this amendment forward. Any later change
+needs its own addendum and its own data.
+
+The registered hypotheses, bars, FDR level, minimum n and stopping rule in
+addendum 44 are unchanged. H3 continues to score the round-one split for both
+sides, which is now the sharpest round claim the check is entitled to make - and
+the exact-round row remains model-only, labelled as such, scored on its own
+terms with no check column, exactly as before.
+
+## Note on what this does not say
+
+It does not say the model's modal round is worthless. The model builds it from a
+competing-risks survival fit over the whole corpus, not from one fighter's nine
+finishes, and it is scored on its own row. The finding is narrower: a round
+claim read off an individual record does not replicate, so the check cannot make
+one honestly.
+
+## Addendum 45, amendment 2: the round claim is scored CONDITIONAL on a finish (2026-10-06)
+
+Found while answering a plain question about how the round row is graded, which
+is how this kind of thing is usually found.
+
+### The defect
+
+The round row is only ever graded on bouts that **finished** - on a decision
+there is no round to call. But both sides were being scored on their
+**unconditional** P(ends in round one), a probability taken across all outcomes
+including the decision.
+
+On the current card the model's unconditional figure runs .106 to .403 and never
+approaches .5:
+
+| bout | P(finish) | P(round one) | P(round one \| finish) |
+|---|---|---|---|
+| Van vs. Pantoja (5rd) | .489 | .106 | .216 |
+| Baraniewski vs. Menifield | .725 | .403 | .556 |
+| Tuivasa vs. Despaigne | .639 | .297 | .465 |
+| O'Neill vs. Moura | .305 | .110 | .362 |
+
+With a .5 threshold on that number, both reads call "after round one" on
+essentially every bout - while round one is where **51.7%** of three-round
+finishes actually land. A near-constant call scored against something close to a
+coin flip is not a read, and it was making the round row look arbitrary for both
+sides at once. It would also have been scored into H3.
+
+This is a category error, not a tuning problem: a probability of one event was
+being judged against a different event.
+
+### The correction
+
+Both sides are divided by their own finish probability before the call is taken:
+
+    check:  P(round one) / (1 - P(decision))        both stored per read
+    model:  p_end_r1      / (1 - m_decision)        both stored per archived bout
+
+The call is then "round one" when that conditional is at or above .5, graded
+against whether the finish landed in round one. The threshold now sits beside
+the real base rate instead of somewhere the unconditional probability cannot
+reach.
+
+Worked example, from a settled bout: a check reading .42 unconditional on a
+fight it gave a 78% chance of finishing is claiming .538 of its finishes land in
+round one. The fight ended by knockout in round one. Under the old scoring that
+read was marked **wrong**; under the correction it is marked right, which is
+plainly the correct verdict.
+
+### Scope
+
+H3 in addendum 44 is unchanged in what it claims and in its bar; only the
+quantity it is computed from is corrected. The exact-round row stays model-only
+per amendment 1. No qualifying data exists yet, so nothing accumulated is
+affected. Brier for the round row is now taken on the conditional as well, so
+the magnitude and the verdict agree.
+
+## Addendum 45, amendment 3: fight-history parsing, recorded for completeness (2026-10-06)
+
+Not a change to what the check computes. Recorded anyway, because the freeze in
+addendum 44 covers the check's inputs and this touches how a pasted block
+becomes those inputs.
+
+**Widened**, so a block pasted with or without ESPN's column header, with or
+without a "Fight History" title, with the header repeated between fights, or
+with the row on a single tab-separated line, all parse identically. Date shapes
+accepted: `Jul 18, 2026`, `July 18, 2026`, `Jul. 18 2026`, `18 Jul 2026`,
+`2026-07-18`. Results accepted as `W`/`L` or `Win`/`Loss`/`Lost`, any case.
+
+**Column ORDER is still assumed** - date, opponent, result, method, round, time,
+event. A reordered table returns nothing rather than guessing which cell is
+which, because a wrong guess would mis-assign silently and never be seen.
+
+**One defect closed.** The month was matched on a token's first three letters,
+so "Marathon 18 2026" read as a March date and "Octagon 12 2024" as an October
+one. An event cell misread as a date shifts every field after it, which is the
+kind of corruption that produces plausible numbers rather than obvious errors -
+the same failure mode as the zeroed method cells in addendum 44. Months are now
+matched as whole tokens against an explicit list.
+
+No qualifying read exists, so nothing accumulated is affected. The estimator,
+the tier weighting, the as-of rule, the hypotheses, the bars and the stopping
+rule are all unchanged.
