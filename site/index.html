@@ -386,11 +386,19 @@
   .ckm.miss{color:var(--dim)}
   .ckna{color:var(--dim);font-size:11px}
   .rc.ck{border-style:dashed}
+  .rrl{display:block;margin-bottom:3px}
+  .rrk{text-transform:none;letter-spacing:.02em;font-size:10px;color:var(--dim)}
+  .rrk b{font-weight:700;text-transform:uppercase;letter-spacing:.05em;font-size:9px}
+  .rrk b.model{color:var(--mute)} .rrk b.check{color:var(--gold)} .rrk b.market{color:var(--mute)}
+  .rrk b:first-child,.rrk>b.model:first-of-type{}
   .pastg{margin-top:6px}
   /* The mark sits against its OWN value, not at the far edge of the column.
      Pushed right, the model's tick landed a few pixels from the check's number
      and read as the check's - the one misreading this grid exists to prevent. */
   .pastg .abc{display:block;overflow-wrap:normal}
+  .pastg .abc.near{color:var(--bone);font-weight:800}
+  .pastg .abc.far{opacity:.6}
+  .pastg .abc.near:nth-child(3n){color:var(--gold);opacity:1}
   .pastg .pm{display:inline;margin-left:1px}
   .pastg .abc:nth-child(3n){padding-left:7px;border-left:1px solid var(--soft)}
   .pm{font-weight:800;font-size:11px;flex:none}
@@ -1291,21 +1299,37 @@ function pastGrid(g){
   const m=(g.report||[]).find(r=>r.kind==='method');
   /* One dash for a cell with nothing in it, not a dash for the value and a
      second for the missing mark - which read as two separate blanks. */
-  const cell=(txt,ok)=>`<div class="abc">${txt==null?'<span class="abnone">—</span>'
+  /* Two ticks side by side say the reads agreed, not which read was better -
+     and on a row where both are right or both are wrong the marks carry no
+     information at all. The nearer of the two is set in full brightness and
+     the other muted, so every row discriminates even when the marks match. */
+  const cell=(txt,ok,nr)=>`<div class="abc${nr===false?' far':nr?' near':''}">${
+    txt==null?'<span class="abnone">—</span>'
     :txt+(ok==null?'':`&nbsp;<span class="pm ${ok?'ok':'no'}">${ok?'✓':'✗'}</span>`)}</div>`;
+  /* Nearer means more probability on what actually happened. Undefined when one
+     side has no read, and left flat when the two are within a point. */
+  const near=(mv,cv)=>(mv==null||cv==null||Math.abs(mv-cv)<0.01)?[null,null]
+    :mv>cv?[true,false]:[false,true];
+  /* 49.6% prints as "50%" and then carries a cross, which reads as a typo. A
+     value inside half a point of even keeps its decimal so the number and the
+     mark agree. */
+  const pc=v=>Math.abs(v-0.5)<0.005?(100*v).toFixed(1)+'%':P0(v)+'%';
   /* Both columns show the probability the source put on WHAT HAPPENED, not on
      what it called. A cell reading 38% with a cross says the same thing twice
      over and in the right order: it called the other way, and not by much. Had
      each column shown its own call instead, the two would not be comparable. */
   const rows=[];
-  rows.push(['winner', cell(`${P0(g.p_winner_model)}%`, g.model_right),
-                       cell(cr?`${P0(cr.win.check)}%`:null, cr?cr.win.check>0.5:null)]);
-  if(dp) rows.push(['ends', cell(`${P0(dp.happened?dp.said:1-dp.said)}%`, dp.right),
-                            cell(cr&&cr.len?`${P0(cr.len.actual==='distance'?cr.len.check_dec:1-cr.len.check_dec)}%`:null,
-                                 cr&&cr.len?cr.len.check_right:null)]);
-  if(m) rows.push(['pick', cell(esc(pickShort(m.top)), !!m.right),
-                           cell(cr&&cr.mfull?esc(pickShort(cr.mfull.check_top)):null,
-                                cr&&cr.mfull?cr.mfull.check_right:null)]);
+  {const mv=g.p_winner_model, cv=cr?cr.win.check:null, n=near(mv,cv);
+   rows.push(['winner', cell(pc(mv), g.model_right, n[0]),
+                        cell(cv==null?null:pc(cv), cv==null?null:cv>0.5, n[1])]);}
+  if(dp){const mv=dp.happened?dp.said:1-dp.said,
+         cv=cr&&cr.len?(cr.len.actual==='distance'?cr.len.check_dec:1-cr.len.check_dec):null, n=near(mv,cv);
+   rows.push(['ends', cell(pc(mv), dp.right, n[0]),
+                      cell(cv==null?null:pc(cv), cr&&cr.len?cr.len.check_right:null, n[1])]);}
+  if(m){const mv=m.said, cv=cr&&cr.mfull?cr.mfull.check_said:null, n=near(mv,cv);
+   rows.push(['pick', cell(esc(pickShort(m.top)), !!m.right, n[0]),
+                      cell(cr&&cr.mfull?esc(pickShort(cr.mfull.check_top)):null,
+                           cr&&cr.mfull?cr.mfull.check_right:null, n[1])]);}
   return `<div class="abgrid pastg">
     <div class="abh"></div><div class="abh">model</div><div class="abh${cr?'':' off'}">ufc.com check</div>
     ${rows.map(([l,a,b])=>`<div class="abl">${l}</div>${a}${b}`).join('')}
@@ -1350,23 +1374,30 @@ function lastCard(){
     const m=g.report.find(r=>r.kind==='method');
     const mk=g.market;
     return `<button class="tile rtile" data-past="${esc(g.bout)}">
-      <div class="trow" style="margin-bottom:5px"><span class="lbl">${g.weight_class?`<b class="divc">${esc(divShort(g.weight_class))}</b> · `:''}${esc(g.method)} · R${g.round} · ${t}</span>
-        <span class="edgeTag ${g.model_right?'hit':'miss'}">${g.model_right?'✓':'✗'} winner</span></div>
+      <div class="trow" style="margin-bottom:5px"><span class="lbl">${g.weight_class?`<b class="divc">${esc(divShort(g.weight_class))}</b> · `:''}${esc(g.method)} · R${g.round} · ${t}</span></div>
       <div class="rname" title="${esc(g.winner)}">${esc(surname(g.winner))}
         <span class="lbl">def. ${esc(surname(g.winner===g.a?g.b:g.a))}</span></div>
       ${pastGrid(g)}
       <div class="rchips">
-        ${mk?`<span class="rc ${mk.model_closer?'ok':'no'}">${mk.model_closer?'beat':'lost to'} market</span>`:''}
-        ${(()=>{const r=ckRow(g.bout); if(!r) return '';
-          /* "model beat check" was printed in red on bouts where NEITHER read
-             called the winner, which made a shared miss look like a result.
-             The colour now tracks whether the winner was called at all; which
-             of the two was nearer is said plainly and left uncoloured. */
-          const better=r.win.check>r.win.model+0.005, worse=r.win.check<r.win.model-0.005;
-          const bothNo=r.win.check<=0.5&&r.win.model<=0.5, bothYes=r.win.check>0.5&&r.win.model>0.5;
-          const lab=better?'check closer':worse?'model closer':'model and check level';
-          return `<span class="rc ck ${bothNo?'no':bothYes?'ok':''}">${
-            bothNo?'both missed · ':''}${lab}</span>`;})()}
+        ${(()=>{
+          /* Green and red mean ONE thing on this tile: was the call right. The
+             chips below are comparisons, which is a different question with a
+             different answer - a read can call the winner and still sit nearer
+             the line than the market. Painted red, "lost to market" sat beside
+             a green tick on the same fight and the two looked like a
+             contradiction. Comparisons are now unpainted and say who was
+             nearer instead of who won or lost. */
+          /* All three chips asked one question - who put most on the fighter
+             who won - so they are one ranking rather than two or three separate
+             verdicts. Shorter, and it says outright what a pair of "beat /
+             lost to" chips left the reader to work out. */
+          const r=ckRow(g.bout), who=[{n:'model',p:g.p_winner_model}];
+          if(r) who.push({n:'check',p:r.win.check});
+          if(mk) who.push({n:'market',p:mk.p_winner_market});
+          if(who.length<2) return '';
+          who.sort((x,y)=>y.p-x.p);
+          return `<span class="lbl rrl">nearest on the winner</span><span class="rc rrk">${
+            who.map(x=>`<b class="${x.n}">${x.n}</b> ${P0(x.p)}%`).join(' › ')}</span>`;})()}
       </div></button>`;}).join('');
   /* The two counts the strip at the top of the page claimed before the fights,
      against what the card actually produced — and against the base rate over
@@ -2816,9 +2847,13 @@ function sandboxPanel(b){
     if(ga==null&&gb==null) return '';
     const fmt=v=>v==null?'—':(k==='str_acc'||k==='str_def'||k==='td_def'
       ? P0(v)+'%' : (+v).toFixed(2));
+    /* On a bout archived before the per-corner inputs were saved, "ours" is a
+       block of zeros, so an arrow row read "0.00 → 4.32" in the colour kept for
+       a real move. There was nothing to move from, so those bouts list the
+       pasted value alone. */
     return `<div class="sbrow"><span class="sbl">${SB_FILL[k]}</span>
-      <span class="mono nm-a">${fmt(ours)} → ${fmt(ga)}</span>
-      <span class="mono nm-b">${fmt(ourB)} → ${fmt(gb)}</span></div>`;
+      <span class="mono nm-a">${b.noRead?fmt(ga):`${fmt(ours)} → ${fmt(ga)}`}</span>
+      <span class="mono nm-b">${b.noRead?fmt(gb):`${fmt(ourB)} → ${fmt(gb)}`}</span></div>`;
   }).filter(Boolean).join('');
 
   return `<div class="sbox" data-bout="${esc(b.bout)}">
@@ -2847,7 +2882,11 @@ function sandboxPanel(b){
         <input type="range" class="sbrange" min="0" max="100" value="${Math.round(100*st.blend)}">
         <span class="mono sbw">${Math.round(100*st.blend)}%</span> toward UFC.com</label>`:''}
     </div>
-    ${cmp?`<div class="lbl" style="margin:11px 0 3px">what changed · ours → UFC.com</div>${cmp}`:''}${est}
+    ${cmp?(b.noRead
+      ?`<div class="lbl" style="margin:11px 0 3px">the records you pasted</div>
+         <div class="note" style="margin:0 0 6px">No model inputs were saved for this bout, so there is
+           nothing to compare these against — they stand on their own.</div>${cmp}`
+      :`<div class="lbl" style="margin:11px 0 3px">what changed · ours → UFC.com</div>${cmp}`):''}${est}
     ${b.noRead&&!canWin?`<div class="note" style="margin-top:9px">A winner number is held back
       until an age or a reach is given for at least one corner. Without them this bout has no
       rating, age, reach, mileage or chin on either side, so a probability would be asserting the
@@ -2963,8 +3002,13 @@ function sbMethodBlock(b,st,pA){
   if(!mix) return '';
   const mk=(b.m_a_ko!=null&&b.m_b_ko!=null)?{
     ko:(b.m_a_ko+b.m_b_ko), sub:(b.m_a_sub+b.m_b_sub), dec:(b.m_decision)}:null;
+  /* On an archived bout the model has no method split, so that column came out
+     as five dashes under a "model" heading - a column of nothing, holding width
+     and implying something had failed. Where the model has no numbers to put
+     there, the column is dropped and the rows stand on the records alone. */
+  const hasM=(b.p_finish!=null);
   const row=(lab,v,w)=>`<div class="sbrow"><span class="sbl">${lab}</span>
-    <span class="mono">${v==null?'—':P0(v)+'%'}</span>
+    ${hasM?`<span class="mono">${v==null?'—':P0(v)+'%'}</span>`:''}
     <span class="mono" style="color:var(--gold);min-width:52px;text-align:right">${w==null?'—':P0(w)+'%'}</span></div>`;
   const each=(nm,m)=>{
     if(m.ko_share==null) return '';
@@ -2975,18 +3019,22 @@ function sbMethodBlock(b,st,pA){
       <span class="mono">${P0(s.ko)}% KO · ${P0(s.sub)}% sub · ${P0(s.dec)}% dec</span></div>`;
   };
   const silent=(b.m_decision==null);
+  const partial=!silent&&!hasM;
   return `<div style="margin-top:14px;padding-top:11px;border-top:1px solid var(--line)">
-    <div class="lbl">How this fight ends · ${silent?'the records only':'model vs these records'}</div>
+    <div class="lbl">How this fight ends · ${silent||partial?'the records only':'model vs these records'}</div>
+    ${partial?`<div class="note" style="margin:5px 0 8px">This bout was archived before the model's
+      method split was kept, so there is no model column to compare against — the rows below are the
+      pasted records on their own.</div>`:''}
     ${silent?`<div class="note" style="margin:5px 0 8px">The model publishes no method or
       round for this bout — neither was ever tested on records this short, so it withholds
-      them rather than guessing. The column beside these rows is empty for that reason, not
+      them rather than guessing. There is no model column beside these rows for that reason, not
       because anything failed. What follows is the pasted records on their own, including
       whatever happened outside the UFC, which is evidence the corpus does not hold.</div>`:''}
     ${read?sbVerdict(ma,mb,pA,b,st):''}
     ${each(surname(b.a),ma)}${each(surname(b.b),mb)}
     ${read?`<div class="sbrow" style="border:none;padding-bottom:0"><span class="sbl"
         style="color:var(--bone)">combined, weighted by who wins</span>
-      <span class="mono" style="color:var(--dim)">model</span>
+      ${hasM?'<span class="mono" style="color:var(--dim)">model</span>':''}
       <span class="mono" style="color:var(--gold);min-width:52px;text-align:right">records</span></div>
       ${row('ends by KO/TKO',mk?mk.ko:null,read.ko)}
       ${row('ends by submission',mk?mk.sub:null,read.sub)}
@@ -2999,7 +3047,11 @@ function sbMethodBlock(b,st,pA){
         const t=sbR1Read(st,b); if(!t) return '';
         const fin=1-read.dec;
         const cond=fin>0.02?t.p/fin:null;
-        return row('ends in round one',b.p_end_r1,t.p)
+        /* The one model number an archived bout keeps. With the column gone it
+           would have gone with it, so it rides in the label instead. */
+        return row(hasM||b.p_end_r1==null?'ends in round one'
+            :`ends in round one <span style="color:var(--dim)">· model ${P0(b.p_end_r1)}%</span>`,
+            b.p_end_r1,t.p)
           + (cond!=null?row('of the finishes, in round one',
               (b.p_end_r1!=null&&b.p_finish>0.02)?b.p_end_r1/b.p_finish:null,
               Math.min(0.99,cond)):'')
