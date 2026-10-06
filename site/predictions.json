@@ -2,7 +2,7 @@
  "event": "UFC Fight Night: Allen vs. Duncan",
  "date": "2026-10-10",
  "venue": "Meta Apex, Enterprise, Nevada , United States",
- "generated_utc": "2026-10-06T00:42:21.457779+00:00",
+ "generated_utc": "2026-10-06T01:18:53.410112+00:00",
  "bouts": [
   {
    "bout": "Brendan Allen vs. Christian Leroy Duncan",
@@ -334,39 +334,17 @@
    "p_open": 0.5937
   },
   {
-   "bout": "Jai Herbert vs. Matheus Camilo",
-   "a": "Jai Herbert",
-   "b": "Matheus Camilo",
+   "bout": "Matheus Camilo vs. Jai Herbert",
+   "a": "Matheus Camilo",
+   "b": "Jai Herbert",
    "rounds": 3,
    "segment": "Main card",
    "weight_class": "Lightweight",
    "thin": false,
-   "p_a": 0.2113,
-   "p_b": 0.7887,
+   "p_a": 0.7887,
+   "p_b": 0.2113,
    "stats": {
     "a": {
-     "record": "4-5",
-     "n_fights": 10,
-     "age": 38.4,
-     "height": 73.0,
-     "reach": 77.0,
-     "stance": "Orthodox",
-     "elo": 1497,
-     "opp_elo": 1517,
-     "slpm": 3.32,
-     "sapm": 3.42,
-     "str_acc": 0.417,
-     "str_def": 0.53,
-     "td15": 0.68,
-     "td_def": 0.659,
-     "sub15": 0.13,
-     "ctrl": 0.167,
-     "kd15": 0.72,
-     "kd_against15": 0.39,
-     "ko_loss": 0.229,
-     "avg_time": 10.71
-    },
-    "b": {
      "record": "2-1",
      "n_fights": 3,
      "age": 25.8,
@@ -387,29 +365,32 @@
      "kd_against15": 0.16,
      "ko_loss": 0.171,
      "avg_time": 8.41
+    },
+    "b": {
+     "record": "4-5",
+     "n_fights": 10,
+     "age": 38.4,
+     "height": 73.0,
+     "reach": 77.0,
+     "stance": "Orthodox",
+     "elo": 1497,
+     "opp_elo": 1517,
+     "slpm": 3.32,
+     "sapm": 3.42,
+     "str_acc": 0.417,
+     "str_def": 0.53,
+     "td15": 0.68,
+     "td_def": 0.659,
+     "sub15": 0.13,
+     "ctrl": 0.167,
+     "kd15": 0.72,
+     "kd_against15": 0.39,
+     "ko_loss": 0.229,
+     "avg_time": 10.71
     }
    },
    "record_split": {
     "a": {
-     "wins": {
-      "ko": 2,
-      "sub": 0,
-      "dec": 2
-     },
-     "losses": {
-      "ko": 2,
-      "sub": 1,
-      "dec": 2
-     },
-     "win_rounds": {
-      "1": {
-       "ko": 2,
-       "sub": 0
-      }
-     },
-     "n": 9
-    },
-    "b": {
      "wins": {
       "ko": 1,
       "sub": 0,
@@ -427,74 +408,77 @@
       }
      },
      "n": 3
+    },
+    "b": {
+     "wins": {
+      "ko": 2,
+      "sub": 0,
+      "dec": 2
+     },
+     "losses": {
+      "ko": 2,
+      "sub": 1,
+      "dec": 2
+     },
+     "win_rounds": {
+      "1": {
+       "ko": 2,
+       "sub": 0
+      }
+     },
+     "n": 9
     }
    },
    "evidence": {
-    "a": 10,
-    "b": 3,
+    "a": 3,
+    "b": 10,
     "min": 3
    },
    "drivers": [
     {
      "label": "age",
-     "value": -0.9977,
-     "favors": "b",
+     "value": 0.9977,
+     "favors": "a",
      "key": "d_age"
     },
     {
      "label": "reach",
-     "value": 0.2423,
-     "favors": "a",
+     "value": -0.2423,
+     "favors": "b",
      "key": "d_reach"
     },
     {
      "label": "takedown threat",
-     "value": -0.2093,
-     "favors": "b",
+     "value": 0.2093,
+     "favors": "a",
      "key": "grapple_edge",
      "parts": {
-      "a": 0.24,
-      "b": 0.83,
+      "a": 0.83,
+      "b": 0.24,
       "how": "their takedown rate x the other's takedown defense"
      }
     },
     {
      "label": "striking defense",
-     "value": -0.1735,
-     "favors": "b",
+     "value": 0.1735,
+     "favors": "a",
      "key": "d_str_def"
     },
     {
      "label": "UFC mileage",
-     "value": -0.1575,
-     "favors": "b",
+     "value": 0.1575,
+     "favors": "a",
      "key": "d_log_exp"
     },
     {
      "label": "striking output",
-     "value": 0.1125,
-     "favors": "a",
+     "value": -0.1125,
+     "favors": "b",
      "key": "d_adj_slpm"
     }
    ],
    "fin": {
     "a": {
-     "elo": 1497.020949,
-     "opp_elo": 1516.885787,
-     "log_exp": 2.397895,
-     "adj_slpm": 3.316362,
-     "sapm": 3.424826,
-     "str_acc": 0.416864,
-     "str_def": 0.530216,
-     "adj_td15": 0.683786,
-     "td_def": 0.659483,
-     "sub15": 0.131339,
-     "ko_loss_rate": 0.228571,
-     "reach": 77.0,
-     "age": 38.409309,
-     "log_layoff": 5.170484
-    },
-    "b": {
      "elo": 1513.538789,
      "opp_elo": 1507.133751,
      "log_exp": 1.386294,
@@ -509,107 +493,123 @@
      "reach": 69.0,
      "age": 25.768652,
      "log_layoff": 4.663439
+    },
+    "b": {
+     "elo": 1497.020949,
+     "opp_elo": 1516.885787,
+     "log_exp": 2.397895,
+     "adj_slpm": 3.316362,
+     "sapm": 3.424826,
+     "str_acc": 0.416864,
+     "str_def": 0.530216,
+     "adj_td15": 0.683786,
+     "td_def": 0.659483,
+     "sub15": 0.131339,
+     "ko_loss_rate": 0.228571,
+     "reach": 77.0,
+     "age": 38.409309,
+     "log_layoff": 5.170484
     }
    },
-   "p_market": 0.3643,
+   "p_market": 0.6357,
    "books": 19.0,
-   "edge": -0.153,
-   "p_finish_survival_raw": 0.6197,
-   "m_a_ko": 0.0736,
-   "m_b_ko": 0.211,
-   "m_a_sub": 0.0337,
-   "m_b_sub": 0.176,
+   "edge": 0.153,
+   "p_finish_survival_raw": 0.501,
+   "m_a_ko": 0.2157,
+   "m_b_ko": 0.1055,
+   "m_a_sub": 0.1309,
+   "m_b_sub": 0.0422,
    "m_decision": 0.5057,
-   "m_a_dec": 0.104,
-   "m_b_dec": 0.4016,
+   "m_a_dec": 0.4421,
+   "m_b_dec": 0.0635,
    "p_finish": 0.4943,
-   "p_end_r1": 0.2428,
-   "p_end_r2": 0.157,
-   "p_end_r3": 0.0946,
+   "p_end_r1": 0.2267,
+   "p_end_r2": 0.1595,
+   "p_end_r3": 0.1081,
    "p_end_r4": null,
    "p_end_r5": null,
-   "p_ends_before_r2": 0.2428,
-   "p_starts_r2": 0.7572,
-   "p_ends_before_r3": 0.3997,
-   "p_starts_r3": 0.6003,
+   "p_ends_before_r2": 0.2267,
+   "p_starts_r2": 0.7733,
+   "p_ends_before_r3": 0.3862,
+   "p_starts_r3": 0.6138,
    "p_ends_before_r4": null,
    "p_starts_r4": null,
    "p_ends_before_r5": null,
    "p_starts_r5": null,
-   "p_a_given_finish": 0.217,
-   "p_b_given_finish": 0.783,
-   "p_a_given_decision": 0.2057,
-   "p_b_given_decision": 0.7943,
-   "exp_minutes": 10.55,
+   "p_a_given_finish": 0.7011,
+   "p_b_given_finish": 0.2989,
+   "p_a_given_decision": 0.8743,
+   "p_b_given_decision": 0.1257,
+   "exp_minutes": 10.7,
    "round_of_victory": {
-    "a_ko_r1": 0.0378,
-    "b_ko_r1": 0.1025,
-    "a_sub_r1": 0.016,
-    "b_sub_r1": 0.0864,
-    "a_ko_r2": 0.0224,
-    "b_ko_r2": 0.0662,
-    "a_sub_r2": 0.011,
-    "b_sub_r2": 0.0574,
-    "a_ko_r3": 0.0133,
-    "b_ko_r3": 0.0424,
-    "a_sub_r3": 0.0067,
-    "b_sub_r3": 0.0323
+    "a_ko_r1": 0.1014,
+    "b_ko_r1": 0.0492,
+    "a_sub_r1": 0.0573,
+    "b_sub_r1": 0.0188,
+    "a_ko_r2": 0.069,
+    "b_ko_r2": 0.033,
+    "a_sub_r2": 0.0438,
+    "b_sub_r2": 0.0137,
+    "a_ko_r3": 0.0452,
+    "b_ko_r3": 0.0233,
+    "a_sub_r3": 0.0298,
+    "b_sub_r3": 0.0098
    },
-   "m_a_finish": 0.1073,
-   "m_b_finish": 0.3871,
+   "m_a_finish": 0.3466,
+   "m_b_finish": 0.1478,
    "totals": {
-    "over_1_5": 0.6782,
-    "over_2_5": 0.5496
+    "over_1_5": 0.6954,
+    "over_2_5": 0.558
    },
    "a_ctrl_lo": 0.0,
-   "a_ctrl_mid": 3.95,
-   "a_ctrl_hi": 15.06,
-   "a_slpm_lo": 0.84,
-   "a_slpm_mid": 2.65,
-   "a_slpm_hi": 5.75,
-   "a_takedowns_rate": 0.721,
-   "a_strikes_rate": 3.459,
-   "a_p_takedown": 0.306,
-   "a_p_knockdown": 0.238,
+   "a_ctrl_mid": 9.51,
+   "a_ctrl_hi": 24.11,
+   "a_slpm_lo": 1.52,
+   "a_slpm_mid": 2.89,
+   "a_slpm_hi": 6.02,
+   "a_takedowns_rate": 1.663,
+   "a_strikes_rate": 3.686,
+   "a_p_takedown": 0.58,
+   "a_p_knockdown": 0.221,
    "b_ctrl_lo": 0.0,
-   "b_ctrl_mid": 9.51,
-   "b_ctrl_hi": 24.11,
-   "b_slpm_lo": 1.52,
-   "b_slpm_mid": 2.89,
-   "b_slpm_hi": 6.02,
-   "b_takedowns_rate": 1.663,
-   "b_strikes_rate": 3.686,
-   "b_p_takedown": 0.58,
-   "b_p_knockdown": 0.221,
+   "b_ctrl_mid": 3.95,
+   "b_ctrl_hi": 15.06,
+   "b_slpm_lo": 0.84,
+   "b_slpm_mid": 2.65,
+   "b_slpm_hi": 5.75,
+   "b_takedowns_rate": 0.721,
+   "b_strikes_rate": 3.459,
+   "b_p_takedown": 0.306,
+   "b_p_knockdown": 0.238,
    "dec_share": {
-    "a": 0.444,
-    "b": 0.333,
+    "a": 0.333,
+    "b": 0.444,
     "pair": 0.389
    },
    "bands": {
     "C1": {
+     "a": 4,
+     "b": 1
+    },
+    "C2": {
+     "a": 3,
+     "b": 2
+    },
+    "C3": {
+     "a": 3,
+     "b": 4
+    },
+    "C6": {
      "a": 1,
      "b": 4
     },
-    "C2": {
-     "a": 2,
-     "b": 3
-    },
-    "C3": {
-     "a": 4,
-     "b": 3
-    },
-    "C6": {
-     "a": 4,
-     "b": 1
-    },
     "C10": {
-     "a": 2,
-     "b": 1
+     "a": 1,
+     "b": 2
     },
     "C11": {
-     "a": 2,
-     "b": 4
+     "a": 4,
+     "b": 2
     },
     "C12": {
      "a": 3,
@@ -634,7 +634,7 @@
      "fight": 2
     }
    },
-   "p_open": 0.3777
+   "p_open": 0.6223
   },
   {
    "bout": "Loopy God\u00ednez vs. Ketlen Souza",
