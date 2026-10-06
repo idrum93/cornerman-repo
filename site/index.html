@@ -170,8 +170,7 @@
     border-radius:999px;padding:4px 11px;font-size:9.5px;letter-spacing:.14em;
     text-transform:uppercase;cursor:pointer}
   .sbacts .more:hover{color:var(--bone);border-color:#3B4557}
-  .sbblend{display:flex;align-items:center;gap:7px;margin-left:auto}
-  .sbrange{width:110px;accent-color:var(--gold)}
+  .sbblend{margin-left:auto;color:var(--dim)}
   .sbrow{display:flex;align-items:baseline;gap:12px;font-size:11.5px;
     padding:4px 0;border-bottom:1px solid var(--line)}
   .sbrow .sbl{flex:1;color:var(--mute)}
@@ -386,6 +385,12 @@
   .ckm.miss{color:var(--dim)}
   .ckna{color:var(--dim);font-size:11px}
   .rc.ck{border-style:dashed}
+  .ckwarn{font-size:11px;line-height:1.5;color:var(--mute);background:rgba(200,68,47,.07);
+    border:1px solid rgba(200,68,47,.3);border-radius:6px;padding:8px 10px;margin:0 0 10px}
+  .ckwarn b{color:var(--red)}
+  .ckwarn.soft{background:rgba(222,140,52,.06);border-color:rgba(222,140,52,.28)}
+  .ckwarn.soft b{color:var(--gold)}
+  .ckstrip.posthoc .ckbig{opacity:.75}
   .sbover{font-size:10.5px;color:var(--dim);line-height:1.45;margin:5px 0 0;padding-left:9px;
     border-left:2px solid var(--soft)}
   .sbover b{color:var(--mute)} .sbover i{font-style:normal;color:var(--mute)}
@@ -421,6 +426,7 @@
     padding-bottom:2px;border-bottom:1px solid var(--soft);margin-bottom:2px}
   .abh:nth-child(3){color:var(--gold)}
   .abh.off{color:var(--dim)}
+  .posth{color:var(--red);letter-spacing:.04em;font-size:7.5px}
   .abl{font-size:8.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--dim);
     white-space:nowrap;align-self:start;padding-top:2px}
   /* Wrap rather than clip. At four-up a tile is ~279px and the check column
@@ -1374,7 +1380,7 @@ function pastGrid(g){
     ? `<span class="lbl rrl">on the winner</span><span class="rc rrk">${
         who.map(x=>`<b class="${x.n}">${x.n}</b> ${P0(x.p)}%`).join(' › ')}</span>` : '';
   return `<div class="abgrid pastg">
-    <div class="abh"></div><div class="abh">model</div><div class="abh${cr?'':' off'}">ufc.com check</div>
+    <div class="abh"></div><div class="abh">model</div><div class="abh${cr?'':' off'}">ufc.com check${cr&&cr.post?' <span class="posth">after the fact</span>':''}</div>
     ${rows.map(r=>`<div class="abl">${r.l}</div>${r.a}${r.b}`).join('')}
   </div>${called}${winline}`;
 }
@@ -1544,23 +1550,22 @@ function openPast(id){
       <div class="note" style="margin-top:6px">Top pick is the single likeliest of five endings. A decision
         can be the likeliest one ending even when a finish of some kind is likelier overall.${
         cr?' The exact-round row is the model on its own — the check\'s only round claim is "round one or later", which is scored for both on the row beneath it.':''}</div></div>`:''}
-    ${(()=>{const pb=pastBout(g);
-      /* The same sandbox the upcoming card uses, on a settled fight. This is
-         how a card that happened before the check existed gets its read in;
-         from the next card on, the read is entered before the fight and simply
-         carries through to here. */
-      return `<div class="card"><div class="ghead" style="background:none;border:none;padding:0 0 6px">
-        <span class="gname">UFC.com check — after the fact</span>
-        <span class="lbl">${cr?'entered · scored above':'enter it to score it against the model'}</span></div>
-        ${pb.noRead?`<div class="note" style="margin:0 0 7px">This card was archived before the model's
-          per-corner inputs were saved, so the blend slider has nothing to blend toward — the read is the
-          pasted records on their own, which is what the check is at its default setting anyway.</div>`:''}
-        ${sandboxPanel(pb)}</div>`;})()}
+    ${cr?`<div class="card"><div class="ghead" style="background:none;border:none;padding:0 0 6px">
+      <span class="gname">UFC.com check</span><span class="lbl">entered ${cr.post?'after this card':'before this card'} · scored above</span></div>
+      <div class="note" style="margin:0">${cr.post
+        ? `This read was pasted after the card had finished, when the UFC.com page already contained
+           this fight — the record, the rates and the Win-by-Method counts all include it. It is shown
+           because you entered it, and it is kept out of the running record because it is not a
+           forecast. Reads for coming cards are entered before the fights and do count.`
+        : `Entered before the fight from the UFC.com pages, and scored against the result above.`}</div></div>`
+      :`<div class="note" style="margin-top:10px">No UFC.com check was entered for this bout before it
+        happened, and one cannot be added now: a UFC.com page is updated once a fight is over, so
+        anything pasted today would contain the result it was meant to predict. Checks are entered on
+        the upcoming card, and carry through to here once it resolves.</div>`}
     <div class="note" style="margin-top:10px">The other contracts this fight settled — over/under rounds,
       "ends before round N", "fight starts round N" — all resolved on the SAME event as the rows above and
       are still graded into the card totals and the forward ledger. They are left off here because a dozen
       restatements of one result is not a dozen pieces of evidence.</div>`;
-  bindSandbox(pastBout(g));
   document.getElementById('xb').addEventListener('click',close_);
   document.getElementById('draw').classList.add('on');
   document.getElementById('draw').setAttribute('aria-hidden','false');
@@ -2268,6 +2273,11 @@ function ckCapture(){
     if(!read) return;
     const t=sbR1Read(st,b);
     const wins=m=>['ko','sub','dec'].reduce((x,y)=>x+(m[y+'_n']||0),0);
+    const sig=JSON.stringify([st.a,st.b,st.a_m,st.b_m,st.a_rec,st.b_rec,st.a_h,st.b_h]);
+    const prev=CKR[k];
+    const first=(prev&&prev.sig===sig&&(prev.first_ts||prev.ts))
+      ? (prev.first_ts||prev.ts)
+      : (prev&&prev.sig==null&&prev.ts ? prev.ts : Date.now());
     CKR[k]={p_a:+pA.toFixed(4), dec:+read.dec.toFixed(4),
       a_ko:+(read.a_ko||0).toFixed(4), a_sub:+(read.a_sub||0).toFixed(4),
       b_ko:+(read.b_ko||0).toFixed(4), b_sub:+(read.b_sub||0).toFixed(4),
@@ -2276,8 +2286,18 @@ function ckCapture(){
       cells_ok:Math.abs((read.a_ko||0)+(read.a_sub||0)+(read.b_ko||0)
                         +(read.b_sub||0)+read.dec-1)<0.02,
       r1:t?+t.p.toFixed(4):null, blend:st.blend,
-      thin:Math.min(wins(st.a_m||{}),wins(st.b_m||{})), ts:Date.now()};
-    dirty=true;
+      thin:Math.min(wins(st.a_m||{}),wins(st.b_m||{})),
+      /* WHEN THIS READ WAS FIRST ENTERED, which is what decides whether it
+         counts as a forecast. This whole object is rebuilt on every page load,
+         so a plain Date.now() recorded "last recomputed" - meaning the first
+         load after a card resolved would restamp every read to the present and
+         silently reclassify genuine pre-fight reads as after-the-fact, emptying
+         the record. The stamp is therefore carried forward and only reset when
+         the INPUTS change. Signed on the pasted inputs rather than on the
+         numbers they produce, so fixing the math in here never looks like a
+         re-entry. */
+      sig:sig, first_ts:first, ts:Date.now()};
+    dirty=dirty||!prev||prev.sig!==sig||prev.first_ts==null;
   });
   if(dirty){ _CKBY=null;   // a new read invalidates the per-bout grading cache
     try{ localStorage.setItem(CK_KEY, JSON.stringify(CKR)); }catch(e){} }
@@ -2296,7 +2316,16 @@ function ckStrip(){
   const S=G.mkt||G.win, three=!!G.mkt;
   const best=Math.min(S.check_brier, S.model_brier, three?S.market_brier:9);
   const thin=G.n<CK_MIN;
-  return `<div class="ckstrip${thin?' thin':''}">
+  return `<div class="ckstrip${thin?' thin':''}${G.all_post?' posthoc':''}">
+    ${G.all_post?`<div class="ckwarn"><b>Not a forecasting record.</b> Every read below was
+      entered after its card had finished, and a UFC.com page is updated once a fight is over —
+      the record, the rate stats and the Win-by-Method counts all then contain the fight being
+      predicted. These reads are partly reading the answer, and they will look strongest exactly
+      where the leak is largest: method, and the winner's own rates. Shown so the machinery can be
+      seen working. Reads entered before a card replace these as the record.</div>`
+      :G.n_post?`<div class="ckwarn soft">${G.n_post} read${G.n_post===1?'':'s'} entered after the
+        card ${G.n_post===1?'is':'are'} left out below — a UFC.com page updated after a fight
+        contains that fight, so it cannot be scored as a forecast.</div>`:''}
     <div class="ckhd"><b>Who has been closer</b>
       <span class="lbl">win/loss on the ${S.n} graded bout${S.n===1?'':'s'} where you
         entered a UFC.com check${three?' and a market price existed':''} — all three
@@ -2388,7 +2417,19 @@ function ckGrade(){
     const r=CKR[g.bout]; if(!r) return;
     const aWon = g.winner===g.a;
     const brier=(p,y)=>Math.pow(p-(y?1:0),2);
-    const row={event:c.event, date:c.date, bout:g.bout, a:g.a, b:g.b,
+    /* WHEN the read was entered, which decides whether it is evidence at all.
+       A UFC.com fighter page is updated after the card: the record, the rate
+       stats and above all the Win-by-Method counts then CONTAIN the fight being
+       predicted. A read pasted afterwards is therefore partly reading the
+       answer, and it will look sharpest exactly where the leak is largest -
+       method, and the winner's own rates. Cards finish late and roll past
+       midnight UTC, so anything entered from midday UTC the day after the card
+       is treated as after the fact; a read entered on or before card day is
+       taken as live. */
+    const evd=Date.parse((c.date||'')+'T00:00:00Z');
+    const tEnter=r.first_ts!=null?r.first_ts:r.ts;
+    const post=(tEnter!=null&&isFinite(evd)) ? tEnter>=evd+36*3600*1000 : null;
+    const row={event:c.event, date:c.date, bout:g.bout, a:g.a, b:g.b, post:post,
       winner:g.winner, method:g.method, round:g.round, thin:r.thin, blend:r.blend,
       win:{check:aWon?r.p_a:1-r.p_a, model:g.p_winner_model,
            market:g.market?g.market.p_winner_market:null},
@@ -2470,17 +2511,23 @@ function ckGrade(){
     rows.push(row);
   }));
   if(!rows.length) return null;
-  const mk=rows.filter(r=>r.win.market!=null);
+  /* The running record is built from reads entered BEFORE the fight. A
+     post-hoc read is not a forecast and cannot be scored as one. They stay in
+     `rows` so each bout still shows what you entered; they are simply not
+     evidence about which read is better. */
+  const live=rows.filter(r=>!r.post), nPost=rows.length-live.length;
+  const base=live.length?live:rows, allPost=!live.length&&rows.length>0;
+  const mk=base.filter(r=>r.win.market!=null);
   const sum=(a,f)=>a.reduce((t,x)=>t+f(x),0);
-  const meth=rows.filter(r=>r.mcmp);
-  const len=rows.filter(r=>r.len);
-  const mty=rows.filter(r=>r.mtype&&r.mtype.model!=null);
-  const rnd=rows.filter(r=>r.rnd&&r.rnd.model_right!=null);
-  const rex=rows.filter(r=>r.rexact);
-  return {rows:rows, n:rows.length,
-    win:{n:rows.length,
-      check_right:sum(rows,r=>r.win.check>0.5?1:0), model_right:sum(rows,r=>r.win.model>0.5?1:0),
-      check_brier:sum(rows,r=>r.wb.check)/rows.length, model_brier:sum(rows,r=>r.wb.model)/rows.length},
+  const meth=base.filter(r=>r.mcmp);
+  const len=base.filter(r=>r.len);
+  const mty=base.filter(r=>r.mtype&&r.mtype.model!=null);
+  const rnd=base.filter(r=>r.rnd&&r.rnd.model_right!=null);
+  const rex=base.filter(r=>r.rexact);
+  return {rows:rows, n:base.length, n_post:nPost, all_post:allPost,
+    win:{n:base.length,
+      check_right:sum(base,r=>r.win.check>0.5?1:0), model_right:sum(base,r=>r.win.model>0.5?1:0),
+      check_brier:sum(base,r=>r.wb.check)/base.length, model_brier:sum(base,r=>r.wb.model)/base.length},
     mkt:mk.length?{n:mk.length,
       check_right:sum(mk,r=>r.win.check>0.5?1:0), model_right:sum(mk,r=>r.win.model>0.5?1:0),
       market_right:sum(mk,r=>r.win.market>0.5?1:0),
@@ -2502,7 +2549,7 @@ function ckGrade(){
        buries whatever difference exists. These are the bouts that carry the
        whole signal, and they are a small fraction of n. */
     dis:(()=>{
-      const w=rows.filter(r=>(r.win.check>0.5)!==(r.win.model>0.5));
+      const w=base.filter(r=>(r.win.check>0.5)!==(r.win.model>0.5));
       const l=len.filter(r=>r.len.check_right!==r.len.model_right);
       return {win_n:w.length, win_check:sum(w,r=>r.win.check>0.5?1:0),
               len_n:l.length, len_check:sum(l,r=>r.len.check_right?1:0)};})()};
@@ -2675,10 +2722,32 @@ function parseRecord(s){
    Honest about its size: +1.4% over the base rate, against the method read's
    +4.3%. It earns its place only because it is the one thing the method mix
    cannot say — when, not how. */
+/* The as-of line for a bout: midnight UTC on its card's date. Everything the
+   check is built from must predate it. Falls back to null rather than to "now",
+   because a missing date must not silently become "keep every row". */
+function sbCardMs(b){
+  let d=null;
+  if(b&&b.past){ const c=HIST&&HIST.cards&&HIST.cards[0]; d=c&&c.date; }
+  else d=(DATA&&DATA.date)||null;
+  const t=d?Date.parse(d+'T00:00:00Z'):NaN;
+  return isFinite(t)?t:null;
+}
 function sbR1Read(st,b){
   const base=((((BR||{}).market_bases||{}).ends_before)||{})[b.rounds===5?'5':'3'];
   const b1=base&&base['2']!=null?base['2']:0.2533;
+  /* Two estimators, and the first is far better where it exists.
+
+     FIGHT-LEVEL (ESPN history): every fight he has had, win or loss, with the
+     round it ended in. P(ends in round one) is then simply the share of his
+     fights that did, tier-weighted.
+
+     COUNT-LEVEL (UFC.com only): round-one WINS over ALL fights. The numerator
+     counts wins and the denominator counts everything, so a man who has been
+     stopped early repeatedly reads as a slow starter - backwards. Kept only
+     because it is all there is without a history block. */
   const one=(m,rec)=>{
+    if(m&&m.espn&&m.p_r1!=null)
+      return (m.w_r1 + SB_SHRINK*b1)/(m.w_total + SB_SHRINK);
     if(!rec||m.r1_n==null) return null;
     return (m.r1_n + SB_SHRINK*b1)/(rec.n + SB_SHRINK);
   };
@@ -2689,7 +2758,8 @@ function sbR1Read(st,b){
   // toward the model's own round-one number, for the same reason as the method
   // read: one slider, every figure it claims to move.
   if(st.blend!=null && b.p_end_r1!=null) p=(1-st.blend)*b.p_end_r1 + st.blend*p;
-  return {p:p, base:b1, both:vals.length===2};
+  const fl=(st.a_m&&st.a_m.espn?1:0)+(st.b_m&&st.b_m.espn?1:0);
+  return {p:p, base:b1, both:vals.length===2, espn:fl};
 }
 /* How the two records alone would call the method. A fighter's method shares
    are conditional on him winning — UFC.com gives no losses-by-method — so the
@@ -2771,6 +2841,102 @@ function sbMethodRead(ma,mb,pA,w,b){
     out[k]=(1-w)*((b['m_'+k]||0)/s)+w*out[k];});
   return out;
 }
+/* ESPN's fight-history table, which is a strictly richer source than UFC.com's
+   "Win by Method" counts and exists to fix the weakest claim the check makes.
+
+   What the round read had before: round-one WINS over ALL fights. The numerator
+   counted only wins while the denominator counted everything, so a fighter who
+   had been stopped early three times scored zero in the numerator and three in
+   the denominator and came out looking like a slow starter - the exact reverse
+   of the truth. Fight-level rows give P(ends in round one) directly, from both
+   wins and losses, and P(round one | finish) separately.
+
+   It also carries what UFC.com withholds entirely: losses by method, the round
+   every fight ended in, and the promotion it happened at.
+
+   PREREGISTERED WEIGHTING, fixed before any data exists rather than tuned
+   afterwards: UFC, Contender Series and The Ultimate Fighter count 1.0, every
+   other promotion 0.5. Nearly half of a typical prospect's finishing record is
+   regional, and treating a knockout on a regional card as equal evidence to one
+   in the UFC is what makes a padded record read as finishing power. The number
+   is a declared judgement, not a fitted parameter, and it is not to be adjusted
+   after seeing which value helps.
+
+   AS-OF: rows dated on or after the card are dropped. An ESPN page pulled after
+   a fight has that fight as its first row, so without this the check would be
+   handed the result it is meant to predict. */
+function espnTier(ev){
+  return /\b(ufc|the ultimate fighter|tuf|contender series|dana white)/i.test(String(ev||''))
+    ? 1 : 0.5;
+}
+function espnFamily(meth){
+  const m=String(meth||'').toLowerCase();
+  if(/^(ko|tko)\b|knockout/.test(m)) return 'ko';
+  if(/^sub|submission|choke|armbar|kimura|triangle/.test(m)) return 'sub';
+  if(/^dec|decision/.test(m)) return 'dec';
+  return null;                      // draws, no contests and DQs are not finishes
+}
+function parseEspnHistory(text, asOfMs){
+  const T=String(text||'').replace(/\t/g,'\n').split(/\n+/)
+          .map(x=>x.trim()).filter(Boolean);
+  const DATE=/^([A-Z][a-z]{2})\s+(\d{1,2}),\s*(\d{4})$/;
+  const MON={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+  const rows=[]; let dropped=0;
+  for(let i=0;i<T.length;i++){
+    const d=DATE.exec(T[i]); if(!d||MON[d[1]]==null) continue;
+    const when=Date.UTC(+d[3],MON[d[1]],+d[2]);
+    // opponent, result, method, round, time, event - in that order, skipping
+    // whatever stray cells a copy-paste leaves between them
+    let j=i+1; const opp=T[j++]||'';
+    while(j<T.length && !/^(W|L|D|NC)$/i.test(T[j])) j++;
+    if(j>=T.length) continue;
+    const res=T[j++].toUpperCase();
+    const fam=espnFamily(T[j++]);
+    let rnd=null, secs=null, ev='';
+    if(j<T.length && /^[1-5]$/.test(T[j])) rnd=+T[j++];
+    if(j<T.length && /^(\d{1,2}:\d{2}|-)$/.test(T[j])){
+      const t=T[j++]; if(t!=='-'){const q=t.split(':'); secs=(+q[0])*60+(+q[1]);} }
+    if(j<T.length && !DATE.test(T[j])) ev=T[j++];
+    if(!fam||(res!=='W'&&res!=='L')) continue;
+    if(asOfMs!=null && when>=asOfMs){ dropped++; continue; }
+    rows.push({when:when, opp:opp, res:res, fam:fam, rnd:rnd, secs:secs,
+               ev:ev, w:espnTier(ev)});
+    i=j-1;
+  }
+  return rows.length?{rows:rows, dropped:dropped}:null;
+}
+/* Turned into the same shape parseUfcMethod produces, so every consumer
+   downstream is unchanged, plus the fight-level quantities that shape cannot
+   express. Counts are tier-weighted, which is why they are not integers. */
+function espnDerive(h){
+  if(!h||!h.rows.length) return null;
+  const R=h.rows, sw=f=>R.filter(f).reduce((t,x)=>t+x.w,0);
+  const wins=R.filter(x=>x.res==='W');
+  const wk=k=>wins.filter(x=>x.fam===k).reduce((t,x)=>t+x.w,0);
+  const ko=wk('ko'), sub=wk('sub'), dec=wk('dec'), wtot=ko+sub+dec;
+  if(!wtot) return null;
+  const tot=sw(()=>true);
+  const fin=sw(x=>x.fam!=='dec');
+  const r1 =sw(x=>x.fam!=='dec'&&x.rnd===1);
+  return {
+    // the existing contract
+    ko_n:ko, sub_n:sub, dec_n:dec,
+    ko_share:ko/wtot, sub_share:sub/wtot, dec_share:dec/wtot,
+    r1_n:sw(x=>x.res==='W'&&x.fam!=='dec'&&x.rnd===1),
+    // what only fight-level rows can give
+    espn:true, n_fights:R.length, w_total:tot,
+    w_finish:fin, w_r1:r1,
+    p_r1: tot>0 ? r1/tot : null,                 // P(ends in round one)
+    p_r1_given_fin: fin>0 ? r1/fin : null,       // P(round one | it finishes)
+    /* Losses are reported as plain counts. The tier weight belongs in the
+       shares, where it changes how much a regional knockout is worth as
+       evidence; "has he been stopped" is a fact, and "0.5 KO losses" is not a
+       sentence anyone should have to read. */
+    l_ko:R.filter(x=>x.res==='L'&&x.fam==='ko').length,
+    l_sub:R.filter(x=>x.res==='L'&&x.fam==='sub').length,
+    l_dec:R.filter(x=>x.res==='L'&&x.fam==='dec').length,
+    off_tier:R.filter(x=>x.w<1).length, dropped:h.dropped};
+}
 function parseUfcBlock(text){
   const L=String(text||'').split(/\n+/).map(s=>s.trim()).filter(Boolean), out={};
   SB_FIELDS.forEach(function(F){
@@ -2820,9 +2986,13 @@ function sbCorner(base,over,w){
   }
   return out;
 }
+/* Blend was a slider; it is now fixed at a pure UFC.com read. An old stored
+   state may still carry a fraction, so it is forced here rather than trusted -
+   a check that is 70% the model is not a second opinion, it is the model. */
 function sbState(b){
   const k=b.bout;
   if(!SBOX[k]) SBOX[k]={a:{},b:{},blend:1,on:false};
+  SBOX[k].blend=1;
   return SBOX[k];
 }
 function sbWeightShare(){
@@ -2932,18 +3102,18 @@ function sandboxPanel(b){
       <label class="lbl">${nA}
         <input class="sbrec" data-c="a" placeholder="record, e.g. 10-3-0 (W-L-D)">
         <textarea class="sbta" data-c="a" rows="4" placeholder="paste the UFC.com stats block"></textarea>
-        <input class="sbrec sbbio" data-c="a" placeholder="paste the Age/Height/Reach block, or type 32, 74"></label>
+        <input class="sbrec sbbio" data-c="a" placeholder="paste the Age/Height/Reach block, or type 32, 74">
+        <textarea class="sbta sbhist" data-c="a" rows="3" placeholder="paste the ESPN fight history table — supersedes Win by Method"></textarea></label>
       <label class="lbl">${nB}
         <input class="sbrec" data-c="b" placeholder="record, e.g. 10-3-0 (W-L-D)">
         <textarea class="sbta" data-c="b" rows="4" placeholder="paste the UFC.com stats block"></textarea>
-        <input class="sbrec sbbio" data-c="b" placeholder="paste the Age/Height/Reach block, or type 32, 74"></label>
+        <input class="sbrec sbbio" data-c="b" placeholder="paste the Age/Height/Reach block, or type 32, 74">
+        <textarea class="sbta sbhist" data-c="b" rows="3" placeholder="paste the ESPN fight history table — supersedes Win by Method"></textarea></label>
     </div>
     <div class="sbacts">
       <button class="more sbgo">Read both</button>
       <button class="more sbclear">Clear</button>
-      ${pNew!=null?`<label class="lbl sbblend">blend
-        <input type="range" class="sbrange" min="0" max="100" value="${Math.round(100*st.blend)}">
-        <span class="mono sbw">${Math.round(100*st.blend)}%</span> toward UFC.com</label>`:''}
+      ${pNew!=null?`<span class="lbl sbblend">a pure UFC.com read — nothing of the model mixed in</span>`:''}
     </div>
     ${cmp?(b.noRead
       ?`<div class="lbl" style="margin:11px 0 3px">the records you pasted</div>
@@ -3053,7 +3223,7 @@ function sbVerdict(ma,mb,pA,b,st){
   const nw=m=>['ko','sub','dec'].reduce((t,x)=>t+(m[x+'_n']||0),0);
   const minW=Math.min(nw(ma),nw(mb));
   const thin = minW<3
-    ? `<span class="sbthin" title="shrinkage pulls a record this short most of the way back to the league rate, and reads built on 1-2 wins measured roughly half as useful as those on 3-5. Shown, but it cannot lead the model's call.">thin — ${minW} win${minW===1?'':'s'} on one side</span>`
+    ? `<span class="sbthin" title="shrinkage pulls a record this short most of the way back to the league rate, and reads built on 1-2 wins measured roughly half as useful as those on 3-5. Shown, but it cannot lead the model's call.">thin — ${Math.round(minW*10)/10} win${minW===1?'':'s'} on one side</span>`
     : '';
   /* The route named above is the best cell WITHIN the family the headline
      called - "if it finishes, this is how". The chip grades the best cell
@@ -3134,13 +3304,29 @@ function sbMethodBlock(b,st,pA){
         const cond=fin>0.02?t.p/fin:null;
         /* The one model number an archived bout keeps. With the column gone it
            would have gone with it, so it rides in the label instead. */
+        /* Where the round figure came from. Two reads that disagree are worth
+           nothing if you cannot tell which rows produced them. */
+        /* Named per corner. Two fighters' figures run together behind a "·"
+           are unreadable, and this line exists so the round number can be
+           traced to the rows that produced it. */
+        const H=[[surname(b.a),st.a_m],[surname(b.b),st.b_m]].filter(x=>x[1]&&x[1].espn);
+        const prov=H.length?`<div class="note" style="margin:6px 0 0">
+          <b style="color:var(--mute)">Round read from fight history.</b>
+          ${H.map(([nm,x])=>`<div style="margin-top:3px">${esc(nm)} — ${x.n_fights} fights${
+            x.off_tier?`, ${x.off_tier} outside the UFC at half weight`:''}${
+            x.dropped?`, ${x.dropped} on or after this card dropped`:''}${
+            x.p_r1_given_fin!=null?` · <b style="color:var(--mute)">${P0(x.p_r1_given_fin)}%</b> of his finishes came in round one`:''
+            } · beaten ${x.l_ko||0} by KO, ${x.l_sub||0} by submission, ${x.l_dec||0} by decision</div>`).join('')}
+          <div style="margin-top:3px">Losses by method and the round each fight ended in are the two
+            things UFC.com does not publish, and they are what the round claim was missing.</div></div>`:'';
         return row(hasM||b.p_end_r1==null?'ends in round one'
             :`ends in round one <span style="color:var(--dim)">· model ${P0(b.p_end_r1)}%</span>`,
             b.p_end_r1,t.p)
           + (cond!=null?row('of the finishes, in round one',
               (b.p_end_r1!=null&&b.p_finish>0.02)?b.p_end_r1/b.p_finish:null,
               Math.min(0.99,cond)):'')
-          + (t.both?'':'<div class="note" style="margin:4px 0 0">Round-one figure uses one corner only — add the other record for both.</div>');
+          + (t.both?'':'<div class="note" style="margin:4px 0 0">Round-one figure uses one corner only — add the other record for both.</div>')
+          + prov;   // under the rows it explains, not wedged above them
       })()}`
      :'<div class="note" style="margin-top:6px">Both corners need a Win by Method block before the two can be combined.</div>'}
     ${(()=>{
@@ -3198,18 +3384,9 @@ function bindSandbox(b){
   if(!box) return;
   const st=sbState(b);
   const redraw=()=>{
-    /* On a settled fight the panel is not the only thing that changes: the M/C
-       marks and the winner card above it are scored from the read, so redrawing
-       the panel alone would leave the comparison showing the previous answer.
-       Re-open the whole drawer instead. */
-    if(b.past){
-      _CKBY=null;
-      // the result TILES are built by render(), not by the drawer, so without
-      // this the "check beat model" chip only appeared after a reload
-      if(typeof render==='function') render();
-      openPast(b.bout);
-      return;
-    }
+    /* Settled bouts no longer host a panel - a check cannot be entered after
+       the fight, because the page it would be pasted from already contains the
+       result - so there is no past branch here any more. */
     const host=box.parentNode;
     host.innerHTML=sandboxPanel(b);
     bindSandbox(b);
@@ -3217,8 +3394,11 @@ function bindSandbox(b){
     // card summary would never refresh if the redraw waited on that flag
     if(typeof render==='function' && (st.on||b.noRead)) render();
   };
-  box.querySelectorAll('.sbta').forEach(ta=>{
+  box.querySelectorAll('.sbta:not(.sbhist)').forEach(ta=>{
     ta.value=st[ta.getAttribute('data-c')+'_raw']||'';
+  });
+  box.querySelectorAll('.sbta.sbhist').forEach(ta=>{
+    ta.value=st[ta.getAttribute('data-c')+'_histraw']||'';
   });
   box.querySelectorAll('.sbrec:not(.sbbio)').forEach(ip=>{
     ip.value=st[ip.getAttribute('data-c')+'_recraw']||'';
@@ -3227,11 +3407,23 @@ function bindSandbox(b){
     ip.value=st[ip.getAttribute('data-c')+'_bioraw']||'';
   });
   const read=()=>{
-    box.querySelectorAll('.sbta').forEach(ta=>{
+    box.querySelectorAll('.sbta:not(.sbhist)').forEach(ta=>{
       const c=ta.getAttribute('data-c');
       st[c+'_raw']=ta.value;
       st[c]=parseUfcBlock(ta.value);
       st[c+'_m']=parseUfcMethod(ta.value);
+    });
+    /* The history supersedes the Win-by-Method counts where it is given: it
+       contains them and four things they cannot express. Rows on or after the
+       card are dropped before anything is derived, so a page pulled late cannot
+       feed the result back in. */
+    const asOf=sbCardMs(b);
+    box.querySelectorAll('.sbta.sbhist').forEach(ta=>{
+      const c=ta.getAttribute('data-c');
+      st[c+'_histraw']=ta.value;
+      const d=espnDerive(parseEspnHistory(ta.value, asOf));
+      st[c+'_h']=d;
+      if(d) st[c+'_m']=Object.assign({}, st[c+'_m']||{}, d);
     });
     box.querySelectorAll('.sbrec:not(.sbbio)').forEach(ip=>{
       const c=ip.getAttribute('data-c');
@@ -3251,12 +3443,12 @@ function bindSandbox(b){
   const cl=box.querySelector('.sbclear');
   if(cl) cl.addEventListener('click',()=>{
     st.a={};st.b={};st.a_raw='';st.b_raw='';st.a_m={};st.b_m={};
+    st.a_h=null;st.b_h=null;st.a_histraw='';st.b_histraw='';
     st.a_rec=null;st.b_rec=null;st.a_recraw='';st.b_recraw='';st.on=false;st.blend=1;
     sbSave(); redraw();
     if(typeof render==='function') render();
   });
-  const rg=box.querySelector('.sbrange');
-  if(rg) rg.addEventListener('input',()=>{st.blend=(+rg.value)/100;sbSave();redraw();});
+
   const ck=box.querySelector('.sbchip');
   if(ck) ck.addEventListener('change',()=>{st.on=ck.checked; sbSave();
     if(typeof render==='function') render();});
