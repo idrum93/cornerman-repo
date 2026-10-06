@@ -1,0 +1,14 @@
+# Corner order overrides.
+#
+# data/upcoming.txt is rebuilt from Wikipedia on every refresh, so fixing a
+# bout there by hand does not survive the next run. Wikipedia does not always
+# list the red corner first; UFC.com and the broadcast are the reference.
+#
+# Write the bout here in the CORRECT order, one per line. Matching is on the
+# pair of names, so whichever way Wikipedia lists them, this wins.
+#
+# This affects only which fighter is drawn red and on the left. The model is
+# unchanged: every win feature is antisymmetric and the fit has no intercept,
+# so P(A beats B) = 1 - P(B beats A) exactly, whichever way round they sit.
+
+Matheus Camilo vs. Jai Herbert
