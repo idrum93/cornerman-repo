@@ -539,7 +539,15 @@ def predict_card(path, fights, fighters, verbose=True):
 
         wc = clean_division((meta.get("weights") or {}).get((na, nb), "")) \
             or infer_division(fights, ids[na], ids[nb])
-        r = dict(bout=f"{na} vs. {nb}", a=na, b=nb, rounds=n_rounds,
+        # The RESOLVED corpus ids, carried into the archive so that grading can
+        # join on identity rather than on a spelling. Transliterations differ
+        # between sources and change over time - "Darya Zheleznyakova" against
+        # "Daria Zhelezniakova", "Patricio Pitbull" against "Patricio Freire" -
+        # and a name join silently drops the bout when they diverge, which is
+        # how two UFC 331 fights ended up predicted but never graded. An id does
+        # not get retransliterated.
+        r = dict(bout=f"{na} vs. {nb}", a=na, b=nb,
+                 a_id=ids[na], b_id=ids[nb], rounds=n_rounds,
                  segment=segment, weight_class=wc, thin=bool(thin),
                  p_a=round(p_a, 4), p_b=round(1 - p_a, 4))
         # Raw pre-fight numbers. Without these the drawer can say "age pushes
@@ -1282,9 +1290,15 @@ def grade_archive(fights, archive_dir="site/archive", out_path="site/history.jso
         return None
     base = _base_rates(fights)
     parts = fights.bout.str.split(" vs. ", n=1, expand=True)
-    idx = {}
+    idx, idx_id = {}, {}
     for i, (r_, b_) in enumerate(zip(parts[0], parts[1])):
         idx.setdefault(frozenset((_key(r_), _key(b_))), []).append(i)
+    # Identity index. Preferred over the name index wherever the archive carries
+    # ids; the name index stays as the fallback for cards archived before ids
+    # were written, and those cannot be re-archived.
+    if {"r_id", "b_id"}.issubset(set(fights.columns)):
+        for i, (r_, b_) in enumerate(zip(fights.r_id, fights.b_id)):
+            idx_id.setdefault(frozenset((r_, b_)), []).append(i)
 
     cards = []
     for fp in sorted(d.glob("*.json")):
@@ -1296,7 +1310,12 @@ def grade_archive(fights, archive_dir="site/archive", out_path="site/history.jso
         graded, tally = [], []
         for b in card.get("bouts", []):
             best = None
-            for i in idx.get(frozenset((_key(b["a"]), _key(b["b"]))), []):
+            cand = None
+            if idx_id and b.get("a_id") and b.get("b_id"):
+                cand = idx_id.get(frozenset((b["a_id"], b["b_id"])))
+            if cand is None:
+                cand = idx.get(frozenset((_key(b["a"]), _key(b["b"]))), [])
+            for i in cand:
                 row = fights.iloc[i]
                 if pd.notna(ev_date):
                     gap = abs((pd.Timestamp(row.date) - ev_date).days)
