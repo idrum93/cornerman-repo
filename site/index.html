@@ -394,6 +394,25 @@
   .abgrid .abc.lit:nth-child(3n){opacity:1;color:var(--gold)}
   .abs{color:var(--dim);margin:0 1px}
   .abr{color:var(--gold);margin-left:3px;font-size:9px}
+  .dcurve{margin-top:10px;padding-top:8px;border-top:1px solid var(--line)}
+  .dcrow{display:flex;align-items:center;gap:7px;padding:2px 0;font-size:11px}
+  .dcrow.here{background:rgba(205,164,58,.09);border-radius:4px;padding:3px 4px;margin:0 -4px}
+  .dcrow.here .dcv{color:var(--gold);font-weight:800}
+  .dcl{width:62px;flex:none;color:var(--mute);font-size:10px}
+  .dcbar{flex:1;height:7px;background:var(--soft);border-radius:4px;overflow:hidden}
+  .dcbar i{display:block;height:7px;background:var(--bluesoft);border-radius:4px}
+  .dcrow.here .dcbar i{background:var(--gold)}
+  .dcv{width:34px;text-align:right;font-size:11px}
+  .dcn{width:52px;text-align:right;color:var(--dim);font-size:9.5px}
+  .brwrap{margin-bottom:14px}
+  .brsum{cursor:pointer;list-style:none;font-size:11.5px;font-weight:700;color:var(--mute);
+    padding:8px 11px;border:1px solid var(--line);border-radius:8px;display:flex;gap:7px;
+    align-items:baseline;flex-wrap:wrap}
+  .brsum::-webkit-details-marker{display:none}
+  .brsum::before{content:'▸';color:var(--gold);font-size:10px}
+  details[open]>.brsum::before{content:'▾'}
+  .brsum:hover{border-color:var(--gold)}
+  .brsumh{font-weight:400;color:var(--dim);font-size:10.5px}
   .abnone{color:var(--dim);font-weight:400}
   .dsrc{text-transform:uppercase;letter-spacing:.06em}
   .dsrc.ck{color:var(--gold)}
@@ -1479,7 +1498,13 @@ function render(){
       'graded against what happened · click any fight',
       lastCard()+(lc?ckCardPanel(lc.event):''))+
     zone('z-hist','z-history','What usually happens','history of every fight since 2012, not predictions',
-      baseRatePanel(null,null,true)+divisionTable())+`
+      /* Collapsed by default. This zone is context, not a read, and at full
+         height it pushed the card's own numbers off the screen. The division
+         table stays open because it answers something about THIS card - which
+         weight classes are on it - rather than about the sport in general. */
+      `<details class="brwrap"><summary class="brsum">takedowns, knockdowns and
+         how fights end — <span class="brsumh">13 measurements across every fight since 2012</span></summary>
+       ${baseRatePanel(null,null,true)}</details>`+divisionTable())+`
     <div class="note" style="margin-top:16px;max-width:900px">
       Win probability is a logistic model on 14 opponent-adjusted differentials, trained only on
       earlier fights. Method and round come from a competing-risks hazard model and sum to 100%.
@@ -2720,6 +2745,37 @@ function sbMethodBlock(b,st,pA){
           + (t.both?'':'<div class="note" style="margin:4px 0 0">Round-one figure uses one corner only — add the other record for both.</div>');
       })()}`
      :'<div class="note" style="margin-top:6px">Both corners need a Win by Method block before the two can be combined.</div>'}
+    ${(()=>{
+      /* The empirical ground under this whole tab. The check has no model
+         behind it - it averages two career method splits and calls the fight
+         long or short - and this is the evidence that doing so means anything.
+         The pair's own bucket is marked, so the read above can be placed on the
+         curve rather than taken on faith.
+
+         RAW shares here, matching how the curve was built. The read itself is
+         shrunk; this table is the unshrunk picture of why the quantity is
+         informative, and mixing the two would misplace the marker. */
+      const C=(BR||{}).decision_curve; if(!C||!C.buckets) return '';
+      const raw=m=>{const t=['ko','sub','dec'].reduce((x,k)=>x+(m[k+'_n']||0),0);
+                    return t?(m.dec_n||0)/t:null;};
+      const ra=raw(ma), rb=raw(mb);
+      const mine=(ra!=null&&rb!=null)?(ra+rb)/2:null;
+      return `<div class="dcurve"><div class="lbl" style="margin-bottom:4px">
+        how often fights finish, by the pair's average career decision share
+        <span style="color:var(--dim)">· ${C.n.toLocaleString()} bouts since 2012 · r ${C.r}</span></div>
+        ${C.buckets.map(x=>{
+          const here = mine!=null && mine>=x.lo && mine<(x.hi>=1?1.0001:x.hi);
+          return `<div class="dcrow${here?' here':''}">
+            <span class="dcl">${Math.round(x.lo*100)}–${Math.round(x.hi*100)}%</span>
+            <span class="dcbar"><i style="width:${(x.finish*100).toFixed(1)}%"></i></span>
+            <span class="mono dcv">${P0(x.finish)}%</span>
+            <span class="dcn">n=${x.n}</span></div>`;}).join('')}
+        <div class="note" style="margin-top:5px">${mine!=null
+          ? `This pair averages <b style="color:var(--gold)">${P0(mine)}%</b> decisions on raw career
+             records, which is the marked row.`
+          : 'Paste both Win by Method blocks to see where this pair sits.'}
+          Raw career shares, not the shrunk numbers above — shrinkage is right for a read and
+          would flatten this table into its middle two rows.</div></div>`;})()}
     <div class="note" style="margin-top:9px">Shares are shrunk toward the league
       mix before being combined. Raw, they are worse than useless: scored on 6,823
       bouts the unshrunk career mix lands at 2.11 nats against the base rate's 1.02,
