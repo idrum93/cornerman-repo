@@ -1353,12 +1353,19 @@ function pastGrid(g){
      thing the drawer was split in two to stop doing. Finishes only: on a
      decision there is no round to call. */
   if(g.method!=='DEC'){
+    /* Conditional on the finish, matching how ckGrade scores it - see the note
+       there. An unconditional P(round one) beside a "did the finish land in
+       round one" verdict is a probability of one thing judged against another.*/
     const r1p=(g.report||[]).find(x=>x.kind==='prop'&&x.label==='Ends before round 2');
     const one=g.round===1;
-    const mv=r1p?(one?r1p.said:1-r1p.said):null;
-    const cv=cr&&cr.rnd?(one?cr.rnd.check_p:1-cr.rnd.check_p):null;
+    const mFin=g.m_decision!=null?1-g.m_decision:null;
+    const mC=(r1p&&mFin!=null&&mFin>0.02)?Math.min(0.99,r1p.said/mFin):null;
+    const mv=mC==null?null:(one?mC:1-mC);
+    const cC=cr&&cr.rnd?cr.rnd.check_p:null;
+    const cv=cC==null?null:(one?cC:1-cC);
     if(mv!=null||cv!=null)
-      put('round one', mv, r1p?(r1p.said>=0.5)===one:null, cv, cr&&cr.rnd?cr.rnd.check_right:null);
+      put('round one', mv, mC==null?null:(mC>=0.5)===one, cv,
+          cr&&cr.rnd?cr.rnd.check_right:null);
   }
   /* Ranking on the winner alone put a read first that could have missed every
      other claim on the card, which is the opposite of "closer". The summary
@@ -1543,8 +1550,11 @@ function openPast(id){
           if(isR&&cr&&cr.rnd&&cr.rnd.model_call!=null)
             out.push(`<div class="pline col"><span>Round one or later</span>
               <b>${esc(cr.rnd.actual==='R1'?'round one':'after round one')}</b>
-              ${say('model',`${P0(cr.rnd.model_p)}% round one · called ${esc(cr.rnd.model_call)}`,cr.rnd.model_right)}
-              ${say('check',`${P0(cr.rnd.check_p)}% round one · called ${esc(cr.rnd.check_call)}`,cr.rnd.check_right)}</div>`);
+              <div class="lbl">scored given that it finished — 52% of three-round finishes land in round one</div>
+              ${cr.rnd.model_p!=null?say('model',`${P0(cr.rnd.model_p)}% of its finishes in round one · called ${
+                esc(cr.rnd.model_call)}`,cr.rnd.model_right):''}
+              ${say('check',`${P0(cr.rnd.check_p)}% of its finishes in round one · called ${
+                esc(cr.rnd.check_call)}`,cr.rnd.check_right)}</div>`);
         });
         return out.join('');})()}
       <div class="note" style="margin-top:6px">Top pick is the single likeliest of five endings. A decision
@@ -2271,7 +2281,7 @@ function ckCapture(){
     if(pA==null||!isFinite(pA)) return;
     const read=sbMethodRead(st.a_m||{}, st.b_m||{}, pA, st.blend, b);
     if(!read) return;
-    const t=sbR1Read(st,b);
+    const t=sbR1Read(st,b,1-read.dec);
     const wins=m=>['ko','sub','dec'].reduce((x,y)=>x+(m[y+'_n']||0),0);
     const sig=JSON.stringify([st.a,st.b,st.a_m,st.b_m,st.a_rec,st.b_rec,st.a_h,st.b_h]);
     const prev=CKR[k];
@@ -2499,14 +2509,32 @@ function ckGrade(){
     const rex=(g.report||[]).find(x=>x.kind==='round');
     if(fin&&rex) row.rexact={model_right:!!rex.right, model_call:rex.top, actual:'round '+g.round};
     const r1p=(g.report||[]).find(x=>x.kind==='prop'&&x.label==='Ends before round 2');
+    /* CONDITIONAL on a finish, because that is the only population this row is
+       graded on. Both sides publish P(ends in round one) across ALL outcomes,
+       which on this card runs .106 to .403 and never approaches .5 - so a .5
+       threshold on the unconditional number made both reads call "after round
+       one" on essentially every bout, while round one is where 52% of
+       three-round finishes actually land. A near-constant call scored against a
+       coin flip is not a read, and it was making the round row look arbitrary
+       for both sides at once.
+
+       Dividing by each side's own finish probability puts the number and the
+       event on the same footing: "given it ended early, was it the first
+       round". The threshold then sits near the real base rate instead of
+       somewhere the unconditional probability cannot reach. */
+    const cnd=(p,pf)=>(p==null||pf==null||pf<=0.02)?null:Math.min(0.99,p/pf);
     if(fin&&r.r1!=null){
       const wasR1=g.round===1;
-      row.rnd={actual:wasR1?'R1':'after R1', check_call:r.r1>=0.5?'R1':'after R1',
-               check_p:r.r1, check_b:brier(r.r1,wasR1)};
-      row.rnd.check_right=row.rnd.check_call===row.rnd.actual;
-      if(r1p){ row.rnd.model_call=r1p.said>=0.5?'R1':'after R1';
-               row.rnd.model_p=r1p.said; row.rnd.model_b=brier(r1p.said,wasR1);
-               row.rnd.model_right=row.rnd.model_call===row.rnd.actual; }
+      const cC=cnd(r.r1, 1-r.dec);
+      if(cC!=null){
+        row.rnd={actual:wasR1?'R1':'after R1', check_call:cC>=0.5?'R1':'after R1',
+                 check_p:cC, check_raw:r.r1, check_b:brier(cC,wasR1)};
+        row.rnd.check_right=row.rnd.check_call===row.rnd.actual;
+        const cM=r1p?cnd(r1p.said, g.m_decision!=null?1-g.m_decision:null):null;
+        if(cM!=null){ row.rnd.model_call=cM>=0.5?'R1':'after R1';
+                 row.rnd.model_p=cM; row.rnd.model_raw=r1p.said; row.rnd.model_b=brier(cM,wasR1);
+                 row.rnd.model_right=row.rnd.model_call===row.rnd.actual; }
+      }
     }
     rows.push(row);
   }));
@@ -2732,7 +2760,42 @@ function sbCardMs(b){
   const t=d?Date.parse(d+'T00:00:00Z'):NaN;
   return isFinite(t)?t:null;
 }
-function sbR1Read(st,b){
+/* P(round one | a finish), as a function of the pair's FINISH RATE.
+   MEASURED 2026-10-06 on 7,177 UFC bouts, 2010-2026 (see PREREGISTRATION
+   addendum 45). Split-half reliability of a fighter's own round behaviour:
+
+     P(round one | finish)        0.21 at 8+ fights, 0.05 at 12+
+     P(ends by round 2 | finish) -0.02 at 8+ fights
+     P(finish at all)  CONTROL    0.54 at 10+, 0.60 at 16+
+
+   The control RISES with more fights, which is what a real trait does; the
+   round quantities fall toward zero, which is what noise does. So WHEN a
+   fighter finishes is not a measurable property of the fighter, while WHETHER
+   he finishes plainly is. Reading a man's round-one tendency off his own nine
+   finishes is reading noise.
+
+   What does survive is this: across 3,623 finishes, heavier finishers finish
+   EARLIER - P(round one | finish) climbs 0.402 to 0.569 from the lowest
+   finish-rate bucket to the highest (r = +0.100, p = 1.7e-9). That is a league
+   curve indexed by a quantity that IS reliable, so the round number is built
+   from it rather than from the fighter's own round history. */
+const R1_CURVE_FALLBACK=[[0,.30,.402],[.30,.45,.441],[.45,.60,.455],
+                         [.60,.75,.510],[.75,1.01,.569]];
+function r1GivenFinish(fr, rounds){
+  const C=((BR||{}).r1_curve)||null;
+  const rows=(C&&C.buckets)||R1_CURVE_FALLBACK.map(x=>({lo:x[0],hi:x[1],p:x[2]}));
+  const f=Math.max(0,Math.min(1,fr==null?0.5:fr));
+  let hit=null;
+  rows.forEach(r=>{const lo=r.lo!=null?r.lo:r[0], hi=r.hi!=null?r.hi:r[1];
+    if(f>=lo && f<hi) hit=(r.p!=null?r.p:r[2]);});
+  if(hit==null) hit=0.46;
+  /* Five-round fights spread the same finishes over more rounds. Measured:
+     0.517 of three-round finishes land in round one against 0.376 of
+     five-round ones, so the curve is scaled by that ratio rather than
+     re-estimated on 362 bouts. */
+  return rounds===5 ? hit*(0.376/0.517) : hit;
+}
+function sbR1Read(st,b,pFin){
   const base=((((BR||{}).market_bases||{}).ends_before)||{})[b.rounds===5?'5':'3'];
   const b1=base&&base['2']!=null?base['2']:0.2533;
   /* Two estimators, and the first is far better where it exists.
@@ -2751,6 +2814,18 @@ function sbR1Read(st,b){
     if(!rec||m.r1_n==null) return null;
     return (m.r1_n + SB_SHRINK*b1)/(rec.n + SB_SHRINK);
   };
+  /* Preferred route: the fight's own finish probability times the league's
+     round shape at this pair's finish rate. Both inputs are reliable; the
+     per-fighter round share this replaces was not. */
+  const fr=m=>(m&&m.espn&&m.w_total>0)?m.w_finish/m.w_total:null;
+  const fa=fr(st.a_m), fb=fr(st.b_m);
+  const frs=[fa,fb].filter(v=>v!=null);
+  if(pFin!=null && frs.length){
+    const pair=frs.reduce((x,y)=>x+y,0)/frs.length;
+    const p0=pFin*r1GivenFinish(pair, b&&b.rounds===5?5:3);
+    return {p:p0, base:b1, both:frs.length===2, espn:frs.length,
+            curve:true, pair_fr:pair, cond:r1GivenFinish(pair, b&&b.rounds===5?5:3)};
+  }
   const ra=one(st.a_m||{},st.a_rec), rb=one(st.b_m||{},st.b_rec);
   if(ra==null&&rb==null) return null;
   const vals=[ra,rb].filter(v=>v!=null);
@@ -2879,24 +2954,46 @@ function espnFamily(meth){
 function parseEspnHistory(text, asOfMs){
   const T=String(text||'').replace(/\t/g,'\n').split(/\n+/)
           .map(x=>x.trim()).filter(Boolean);
-  const DATE=/^([A-Z][a-z]{2})\s+(\d{1,2}),\s*(\d{4})$/;
-  const MON={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+  /* Four date shapes rather than one. ESPN writes "Jul 18, 2026", but a block
+     can arrive spelled out, day-first, or ISO depending on where it was copied
+     from, and a parser that silently returns nothing is the worst way to tell
+     someone their paste was the wrong shape. Column ORDER is still assumed -
+     reordered columns are a different table, not a formatting variation, and
+     guessing which cell is which would mis-assign silently. */
+  /* Whole-token month lookup, not a three-letter prefix. Matching on the first
+     three letters would read "Marathon 18 2026" as a March date and "Octagon 12
+     2024" as an October one - and an event cell misread as a date silently
+     shifts every field after it. */
+  const MON={jan:0,january:0,feb:1,february:1,mar:2,march:2,apr:3,april:3,may:4,
+             jun:5,june:5,jul:6,july:6,aug:7,august:7,sep:8,sept:8,september:8,
+             oct:9,october:9,nov:10,november:10,dec:11,december:11};
+  const mon=w=>MON[String(w).replace(/\.$/,'').toLowerCase()];
+  const readDate=t=>{
+    let m=/^([A-Za-z]{3,9}\.?)\s+(\d{1,2}),?\s*(\d{4})$/.exec(t);      // Jul 18, 2026
+    if(m&&mon(m[1])!=null) return Date.UTC(+m[3],mon(m[1]),+m[2]);
+    m=/^(\d{1,2})\s+([A-Za-z]{3,9}\.?)\s+(\d{4})$/.exec(t);            // 18 Jul 2026
+    if(m&&mon(m[2])!=null) return Date.UTC(+m[3],mon(m[2]),+m[1]);
+    m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(t);                              // 2026-07-18
+    if(m) return Date.UTC(+m[1],+m[2]-1,+m[3]);
+    return null;
+  };
+  const RES=/^(w|l|d|nc|win|loss|lost|draw|no contest)$/i;
   const rows=[]; let dropped=0;
   for(let i=0;i<T.length;i++){
-    const d=DATE.exec(T[i]); if(!d||MON[d[1]]==null) continue;
-    const when=Date.UTC(+d[3],MON[d[1]],+d[2]);
+    const when=readDate(T[i]); if(when==null) continue;
     // opponent, result, method, round, time, event - in that order, skipping
     // whatever stray cells a copy-paste leaves between them
     let j=i+1; const opp=T[j++]||'';
-    while(j<T.length && !/^(W|L|D|NC)$/i.test(T[j])) j++;
+    while(j<T.length && !RES.test(T[j])) j++;
     if(j>=T.length) continue;
-    const res=T[j++].toUpperCase();
+    const rtok=T[j++].toLowerCase();
+    const res=(rtok==='w'||rtok==='win')?'W':(rtok==='l'||rtok==='loss'||rtok==='lost')?'L':'X';
     const fam=espnFamily(T[j++]);
     let rnd=null, secs=null, ev='';
     if(j<T.length && /^[1-5]$/.test(T[j])) rnd=+T[j++];
     if(j<T.length && /^(\d{1,2}:\d{2}|-)$/.test(T[j])){
       const t=T[j++]; if(t!=='-'){const q=t.split(':'); secs=(+q[0])*60+(+q[1]);} }
-    if(j<T.length && !DATE.test(T[j])) ev=T[j++];
+    if(j<T.length && readDate(T[j])==null) ev=T[j++];
     if(!fam||(res!=='W'&&res!=='L')) continue;
     if(asOfMs!=null && when>=asOfMs){ dropped++; continue; }
     rows.push({when:when, opp:opp, res:res, fam:fam, rnd:rnd, secs:secs,
@@ -3204,7 +3301,7 @@ function sbVerdict(ma,mb,pA,b,st){
 
   // round, only when a finish is the call and the timing read says something
   let rnd='';
-  const t=sbR1Read(st,b);
+  const t=sbR1Read(st,b,fin!=null?fin:null);
   /* `top` was never declared in this function. It silently resolved to the
      BROWSER GLOBAL window.top, whose [2] is undefined, so the guard
      `top[2]!=='decision'` was always true and a round was appended to decision
@@ -3299,7 +3396,7 @@ function sbMethodBlock(b,st,pA){
         /* Timing. P(round one) stands on its own; P(round one GIVEN a finish)
            is the two reads divided, which is the "if it finishes, how early"
            question and the only form in which this number is worth much. */
-        const t=sbR1Read(st,b); if(!t) return '';
+        const t=sbR1Read(st,b,read?1-read.dec:null); if(!t) return '';
         const fin=1-read.dec;
         const cond=fin>0.02?t.p/fin:null;
         /* The one model number an archived bout keeps. With the column gone it
@@ -3315,10 +3412,14 @@ function sbMethodBlock(b,st,pA){
           ${H.map(([nm,x])=>`<div style="margin-top:3px">${esc(nm)} — ${x.n_fights} fights${
             x.off_tier?`, ${x.off_tier} outside the UFC at half weight`:''}${
             x.dropped?`, ${x.dropped} on or after this card dropped`:''}${
-            x.p_r1_given_fin!=null?` · <b style="color:var(--mute)">${P0(x.p_r1_given_fin)}%</b> of his finishes came in round one`:''
+            x.w_total>0?` · finishes <b style="color:var(--mute)">${P0(x.w_finish/x.w_total)}%</b> of the time`:''
             } · beaten ${x.l_ko||0} by KO, ${x.l_sub||0} by submission, ${x.l_dec||0} by decision</div>`).join('')}
-          <div style="margin-top:3px">Losses by method and the round each fight ended in are the two
-            things UFC.com does not publish, and they are what the round claim was missing.</div></div>`:'';
+          <div style="margin-top:4px">The round number is this pair's finish rate times the league's
+            round shape at that finish rate — heavier finishers finish earlier, 40% of their finishes in
+            round one at the low end against 57% at the high end, across 3,623 bouts. It is NOT built
+            from either man's own round history: split-half reliability of a fighter's round-one share
+            measures 0.21 and falls to 0.05 as the sample grows, while his finish rate measures 0.54 and
+            RISES to 0.60. When he finishes is noise; whether he finishes is not.</div></div>`:'';
         return row(hasM||b.p_end_r1==null?'ends in round one'
             :`ends in round one <span style="color:var(--dim)">· model ${P0(b.p_end_r1)}%</span>`,
             b.p_end_r1,t.p)
@@ -3513,7 +3614,7 @@ function sbLengthCall(b,stIn){
   }
   let round=null;
   if(kind==='finish'){
-    const t=sbR1Read(st,b);
+    const t=sbR1Read(st,b,fin!=null?fin:null);
     if(t&&fin>0.02){
       const cond=Math.min(0.99,t.p/fin);
       // "FINISH LIKELY ... R1 LIKELY" used the same word for two different
