@@ -406,6 +406,17 @@
   .ckwarn.soft{background:rgba(222,140,52,.06);border-color:rgba(222,140,52,.28)}
   .ckwarn.soft b{color:var(--gold)}
   .ckstrip.posthoc .ckbig{opacity:.75}
+  .rbgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px;margin-top:7px}
+  .rbwrap{border:1px solid var(--line);border-radius:7px;padding:7px 9px}
+  .rbhd{display:flex;align-items:baseline;gap:7px;flex-wrap:wrap;margin-bottom:4px}
+  .rbhd b{font-size:12px;color:var(--bone);text-transform:uppercase;letter-spacing:.03em}
+  .rbrow{display:grid;grid-template-columns:66px 1fr 1fr;gap:7px;align-items:baseline;
+    font-size:11px;padding:2.5px 0;border-top:1px solid var(--soft)}
+  .rbw,.rbo{display:flex;flex-wrap:wrap;gap:3px 7px}
+  .rbb{white-space:nowrap}
+  .rbrow.rbh{border-top:none;font-size:8.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--dim)}
+  .rbl{color:var(--mute)}
+  .rbw{color:var(--good)} .rbo{color:var(--warn)}
   .sbmis{color:var(--warn);background:rgba(200,68,47,.07);border-left:2px solid rgba(200,68,47,.45);
     padding:5px 8px;margin:3px 0 5px;line-height:1.45}
   .sbmis b{color:var(--red)}
@@ -3082,6 +3093,17 @@ function espnDerive(h){
        These are the fields that let the marker match the axis. */
     u_wins:wins.filter(x=>x.w===1).length,
     u_dec:wins.filter(x=>x.w===1&&x.fam==='dec').length,
+    /* The full record laid out by round, wins and losses separately. Plain
+       counts, no weighting and no shrinkage - this is the evidence itself, for
+       reading rather than for computing with, and every number above can be
+       traced back to a row here. */
+    by_round:[1,2,3,4,5].map(r=>({r:r,
+      w_ko:R.filter(x=>x.res==='W'&&x.fam==='ko'&&x.rnd===r).length,
+      w_sub:R.filter(x=>x.res==='W'&&x.fam==='sub'&&x.rnd===r).length,
+      l_ko:R.filter(x=>x.res==='L'&&x.fam==='ko'&&x.rnd===r).length,
+      l_sub:R.filter(x=>x.res==='L'&&x.fam==='sub'&&x.rnd===r).length})),
+    n_loss:R.filter(x=>x.res==='L').length,
+    no_round:R.filter(x=>x.fam!=='dec'&&x.rnd==null).length,
     r1_n:sw(x=>x.res==='W'&&x.fam!=='dec'&&x.rnd===1),
     // what only fight-level rows can give
     espn:true, n_fights:R.length, w_total:tot,
@@ -3539,6 +3561,46 @@ function sbMethodBlock(b,st,pA){
           + prov;   // under the rows it explains, not wedged above them
       })()}`
      :'<div class="note" style="margin-top:6px">Both corners need a Win by Method block before the two can be combined.</div>'}
+    ${(()=>{
+      /* The record itself, round by round, for reading rather than computing
+         with. Everything above this point is a derived number - shrunk,
+         tier-weighted, combined, or run through a league curve - and none of
+         it shows WHERE a man's fights have actually ended. This does, in plain
+         counts, so a figure above can be traced to the fights behind it.
+         Mirrors "How they have won" in the method tab, with the losses the UFC
+         record cannot supply. */
+      const H=[[surname(b.a),st.a_m],[surname(b.b),st.b_m]].filter(x=>x[1]&&x[1].espn);
+      if(!H.length) return '';
+      /* Each count is its own box rather than a joined string: at column width
+         "1 KO · 1 sub" wrapped after the separator and left a dangling middot
+         on the line above. */
+      const bit=(n,lab)=>n?`<span class="rbb">${n}&nbsp;${lab}</span>`:'';
+      const side=(ko,sub)=>[bit(ko,'KO'),bit(sub,'sub')].filter(Boolean).join('')
+        ||'<span style="color:var(--dim)">—</span>';
+      const block=([nm,x])=>{
+        const rows=x.by_round.filter(r=>r.w_ko+r.w_sub+r.l_ko+r.l_sub>0);
+        const wd=x.dec_raw||0, ld=x.l_dec||0;
+        return `<div class="rbwrap">
+          <div class="rbhd"><b>${esc(nm)}</b>
+            <span class="lbl">${x.wins_n}-${x.n_loss} over ${x.n_fights} fights${
+              x.off_tier?` · ${x.off_tier} outside the UFC`:''}${
+              x.dropped?` · ${x.dropped} on or after this card dropped`:''}</span></div>
+          <div class="rbrow rbh"><span></span><span>won</span><span>lost</span></div>
+          ${rows.map(r=>`<div class="rbrow"><span class="rbl">round ${r.r}</span>
+            <span class="mono rbw">${side(r.w_ko,r.w_sub)}</span>
+            <span class="mono rbo">${side(r.l_ko,r.l_sub)}</span></div>`).join('')}
+          <div class="rbrow"><span class="rbl">to the cards</span>
+            <span class="mono rbw">${wd?wd:'<span style="color:var(--dim)">—</span>'}</span>
+            <span class="mono rbo">${ld?ld:'<span style="color:var(--dim)">—</span>'}</span></div>
+          ${x.no_round?`<div class="note" style="margin:3px 0 0">${x.no_round} finish${
+            x.no_round===1?'':'es'} with no round listed, counted in the totals above but not here.</div>`:''}
+        </div>`;};
+      return `<div style="margin-top:14px;padding-top:11px;border-top:1px solid var(--line)">
+        <div class="lbl">Where their fights have ended · the full record, plain counts</div>
+        <div class="rbgrid">${H.map(block).join('')}</div>
+        <div class="note" style="margin-top:7px">Unweighted and unshrunk, wins and losses alike —
+          the evidence, not the read. Losses by round are the part a UFC.com page does not publish
+          at all, and the part that says most about how a man gets stopped.</div></div>`;})()}
     ${(()=>{
       /* The empirical ground under this whole tab. The check has no model
          behind it - it averages two career method splits and calls the fight
