@@ -3362,19 +3362,9 @@ function sbVerdict(ma,mb,pA,b,st){
   let who = clear ? sbName(best)
                   : `no clear favorite — ${fam==='dec'?'decision':fam==='fin'?'finish':(dec>fin?'decision':'finish')}`;
 
-  // round, only when a finish is the call and the timing read says something
-  let rnd='';
-  const t=sbR1Read(st,b,fin!=null?fin:null);
-  /* `top` was never declared in this function. It silently resolved to the
-     BROWSER GLOBAL window.top, whose [2] is undefined, so the guard
-     `top[2]!=='decision'` was always true and a round was appended to decision
-     calls - "Kamaka by decision · round 1", which cannot happen. Gate on the
-     cell actually named instead, and only when the headline called a finish. */
-  if(t && fin>0.02 && cls==='fin' && best && best.how!=='decision'){
-    const cond=Math.min(0.99,t.p/fin);
-    if(cond>=0.55) rnd=' · round 1';
-    else if(cond<=0.30) rnd=' · later rounds';
-  }
+  /* Dropped for the same reason as the chip's: see sbLengthCall. The round
+     suffix restated the finish call rather than adding to it. */
+  const rnd='';
   /* The thin warning sits on the verdict as well as the chip, because this is
      where someone decides whether to believe it. Three wins is the line the
      measurement drew: the 1-2 win bucket gains +0.0235 over guessing against
@@ -3529,10 +3519,20 @@ function sbMethodBlock(b,st,pA){
             from either man's own round history: split-half reliability of a fighter's round-one share
             measures 0.21 and falls to 0.05 as the sample grows, while his finish rate measures 0.54 and
             RISES to 0.60. When he finishes is noise; whether he finishes is not.</div></div>`:'';
-        return row(hasM||b.p_end_r1==null?'ends in round one'
-            :`ends in round one <span style="color:var(--dim)">· model ${P0(b.p_end_r1)}%</span>`,
+        /* The league figure on both round rows. Every other row is a
+           comparison - model against records - but a bare "25% ends in round
+           one" is uninterpretable without knowing that 25% IS the league rate,
+           and "47% of the finishes in round one" reads as early until you know
+           the league runs 52%. Without an anchor the reader cannot tell a real
+           call from the base rate, which is the whole job of this row. */
+        const lgR1=t.base!=null?t.base:(b.rounds===5?0.1555:0.2533);
+        const lgCond=b.rounds===5?0.376:0.517;
+        const anch=v=>`<span style="color:var(--dim)">· league ${P0(v)}%</span>`;
+        return row((hasM||b.p_end_r1==null?'ends in round one'
+            :`ends in round one <span style="color:var(--dim)">· model ${P0(b.p_end_r1)}%</span>`)
+            +' '+anch(lgR1),
             b.p_end_r1,t.p)
-          + (cond!=null?row('of the finishes, in round one',
+          + (cond!=null?row('of the finishes, in round one '+anch(lgCond),
               (b.p_end_r1!=null&&b.p_finish>0.02)?b.p_end_r1/b.p_finish:null,
               Math.min(0.99,cond)):'')
           + (t.both?'':'<div class="note" style="margin:4px 0 0">Round-one figure uses one corner only — add the other record for both.</div>')
@@ -3759,17 +3759,23 @@ function sbLengthCall(b,stIn){
     const mf=1-b.m_decision;
     modelConv=Math.max(mf-finBase, b.m_decision-decBase);
   }
-  let round=null;
-  if(kind==='finish'){
-    const t=sbR1Read(st,b,fin!=null?fin:null);
-    if(t&&fin>0.02){
-      const cond=Math.min(0.99,t.p/fin);
-      // "FINISH LIKELY ... R1 LIKELY" used the same word for two different
-      // claims in one badge. "IN R1" / "AFTER R1" says where without repeating
-      // the strength word that already applies to the finish itself.
-      round = cond>=0.55 ? 'in R1' : cond<=0.30 ? 'after R1' : null;
-    }
-  }
+  /* NO round suffix on the badge any more.
+
+     It used to carry independent information, back when P(round one | finish)
+     was read off each fighter's own finishes. Addendum 45 replaced that with
+     the league curve indexed by the pair's finish rate, because the per-fighter
+     version does not replicate - and the arithmetic then collapses: the badge
+     asked for t.p / fin, t.p is fin x curve, so fin cancels and the condition
+     IS the curve. A step function of the finish rate, which is the same number
+     the FINISH / DISTANCE half of the badge is already built from.
+
+     "in R1" therefore fired only for pairs finishing 75%+ of the time, which is
+     exactly the population that reads FINISH LIKELY, so the badge said the same
+     thing twice; and "after R1" could not fire at all, because the curve's floor
+     of .402 never reaches the .30 bar. The round number itself is unchanged and
+     is still scored - it lives in the table, where it is shown with what it was
+     derived from. */
+  const round=null;
   /* How thin the thinner record is. Shrinkage already does most of this job —
      k=5 scored best or near-best in every record-size bucket, and it caps a
      one-win record at +8.4 points past the league rate, below the 12-point bar,
