@@ -410,13 +410,16 @@
   .rbwrap{border:1px solid var(--line);border-radius:7px;padding:7px 9px}
   .rbhd{display:flex;align-items:baseline;gap:7px;flex-wrap:wrap;margin-bottom:4px}
   .rbhd b{font-size:12px;color:var(--bone);text-transform:uppercase;letter-spacing:.03em}
-  .rbrow{display:grid;grid-template-columns:66px 1fr 1fr;gap:7px;align-items:baseline;
+  .rbrow{display:grid;grid-template-columns:84px 1fr 1fr;gap:7px;align-items:baseline;
     font-size:11px;padding:2.5px 0;border-top:1px solid var(--soft)}
   .rbw,.rbo{display:flex;flex-wrap:wrap;gap:3px 7px}
   .rbb{white-space:nowrap}
   .rbrow.rbh{border-top:none;font-size:8.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--dim)}
-  .rbl{color:var(--mute)}
+  .rbl{color:var(--mute);white-space:nowrap}
   .rbw{color:var(--good)} .rbo{color:var(--warn)}
+  .rbfar{opacity:.45}
+  .rbtag{font-size:7.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);
+    margin-left:4px;white-space:nowrap}
   .sbmis{color:var(--warn);background:rgba(200,68,47,.07);border-left:2px solid rgba(200,68,47,.45);
     padding:5px 8px;margin:3px 0 5px;line-height:1.45}
   .sbmis b{color:var(--red)}
@@ -3606,6 +3609,8 @@ function sbMethodBlock(b,st,pA){
       const bit=(n,lab)=>n?`<span class="rbb">${n}&nbsp;${lab}</span>`:'';
       const side=(ko,sub)=>[bit(ko,'KO'),bit(sub,'sub')].filter(Boolean).join('')
         ||'<span style="color:var(--dim)">—</span>';
+      const sched=(b.rounds===5)?5:3;
+      const anyFar=H.some(([,x])=>x.by_round.some(r=>r.r>sched&&(r.w_ko+r.w_sub+r.l_ko+r.l_sub)>0));
       const block=([nm,x])=>{
         const rows=x.by_round.filter(r=>r.w_ko+r.w_sub+r.l_ko+r.l_sub>0);
         const wd=x.dec_raw||0, ld=x.l_dec||0;
@@ -3615,9 +3620,19 @@ function sbMethodBlock(b,st,pA){
               x.off_tier?` · ${x.off_tier} outside the UFC`:''}${
               x.dropped?` · ${x.dropped} on or after this card dropped`:''}</span></div>
           <div class="rbrow rbh"><span></span><span>won</span><span>lost</span></div>
-          ${rows.map(r=>`<div class="rbrow"><span class="rbl">round ${r.r}</span>
+          ${rows.map(r=>{
+            /* A round past this bout's scheduled length is MARKED, never
+               dropped. A finish in round four only ever happened in a
+               five-round fight, so on a three-round card that row is real
+               history that cannot repeat on Saturday - and deleting it would
+               both hide evidence and stop the rows adding up to the record in
+               the header. Rounds one to three are reachable either way and are
+               left alone. */
+            const far=r.r>sched;
+            return `<div class="rbrow${far?' rbfar':''}"><span class="rbl">round ${r.r}${
+              far?'<span class="rbtag" title="only reachable in a five-round fight">5R</span>':''}</span>
             <span class="mono rbw">${side(r.w_ko,r.w_sub)}</span>
-            <span class="mono rbo">${side(r.l_ko,r.l_sub)}</span></div>`).join('')}
+            <span class="mono rbo">${side(r.l_ko,r.l_sub)}</span></div>`;}).join('')}
           <div class="rbrow"><span class="rbl">to the cards</span>
             <span class="mono rbw">${wd?wd:'<span style="color:var(--dim)">—</span>'}</span>
             <span class="mono rbo">${ld?ld:'<span style="color:var(--dim)">—</span>'}</span></div>
@@ -3629,7 +3644,11 @@ function sbMethodBlock(b,st,pA){
         <div class="rbgrid">${H.map(block).join('')}</div>
         <div class="note" style="margin-top:7px">Unweighted and unshrunk, wins and losses alike —
           the evidence, not the read. Losses by round are the part a UFC.com page does not publish
-          at all, and the part that says most about how a man gets stopped.</div></div>`;})()}
+          at all, and the part that says most about how a man gets stopped.${anyFar
+            ? ` This bout is scheduled for ${sched} rounds, and the greyed <b>5R</b> rows are rounds that only exist
+               in a five-round fight — kept so the counts still add up to the record above, but they
+               cannot repeat here.`
+            : ''}</div></div>`;})()}
     ${(()=>{
       /* The empirical ground under this whole tab. The check has no model
          behind it - it averages two career method splits and calls the fight
