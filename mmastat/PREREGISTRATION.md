@@ -4558,3 +4558,55 @@ The tier weighting is deliberately NOT applied here. The curve's axis carries no
 weighting, so a weighted share would sit on a curve that was never estimated
 from weighted shares. Weighting belongs in the read; the axis belongs to the
 corpus.
+
+## Addendum 45, amendment 5: the round badge collapsed into the finish call, and what that means for H3 (2026-10-06)
+
+Noticed from the outside - "almost every finish and finish-likely shows R1 next
+to it" - and the arithmetic confirms it.
+
+### The collapse
+
+The badge appended a round when `t.p / fin` cleared 0.55. After amendment 1,
+`t.p` is `fin x r1GivenFinish(pair finish rate)`, so `fin` cancels and the
+condition **is** the curve:
+
+| pair finish rate | P(R1 \| finish), 3rd | badge |
+|---|---|---|
+| 0.50 | .455 | — |
+| 0.62 | .510 | — |
+| 0.78 | .569 | · in R1 |
+
+A step function of the pair's finish rate - the same quantity the FINISH /
+DISTANCE half of the badge is built from. "in R1" fired only at a 75%+ finish
+rate, which is exactly the population reading FINISH LIKELY, so the badge stated
+one fact twice; and "after R1" could never fire, the curve's floor of .402 being
+above the .30 bar. The suffix is removed from the chip and from the drawer
+verdict. The round NUMBER is unchanged and still scored.
+
+### The honest consequence for H3
+
+After amendment 1 the check's round claim carries **exactly the information in
+the pair's finish rate, and no more**. P(ends in round one) is P(finish) times a
+league curve indexed by that same finish rate, so the conditional share is
+bounded in [.402, .569] for three-round fights and crosses the 0.5 call
+threshold only as the pair's finish rate passes about 0.60.
+
+So H3 as registered is not testing "can the check read rounds". It is testing
+"does a pair's finish rate predict an early finish better than the model's
+survival fit does". That is still a real and worthwhile question, and it is the
+only round question the data supports - amendment 1 measured a reliability of
+0.21 falling to 0.05 for anything fighter-specific. But it is a narrower claim
+than the hypothesis as written, and recording it now is the difference between a
+known limitation and a result that looks stronger than it is.
+
+**H3 is retained with its bar and FDR unchanged, and is to be reported with this
+sentence attached:** the check's round claim is a deterministic function of the
+pair's finish rate, so a pass means the finish rate carries round information
+the model's survival fit misses, not that the check reads rounds independently.
+
+### Readability
+
+Both round rows now carry the league figure alongside the two reads - the
+earlier presentation gave "25% ends in round one" with nothing to judge it
+against, when 25% IS the league rate for a three-round fight, and "47% of the
+finishes in round one" reads as early until you know the league runs 52%.
