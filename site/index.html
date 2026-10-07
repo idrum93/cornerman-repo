@@ -3171,10 +3171,38 @@ function sbCorner(base,over,w){
 /* Blend was a slider; it is now fixed at a pure UFC.com read. An old stored
    state may still carry a fraction, so it is forced here rather than trusted -
    a check that is 70% the model is not a second opinion, it is the model. */
+/* A stored read is a DERIVED object, and the derivation keeps gaining fields as
+   the check grows. One written by an earlier build carries espn:true but none
+   of the later fields, and a panel that reads `m.by_round.filter(...)` then
+   throws and takes the entire drawer down with it - which is exactly how
+   "upcoming chips do nothing" happened, while last-card chips kept working
+   because they no longer host a panel at all.
+
+   Guarding each field in turn does not scale: the next field added brings the
+   same bug back. The raw paste is stored alongside the derived object, so the
+   read is simply re-derived whenever the shape is out of date, and is always
+   current by construction. Where there is no raw text to rebuild from, the
+   stale espn marker is dropped so the page falls back to the UFC.com counts
+   instead of reaching for fields that were never written. */
+function sbFreshen(st,b){
+  if(!st) return st;
+  const asOf=(typeof sbCardMs==='function')?sbCardMs(b):null;
+  ['a','b'].forEach(c=>{
+    const m=st[c+'_m'];
+    if(!m||!m.espn||Array.isArray(m.by_round)) return;   // not a history read, or already current
+    const raw=st[c+'_histraw'];
+    let d=null;
+    try{ d=raw?espnDerive(parseEspnHistory(raw,asOf)):null; }catch(e){ d=null; }
+    if(d){ st[c+'_h']=d; st[c+'_m']=Object.assign({}, m, d); }
+    else { const q=Object.assign({}, m); delete q.espn; st[c+'_m']=q; st[c+'_h']=null; }
+  });
+  return st;
+}
 function sbState(b){
   const k=b.bout;
   if(!SBOX[k]) SBOX[k]={a:{},b:{},blend:1,on:false};
   SBOX[k].blend=1;
+  sbFreshen(SBOX[k], b);
   return SBOX[k];
 }
 function sbWeightShare(){
@@ -3569,7 +3597,8 @@ function sbMethodBlock(b,st,pA){
          counts, so a figure above can be traced to the fights behind it.
          Mirrors "How they have won" in the method tab, with the losses the UFC
          record cannot supply. */
-      const H=[[surname(b.a),st.a_m],[surname(b.b),st.b_m]].filter(x=>x[1]&&x[1].espn);
+      const H=[[surname(b.a),st.a_m],[surname(b.b),st.b_m]]
+        .filter(x=>x[1]&&x[1].espn&&Array.isArray(x[1].by_round));
       if(!H.length) return '';
       /* Each count is its own box rather than a joined string: at column width
          "1 KO · 1 sub" wrapped after the separator and left a dangling middot
