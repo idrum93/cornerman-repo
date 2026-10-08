@@ -4610,3 +4610,141 @@ Both round rows now carry the league figure alongside the two reads - the
 earlier presentation gave "25% ends in round one" with nothing to judge it
 against, when 25% IS the league rate for a three-round fight, and "47% of the
 finishes in round one" reads as early until you know the league runs 52%.
+
+# Addendum 46: recency weighting of the check's method mix — tested, null (2026-10-07)
+
+Proposed from the outside: a fighter with a knockout-heavy career whose recent
+wins have gone to the cards is arguably not the same fighter his career mix
+describes, so the check's method mix might carry a recency weighting or a
+secondary trend term.
+
+Tested before building, on 6,915 UFC bouts 2010-2026. Walked forward in time so
+each bout is predicted from the two fighters' PRIOR fights only; both corners
+required 4+ priors; the pair's averaged, shrunk (k=5) finish rate is scored
+against whether the fight actually finished. n = 2,309.
+
+## Every recency scheme is worse than flat career, monotonically
+
+| scheme | log loss | vs career |
+|---|---|---|
+| **career, flat — what the check does** | **0.65935** | — |
+| decay, half-life 8 fights | 0.66074 | +0.00139 |
+| decay, half-life 4 years | 0.66143 | +0.00208 |
+| decay, half-life 5 fights | 0.66208 | +0.00273 |
+| decay, half-life 3 fights | 0.66456 | +0.00521 |
+| last 5 fights only | 0.66555 | +0.00620 |
+| last 3 fights only | 0.67214 | +0.01279 |
+| league base rate alone | 0.69303 | +0.03368 |
+
+The ordering is the finding: the harder old fights are discounted, the worse the
+read, with no interior optimum. The gradient points at "use every fight", and
+flat career is that limit. For scale, the whole career-over-base-rate gain is
+0.0337 - taking the last three fights throws away 38% of it.
+
+The mechanism is variance, not bias. A method outcome is one Bernoulli draw per
+fight; a career mix is already a small sample, and halving it to chase a trend
+costs more in noise than any drift it recovers.
+
+## A trend term adds nothing on top of the career rate
+
+TREND = (last-3 finish rate) − (career finish rate), averaged over the pair;
+spread sd 0.071, range −0.280 to +0.231.
+
+| term | coefficient |
+|---|---|
+| career finish rate | **+5.713** |
+| TREND | +0.535 |
+
+LR chi2(1) = 0.540, **p = 0.462**. Bootstrap 95% CI on the trend coefficient
+**[−0.932, +1.993] — includes zero**, against a career-rate coefficient an order
+of magnitude larger and unambiguous.
+
+## The premise itself is weak
+
+Within-fighter, first half of a UFC career against second half, 640 fighters
+with 8+ bouts: finish rate .510 → .493, a change of **−0.017**, paired
+t = −1.51, **p = 0.131**. Fighters do drift slightly toward the cards as careers
+run on, and the drift is not distinguishable from noise at this sample size.
+
+## Why the pattern looks real anyway
+
+With a true finish rate near the league's .492, the chance of any fighter
+producing three straight non-finishes is about one in eight. Across the twenty-two
+corners on an eleven-bout card, two or three fighters will be showing exactly
+that pattern at any moment, every card, with nothing having changed about them.
+The run is visible; the signal is not.
+
+**Decision: not built.** The check's method mix stays flat over the career, and
+the round-by-round panel added the same day shows the dates and the sequence, so
+a reader can see a run for himself and weigh it as judgement rather than having
+it folded into the number. Any future revisit needs its own addendum and its own
+out-of-sample test, not this one re-read.
+
+# Addendum 47: the Polymarket moneyline capture was reading the wrong market (2026-10-07)
+
+Noticed from the outside — the site's split for Walker vs. Meerschaert did not
+match what polymarket.us was showing.
+
+## What happened
+
+`moneylines()` in polymarket_us.py wrote one key per bout and let the LAST
+matching market win. A method market ("who wins by decision") has two
+fighter-named sides rather than Yes/No, so it cleared every gate and replaced
+the real moneyline. Two similar fighters are near-equally likely to win a
+decision, so the stored price sat near .50 on bout after bout:
+
+| bout | stored | 25-book consensus | exchange |
+|---|---|---|---|
+| Walker vs. Meerschaert | .503 | .705 | 73/28 |
+| Camilo vs. Herbert | .496 | .634 | — |
+| Allen vs. Duncan | .496 | .547 | — |
+
+It read as a dead market rather than a bug, which is why it survived.
+
+**Fixed** two ways: method markets are refused outright by their question text —
+they are never the moneyline, so ranking them below one is not enough, since a
+bout whose real moneyline is missing would still publish a wrong number instead
+of nothing — and what remains is ranked (declared winner market first, then
+volume, ties keeping the row already held) rather than overwritten, so the order
+the feed returns markets in cannot decide the price. Verified across four
+orderings including props-only, which now yields no price.
+
+## Scope, and why the rows were NOT deleted
+
+662 contaminated moneyline rows, 195 flagged as qualifying bets, 158 settled —
+against 307 settled sportsbook bets. A pooled report was carrying roughly a
+third contaminated, and addendum 1's bar is 300 settled bets.
+
+Cleaned ledger files were prepared and then **not used**. This file's own rule
+is that the ledger is append-only, and the reason it gives is that a ledger you
+can edit is one you will edit; a bad capture does not suspend that. The rows
+stay as the record of what was captured. They are excluded AT READ TIME by a
+dated constant, `BAD_PUS_ML_BEFORE`, which anyone can audit or lift, and
+`report(include_bad_pus=True)` still shows the contaminated view.
+
+Props are unaffected — they come from `map_props()`, a separate path.
+
+## A second bug found on the way
+
+`report()` defaulted to `path=LEDGER`, and `LEDGER` is the LEGACY single file
+kept only "for call sites that pass an explicit path": 98 rows against 3,298 in
+the monthly files. The forward-test readout was therefore reporting on a stale
+fragment — 8 bets where the real record holds 307 settled sportsbook ones.
+`read()` and `_market_for_card()` already default to the monthly files; report()
+now agrees with them.
+
+Effect on the readout:
+
+| | triggered | settled |
+|---|---|---|
+| legacy file (what it was reading) | 8 | 8 |
+| monthly files, broken capture excluded | **32** | **14** |
+| monthly files, contaminated view | 45 | 24 |
+
+## Not changed
+
+The site's market gauge still reads `venue == "sportsbook"` — a devigged
+consensus across ~25 books. Polymarket has never fed it, and now that the
+exchange prices are being read correctly the two largely agree (72 against
+70.5), so there is no accuracy argument for switching. Any change there is a
+display decision, not a correctness one, and would need its own note.

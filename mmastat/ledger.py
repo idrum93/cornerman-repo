@@ -882,11 +882,50 @@ def settle(fights, path=None, date_tol_days=4, verbose=True):
     return n
 
 
-def report(path=LEDGER, vig=0.037, venue=None):
+# Polymarket US moneylines captured before this instant are not prices.
+# moneylines() in polymarket_us.py wrote one key per bout and let the last
+# matching market win, so a "who wins by decision" market - two fighter-named
+# sides, no Yes/No, every gate cleared - replaced the real moneyline. The stored
+# figure was then the decision market: Meerschaert at .503 while twenty-five
+# books had Walker at .705 and the exchange itself showed 73/28. 662 such rows
+# exist, 195 of them flagged as qualifying bets and 158 already settled, against
+# 307 settled sportsbook bets - so a pooled report was carrying roughly a third
+# contaminated.
+#
+# They are EXCLUDED AT READ TIME, not deleted. This file's own rule is that the
+# ledger is append-only, and the reason given is that a ledger you can edit is
+# one you will edit; a bad capture does not suspend that. The rows stay as the
+# record of what was captured, the forward test stops counting them, and the
+# cutoff is a dated constant that anyone can audit or lift.
+BAD_PUS_ML_BEFORE = "2026-10-08T02:00:00+00:00"
+
+
+def _drop_bad_pus_ml(L):
+    """Rows from the broken Polymarket moneyline capture, out of the analysis."""
+    if L.empty or "venue" not in L.columns:
+        return L
+    bad = (L.venue == "polymarket_us") & (L.captured_utc.astype(str) < BAD_PUS_ML_BEFORE)
+    if "market" in L.columns:
+        bad &= L.market.isna()            # moneylines only; the props were fine
+    return L[~bad]
+
+
+# path=None reads every monthly file, which is where the captures actually go.
+# It defaulted to LEDGER, and LEDGER is the LEGACY single file kept only "for
+# call sites that pass an explicit path" - 98 rows against 3,298 in the monthly
+# files. So the forward-test readout was reporting on a stale fragment: 8 bets
+# where the real record holds 307 settled sportsbook bets, which is the bar
+# addendum 1 is waiting on. read() and _market_for_card already default to the
+# monthly files; this now agrees with them.
+def report(path=None, vig=0.037, venue=None, include_bad_pus=False):
     """Where the forward test stands. CLV first — it converges long before ROI."""
     L = read(path)
     if L.empty:
         return {"status": "ledger empty"}
+    if not include_bad_pus:
+        L = _drop_bad_pus_ml(L)
+        if L.empty:
+            return {"status": "ledger empty after excluding the broken capture"}
     # one row per fighter-price: the LAST capture before the fight is the close
     if venue:
         L = L[L.venue == venue]

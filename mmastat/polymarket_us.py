@@ -234,6 +234,14 @@ def parse(events):
     return rows
 
 
+# Questions naming a method, a round or a length are not the moneyline, however
+# their two sides happen to be labelled.
+_METHOD_RX = re.compile(
+    r"\b(by\s+(ko|tko|knockout|submission|sub|decision|dq|disqualification)"
+    r"|method|round\s*\d|which\s+round|go\s+the\s+distance|distance|stoppage"
+    r"|unanimous|split|majority|points)\b", re.I)
+
+
 def moneylines(rows, max_spread=0.06, min_volume=200.0, require_book=True):
     """{frozenset(name_a, name_b): (name_a, P(a), meta)} — same shape the global
     reader returns, so the ledger treats both venues identically.
@@ -242,7 +250,7 @@ def moneylines(rows, max_spread=0.06, min_volume=200.0, require_book=True):
     in this payload, so lifetime volume stands in for it; that is a weaker
     filter than the global reader's order-book depth and is recorded as such.
     """
-    out = {}
+    out, score = {}, {}
     for r in rows:
         # Shape, not the stated type. The live feed labelled every market
         # "other", which put twelve winner markets for this card into the
@@ -253,6 +261,16 @@ def moneylines(rows, max_spread=0.06, min_volume=200.0, require_book=True):
         names = [_nm(n) for n, _ in r["sides"]]
         yes_no = any(x.startswith(("yes", "no", "over", "under")) for x in names)
         if r["kind"] not in ("winner", "other") or yes_no:
+            continue
+        # A METHOD market also has two fighter-named sides, so "who wins by
+        # decision" cleared every gate above and - because this loop wrote the
+        # key on each pass, last write winning - replaced the real moneyline.
+        # Two similar fighters are near-equally likely to win a decision, so the
+        # overwrite produced ~50/50 on bout after bout: Meerschaert at .503 in
+        # the ledger while twenty-five books had Walker at .705 and the exchange
+        # itself showed 73/28. Named by its question, these are never the
+        # moneyline, so they are refused rather than ranked below it.
+        if _METHOD_RX.search(f"{r.get('question') or ''} {r.get('slug') or ''}"):
             continue
         (na, pa), (nb, pb) = r["sides"]
         a, b = _nm(na), _nm(nb)
@@ -285,7 +303,15 @@ def moneylines(rows, max_spread=0.06, min_volume=200.0, require_book=True):
                 "venue": "polymarket_us",
                 "volume": r["volume"],
                 "weight_class": r["weight_class"], "segment": r["segment"], **bk}
-        out[frozenset((a, b))] = (a, round(p, 5), meta)
+        # Rank, never overwrite blindly: a declared winner market outranks one
+        # the feed could only call "other", and among equals the busier book
+        # wins. A tie keeps the row already held, so the order the feed happens
+        # to return markets in cannot decide the price.
+        key = frozenset((a, b))
+        rank = (1 if r["kind"] == "winner" else 0, float(r["volume"] or 0.0))
+        if key in out and rank <= score[key]:
+            continue
+        out[key], score[key] = (a, round(p, 5), meta), rank
     return _with_variants(out)
 
 
