@@ -6,7 +6,20 @@ produced every mis-linked "verify" in this area. The registered distance rule
 (addendum 9) runs on the US exchange, which quotes the same markets.
 
 Kept in the tree because the parsing works and a second venue may be wanted
-again; nothing imports it.
+again. It is NOT dead weight: tests.py imports moneylines() and parse_events()
+from here for the fail-closed regression test - the one that checks a market
+with no order book is refused rather than priced. Deleting this file breaks the
+test suite, so it stays.
+
+BEFORE REVIVING IT, read the fix made to polymarket_us.py on 2026-10-07
+(addendum 47). The loop below writes out[frozenset((a, b))] once per matching
+market and lets the LAST one win, which is the shape of that bug. It does not
+bite here only because the gate on the next line requires the feed to have
+DECLARED the market a winner market - the US feed labelled everything "other",
+that gate had to be loosened there, and a "who wins by decision" market then
+walked through it and replaced the real moneyline on every bout. If this venue
+is ever brought back and its feed stops labelling markets honestly, carry the
+method-question refusal and the ranking across before trusting a price.
 
 Original notes follow.
 
@@ -171,6 +184,9 @@ def moneylines(rows, with_book=True, max_spread=0.06, min_depth=250.0,
     """
     out = {}
     for r in rows:
+        # The gate that has been holding this together: only markets the feed
+        # itself calls a winner market. See the module docstring - loosening
+        # this is precisely what broke the US reader.
         if r["kind"] != "winner" or len(r["outcomes"]) != 2 or len(r["prices"]) != 2:
             continue
         if r.get("closed") or r.get("resolved"):
