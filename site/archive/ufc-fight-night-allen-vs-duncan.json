@@ -2,7 +2,7 @@
  "event": "UFC Fight Night: Allen vs. Duncan",
  "date": "2026-10-10",
  "venue": "Meta Apex, Enterprise, Nevada , United States",
- "generated_utc": "2026-10-09T17:24:07.928734+00:00",
+ "generated_utc": "2026-10-10T02:07:10.547842+00:00",
  "bouts": [
   {
    "bout": "Brendan Allen vs. Christian Leroy Duncan",
@@ -515,9 +515,9 @@
      "log_layoff": 5.170484
     }
    },
-   "p_market": 0.625,
+   "p_market": 0.6277,
    "books": 26.0,
-   "edge": 0.1637,
+   "edge": 0.161,
    "p_finish_survival_raw": 0.501,
    "m_a_ko": 0.2157,
    "m_b_ko": 0.1055,
@@ -1127,9 +1127,9 @@
      "log_layoff": 5.087596
     }
    },
-   "p_market": 0.7158,
+   "p_market": 0.7188,
    "books": 24.0,
-   "edge": 0.0094,
+   "edge": 0.0064,
    "p_finish_survival_raw": 0.9339,
    "m_a_ko": 0.1966,
    "m_b_ko": 0.1478,
@@ -1709,9 +1709,9 @@
      "log_layoff": 4.356709
     }
    },
-   "p_market": 0.5288,
+   "p_market": 0.557,
    "books": 24.0,
-   "edge": 0.0157,
+   "edge": -0.0125,
    "p_finish_survival_raw": 0.5925,
    "m_a_ko": 0.1594,
    "m_b_ko": 0.0871,
@@ -2839,9 +2839,9 @@
      "log_layoff": 5.170484
     }
    },
-   "p_market": 0.5596,
+   "p_market": 0.5544,
    "books": 22.0,
-   "edge": 0.0882,
+   "edge": 0.0933,
    "p_finish_survival_raw": 0.451,
    "m_a_ko": 0.1224,
    "m_b_ko": 0.0767,
@@ -3131,9 +3131,9 @@
      "log_layoff": 5.247024
     }
    },
-   "p_market": 0.4895,
+   "p_market": 0.4868,
    "books": 23.0,
-   "edge": 0.0225,
+   "edge": 0.0251,
    "p_finish_survival_raw": 0.4497,
    "m_a_ko": 0.0505,
    "m_b_ko": 0.1182,
