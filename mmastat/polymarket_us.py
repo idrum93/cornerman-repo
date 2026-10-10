@@ -37,17 +37,43 @@ PAUSE = 0.4
 # is written a different way.
 # The live feed says "ufc_fight_winner", "ufc_round_of_finish" and the like —
 # nothing resembling the documented SPORTS_MARKET_TYPE_* names.
-TYPE_WORDS = {"moneyline": "winner", "fight_winner": "winner", "winner": "winner",
-              "total": "total", "round": "prop", "method": "prop", "prop": "prop",
-              "distance": "prop", "finish": "prop", "victory": "prop",
-              "spread": "spread", "future": "future", "outright": "future"}
+# Read as WHOLE TOKENS and most-specific-first, which is the whole point.
+# This was a dict scanned in insertion order, so "fight_winner" was tested
+# before "method" and "decision": the exchange's method markets, typed
+# "ufc_fight_winner_by_decision", came back as kind "winner". That tied them
+# with the real moneyline on rank, let feed order pick between them, and put
+# ~50/50 decision prices on bout after bout — the failure the question-text
+# refusal did not catch, because on this feed the question is often just the
+# bare bout name with nothing to match. The same misread also kept those
+# markets OUT of map_props, which only accepts prop/total/other.
+#
+# A type that names a method, a round or a length is a prop even when it also
+# says "winner". Only a type with no such word left in it is a moneyline.
+# Substring matching is what made this fragile, so tokens it is: bare "ko" and
+# "sub" are real type words here and must not match inside other words.
+PROP_TOKENS = {"method", "decision", "ko", "tko", "knockout", "submission",
+               "sub", "round", "distance", "finish", "victory", "stoppage",
+               "dq", "disqualification", "points", "unanimous", "split",
+               "majority", "prop"}
+TOTAL_TOKENS = {"total", "totals"}
+SPREAD_TOKENS = {"spread", "handicap"}
+FUTURE_TOKENS = {"future", "futures", "outright"}
+WINNER_TOKENS = {"moneyline", "winner", "ml"}
 
 
 def market_kind(raw):
-    v = str(raw or "").lower()
-    for word, kind in TYPE_WORDS.items():
-        if word in v:
-            return kind
+    toks = {t for t in re.split(r"[^a-z0-9]+", str(raw or "").lower()) if t}
+    # Totals before props: "ufc_total_rounds" is a total, not a round prop.
+    if toks & TOTAL_TOKENS:
+        return "total"
+    if toks & SPREAD_TOKENS:
+        return "spread"
+    if toks & FUTURE_TOKENS:
+        return "future"
+    if toks & PROP_TOKENS:
+        return "prop"
+    if toks & WINNER_TOKENS:
+        return "winner"
     return "other"
 
 
@@ -270,7 +296,12 @@ def moneylines(rows, max_spread=0.06, min_volume=200.0, require_book=True):
         # the ledger while twenty-five books had Walker at .705 and the exchange
         # itself showed 73/28. Named by its question, these are never the
         # moneyline, so they are refused rather than ranked below it.
-        if _METHOD_RX.search(f"{r.get('question') or ''} {r.get('slug') or ''}"):
+        # The stated type is checked alongside the text, with its separators
+        # turned into spaces: "ufc_fight_winner_by_decision" has no word
+        # boundary at "by decision" while the underscores are still there, so
+        # a raw search over it matched nothing.
+        _rt = re.sub(r"[^a-z0-9]+", " ", str(r.get("raw_type") or "").lower())
+        if _METHOD_RX.search(f"{r.get('question') or ''} {r.get('slug') or ''} {_rt}"):
             continue
         (na, pa), (nb, pb) = r["sides"]
         a, b = _nm(na), _nm(nb)
@@ -313,6 +344,45 @@ def moneylines(rows, max_spread=0.06, min_volume=200.0, require_book=True):
             continue
         out[key], score[key] = (a, round(p, 5), meta), rank
     return _with_variants(out)
+
+
+def ml_audit(rows, limit=14):
+    """Every two-fighter-named market per event, with the reason it was taken
+    or refused — printed by the capture so the log answers "which market set
+    this price" without a round trip.
+
+    Two fixes were shipped against this price on a diagnosis read off the
+    ledger alone, and the first one did nothing. The feed is only reachable
+    from where the capture runs, so the capture is where the evidence has to
+    come from.
+    """
+    per = {}
+    for r in rows:
+        if len(r["sides"]) != 2:
+            continue
+        names = [_nm(n) for n, _ in r["sides"]]
+        if any(x.startswith(("yes", "no", "over", "under")) for x in names):
+            continue
+        rt = re.sub(r"[^a-z0-9]+", " ", str(r.get("raw_type") or "").lower())
+        blob = f"{r.get('question') or ''} {r.get('slug') or ''} {rt}"
+        hit = _METHOD_RX.search(blob)
+        if r["kind"] not in ("winner", "other"):
+            why = f"refused: kind={r['kind']}"
+        elif hit:
+            why = f"refused: names '{hit.group(0)}'"
+        else:
+            why = f"CANDIDATE rank=({1 if r['kind'] == 'winner' else 0}," \
+                  f"{float(r['volume'] or 0.0):.0f})"
+        (pa, pb) = (r["sides"][0][1], r["sides"][1][1])
+        tot = pa + pb
+        per.setdefault(r["event_slug"], []).append(
+            f"      {why}  p={(pa / tot if tot > 0 else float('nan')):.3f}"
+            f"  type={r.get('raw_type') or '-'}  q={(r.get('question') or '-')[:44]}")
+    out = []
+    for ev, lines in list(per.items())[:limit]:
+        out.append(f"    {ev}")
+        out.extend(lines)
+    return "\n".join(out)
 
 
 def _with_variants(out):

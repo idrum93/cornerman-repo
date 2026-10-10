@@ -11,15 +11,26 @@ from here for the fail-closed regression test - the one that checks a market
 with no order book is refused rather than priced. Deleting this file breaks the
 test suite, so it stays.
 
-BEFORE REVIVING IT, read the fix made to polymarket_us.py on 2026-10-07
-(addendum 47). The loop below writes out[frozenset((a, b))] once per matching
-market and lets the LAST one win, which is the shape of that bug. It does not
-bite here only because the gate on the next line requires the feed to have
-DECLARED the market a winner market - the US feed labelled everything "other",
-that gate had to be loosened there, and a "who wins by decision" market then
-walked through it and replaced the real moneyline on every bout. If this venue
-is ever brought back and its feed stops labelling markets honestly, carry the
-method-question refusal and the ranking across before trusting a price.
+BEFORE REVIVING IT, read addendum 47 AND its amendment 1 in PREREGISTRATION.md.
+The loop below writes out[frozenset((a, b))] once per matching market and lets
+the LAST one win, which is the shape of that bug: a "who wins by decision"
+market has two fighter-named sides rather than Yes/No, so it cleared every gate
+on the US feed and replaced the real moneyline on bout after bout, at ~.50.
+
+It does not bite here only because the gate on the next line requires the feed
+to have DECLARED the market a winner market. That is a thinner protection than
+it looks, and the US fix is the reason to distrust it: relying on a declared
+type means relying on how the type is READ. There, market_kind() scanned its
+word list in dict insertion order, so "fight_winner" was tested before
+"decision" and the exchange's own "ufc_fight_winner_by_decision" was declared a
+winner market. The first fix - refusing markets whose QUESTION names a method -
+shipped, ran twice, and changed nothing, because this feed's question is often
+just the bare bout name on every market of the bout.
+
+So if this venue is ever brought back: carry across the ranking, the
+method refusal applied to the TYPE as well as the question text, and
+market_kind()'s token-based most-specific-first reading. Then confirm it from a
+capture log and a ledger row, not from the code looking right.
 
 Original notes follow.
 

@@ -4744,7 +4744,70 @@ Effect on the readout:
 ## Not changed
 
 The site's market gauge still reads `venue == "sportsbook"` — a devigged
-consensus across ~25 books. Polymarket has never fed it, and now that the
-exchange prices are being read correctly the two largely agree (72 against
-70.5), so there is no accuracy argument for switching. Any change there is a
-display decision, not a correctness one, and would need its own note.
+consensus across ~25 books. Polymarket has never fed it, so nothing displayed
+was ever wrong because of this bug. Any change there is a display decision, not
+a correctness one, and would need its own note.
+
+~~and now that the exchange prices are being read correctly the two largely
+agree (72 against 70.5)~~ — **struck.** That sentence was written from the
+exchange page, not from a capture made with the fix in place. See amendment 1.
+
+## Amendment 1 (2026-10-08): the fix above did not work, and why
+
+Asked whether the capture was working now, and the measured answer was **no**.
+Two captures ran with the fix in place and priced every bout the same way the
+contaminated rows did:
+
+| capture (UTC) | rows | min | max | sd |
+|---|---|---|---|---|
+| 2026-10-08T01:32 | 12 | .495 | .505 | — |
+| 2026-10-08T08:21 | 12 | .495 | .505 | .0043 |
+
+against the books on the same six bouts: .295, .366, .471, .497, .512, and one
+unpriced. The refusal and the ranking both ran and neither bit.
+
+**The cause was one level further back.** `market_kind()` held its word list in
+a dict and returned on the first substring hit, so insertion order decided
+precedence: `"fight_winner"` was tested before `"method"` and `"decision"`.
+The exchange types its method markets `ufc_fight_winner_by_decision`, which
+therefore came back as kind **`winner`** — tying the real moneyline on rank, so
+feed order chose between them exactly as before. The question-text refusal
+missed it because on this feed the question is frequently just the bare bout
+name ("Gerald Meerschaert vs Julius Walker") on every market of the bout, with
+the only distinction in the type field.
+
+The same misread also kept those markets **out of `map_props()`**, which
+accepts only prop/total/other. One classification bug, two effects.
+
+Fixed by reading the type as **whole tokens, most-specific-first** — a type
+naming a method, round or length is a prop even when it also says "winner" —
+and by extending the refusal to the stated type with its separators normalized
+(`\b` does not fire at "by decision" while the underscores are still there).
+Reproduced and verified offline: a decision market typed
+`ufc_fight_winner_by_decision`, listed first, with 75× the volume of the real
+moneyline, is now refused, and Meerschaert comes through at **.295** — the
+book's figure, and consistent with the 73/28 on the exchange page. All 11
+suite checks pass.
+
+`BAD_PUS_ML_BEFORE` moves from `02:00` to `20:00` on 2026-10-08: captures run
+at 02/10/16/22 UTC, so this excludes every run made today with the broken
+classifier and admits the 22:00 run as the first trustworthy one.
+
+### What this changes about how such a fix is confirmed
+
+The first fix was shipped on a diagnosis read off the ledger alone, and
+"verified across four orderings" verified the ranking logic against a feed
+shape I had assumed rather than observed. The feed is only reachable from where
+the capture runs, so a `ml_audit()` dump now prints, per event, every
+two-fighter-named market with its type, price and the reason it was taken or
+refused. **A price change on this venue is not confirmed by the code reading
+correctly; it is confirmed by a capture log and a ledger row.** Until the 22:00
+run is in, the correct statement is that the cause is identified and the fix is
+verified offline — not that the capture is working.
+
+### Rejected: a near-50% guard
+
+Refusing any price in a band around .50 would have caught both bad batches, and
+was rejected: Bonfim vs. Prado is a genuine pick'em at .497 on the books, and a
+rule keyed to the value would discard real coin-flips while leaving the actual
+defect in place. **Gate on market identity, never on the price it reports.**

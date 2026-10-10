@@ -271,6 +271,8 @@ def capture(fights, fighters, card_path="data/upcoming.txt", path=None,
         rows_us = pus.parse(pus.expand(pus.fetch_events()))
         if verbose:
             print(f"polymarket us: {pus.describe(rows_us)}")
+            print("polymarket us moneyline candidates:")
+            print(pus.ml_audit(rows_us))
         us = pus.moneylines(rows_us)
         if us:
             venues["polymarket_us"] = us
@@ -897,7 +899,19 @@ def settle(fights, path=None, date_tol_days=4, verbose=True):
 # one you will edit; a bad capture does not suspend that. The rows stay as the
 # record of what was captured, the forward test stops counting them, and the
 # cutoff is a dated constant that anyone can audit or lift.
-BAD_PUS_ML_BEFORE = "2026-10-08T02:00:00+00:00"
+# Moved out from 02:00 to 20:00 on 2026-10-08. The first fix - a refusal on
+# any market whose QUESTION named a method - did not work: the captures at
+# 01:32 and 08:21 that ran with it still priced all twelve rows between 0.495
+# and 0.505 while the books spanned 0.295 to 0.512. The cause was one level
+# further back, in market_kind(): its word list was scanned in insertion order,
+# so "fight_winner" was tested before "method" and "decision" and the
+# exchange's own "ufc_fight_winner_by_decision" was classified kind "winner".
+# It therefore tied the real moneyline on rank and feed order chose between
+# them, and the question-text refusal missed it because this feed's question is
+# often just the bare bout name. Captures run at 02/10/16/22 UTC, so 20:00
+# excludes every run made with the broken classifier today and admits the 22:00
+# run, which is the first with the token-based one.
+BAD_PUS_ML_BEFORE = "2026-10-08T20:00:00+00:00"
 
 
 def _drop_bad_pus_ml(L):
