@@ -2936,6 +2936,30 @@ function sbShrinkMix(m){
   ['ko','sub','dec'].forEach(k=>{out[k]=((c[k]||0)+SB_SHRINK*base[k])/(n+SB_SHRINK);});
   return out;
 }
+/* The same operation on the loss side: "when this man loses, how".
+
+   It shrinks toward sbBaseMix() - the SAME league mix the win side uses, not a
+   second constant - and that is not a shortcut. Every bout has exactly one
+   winner and one loser and the method belongs to the fight, so a league counted
+   from the losers' corners returns the identical ko/sub/dec split. There is no
+   loss-side prior to measure, and inventing one would have been a number with
+   nothing behind it.
+
+   Shrinkage matters MORE here than on the win side, because losses are rarer:
+   a 20-5 fighter has five of them, and splitting five into three families gives
+   cells of one. k=5 against a five-loss record puts half the weight on the
+   league, which is the honest answer when the raw split is 1/1/3. */
+function sbLossMix(m){
+  if(!m||m.l_total==null) return null;
+  const n=m.l_total;
+  if(!n) return null;                      // undefeated: no evidence, not a zero
+  const base=sbBaseMix();
+  const c={ko:m.lko_n||0, sub:m.lsub_n||0, dec:m.ldec_n||0};
+  const out={};
+  ['ko','sub','dec'].forEach(k=>{out[k]=(c[k]+SB_SHRINK*base[k])/(n+SB_SHRINK);});
+  out.n=n;
+  return out;
+}
 /* `w` blends the result toward the MODEL's own method split, so the slider
    moves every number it ought to. Without it the slider moved only the winner
    probability: the method read, the length call and the round call were pinned
@@ -3065,6 +3089,12 @@ function parseEspnHistory(text, asOfMs){
 /* Turned into the same shape parseUfcMethod produces, so every consumer
    downstream is unchanged, plus the fight-level quantities that shape cannot
    express. Counts are tier-weighted, which is why they are not integers. */
+/* Bumped whenever espnDerive() gains or changes a field. sbFreshen() re-derives
+   any stored read carrying an older number, which is what keeps a panel from
+   reaching for a field that build never wrote. It replaces a check on whether
+   ONE field had arrived - see the note on sbFreshen for why that could only
+   work until the next field was added, which is this one. */
+const ESPN_DV = 3;
 function espnDerive(h){
   if(!h||!h.rows.length) return null;
   const R=h.rows, sw=f=>R.filter(f).reduce((t,x)=>t+x.w,0);
@@ -3120,6 +3150,31 @@ function espnDerive(h){
     l_ko:R.filter(x=>x.res==='L'&&x.fam==='ko').length,
     l_sub:R.filter(x=>x.res==='L'&&x.fam==='sub').length,
     l_dec:R.filter(x=>x.res==='L'&&x.fam==='dec').length,
+    /* The loss side, TIER-WEIGHTED, which is the half the derivation never
+       computed. Every field above this comment is built from `wins` alone, so
+       the check has been reading one fighter's offense against the other's
+       offense and nothing about how either man actually gets beaten. A
+       submission win priced against an opponent who has never been submitted
+       and one priced against an opponent submitted five times came out
+       identical.
+
+       Weighted here where the plain counts above are not, for the reason the
+       note above gives: "has he been stopped" is a fact and belongs unweighted,
+       while a SHARE is evidence about a fighter and a regional knockout is
+       weaker evidence than a UFC one. Same 0.5 tier weight, same as the wins.
+
+       `l_*_n` are over losses - "when he loses, how" - and `stop_rate` is over
+       ALL fights, which is the durability quantity and the one that pairs
+       against an opponent's finishing. The Python model's `ko_loss_rate` uses
+       that same all-fights denominator, so the two agree by construction. */
+    l_total:sw(x=>x.res==='L'),
+    lko_n:sw(x=>x.res==='L'&&x.fam==='ko'),
+    lsub_n:sw(x=>x.res==='L'&&x.fam==='sub'),
+    ldec_n:sw(x=>x.res==='L'&&x.fam==='dec'),
+    stop_rate: tot>0 ? sw(x=>x.res==='L'&&x.fam!=='dec')/tot : null,
+    ko_stop_rate: tot>0 ? sw(x=>x.res==='L'&&x.fam==='ko')/tot : null,
+    sub_stop_rate: tot>0 ? sw(x=>x.res==='L'&&x.fam==='sub')/tot : null,
+    dv:ESPN_DV,
     off_tier:R.filter(x=>x.w<1).length, dropped:h.dropped};
 }
 function parseUfcBlock(text){
@@ -3186,13 +3241,20 @@ function sbCorner(base,over,w){
    read is simply re-derived whenever the shape is out of date, and is always
    current by construction. Where there is no raw text to rebuild from, the
    stale espn marker is dropped so the page falls back to the UFC.com counts
-   instead of reaching for fields that were never written. */
+   instead of reaching for fields that were never written.
+
+   The staleness test was `Array.isArray(m.by_round)` - itself a check on
+   whether ONE field had arrived, which is the very thing the paragraph above
+   says does not scale. It held until the loss-side fields were added: those
+   reads already carry by_round, so they read as current and would have been
+   handed to a panel expecting fields they do not have. It is a VERSION NUMBER
+   now, so every future field is covered without touching this function. */
 function sbFreshen(st,b){
   if(!st) return st;
   const asOf=(typeof sbCardMs==='function')?sbCardMs(b):null;
   ['a','b'].forEach(c=>{
     const m=st[c+'_m'];
-    if(!m||!m.espn||Array.isArray(m.by_round)) return;   // not a history read, or already current
+    if(!m||!m.espn||m.dv===ESPN_DV) return;   // not a history read, or already current
     const raw=st[c+'_histraw'];
     let d=null;
     try{ d=raw?espnDerive(parseEspnHistory(raw,asOf)):null; }catch(e){ d=null; }
@@ -3592,6 +3654,113 @@ function sbMethodBlock(b,st,pA){
           + prov;   // under the rows it explains, not wedged above them
       })()}`
      :'<div class="note" style="margin-top:6px">Both corners need a Win by Method block before the two can be combined.</div>'}
+    ${(()=>{
+      /* How each man GETS BEATEN - the half the check could not see at all.
+         Every derived field on this tab was built from `wins`, so the method
+         read priced one fighter's offense against the other's offense and
+         treated both corners as equally finishable. A submission specialist
+         facing a man never submitted and one facing a man submitted five times
+         produced the same number.
+
+         DISPLAY ONLY, deliberately, and the method rows above are untouched.
+         Folding opponent finishability into the read changes a prediction, and
+         a loss profile is a thin sample: five losses split three ways is cells
+         of one. The win-side ROUND claim died on exactly that - split-half
+         reliability 0.21, falling to 0.05 as the sample grew. So this shows the
+         evidence and waits for a loss-side split-half test to pass before any
+         number above it moves. Addendum 48 registers that test.
+
+         The league column is sbBaseMix(), the same mix the win side shrinks
+         toward, and comparing a loss profile against it is legitimate rather
+         than convenient: every bout produces exactly one loss, so the method
+         split taken over all losses in the league IS the split taken over all
+         bouts. Same quantity, no population mismatch. */
+      const LS=[[surname(b.a),st.a_m],[surname(b.b),st.b_m]]
+        .filter(x=>x[1]&&x[1].espn)
+        .map(([nm,x])=>[nm,x,sbLossMix(x)]).filter(x=>x[2]);
+      if(!LS.length) return '';
+      const base=sbBaseMix();
+      const fam=[['ko','by KO/TKO'],['sub','by submission'],['dec','on the cards']];
+      /* A share is only called high or low against the league when it clears
+         five points. Below that the shrinkage is doing the talking, and a
+         coloured arrow on noise is worse than no arrow. */
+      const mark=d=>Math.abs(d)<0.05?''
+        :`<span class="rbb" style="color:${d>0?'var(--redsoft)':'var(--good)'}">&nbsp;${
+            d>0?'+':''}${(100*d).toFixed(0)}</span>`;
+      /* The cards row is NOT marked, and that is deliberate. Its delta is the
+         negative of the other two added together, so it carries no information
+         they do not - and the colour contradicted itself: a man stopped far
+         more than the league reads "-11 on the cards", which the red/green rule
+         paints GREEN while the +19 directly above it is red. Same fact, two
+         opposite colours, on adjacent lines. The split bar underneath says
+         stopped-or-cards once, in one direction, which is all this row was
+         ever doing. */
+      const block=([nm,x,L])=>`<div class="rbwrap">
+        <div class="rbhd"><b>${esc(nm)}</b>
+          <span class="lbl">${x.n_loss} loss${x.n_loss===1?'':'es'} in ${x.n_fights} fights${
+            x.off_tier?` · ${x.off_tier} outside the UFC at half weight`:''}</span></div>
+        <div class="rbrow rbh"><span></span><span>when beaten</span><span>league</span></div>
+        ${/* Values in bone, not the record panel's .rbw/.rbo pair. Those are
+              coloured green for WON and orange for LOST, and this column is a
+              man's losses - borrowing .rbw would have printed a losses column
+              in the colour the panel directly below uses for wins. Colour on
+              this panel means exactly one thing, the distance from the league,
+              and the +/- mark is the only thing carrying it. */''}
+        ${fam.map(([k,lab])=>`<div class="rbrow"><span class="rbl">${lab}</span>
+          <span class="mono" style="color:var(--bone)">${P0(L[k])}%${
+            k==='dec'?'':mark(L[k]-base[k])}</span>
+          <span class="mono" style="color:var(--dim)">${P0(base[k])}%</span></div>`).join('')}
+        <div class="spline" style="margin-top:6px">
+          <span class="spw">stopped</span>
+          <span class="spbar"><i style="width:${(100*(1-L.dec)).toFixed(1)}%"></i></span>
+          <span class="spn mono"><b>${P0(1-L.dec)}%</b> stopped · ${P0(L.dec)}% cards</span></div>
+        ${x.stop_rate!=null?`<div class="note" style="margin:4px 0 0">Stopped in
+          <b style="color:var(--mute)">${P0(x.stop_rate)}%</b> of all ${x.n_fights} fights, not just
+          the losses — the durability figure, and the one that pairs against the other man's
+          finishing.</div>`:''}
+      </div>`;
+      /* The pairing, which is the whole reason the loss side is worth having:
+         a method is produced by one man's offense meeting the other man's
+         defense, and until now only the first half was on the page. Reported
+         only where BOTH halves lean the same way past the league, because one
+         side alone is the thing the win-only read was already showing. */
+      let pair='';
+      const full=[[surname(b.a),st.a_m],[surname(b.b),st.b_m]].filter(x=>x[1]&&x[1].espn);
+      if(full.length===2){
+        const hits=[];
+        [[0,1],[1,0]].forEach(([i,j])=>{
+          const W=sbShrinkMix(full[i][1]), D=sbLossMix(full[j][1]);
+          if(!W||!D) return;
+          ['ko','sub'].forEach(k=>{
+            const dw=W[k]-base[k], dd=D[k]-base[k];
+            if(dw>0.04&&dd>0.04) hits.push({a:full[i][0],b:full[j][0],k:k,
+              w:W[k],d:D[k],score:dw+dd});
+          });
+        });
+        hits.sort((p,q)=>q.score-p.score);
+        if(hits.length) pair=`<div class="note" style="margin-top:7px">
+          <b style="color:var(--mute)">Where offense meets the way the other man loses.</b>
+          ${hits.slice(0,2).map(h=>`<div style="margin-top:3px">${esc(h.a)} wins
+            <b style="color:var(--bone)">${P0(h.w)}%</b> ${h.k==='ko'?'by KO/TKO':'by submission'},
+            and ${esc(h.b)}'s losses are <b style="color:var(--bone)">${P0(h.d)}%</b>
+            ${h.k==='ko'?'by KO/TKO':'by submission'} — both above the league's
+            ${P0(base[h.k])}%.</div>`).join('')}
+          <div style="margin-top:4px">An alignment, not a forecast: it is listed when both halves
+            lean the same way and says nothing about how often it comes off. Nothing above this
+            section uses it.</div></div>`;
+        else pair=`<div class="note" style="margin-top:7px">No family where one man's finishing and
+          the other's way of losing both lean past the league — on these two records the matchup
+          gives neither corner a stylistic opening.</div>`;
+      }
+      return `<div style="margin-top:14px;padding-top:11px;border-top:1px solid var(--line)">
+        <div class="lbl">How they have been beaten · shrunk toward the league, tier-weighted</div>
+        <div class="rbgrid">${LS.map(block).join('')}</div>
+        ${pair}
+        <div class="note" style="margin-top:7px">Shares over each man's own losses, shrunk k=5 toward
+          the league mix — losses are rarer than wins, so a five-loss record sits half on the league
+          and a raw 1/1/3 split is not reported as 20/20/60. <b style="color:var(--mute)">Shown, not
+          used:</b> the method rows above this section are still built from wins alone, and stay that
+          way until a loss-side reliability test passes.</div></div>`;})()}
     ${(()=>{
       /* The record itself, round by round, for reading rather than computing
          with. Everything above this point is a derived number - shrunk,
