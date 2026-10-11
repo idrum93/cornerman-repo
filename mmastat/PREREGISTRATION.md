@@ -4811,3 +4811,102 @@ Refusing any price in a band around .50 would have caught both bad batches, and
 was rejected: Bonfim vs. Prado is a genuine pick'em at .497 on the books, and a
 rule keyed to the value would discard real coin-flips while leaving the actual
 defect in place. **Gate on market identity, never on the price it reports.**
+
+# Addendum 48: the loss side of the record (2026-10-11)
+
+Raised from the outside: the check reads a win-by-method breakdown for each
+corner, so should it not read a loss-by-method breakdown too — does a man get
+stopped by strikes, submitted, or beaten on the cards?
+
+## What was already there, and what was not
+
+Half of this is built and load-bearing, which is worth stating before anything
+new is proposed:
+
+| quantity | where | status |
+|---|---|---|
+| `d_ko_loss_rate` | `features.py` DIFF_KEYS | **one of the 14 win features** |
+| `kd_against15` | CORE, method model | +0.23/SD; KO rate 14→18→22→24% across quartiles |
+| `l_ko`, `l_sub`, `l_dec` | `espnDerive` | parsed, DISPLAYED as plain counts, nothing computed |
+| submission-loss rate | nowhere | **does not exist**; `FighterState` has `w_ko`, `w_sub`, `l_ko` and no `l_sub` |
+
+Two things follow. First, `d_finish_rate` — the WIN-side twin — was pruned as
+"carried by `ko_edge`", while `d_ko_loss_rate` survived pruning. Being
+finishable is not the mirror of being a finisher, and the corpus already says
+so. Second, the gap is specifically the submission side: `sub_edge` prices one
+man's submission offense against nothing at all on the other side of the cage.
+
+**Decision losses are not proposed.** The three shares sum to one, so all three
+is exact collinearity; and losing on the cards is the residual of the other two
+rather than a property of the fighter — `d_elo` already carries "loses".
+
+## Shipped now: display only
+
+`espnDerive` gains tier-weighted loss counts (`lko_n`, `lsub_n`, `ldec_n`,
+`l_total`), an all-fights `stop_rate` matching `ko_loss_rate`'s denominator, and
+`sbLossMix()` shrinks the loss profile toward the league with the same k=5.
+
+The league prior is `sbBaseMix()`, the win side's own, and no second constant
+was measured. Every bout produces exactly one win and one loss and the method
+belongs to the fight, so the method split over all losses in the league IS the
+split over all bouts. Losses map to bouts one-to-one; there is no population
+mismatch of the kind that broke the decision-curve marker (addendum 45).
+
+The panel also reports where one man's finishing meets the other's way of
+losing, when both halves lean past the league. **Nothing above it moves.** The
+method rows are still built from wins alone.
+
+## Registered, NOT yet run: the precondition
+
+Before any loss-side quantity enters the read:
+
+- **Split-half reliability** of each fighter's loss profile, odd/even fights,
+  Spearman-Brown corrected. Bar: **≥ 0.40 and not falling as the sample grows.**
+  Control: `ko_loss_rate` on the same fighters, which should clear it.
+- Reported with a bootstrap CI, BH at FDR 0.10 across the three families.
+
+The bar is set from what killed the round claim: a fighter's round-one share
+measured 0.21 and fell to 0.05 as the sample grew, while his finish rate
+measured 0.54 and rose to 0.60. Losses are rarer than wins — a 20-5 record is
+five events split three ways — so the prior here is **low**, and lower for
+submissions than for KOs. If it fails, it is recorded as a null and the panel
+stays display-only permanently.
+
+Not run in this session: the UFCStats CSVs are not in the repo.
+
+# Addendum 49: cage size, and what addendum 8 did and did not test
+
+Raised from the outside: the Apex cage is smaller than a standard one — is
+there a statistical difference?
+
+**The interaction is tested and null.** Addendum 8 registered it as V1, "small
+cage (UFC Apex) x own pressure style", from `LOCATION`. Result: beta +0.0144,
+**p = .567**, correct sign, nowhere near the BH threshold, in a family where
+zero of five were supported and the smallest p-value was 0.140. It is on the
+standing do-not-re-propose list with venue and altitude.
+
+**But V1 tested the wrong target for this question.** Addendum 8 states that
+winner hypotheses ran against outcome and only V3 ran against method. V1 was an
+interaction with pressure style predicting **who wins** — while its own stated
+rationale ends "and raise finish rates". The main effect on **method** was never
+measured. A 25ft cage plausibly changes how a fight ends without changing who
+wins it, and the method and round props are where this tool would use it.
+
+So the narrow version is open: **does P(finish), conditional on the model's
+existing method inputs, differ at the Apex?** It is a different hypothesis from
+V1, not a re-proposal, and it must be registered as such before it is fitted.
+
+**Two confounds decide whether it is worth running at all**, and both are severe
+enough that an uncontrolled finish-rate comparison is worthless:
+
+1. **Card tier.** Apex cards are overwhelmingly Fight Nights with lower-ranked
+   fighters. A raw finish-rate gap is mostly matchmaking.
+2. **Era.** Apex usage spiked in 2020–21 behind closed doors, with short-notice
+   replacements and no crowd. "Apex" is substantially a proxy for a period that
+   differed in several other ways at once, and addendum 9 already records that
+   decision rates move by era.
+
+Any test conditions on card segment and year, or it measures those instead. The
+prior is low: nine families have now come back null, this one has already failed
+in its interaction form, and the two confounds both push the same direction.
+Registered as a candidate, not scheduled.
