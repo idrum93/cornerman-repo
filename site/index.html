@@ -187,6 +187,12 @@
   .spline .spw.m ~ .spbar i{background:#7f8da3}
   .spn{font-size:10px;color:var(--dim);white-space:nowrap}
   .spn b{color:var(--bone)}
+  /* The same bar inside a narrow column. .spbar is a fixed 120px because it
+     lives in a full-width row; dropped into the two-up record grid it overran
+     its box and the text beside it ran under the neighbouring block. Here it
+     takes whatever is left instead of demanding 120px. */
+  .spline.spfit{gap:6px}
+  .spbar.spfit{width:auto;flex:1 1 auto;min-width:30px}
   @media(max-width:520px){ .sbsplit{align-items:flex-start;flex-direction:column;gap:5px}
     .spbar{width:96px} .spn{font-size:9.5px} }
   .sbout{display:flex;align-items:baseline;gap:20px;flex-wrap:wrap;margin-top:12px;
@@ -3643,13 +3649,43 @@ function sbMethodBlock(b,st,pA){
         const lgR1=t.base!=null?t.base:(b.rounds===5?0.1555:0.2533);
         const lgCond=b.rounds===5?0.376:0.517;
         const anch=v=>`<span style="color:var(--dim)">· league ${P0(v)}%</span>`;
+        /* Where the fight ends, as three shares of ALL outcomes that add to
+           100. It was two rows that could not be read together: "ends in round
+           one" over ALL outcomes, and "of the finishes, in round one" over the
+           FINISHES only. Two denominators, stacked, neither stated - so 15%
+           above 26% looked like a contradiction rather than the same fact
+           counted two ways, and neither row answered the question actually
+           being asked, which is round one against the rounds after it.
+           Splitting the whole space answers it directly and the arithmetic is
+           checkable on sight.
+           Rounds two-and-after are kept as ONE row rather than split per round
+           for the reason the note below gives: which round a finish lands in
+           does not replicate (0.21 falling to 0.05), so a per-round column
+           would be rendering noise at three decimal places of confidence. */
+        const clamp=v=>(v==null||!isFinite(v))?null:Math.max(0,Math.min(1,v));
+        const midLab=b.rounds===5?'ends in rounds 2–5':'ends in rounds 2–3';
+        const mDec=mk?mk.dec:null;
+        /* The middle row is shown as the RESIDUAL of the two rounded figures
+           beside it, not as its own rounded number. Three values rounded
+           independently add to 99 or 101 about as often as they add to 100 -
+           the first run of this block printed 27 + 41 + 33 - and a note that
+           promises 100 under a column that shows 101 is worse than no note.
+           It is the residual by construction anyway (finish minus round one),
+           so this changes the display and not the quantity. */
+        const resid=(r1,dec)=>(r1==null||dec==null)?null
+          :clamp((100-P0(r1)-P0(dec))/100);
+        const mMid=(b.p_end_r1!=null&&mDec!=null)?resid(b.p_end_r1,mDec):null;
+        const rMid=(t.p!=null&&read.dec!=null)?resid(t.p,read.dec):null;
         return row((hasM||b.p_end_r1==null?'ends in round one'
             :`ends in round one <span style="color:var(--dim)">· model ${P0(b.p_end_r1)}%</span>`)
             +' '+anch(lgR1),
             b.p_end_r1,t.p)
-          + (cond!=null?row('of the finishes, in round one '+anch(lgCond),
-              (b.p_end_r1!=null&&b.p_finish>0.02)?b.p_end_r1/b.p_finish:null,
-              Math.min(0.99,cond)):'')
+          + row(midLab,mMid,rMid)
+          + row('goes to decision',mDec,read.dec)
+          + `<div class="note" style="margin:4px 0 0">Those three are every way the fight can end,
+              so each column adds to 100%.${cond!=null?` Put the other way round: <b
+              style="color:var(--mute)">if</b> it finishes, round one is ${P0(Math.min(0.99,cond))}%
+              of those finishes, against a league ${P0(lgCond)}%.`:''}</div>`
           + (t.both?'':'<div class="note" style="margin:4px 0 0">Round-one figure uses one corner only — add the other record for both.</div>')
           + prov;   // under the rows it explains, not wedged above them
       })()}`
@@ -3710,10 +3746,14 @@ function sbMethodBlock(b,st,pA){
           <span class="mono" style="color:var(--bone)">${P0(L[k])}%${
             k==='dec'?'':mark(L[k]-base[k])}</span>
           <span class="mono" style="color:var(--dim)">${P0(base[k])}%</span></div>`).join('')}
-        <div class="spline" style="margin-top:6px">
+        ${/* The trailing "· N% cards" is gone with the fixed width: it repeated
+              the "on the cards" row immediately above AND the unshaded half of
+              this bar, so the same number was on screen three times in four
+              lines - and it was the part being clipped. */''}
+        <div class="spline spfit" style="margin-top:6px">
           <span class="spw">stopped</span>
-          <span class="spbar"><i style="width:${(100*(1-L.dec)).toFixed(1)}%"></i></span>
-          <span class="spn mono"><b>${P0(1-L.dec)}%</b> stopped · ${P0(L.dec)}% cards</span></div>
+          <span class="spbar spfit"><i style="width:${(100*(1-L.dec)).toFixed(1)}%"></i></span>
+          <span class="spn mono"><b>${P0(1-L.dec)}%</b></span></div>
         ${x.stop_rate!=null?`<div class="note" style="margin:4px 0 0">Stopped in
           <b style="color:var(--mute)">${P0(x.stop_rate)}%</b> of all ${x.n_fights} fights, not just
           the losses — the durability figure, and the one that pairs against the other man's
