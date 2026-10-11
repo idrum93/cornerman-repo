@@ -250,6 +250,10 @@
     color:var(--bone);background:var(--soft);border:1px solid var(--line);
     border-radius:5px;padding:4px 9px;cursor:pointer}
   .ckbtn:hover{border-color:var(--gold);color:var(--gold)}
+  .fbtog{display:inline-flex;align-items:center;gap:5px;margin-left:auto;cursor:pointer;
+    font-size:9.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--mute)}
+  .fbtog input{accent-color:var(--gold);cursor:pointer;margin:0}
+  .fbtog.off{opacity:.45;cursor:default} .fbtog.off input{cursor:default}
   .fbnone{color:var(--dim);font-size:11px}
   .fbna{background:var(--ink)}
   @media(max-width:620px){ .fbp{font-size:9px} .fbg-b{font-size:10px} }
@@ -1784,11 +1788,60 @@ function cardShapeStrip(){
    combined figure is a true probability, while the card total is an expected
    count and is labelled as one. */
 const FB_N=25;
+const FB_KEY='cornerman.finishboard.check.v1';
+let FB_CHECK=(function(){ try{ return localStorage.getItem(FB_KEY)==='1'; }catch(e){ return false; } })();
+
+/* The check can re-level this board; it cannot reshape it.
+
+   WHAT IT MAY DO. The model's round cells decompose exactly into the four
+   route totals - a_ko, a_sub, b_ko, b_sub - which is verified, not assumed.
+   The check publishes those same four cells plus a decision, shrunk and
+   tier-weighted. So each route's round cells can be multiplied by
+   check_route / model_route: the LEVEL of each route becomes the check's, and
+   the shape across rounds within that route stays the model's. It is the same
+   move the pipeline already makes with k_fin, which rescales the survival
+   model's shape to a separately calibrated finish level, applied per route
+   instead of once overall.
+
+   WHAT IT MAY NOT DO, and this is the whole reason the toggle is scoped this
+   way: it must not set the round shape from a fighter's own round history.
+   That is the "where their fights have ended" table - six KOs in round one,
+   four in round two - and it is displayed as evidence precisely BECAUSE it was
+   measured and failed. Split-half reliability of a fighter's round-one share
+   is 0.21 and falls to 0.05 as the sample grows, while his finish rate is 0.54
+   and RISES to 0.60. Whether a man finishes replicates; when he finishes does
+   not. Reading round probabilities off those counts would re-introduce a
+   recorded null with a checkbox in front of it.
+
+   The loss side - "how they have been beaten" - is also NOT folded in here,
+   for a different reason: it is display-only pending the split-half test
+   registered as addendum 48, which has not been run. When it passes it enters
+   the check's own method read, and this board inherits it automatically
+   because it reads that read. Nothing here needs changing for that. */
+function fbCheckCells(b){
+  if(!FB_CHECK) return null;
+  const c=(typeof CKR==='object'&&CKR)?CKR[b.bout]:null;
+  if(!c||c.cells_ok!==true) return null;
+  const cells={a_ko:+c.a_ko||0,a_sub:+c.a_sub||0,b_ko:+c.b_ko||0,b_sub:+c.b_sub||0};
+  const fin=cells.a_ko+cells.a_sub+cells.b_ko+cells.b_sub;
+  return fin>0.001?cells:null;
+}
 function finishPicks(d){
   const out=[];
   (d&&d.bouts||[]).forEach(b=>{
     const rv=b.round_of_victory; if(!rv) return;
     const R=b.rounds||3;
+    const ck=fbCheckCells(b);
+    // Per-route scale factors. A route the model gives no weight at all cannot
+    // be scaled into existence, so it stays absent rather than being invented.
+    const sc={};
+    if(ck){
+      ['a_ko','a_sub','b_ko','b_sub'].forEach(route=>{
+        let tot=0;
+        Object.keys(rv).forEach(k=>{ if(k.indexOf(route+'_r')===0) tot+=(+rv[k]||0); });
+        sc[route]=tot>1e-6?ck[route]/tot:0;
+      });
+    }
     Object.keys(rv).forEach(k=>{
       const m=/^([ab])_(ko|sub)_r([1-5])$/.exec(k); if(!m) return;
       const r=+m[3];
@@ -1796,8 +1849,11 @@ function finishPicks(d){
       // a stale payload that does carry them must not put a round-four pick on
       // a fight that cannot reach round four.
       if(r>R) return;
-      const p=+rv[k]; if(!isFinite(p)||p<=0) return;
-      out.push({bout:b.bout,who:(m[1]==='a'?b.a:b.b),fam:m[2],r:r,p:p,rounds:R});
+      let p=+rv[k]; if(!isFinite(p)||p<=0) return;
+      const route=m[1]+'_'+m[2];
+      if(ck) p=p*(sc[route]||0);
+      if(!(p>0)) return;
+      out.push({bout:b.bout,who:(m[1]==='a'?b.a:b.b),fam:m[2],r:r,p:p,rounds:R,ck:!!ck});
     });
   });
   out.sort((x,y)=>y.p-x.p || (x.bout<y.bout?-1:1) || x.r-y.r);
@@ -1828,15 +1884,22 @@ function finishBoard(d){
       return `<div class="fbg-c">${here.map(x=>`<span class="fbp ${x.fam}"><i>${
         x.fam==='ko'?'KO/TKO':'SUB'}</i> <u>${esc(surname(x.who))} ${P0(x.p)}%</u></span>`).join('')}</div>`;
     }).join('');
+    const ckd=mine.length&&mine[0].ck;
     return `<div class="fbg-b"><b>${esc(surname(b.a))} v ${esc(surname(b.b))}</b>
       <span class="lbl">${esc(divShort(b.weight_class||''))} · ${R} rds${
-        mine.length?'':' · no pick'}</span></div>${cells}<div class="fbg-t">${
+        mine.length?'':' · no pick'}${ckd?' · <b style="color:var(--gold)">check</b>':''}</span></div>${cells}<div class="fbg-t">${
         mine.length?P0(sum)+'%':'<span class="fbnone">—</span>'}</div>`;
   }).join('');
+  const nCk=withRv.filter(b=>fbCheckCells(b)).length;
+  const avail=withRv.filter(b=>{const c=(typeof CKR==='object'&&CKR)?CKR[b.bout]:null;
+    return c&&c.cells_ok===true;}).length;
   return `<div class="fbwrap">
     <div class="fbhd"><b>Finish board</b>
       <span class="lbl">${picks.length} picks · <b style="color:var(--gold)">${exp.toFixed(1)} expected to land</b>
-        · cut-off ${P0(cut)}%</span></div>
+        · cut-off ${P0(cut)}%</span>
+      <label class="fbtog${avail?'':' off'}" title="${avail?'':'No UFC.com check entered for any bout on this card'}">
+        <input type="checkbox" class="fbck"${FB_CHECK?' checked':''}${avail?'':' disabled'}>
+        <span>use UFC.com check${avail?` (${FB_CHECK?nCk:avail} bout${(FB_CHECK?nCk:avail)===1?'':'s'})`:' — none entered'}</span></label></div>
     <div class="fbgrid" style="grid-template-columns:minmax(118px,1.5fr) repeat(${maxR},minmax(84px,1fr)) minmax(62px,.7fr)">
       ${head}${rows}</div>
     <div class="note" style="padding:7px 11px 9px">The card's ${FB_N} likeliest finishes by the model's
@@ -1847,6 +1910,11 @@ function finishBoard(d){
       figure is a real probability; across the card the ${exp.toFixed(1)} is an <b
       style="color:var(--mute)">expected count</b>, not a chance of anything — most of these lose,
       and at most ${withRv.filter(b=>(by[b.bout]||[]).length).length} can ever land.
+      ${FB_CHECK&&nCk?`<b style="color:var(--gold)">Check on:</b> on the ${nCk} bout${nCk===1?'':'s'}
+        marked <b style="color:var(--gold)">check</b>, each route's LEVEL is the UFC.com read's and
+        only the shape across rounds stays the model's. The check sets how often a route happens; it
+        never sets which round, because a fighter's own round history does not replicate — 0.21
+        split-half, falling to 0.05, against 0.54 rising to 0.60 for whether he finishes at all. `:''}
       The round split is the model's least-tested claim: it went 2 of 4 last card.${
       noRv.length?` ${noRv.length} bout${noRv.length===1?'':'s'} on this card publish no round split
         and ${noRv.length===1?'is':'are'} left out entirely.`:''}</div></div>`;
@@ -2578,6 +2646,12 @@ function ckImportText(txt){
 }
 /* One delegated listener, bound once. ckStrip is re-rendered on every draw, so
    per-element binding would have to be redone each time and would leak. */
+document.addEventListener('change',function(e){
+  if(!e.target.classList||!e.target.classList.contains('fbck')) return;
+  FB_CHECK=!!e.target.checked;
+  try{ localStorage.setItem(FB_KEY, FB_CHECK?'1':'0'); }catch(err){}
+  if(typeof render==='function') render();
+});
 document.addEventListener('click',function(e){
   const x=e.target.closest&&e.target.closest('.ckexp,.ckimp');
   if(!x) return;
