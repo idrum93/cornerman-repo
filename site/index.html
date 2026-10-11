@@ -1789,6 +1789,9 @@ function cardShapeStrip(){
    count and is labelled as one. */
 const FB_N=25;
 const FB_KEY='cornerman.finishboard.check.v1';
+const FB_MKEY='cornerman.finishboard.mode.v1';
+let FB_MODE=(function(){ try{ return localStorage.getItem(FB_MKEY)==='spread'?'spread':'cell'; }
+                         catch(e){ return 'cell'; } })();
 let FB_CHECK=(function(){ try{ return localStorage.getItem(FB_KEY)==='1'; }catch(e){ return false; } })();
 
 /* The check can re-level this board; it cannot reshape it.
@@ -1826,8 +1829,57 @@ function fbCheckCells(b){
   const fin=cells.a_ko+cells.a_sub+cells.b_ko+cells.b_sub;
   return fin>0.001?cells:null;
 }
+/* A round shape for a bout the model declined to split.
+
+   Thin bouts publish no round_of_victory at all, so a check read on one could
+   never reach the board however high its finish probability - which is exactly
+   what was reported: the two highest finish reads on the card were invisible.
+
+   The shape is POOLED FROM THIS CARD'S OTHER BOUTS at the same scheduled
+   length, using the model's own survival output, normalised. Not from a league
+   table: baserates carries `ends_before` cumulatively, which gives round one
+   and round two cleanly but leaves the final round as a residual against a
+   finish rate the table does not hold at that scheduled length - for five
+   rounds it comes out negative. Estimating that tail to fill a gap would be
+   inventing the number that matters most. The card's own bouts need no
+   estimate and come from the same model.
+
+   It is an extrapolation either way, so a row built this way is marked. */
+function fbShape(d,R){
+  const acc={}; let tot=0;
+  (d&&d.bouts||[]).forEach(b=>{
+    if((b.rounds||3)!==R || !b.round_of_victory) return;
+    Object.keys(b.round_of_victory).forEach(k=>{
+      const m=/^[ab]_(?:ko|sub)_r([1-5])$/.exec(k); if(!m) return;
+      const r=+m[1]; if(r>R) return;
+      const v=+b.round_of_victory[k]||0;
+      acc[r]=(acc[r]||0)+v; tot+=v;
+    });
+  });
+  if(tot>1e-6){ const o={}; for(let r=1;r<=R;r++) o[r]=(acc[r]||0)/tot; return o; }
+  // Nothing at this length on the card: a decaying default, declared not fitted.
+  const w={}; let s2=0;
+  for(let r=1;r<=R;r++){ w[r]=Math.pow(0.72,r-1); s2+=w[r]; }
+  for(let r=1;r<=R;r++) w[r]/=s2;
+  return w;
+}
 function finishPicks(d){
   const out=[];
+  /* Bouts the model would not split, placed from the check alone. Only ever
+     when the check is on and only when it has a complete five-cell read. */
+  if(FB_CHECK) (d&&d.bouts||[]).forEach(b=>{
+    if(b.round_of_victory) return;
+    const ck=fbCheckCells(b); if(!ck) return;
+    const R=b.rounds||3, sh=fbShape(d,R);
+    ['a_ko','a_sub','b_ko','b_sub'].forEach(route=>{
+      const q=route.split('_');
+      for(let r=1;r<=R;r++){
+        const p=ck[route]*(sh[r]||0);
+        if(p>0) out.push({bout:b.bout,who:(q[0]==='a'?b.a:b.b),fam:q[1],r:r,p:p,
+                          rounds:R,ck:true,borrowed:true});
+      }
+    });
+  });
   (d&&d.bouts||[]).forEach(b=>{
     const rv=b.round_of_victory; if(!rv) return;
     const R=b.rounds||3;
@@ -1853,21 +1905,58 @@ function finishPicks(d){
       const route=m[1]+'_'+m[2];
       if(ck) p=p*(sc[route]||0);
       if(!(p>0)) return;
-      out.push({bout:b.bout,who:(m[1]==='a'?b.a:b.b),fam:m[2],r:r,p:p,rounds:R,ck:!!ck});
+      out.push({bout:b.bout,who:(m[1]==='a'?b.a:b.b),fam:m[2],r:r,p:p,rounds:R,ck:!!ck,borrowed:false});
     });
   });
   out.sort((x,y)=>y.p-x.p || (x.bout<y.bout?-1:1) || x.r-y.r);
   return out;
 }
+/* Two ways to spend the 25.
+
+   CELL — the top 25 cells on the card, straight down. It is what you would
+   actually bet on individually, and it is the default. Its known distortion is
+   that a five-round bout dilutes the same finish probability across twenty
+   cells, so the likeliest finish on a card can draw fewer picks than a shorter
+   fight behind it.
+
+   SPREAD — bouts ranked by their own finish probability, then one pick each in
+   turn until the 25 are gone. Every qualifying bout gets a first pick before
+   any bout gets a second, so coverage is maximal, and because the passes run
+   in finish order the higher bouts collect their second and third picks first.
+   This is the mode that answers "cover the card's likeliest finishes" rather
+   than "take the biggest individual cells", and the two genuinely disagree. */
+function fbAllocate(all,d){
+  if(FB_MODE!=='spread') return all.slice(0,FB_N);
+  const by={};
+  all.forEach(x=>{(by[x.bout]=by[x.bout]||[]).push(x);});
+  const order=Object.keys(by).map(k=>{
+    const arr=by[k].slice().sort((a,b)=>b.p-a.p);
+    // the bout's own finish probability, from whichever source placed it
+    const fin=arr.reduce((t,x)=>t+x.p,0);
+    return {bout:k,arr:arr,fin:fin};
+  }).sort((a,b)=>b.fin-a.fin);
+  const out=[]; let i=0;
+  while(out.length<FB_N){
+    let placed=false;
+    for(const o of order){
+      if(o.arr.length>i){ out.push(o.arr[i]); placed=true; if(out.length>=FB_N) break; }
+    }
+    if(!placed) break;      // every bout exhausted
+    i++;
+  }
+  return out;
+}
 function finishBoard(d){
   const all=finishPicks(d);
   if(!all.length) return '';
-  const picks=all.slice(0,FB_N);
+  const picks=fbAllocate(all,d);
   const exp=picks.reduce((t,x)=>t+x.p,0);
-  const cut=picks.length?picks[picks.length-1].p:0;
+  const cut=picks.length?Math.min.apply(null,picks.map(x=>x.p)):0;
   const by={}; picks.forEach(x=>{(by[x.bout]=by[x.bout]||[]).push(x);});
-  const withRv=(d.bouts||[]).filter(b=>b.round_of_victory);
-  const noRv=(d.bouts||[]).filter(b=>!b.round_of_victory);
+  /* A bout earns a row if the model split it OR the check placed it. A thin
+     bout the check reached is a real row with real cells, not a footnote. */
+  const withRv=(d.bouts||[]).filter(b=>b.round_of_victory||(by[b.bout]||[]).length);
+  const noRv=(d.bouts||[]).filter(b=>!b.round_of_victory&&!(by[b.bout]||[]).length);
   const maxR=Math.max.apply(null,withRv.map(b=>b.rounds||3).concat([3]));
   /* TWO numbers per row, because one was doing the work of both and doing it
      wrong. "Combined" was the sum of the cells that made the top 25, and it
@@ -1902,6 +1991,7 @@ function finishBoard(d){
         x.fam==='ko'?'KO/TKO':'SUB'}</i> <u>${esc(surname(x.who))} ${P0(x.p)}%</u></span>`).join('')}</div>`;
     }).join('');
     const ckd=!!fbCheckCells(b);
+    const borrowed=!b.round_of_victory;
     /* The bout's whole finish probability, from whichever source is driving
        the row - every route, every round, not only the cells that got picked. */
     const ckc=fbCheckCells(b);
@@ -1911,7 +2001,8 @@ function finishBoard(d){
           return t+((mm&&+mm[1]<=R)?(+b.round_of_victory[k]||0):0);},0);
     return `<div class="fbg-b"><b>${esc(surname(b.a))} v ${esc(surname(b.b))}</b>
       <span class="lbl">${esc(divShort(b.weight_class||''))} · ${R} rds${
-        mine.length?'':' · no pick'}${ckd?' · <b style="color:var(--gold)">check</b>':''}</span></div>${cells}<div class="fbg-t" style="color:${
+        mine.length?'':' · no pick'}${ckd?' · <b style="color:var(--gold)">check</b>':''}${
+        borrowed?' · <b style="color:var(--warn)">shape borrowed</b>':''}</span></div>${cells}<div class="fbg-t" style="color:${
         ckd?'var(--gold)':'var(--mute)'}">${P0(pFin)}%</div><div class="fbg-t">${
         mine.length?P0(sum)+'%':'<span class="fbnone">—</span>'}</div>`;
   }).join('');
@@ -1922,13 +2013,18 @@ function finishBoard(d){
     <div class="fbhd"><b>Finish board</b>
       <span class="lbl">${picks.length} picks · <b style="color:var(--gold)">${exp.toFixed(1)} expected to land</b>
         · cut-off ${P0(cut)}%</span>
+      <label class="fbtog"><span>spread across bouts</span>
+        <input type="checkbox" class="fbmode"${FB_MODE==='spread'?' checked':''}></label>
       <label class="fbtog${avail?'':' off'}" title="${avail?'':'No UFC.com check entered for any bout on this card'}">
         <input type="checkbox" class="fbck"${FB_CHECK?' checked':''}${avail?'':' disabled'}>
         <span>use UFC.com check${avail?` (${FB_CHECK?nCk:avail} bout${(FB_CHECK?nCk:avail)===1?'':'s'})`:' — none entered'}</span></label></div>
     <div class="fbgrid" style="grid-template-columns:minmax(118px,1.5fr) repeat(${maxR},minmax(84px,1fr)) minmax(52px,.6fr) minmax(52px,.6fr)">
       ${head}${rows}${thinRows}</div>
-    <div class="note" style="padding:7px 11px 9px">The card's ${FB_N} likeliest finishes by the model's
-      own round-by-round split, finish-only — no decision, and every cell above ${P0(cut)}%.
+    <div class="note" style="padding:7px 11px 9px">${FB_MODE==='spread'
+      ? `${FB_N} finish picks shared across <b style="color:var(--mute)">${
+          Object.keys(by).length}</b> bouts, finish-only — no decision, lowest pick ${P0(cut)}%.`
+      : `The card's ${FB_N} likeliest finishes${FB_CHECK?'':' by the model\'s own round-by-round split'},
+         finish-only — no decision, and every cell above ${P0(cut)}%.`}
       <b style="color:var(--mute)">Ranked by probability, not by value:</b> nothing on the venues this
       tool reads prices a method-and-round contract, so there is no price to beat and these are not
       "+EV" picks. A fight ends once, so within a row the picks are alternatives and the combined
@@ -1939,6 +2035,14 @@ function finishBoard(d){
       <b style="color:var(--mute)">picked</b> is only the part these 25 cover — they differ because
       the 25 are ranked cell by cell, so a five-round bout spreads the same probability across twenty
       cells and draws fewer picks than a shorter fight that concentrates it.
+      ${picks.some(x=>x.borrowed)?`<b style="color:var(--warn)">Shape borrowed:</b> a bout the model
+        declined to split is placed from the check's method cells alone, spread over rounds using the
+        shape of this card's other bouts at the same scheduled length. The level is a real read; the
+        round shape is an extrapolation from neighbouring fights, and those rows say so. `:''}
+      ${FB_MODE==='spread'?`<b style="color:var(--mute)">Spread:</b> bouts are ranked by their own
+        finish probability and each takes one pick per pass, so every bout is covered before any bout
+        is doubled. Switch it off to rank the card's individual cells straight down instead — the two
+        disagree, and the cell ranking favours shorter fights that concentrate their probability. `:''}
       ${FB_CHECK&&nCk?`<b style="color:var(--gold)">Check on:</b> on the ${nCk} bout${nCk===1?'':'s'}
         marked <b style="color:var(--gold)">check</b>, each route's LEVEL is the UFC.com read's and
         only the shape across rounds stays the model's. The check sets how often a route happens; it
@@ -2677,9 +2781,14 @@ function ckImportText(txt){
 /* One delegated listener, bound once. ckStrip is re-rendered on every draw, so
    per-element binding would have to be redone each time and would leak. */
 document.addEventListener('change',function(e){
-  if(!e.target.classList||!e.target.classList.contains('fbck')) return;
-  FB_CHECK=!!e.target.checked;
-  try{ localStorage.setItem(FB_KEY, FB_CHECK?'1':'0'); }catch(err){}
+  const cl=e.target.classList; if(!cl) return;
+  if(cl.contains('fbck')){
+    FB_CHECK=!!e.target.checked;
+    try{ localStorage.setItem(FB_KEY, FB_CHECK?'1':'0'); }catch(err){}
+  } else if(cl.contains('fbmode')){
+    FB_MODE=e.target.checked?'spread':'cell';
+    try{ localStorage.setItem(FB_MKEY, FB_MODE); }catch(err){}
+  } else return;
   if(typeof render==='function') render();
 });
 document.addEventListener('click',function(e){
