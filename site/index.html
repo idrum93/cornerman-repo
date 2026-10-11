@@ -1869,9 +1869,26 @@ function finishBoard(d){
   const withRv=(d.bouts||[]).filter(b=>b.round_of_victory);
   const noRv=(d.bouts||[]).filter(b=>!b.round_of_victory);
   const maxR=Math.max.apply(null,withRv.map(b=>b.rounds||3).concat([3]));
+  /* TWO numbers per row, because one was doing the work of both and doing it
+     wrong. "Combined" was the sum of the cells that made the top 25, and it
+     was read - reasonably - as how likely the fight is to finish. It is not:
+     a bout can be the likeliest finish on the card and still show a small
+     combined figure, because the 25 are ranked by CELL and a five-round bout
+     spreads the same probability over twenty cells instead of twelve. On this
+     card the 59% bout drew six picks while a 51% bout drew seven, purely from
+     that dilution. So the bout's own finish probability now has its own
+     column, and the picked total is labelled as what it is. */
   const head=`<div class="fbg-h l">bout</div>`
     + [...Array(maxR)].map((_,i)=>`<div class="fbg-h">round ${i+1}</div>`).join('')
-    + `<div class="fbg-h">combined</div>`;
+    + `<div class="fbg-h">finish</div><div class="fbg-h">picked</div>`;
+  /* Bouts the model publishes no round split for are shown as a row rather
+     than dropped to a footnote. They were invisible, and a bout missing from a
+     board of "the card's likeliest finishes" reads as the model having no
+     opinion, when the truth is that it declined to split one. */
+  const thinRows=noRv.map(b=>`<div class="fbg-b"><b>${esc(surname(b.a))} v ${esc(surname(b.b))}</b>
+      <span class="lbl">${esc(divShort(b.weight_class||''))} · ${b.rounds||3} rds · no round split</span></div>`
+    + [...Array(maxR)].map(()=>`<div class="fbg-c fbna"></div>`).join('')
+    + `<div class="fbg-t"><span class="fbnone">—</span></div><div class="fbg-t"><span class="fbnone">—</span></div>`).join('');
   const rows=withRv.map(b=>{
     const mine=by[b.bout]||[];
     const R=b.rounds||3;
@@ -1884,10 +1901,18 @@ function finishBoard(d){
       return `<div class="fbg-c">${here.map(x=>`<span class="fbp ${x.fam}"><i>${
         x.fam==='ko'?'KO/TKO':'SUB'}</i> <u>${esc(surname(x.who))} ${P0(x.p)}%</u></span>`).join('')}</div>`;
     }).join('');
-    const ckd=mine.length&&mine[0].ck;
+    const ckd=!!fbCheckCells(b);
+    /* The bout's whole finish probability, from whichever source is driving
+       the row - every route, every round, not only the cells that got picked. */
+    const ckc=fbCheckCells(b);
+    const pFin=ckc ? (ckc.a_ko+ckc.a_sub+ckc.b_ko+ckc.b_sub)
+      : Object.keys(b.round_of_victory||{}).reduce((t,k)=>{
+          const mm=/^[ab]_(?:ko|sub)_r([1-5])$/.exec(k);
+          return t+((mm&&+mm[1]<=R)?(+b.round_of_victory[k]||0):0);},0);
     return `<div class="fbg-b"><b>${esc(surname(b.a))} v ${esc(surname(b.b))}</b>
       <span class="lbl">${esc(divShort(b.weight_class||''))} · ${R} rds${
-        mine.length?'':' · no pick'}${ckd?' · <b style="color:var(--gold)">check</b>':''}</span></div>${cells}<div class="fbg-t">${
+        mine.length?'':' · no pick'}${ckd?' · <b style="color:var(--gold)">check</b>':''}</span></div>${cells}<div class="fbg-t" style="color:${
+        ckd?'var(--gold)':'var(--mute)'}">${P0(pFin)}%</div><div class="fbg-t">${
         mine.length?P0(sum)+'%':'<span class="fbnone">—</span>'}</div>`;
   }).join('');
   const nCk=withRv.filter(b=>fbCheckCells(b)).length;
@@ -1900,8 +1925,8 @@ function finishBoard(d){
       <label class="fbtog${avail?'':' off'}" title="${avail?'':'No UFC.com check entered for any bout on this card'}">
         <input type="checkbox" class="fbck"${FB_CHECK?' checked':''}${avail?'':' disabled'}>
         <span>use UFC.com check${avail?` (${FB_CHECK?nCk:avail} bout${(FB_CHECK?nCk:avail)===1?'':'s'})`:' — none entered'}</span></label></div>
-    <div class="fbgrid" style="grid-template-columns:minmax(118px,1.5fr) repeat(${maxR},minmax(84px,1fr)) minmax(62px,.7fr)">
-      ${head}${rows}</div>
+    <div class="fbgrid" style="grid-template-columns:minmax(118px,1.5fr) repeat(${maxR},minmax(84px,1fr)) minmax(52px,.6fr) minmax(52px,.6fr)">
+      ${head}${rows}${thinRows}</div>
     <div class="note" style="padding:7px 11px 9px">The card's ${FB_N} likeliest finishes by the model's
       own round-by-round split, finish-only — no decision, and every cell above ${P0(cut)}%.
       <b style="color:var(--mute)">Ranked by probability, not by value:</b> nothing on the venues this
@@ -1910,14 +1935,19 @@ function finishBoard(d){
       figure is a real probability; across the card the ${exp.toFixed(1)} is an <b
       style="color:var(--mute)">expected count</b>, not a chance of anything — most of these lose,
       and at most ${withRv.filter(b=>(by[b.bout]||[]).length).length} can ever land.
+      <b style="color:var(--mute)">finish</b> is the bout's whole finish probability and
+      <b style="color:var(--mute)">picked</b> is only the part these 25 cover — they differ because
+      the 25 are ranked cell by cell, so a five-round bout spreads the same probability across twenty
+      cells and draws fewer picks than a shorter fight that concentrates it.
       ${FB_CHECK&&nCk?`<b style="color:var(--gold)">Check on:</b> on the ${nCk} bout${nCk===1?'':'s'}
         marked <b style="color:var(--gold)">check</b>, each route's LEVEL is the UFC.com read's and
         only the shape across rounds stays the model's. The check sets how often a route happens; it
         never sets which round, because a fighter's own round history does not replicate — 0.21
         split-half, falling to 0.05, against 0.54 rising to 0.60 for whether he finishes at all. `:''}
       The round split is the model's least-tested claim: it went 2 of 4 last card.${
-      noRv.length?` ${noRv.length} bout${noRv.length===1?'':'s'} on this card publish no round split
-        and ${noRv.length===1?'is':'are'} left out entirely.`:''}</div></div>`;
+      noRv.length?` ${noRv.length} bout${noRv.length===1?'':'s'} on this card publish no round split —
+        listed at the foot with no cells, because the model declined to split them rather than
+        having no opinion, and a bout missing from this board entirely would not say which.`:''}</div></div>`;
 }
 function render(){
   const d=DATA;
