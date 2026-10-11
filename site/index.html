@@ -222,6 +222,38 @@
      drawer's real width - correct proportions, unreadable. Indented to line up
      with the bar's left edge (.spw 44px + the row's 6px gap). */
   .r3leg{font-size:9.5px;color:var(--dim);margin:2px 0 0 50px;white-space:normal}
+  /* The finish board: bouts down, rounds across, one chip per picked finish. */
+  .fbwrap{margin-top:12px;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .fbhd{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;
+    padding:8px 11px;background:var(--panel2);border-bottom:1px solid var(--line)}
+  .fbhd b{font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+  .fbgrid{display:grid;gap:1px;background:var(--line)}
+  .fbg-h,.fbg-c,.fbg-b,.fbg-t{background:var(--panel);padding:6px 8px;min-width:0}
+  .fbg-h{font-size:8.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--dim);
+    background:var(--soft);text-align:center}
+  .fbg-h.l{text-align:left}
+  .fbg-b{font-size:11px;color:var(--bone);line-height:1.25}
+  .fbg-b .lbl{display:block;margin-top:1px}
+  .fbg-c{text-align:center}
+  .fbg-t{text-align:right;font-size:11px;color:var(--gold)}
+  /* One pick. Surname then family then the model's probability - a chip has to
+     carry all three or it is not a bet anyone can place. */
+  .fbp{display:block;font-size:10px;line-height:1.3;white-space:nowrap;
+    overflow:hidden;text-overflow:ellipsis}
+  .fbp+.fbp{margin-top:3px}
+  .fbp i{font-style:normal;color:var(--bone);font-weight:700}
+  .fbp u{text-decoration:none;color:var(--mute)}
+  .fbp.ko i{color:var(--redsoft)} .fbp.sub i{color:var(--bluesoft)}
+  .ckio{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:8px 0 2px;
+    padding:7px 10px;border:1px solid var(--line);border-radius:7px;background:var(--panel)}
+  .ckbtn{font:inherit;font-size:10px;letter-spacing:.04em;text-transform:uppercase;
+    color:var(--bone);background:var(--soft);border:1px solid var(--line);
+    border-radius:5px;padding:4px 9px;cursor:pointer}
+  .ckbtn:hover{border-color:var(--gold);color:var(--gold)}
+  .fbnone{color:var(--dim);font-size:11px}
+  .fbna{background:var(--ink)}
+  @media(max-width:620px){ .fbp{font-size:9px} .fbg-b{font-size:10px} }
+
   .r3leg b{color:var(--bone)}
   /* This row's column takes the space left over instead of hugging its
      content, so the bar is as wide as the drawer allows. */
@@ -1732,6 +1764,93 @@ function cardShapeStrip(){
     </div></div>`;
 }
 
+/* The finish board - bouts down, rounds across, the card's 25 most likely
+   finishes. Built from `round_of_victory`, which the survival model publishes
+   per corner, per family, per round and which sums exactly to p_finish.
+
+   RANKED BY PROBABILITY, NOT BY VALUE, and the header says so. Nothing prices
+   a "Daukaus by submission in round 2" contract on the venues this tool reads,
+   so there is no edge to compute - these are the outcomes the model thinks are
+   likeliest, which is a different and weaker claim than a bet worth taking.
+   Calling them optimal without a price would be inventing the half of the
+   comparison that decides it.
+
+   The number that governs how this reads is EXPECTED HITS. Twenty-five picks
+   off a card like this sum to about 1.5, because the biggest single cell on a
+   typical card is 10-12% and most are 4-6%. A grid of 25 confident-looking
+   chips implies a hit rate it cannot deliver, so the expectation is printed in
+   the header at the same size as the count, not buried in a footnote. Within
+   one bout the picks are mutually exclusive - a fight ends once - so a row's
+   combined figure is a true probability, while the card total is an expected
+   count and is labelled as one. */
+const FB_N=25;
+function finishPicks(d){
+  const out=[];
+  (d&&d.bouts||[]).forEach(b=>{
+    const rv=b.round_of_victory; if(!rv) return;
+    const R=b.rounds||3;
+    Object.keys(rv).forEach(k=>{
+      const m=/^([ab])_(ko|sub)_r([1-5])$/.exec(k); if(!m) return;
+      const r=+m[3];
+      // A three-round bout carries no r4/r5 keys at all, but the guard stays:
+      // a stale payload that does carry them must not put a round-four pick on
+      // a fight that cannot reach round four.
+      if(r>R) return;
+      const p=+rv[k]; if(!isFinite(p)||p<=0) return;
+      out.push({bout:b.bout,who:(m[1]==='a'?b.a:b.b),fam:m[2],r:r,p:p,rounds:R});
+    });
+  });
+  out.sort((x,y)=>y.p-x.p || (x.bout<y.bout?-1:1) || x.r-y.r);
+  return out;
+}
+function finishBoard(d){
+  const all=finishPicks(d);
+  if(!all.length) return '';
+  const picks=all.slice(0,FB_N);
+  const exp=picks.reduce((t,x)=>t+x.p,0);
+  const cut=picks.length?picks[picks.length-1].p:0;
+  const by={}; picks.forEach(x=>{(by[x.bout]=by[x.bout]||[]).push(x);});
+  const withRv=(d.bouts||[]).filter(b=>b.round_of_victory);
+  const noRv=(d.bouts||[]).filter(b=>!b.round_of_victory);
+  const maxR=Math.max.apply(null,withRv.map(b=>b.rounds||3).concat([3]));
+  const head=`<div class="fbg-h l">bout</div>`
+    + [...Array(maxR)].map((_,i)=>`<div class="fbg-h">round ${i+1}</div>`).join('')
+    + `<div class="fbg-h">combined</div>`;
+  const rows=withRv.map(b=>{
+    const mine=by[b.bout]||[];
+    const R=b.rounds||3;
+    const sum=mine.reduce((t,x)=>t+x.p,0);
+    const cells=[...Array(maxR)].map((_,i)=>{
+      const r=i+1;
+      if(r>R) return `<div class="fbg-c fbna"></div>`;   // cannot be reached
+      const here=mine.filter(x=>x.r===r);
+      if(!here.length) return `<div class="fbg-c"><span class="fbnone">—</span></div>`;
+      return `<div class="fbg-c">${here.map(x=>`<span class="fbp ${x.fam}"><i>${
+        x.fam==='ko'?'KO/TKO':'SUB'}</i> <u>${esc(surname(x.who))} ${P0(x.p)}%</u></span>`).join('')}</div>`;
+    }).join('');
+    return `<div class="fbg-b"><b>${esc(surname(b.a))} v ${esc(surname(b.b))}</b>
+      <span class="lbl">${esc(divShort(b.weight_class||''))} · ${R} rds${
+        mine.length?'':' · no pick'}</span></div>${cells}<div class="fbg-t">${
+        mine.length?P0(sum)+'%':'<span class="fbnone">—</span>'}</div>`;
+  }).join('');
+  return `<div class="fbwrap">
+    <div class="fbhd"><b>Finish board</b>
+      <span class="lbl">${picks.length} picks · <b style="color:var(--gold)">${exp.toFixed(1)} expected to land</b>
+        · cut-off ${P0(cut)}%</span></div>
+    <div class="fbgrid" style="grid-template-columns:minmax(118px,1.5fr) repeat(${maxR},minmax(84px,1fr)) minmax(62px,.7fr)">
+      ${head}${rows}</div>
+    <div class="note" style="padding:7px 11px 9px">The card's ${FB_N} likeliest finishes by the model's
+      own round-by-round split, finish-only — no decision, and every cell above ${P0(cut)}%.
+      <b style="color:var(--mute)">Ranked by probability, not by value:</b> nothing on the venues this
+      tool reads prices a method-and-round contract, so there is no price to beat and these are not
+      "+EV" picks. A fight ends once, so within a row the picks are alternatives and the combined
+      figure is a real probability; across the card the ${exp.toFixed(1)} is an <b
+      style="color:var(--mute)">expected count</b>, not a chance of anything — most of these lose,
+      and at most ${withRv.filter(b=>(by[b.bout]||[]).length).length} can ever land.
+      The round split is the model's least-tested claim: it went 2 of 4 last card.${
+      noRv.length?` ${noRv.length} bout${noRv.length===1?'':'s'} on this card publish no round split
+        and ${noRv.length===1?'is':'are'} left out entirely.`:''}</div></div>`;
+}
 function render(){
   const d=DATA;
   const away=daysFromToday(d.date);
@@ -1838,7 +1957,7 @@ function render(){
   const lc=HIST&&HIST.cards&&HIST.cards[0];
   document.getElementById('app').innerHTML=nav+
     zone('z-up','z-upcoming','Upcoming card',`${esc(d.event||'')} · ${d.bouts.length} bouts modeled`,
-      ckStrip()+strip()+filt+segs)+
+      ckStrip()+ckIO()+strip()+filt+segs+finishBoard(d))+
     zone('z-res','z-results', lc?`Last card — ${esc(lc.event)}`:'Last card',
       (lc&&lc.date?`${dayET(lc.date)} · `:'')+
       'graded against what happened · click any fight',
@@ -2338,6 +2457,16 @@ function sbSave(){
 const CK_KEY='cornerman.checkreads.v1';
 let CKR={};
 function ckLoad(){ try{ return JSON.parse(localStorage.getItem(CK_KEY)||'{}')||{}; }catch(e){ return {}; } }
+/* 32-bit hash plus the source length, which is all an equality test needs.
+   The length is carried because a bare 32-bit hash collides once in about
+   four billion and two different pastes colliding would freeze first_ts on a
+   read that had genuinely changed; matching the length too makes that
+   vanishingly unlikely for the sizes involved. */
+function ckSig(str){
+  let h=5381;
+  for(let i=0;i<str.length;i++) h=((h<<5)+h+str.charCodeAt(i))|0;
+  return 'h'+(h>>>0).toString(16)+'.'+str.length;
+}
 function ckCapture(){
   if(!DATA||!DATA.bouts) return;
   const by={}; DATA.bouts.forEach(b=>by[b.bout]=b);
@@ -2353,9 +2482,28 @@ function ckCapture(){
     if(!read) return;
     const t=sbR1Read(st,b,1-read.dec);
     const wins=m=>['ko','sub','dec'].reduce((x,y)=>x+(m[y+'_n']||0),0);
-    const sig=JSON.stringify([st.a,st.b,st.a_m,st.b_m,st.a_rec,st.b_rec,st.a_h,st.b_h]);
+    /* HASHED, not stored whole. This signature was the full JSON of both
+       pasted blocks - two stat blocks, two records and two parsed ESPN
+       histories with their round arrays - and it was kept on every read
+       forever, while CKR is the permanent record and is never pruned. Around
+       3KB a bout, a dozen bouts a card, forty-odd cards a year: the record
+       would have walked into the 5MB localStorage ceiling in a couple of
+       seasons and then failed to save, silently, which is the worst way for a
+       forecasting record to end. The signature is only ever compared for
+       equality, so a 32-bit hash plus the length does the same job in about
+       twelve bytes.
+
+       MIGRATION MATTERS HERE more than the saving does. An entry written by an
+       earlier build holds the full string, and comparing that against a hash
+       would read as "inputs changed" and restamp first_ts to now - which is
+       precisely the failure the note below describes, genuine pre-fight reads
+       silently reclassified as after-the-fact. So a stored signature counts as
+       a match against EITHER form, and is rewritten as a hash once seen. */
+    const sigFull=JSON.stringify([st.a,st.b,st.a_m,st.b_m,st.a_rec,st.b_rec,st.a_h,st.b_h]);
+    const sig=ckSig(sigFull);
     const prev=CKR[k];
-    const first=(prev&&prev.sig===sig&&(prev.first_ts||prev.ts))
+    const same=!!prev&&(prev.sig===sig||prev.sig===sigFull);
+    const first=(same&&(prev.first_ts||prev.ts))
       ? (prev.first_ts||prev.ts)
       : (prev&&prev.sig==null&&prev.ts ? prev.ts : Date.now());
     CKR[k]={p_a:+pA.toFixed(4), dec:+read.dec.toFixed(4),
@@ -2377,7 +2525,7 @@ function ckCapture(){
          numbers they produce, so fixing the math in here never looks like a
          re-entry. */
       sig:sig, first_ts:first, ts:Date.now()};
-    dirty=dirty||!prev||prev.sig!==sig||prev.first_ts==null;
+    dirty=dirty||!prev||!same||prev.first_ts==null;
   });
   if(dirty){ _CKBY=null;   // a new read invalidates the per-bout grading cache
     try{ localStorage.setItem(CK_KEY, JSON.stringify(CKR)); }catch(e){} }
@@ -2386,6 +2534,78 @@ function ckCapture(){
    every total computed over the SAME bouts (see the subset rule above). */
 /* Top-of-page standing record. Only ever win/loss: the market quotes a
    moneyline and nothing else here, so it is the one claim all three make. */
+/* EXPORT AND IMPORT. The record lived in one browser's localStorage and
+   nothing read it - no export, no copy, nothing in mmastat. Clearing site data
+   erased it, and no analysis of it was possible from anywhere else, which left
+   the whole check unfalsifiable: the question it exists to answer, whether a
+   UFC.com read beats the model, could never be settled across cards.
+
+   Import MERGES and never blindly overwrites: where both sides hold the same
+   bout, the entry with the EARLIER first_ts wins. That is the conservative
+   rule, because first_ts is what decides whether a read counts as a forecast,
+   and a restore must not be a way to make a late read look early. The
+   consequence worth knowing: re-importing an old file can only ever move a
+   read's timestamp backwards, never forwards. */
+function ckExport(){
+  const n=Object.keys(CKR||{}).length;
+  if(!n){ alert('No check reads stored yet.'); return; }
+  const blob=new Blob([JSON.stringify({v:1,exported_utc:new Date().toISOString(),
+    n:n, reads:CKR},null,1)],{type:'application/json'});
+  const u=URL.createObjectURL(blob), a=document.createElement('a');
+  a.href=u; a.download='cornerman-check-'+new Date().toISOString().slice(0,10)+'.json';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(u),1000);
+}
+function ckImportText(txt){
+  let o=null;
+  try{ o=JSON.parse(txt); }catch(e){ alert('That file is not readable JSON.'); return; }
+  const incoming=(o&&o.reads&&typeof o.reads==='object')?o.reads
+                 :(o&&typeof o==='object'&&!o.reads?o:null);
+  if(!incoming){ alert('No check reads found in that file.'); return; }
+  let added=0, kept=0, older=0;
+  Object.keys(incoming).forEach(k=>{
+    const inc=incoming[k]; if(!inc||typeof inc!=='object') return;
+    const cur=CKR[k];
+    if(!cur){ CKR[k]=inc; added++; return; }
+    const ct=cur.first_ts||cur.ts||Infinity, it=inc.first_ts||inc.ts||Infinity;
+    if(it<ct){ CKR[k]=inc; older++; } else kept++;
+  });
+  try{ localStorage.setItem(CK_KEY, JSON.stringify(CKR)); }catch(e){
+    alert('Imported, but saving failed — storage may be full or blocked.'); }
+  _CKBY=null;
+  alert(added+' added, '+older+' replaced with an earlier read, '+kept+' already current.');
+  if(typeof render==='function') render();
+}
+/* One delegated listener, bound once. ckStrip is re-rendered on every draw, so
+   per-element binding would have to be redone each time and would leak. */
+document.addEventListener('click',function(e){
+  const x=e.target.closest&&e.target.closest('.ckexp,.ckimp');
+  if(!x) return;
+  e.preventDefault();
+  if(x.classList.contains('ckexp')) return ckExport();
+  const f=document.createElement('input'); f.type='file'; f.accept='.json,application/json';
+  f.addEventListener('change',()=>{
+    const file=f.files&&f.files[0]; if(!file) return;
+    const r=new FileReader();
+    r.onload=()=>ckImportText(String(r.result||''));
+    r.readAsText(file);
+  });
+  f.click();
+});
+/* Rendered on its own, NOT inside ckStrip. ckStrip returns nothing until there
+   is a gradeable record, so buttons living there would be invisible on a
+   browser with no reads - which is precisely the browser someone restoring a
+   backup is sitting at. The import has to exist before the record does. */
+function ckIO(){
+  const n=Object.keys(CKR||{}).length;
+  return `<div class="ckio">
+    <span class="lbl">Check record — <b style="color:var(--mute)">${n} read${n===1?'':'s'}</b>,
+      stored in this browser only; clearing site data erases it.</span>
+    <button class="ckbtn ckexp" type="button">Export</button>
+    <button class="ckbtn ckimp" type="button">Import</button>
+    <span class="lbl">merging keeps the earlier first-entry time, so a restore can never make a
+      late read look early</span></div>`;
+}
 function ckStrip(){
   const G=ckGrade(); if(!G) return '';
   const CK_MIN=12;   // registered floor, same spirit as the 300-bet betting bar
@@ -2424,7 +2644,8 @@ function ckStrip(){
     ${thin?`<div class="cknote">Too few to rank — ${G.n} of ${CK_MIN}. Shown so it is
       visible that it is accumulating, not so it can be read as a verdict.</div>`
       :`<div class="cknote">Lower Brier is better and is what ranks the win/loss row; the
-      percentage alone treats a 51% call and a 95% call as the same claim.</div>`}</div>`;
+      percentage alone treats a 51% call and a 95% call as the same claim.</div>`}
+    </div>`;
 }
 /* "How this fight ends", split into the claims that are actually separate.
    One combined "called the finish" number hid too much: a read can be right
