@@ -1863,6 +1863,44 @@ function fbShape(d,R){
   for(let r=1;r<=R;r++) w[r]/=s2;
   return w;
 }
+/* THE FLOOR, and why there is one at all.
+
+   There was none: the board ranked and allocated and never filtered, so it
+   offered finish picks on a bout the rest of the tool labels DISTANCE LEANS.
+   Blanchfield came out at 44% finish - six points under the league's own 49.5%
+   base - and still drew picks, while the verdict panel on the same fight reads
+   "distance leans". One tool, two opposite recommendations on one bout.
+
+   The floor uses the SAME rule as that verdict, not a number invented for this
+   panel: a bout is excluded when its decision probability sits 5 points or
+   more above the league decision base, which is exactly the line at which the
+   tool starts saying "distance". Nothing is excluded for being merely
+   unexciting - a bout at the base rate still qualifies - and the 61.5% that
+   earns a FINISH LIKELY badge is a much higher bar that was never the
+   inclusion test and is not being made into one.
+
+   This is a consistency rule, not a betting rule. It cannot tell you a pick is
+   good; it only stops the board recommending finishes on fights this tool
+   has already called the other way. */
+function fbLean(b,p){
+  const MB=(typeof BR==='object'&&BR&&BR.market_bases)||{};
+  const decBase=(MB.dec==null?0.505:MB.dec), finBase=1-decBase;
+  const dec=1-p;
+  let lean='no lean';
+  if(p-finBase>=0.12) lean='finish likely';
+  else if(dec-decBase>=0.12) lean='distance likely';
+  else if(p-finBase>=0.05) lean='finish leans';
+  else if(dec-decBase>=0.05) lean='distance leans';
+  return {lean:lean, pass:!(dec-decBase>=0.05)};
+}
+function fbBoutFinish(b){
+  const ck=fbCheckCells(b);
+  if(ck) return ck.a_ko+ck.a_sub+ck.b_ko+ck.b_sub;
+  const rv=b.round_of_victory||{}, R=b.rounds||3;
+  return Object.keys(rv).reduce((t,k)=>{
+    const m=/^[ab]_(?:ko|sub)_r([1-5])$/.exec(k);
+    return t+((m&&+m[1]<=R)?(+rv[k]||0):0);},0);
+}
 function finishPicks(d){
   const out=[];
   /* Bouts the model would not split, placed from the check alone. Only ever
@@ -1870,6 +1908,7 @@ function finishPicks(d){
   if(FB_CHECK) (d&&d.bouts||[]).forEach(b=>{
     if(b.round_of_victory) return;
     const ck=fbCheckCells(b); if(!ck) return;
+    if(!fbLean(b,ck.a_ko+ck.a_sub+ck.b_ko+ck.b_sub).pass) return;
     const R=b.rounds||3, sh=fbShape(d,R);
     ['a_ko','a_sub','b_ko','b_sub'].forEach(route=>{
       const q=route.split('_');
@@ -1882,6 +1921,7 @@ function finishPicks(d){
   });
   (d&&d.bouts||[]).forEach(b=>{
     const rv=b.round_of_victory; if(!rv) return;
+    if(!fbLean(b,fbBoutFinish(b)).pass) return;
     const R=b.rounds||3;
     const ck=fbCheckCells(b);
     // Per-route scale factors. A route the model gives no weight at all cannot
@@ -1957,6 +1997,12 @@ function finishBoard(d){
      bout the check reached is a real row with real cells, not a footnote. */
   const withRv=(d.bouts||[]).filter(b=>b.round_of_victory||(by[b.bout]||[]).length);
   const noRv=(d.bouts||[]).filter(b=>!b.round_of_victory&&!(by[b.bout]||[]).length);
+  /* Bouts the floor removed. Listed by name: a bout dropping off a board of
+     "the card's likeliest finishes" must not look like an oversight. */
+  const leaned=(d.bouts||[]).filter(b=>{
+    if((by[b.bout]||[]).length) return false;
+    const pf=fbBoutFinish(b); if(!(pf>0)) return false;
+    return !fbLean(b,pf).pass;});
   const maxR=Math.max.apply(null,withRv.map(b=>b.rounds||3).concat([3]));
   /* TWO numbers per row, because one was doing the work of both and doing it
      wrong. "Combined" was the sum of the cells that made the top 25, and it
@@ -2001,7 +2047,8 @@ function finishBoard(d){
           return t+((mm&&+mm[1]<=R)?(+b.round_of_victory[k]||0):0);},0);
     return `<div class="fbg-b"><b>${esc(surname(b.a))} v ${esc(surname(b.b))}</b>
       <span class="lbl">${esc(divShort(b.weight_class||''))} · ${R} rds${
-        mine.length?'':' · no pick'}${ckd?' · <b style="color:var(--gold)">check</b>':''}${
+        mine.length?'':' · no pick'} · ${esc(fbLean(b,pFin).lean)}${
+        ckd?' · <b style="color:var(--gold)">check</b>':''}${
         borrowed?' · <b style="color:var(--warn)">shape borrowed</b>':''}</span></div>${cells}<div class="fbg-t" style="color:${
         ckd?'var(--gold)':'var(--mute)'}">${P0(pFin)}%</div><div class="fbg-t">${
         mine.length?P0(sum)+'%':'<span class="fbnone">—</span>'}</div>`;
@@ -2035,6 +2082,18 @@ function finishBoard(d){
       <b style="color:var(--mute)">picked</b> is only the part these 25 cover — they differ because
       the 25 are ranked cell by cell, so a five-round bout spreads the same probability across twenty
       cells and draws fewer picks than a shorter fight that concentrates it.
+      ${leaned.length?`<b style="color:var(--mute)">Left out:</b> ${leaned.map(b=>
+          `${esc(surname(b.a))} v ${esc(surname(b.b))} (${P0(fbBoutFinish(b))}% finish)`).join(', ')} —
+        ${leaned.length===1?'this bout leans':'these bouts lean'} toward the distance on the same rule
+        the verdict panel uses, so offering finish picks ${leaned.length===1?'on it':'on them'} would
+        contradict what this tool says about ${leaned.length===1?'it':'them'} elsewhere.
+        ${(()=>{const MBx=(typeof BR==='object'&&BR&&BR.market_bases)||{};
+          const db=(MBx.dec==null?0.505:MBx.dec);
+          return `The line is a decision <b style="color:var(--mute)">5 points</b> likelier than the
+            league's own ${P0(db)}% — so a bout is left out below about <b
+            style="color:var(--mute)">${P0(1-(db+0.05))}%</b> finish. That is far short of the
+            ${P0(1-db+0.12)}% that earns a FINISH LIKELY badge, which was never the inclusion test
+            and is not being made into one.`;})()} `:''}
       ${picks.some(x=>x.borrowed)?`<b style="color:var(--warn)">Shape borrowed:</b> a bout the model
         declined to split is placed from the check's method cells alone, spread over rounds using the
         shape of this card's other bouts at the same scheduled length. The level is a real read; the
