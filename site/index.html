@@ -2943,14 +2943,42 @@ function sbR1Read(st,b,pFin){
    record is not a read. */
 /* The league's own method mix, for shrinking toward. Weighted across divisions
    so it tracks the corpus rather than a number typed in here. */
-function sbBaseMix(){
+/* THE BOUT'S OWN DIVISION where there is one, and the pooled figure only as a
+   fallback. This pooled every division into one mix, and the divisions are not
+   close to each other:
+
+     Heavyweight          ko .505  sub .128  dec .367   (n=509)
+     Women's Strawweight  ko .140  sub .198  dec .662   (n=378)
+     POOLED               ko .319  sub .177  dec .504
+
+   A heavyweight was being shrunk toward a decision rate 14 points above his
+   division's and a KO rate 19 below it, and the "league" column he was being
+   compared against carried the same error - so a heavyweight whose losses are
+   45% by KO read "+13 above league" when he is in fact BELOW his division's
+   50.5%. The flag could point the wrong way, which is worse than no flag.
+   The submission axis is the narrowest of the three (.128 to .211) and is the
+   one that prompted this, but KO and decision are where the damage was.
+
+   Every division in the payload carries n >= 251, which is ample for a
+   three-way share; the floor below is for a future division that does not.
+   A catchweight or an unrecognised name falls back to pooled, and the caller
+   can tell which it got from `div`. */
+function sbBaseMix(b){
   const D=(BR||{}).divisions;
   if(D&&D.length){
+    const wc=(b&&b.weight_class)?String(b.weight_class).trim().toLowerCase():null;
+    if(wc){
+      const hit=D.find(d=>String(d.division||'').trim().toLowerCase()===wc);
+      if(hit&&hit.n>=150&&hit.ko!=null&&hit.sub!=null)
+        return {ko:hit.ko,sub:hit.sub,dec:Math.max(0,1-hit.ko-hit.sub),
+                div:hit.division,n:hit.n};
+    }
     let n=0,ko=0,sub=0;
     D.forEach(d=>{ if(d.n){n+=d.n; ko+=d.n*(d.ko||0); sub+=d.n*(d.sub||0);} });
-    if(n){ const K=ko/n,S=sub/n; return {ko:K,sub:S,dec:Math.max(0,1-K-S)}; }
+    if(n){ const K=ko/n,S=sub/n;
+           return {ko:K,sub:S,dec:Math.max(0,1-K-S),div:null,n:n}; }
   }
-  return {ko:0.317,sub:0.182,dec:0.501};
+  return {ko:0.317,sub:0.182,dec:0.501,div:null,n:null};
 }
 /* Shrunk toward that mix, because the raw shares are the worst version of this
    number and it is not close. Scored on 6,823 bouts, as a method prediction
@@ -2965,9 +2993,9 @@ function sbBaseMix(){
    20/40 and the curve is flat between 2 and 10, so nothing hangs on the exact
    value. */
 const SB_SHRINK = 5;
-function sbShrinkMix(m){
+function sbShrinkMix(m,b){
   if(m.ko_share==null) return null;
-  const base=sbBaseMix();
+  const base=sbBaseMix(b);
   const c={ko:m.ko_n, sub:m.sub_n, dec:m.dec_n};
   const n=(c.ko||0)+(c.sub||0)+(c.dec||0);
   if(!n) return {ko:m.ko_share,sub:m.sub_share,dec:m.dec_share};
@@ -2988,11 +3016,11 @@ function sbShrinkMix(m){
    a 20-5 fighter has five of them, and splitting five into three families gives
    cells of one. k=5 against a five-loss record puts half the weight on the
    league, which is the honest answer when the raw split is 1/1/3. */
-function sbLossMix(m){
+function sbLossMix(m,b){
   if(!m||m.l_total==null) return null;
   const n=m.l_total;
   if(!n) return null;                      // undefeated: no evidence, not a zero
-  const base=sbBaseMix();
+  const base=sbBaseMix(b);
   const c={ko:m.lko_n||0, sub:m.lsub_n||0, dec:m.ldec_n||0};
   const out={};
   ['ko','sub','dec'].forEach(k=>{out[k]=(c[k]+SB_SHRINK*base[k])/(n+SB_SHRINK);});
@@ -3007,7 +3035,7 @@ function sbLossMix(m){
    At w=0 this now returns the model exactly, which is the property that makes
    the slider mean anything. */
 function sbMethodRead(ma,mb,pA,w,b){
-  const A=sbShrinkMix(ma), B=sbShrinkMix(mb);
+  const A=sbShrinkMix(ma,b), B=sbShrinkMix(mb,b);
   if(!A||!B) return null;
   /* No winner probability means EVEN, not zero. A null pA made the weighting
      collapse to `0*A + 1*B` — the whole method read became corner B's record
@@ -3480,7 +3508,7 @@ function sandboxPanel(b){
    the top two are within 6 points it says so instead of picking, because a
    coin-flip announced confidently is worse than no call. */
 function sbVerdict(ma,mb,pA,b,st){
-  const A=sbShrinkMix(ma), B=sbShrinkMix(mb);
+  const A=sbShrinkMix(ma,b), B=sbShrinkMix(mb,b);
   if(!A||!B) return '';
   /* Same guard as sbMethodRead, and it had to be repeated because this builds
      its own six cells rather than reusing that function's output. With pA null
@@ -3492,7 +3520,7 @@ function sbVerdict(ma,mb,pA,b,st){
   const MB=(BR||{}).market_bases||{};
   const decBase=MB.dec??0.505, finBase=1-decBase;
   const nA=surname(b.a), nB=surname(b.b);
-  const cells=sbCells(ma,mb,pA,nA,nB);
+  const cells=sbCells(ma,mb,pA,nA,nB,b);
   if(!cells) return '';
   const dec=blended?blended.dec:(pA*A.dec+(1-pA)*B.dec), fin=1-dec;
 
@@ -3584,7 +3612,7 @@ function sbMethodBlock(b,st,pA){
      is called out rather than left to be noticed. */
   const each=(nm,m,rec)=>{
     if(m.ko_share==null) return '';
-    const s=sbShrinkMix(m);
+    const s=sbShrinkMix(m,b);
     const wn=(m.ko_n||0)+(m.sub_n||0)+(m.dec_n||0);
     const plain=m.espn?m.wins_n:wn;
     const raw=m.espn
@@ -3723,7 +3751,7 @@ function sbMethodBlock(b,st,pA){
            to look unusual, which is how a reference table turns into a machine
            for rendering noise. The league ticks give the reader the deviation
            and leave the verdict alone. */
-        const lgDec=(typeof sbBaseMix==='function'?sbBaseMix().dec:0.50);
+        const lgDec=(typeof sbBaseMix==='function'?sbBaseMix(b).dec:0.50);
         const lgMid=clamp(1-lgR1-lgDec);
         const seg=(r1,mid,dec,nm,cls)=>{
           if(r1==null||mid==null||dec==null) return '';
@@ -3743,8 +3771,9 @@ function sbMethodBlock(b,st,pA){
             <div class="spcol wide">${seg(b.p_end_r1,mMid,mDec,'model','m')}${
               seg(t.p,rMid,read.dec,'records','r')}</div></div>
           <div class="note" style="margin:4px 0 0">Every way the fight can end, so each bar is the
-            whole 100%. The two ticks mark where the LEAGUE's boundaries fall — ${P0(lgR1)}% in round
-            one, ${P0(lgDec)}% on the cards — so a segment running past a tick is this pair departing
+            whole 100%. The two ticks mark where ${(typeof sbBaseMix==='function'&&sbBaseMix(b).div)
+              ?`<b style="color:var(--mute)">${esc(sbBaseMix(b).div)}</b>'s`:`the league's`} boundaries
+            fall — ${P0(lgR1)}% in round one, ${P0(lgDec)}% on the cards — so a segment running past a tick is this pair departing
             from the league, and nothing more than that: no claim is made that the departure predicts
             anything.${cond!=null?` Put the other way round: <b style="color:var(--mute)">if</b> it
             finishes, round one is ${P0(Math.min(0.99,cond))}% of those finishes, against a league
@@ -3776,9 +3805,9 @@ function sbMethodBlock(b,st,pA){
          bouts. Same quantity, no population mismatch. */
       const LS=[[surname(b.a),st.a_m],[surname(b.b),st.b_m]]
         .filter(x=>x[1]&&x[1].espn)
-        .map(([nm,x])=>[nm,x,sbLossMix(x)]).filter(x=>x[2]);
+        .map(([nm,x])=>[nm,x,sbLossMix(x,b)]).filter(x=>x[2]);
       if(!LS.length) return '';
-      const base=sbBaseMix();
+      const base=sbBaseMix(b);
       const fam=[['ko','by KO/TKO'],['sub','by submission'],['dec','on the cards']];
       /* A share is only called high or low against the league when it clears
          five points. Below that the shrinkage is doing the talking, and a
@@ -3798,7 +3827,8 @@ function sbMethodBlock(b,st,pA){
         <div class="rbhd"><b>${esc(nm)}</b>
           <span class="lbl">${x.n_loss} loss${x.n_loss===1?'':'es'} in ${x.n_fights} fights${
             x.off_tier?` · ${x.off_tier} outside the UFC at half weight`:''}</span></div>
-        <div class="rbrow rbh"><span></span><span>when beaten</span><span>league</span></div>
+        <div class="rbrow rbh"><span></span><span>when beaten</span><span>${
+          base.div?esc(divShort(base.div)):'league'}</span></div>
         ${/* Values in bone, not the record panel's .rbw/.rbo pair. Those are
               coloured green for WON and orange for LOST, and this column is a
               man's losses - borrowing .rbw would have printed a losses column
@@ -3832,7 +3862,7 @@ function sbMethodBlock(b,st,pA){
       if(full.length===2){
         const hits=[];
         [[0,1],[1,0]].forEach(([i,j])=>{
-          const W=sbShrinkMix(full[i][1]), D=sbLossMix(full[j][1]);
+          const W=sbShrinkMix(full[i][1],b), D=sbLossMix(full[j][1],b);
           if(!W||!D) return;
           ['ko','sub'].forEach(k=>{
             const dw=W[k]-base[k], dd=D[k]-base[k];
@@ -3860,10 +3890,14 @@ function sbMethodBlock(b,st,pA){
         <div class="rbgrid">${LS.map(block).join('')}</div>
         ${pair}
         <div class="note" style="margin-top:7px">Shares over each man's own losses, shrunk k=5 toward
-          the league mix — losses are rarer than wins, so a five-loss record sits half on the league
-          and a raw 1/1/3 split is not reported as 20/20/60. <b style="color:var(--mute)">Shown, not
-          used:</b> the method rows above this section are still built from wins alone, and stay that
-          way until a loss-side reliability test passes.</div></div>`;})()}
+          ${base.div?`<b style="color:var(--mute)">${esc(base.div)}</b>'s own rate over ${base.n}
+            bouts — not the all-division figure, which runs ${P0(0.504)}% decision against this
+            division's ${P0(base.dec)}%`
+          :'the pooled all-division mix, because this bout has no division the base rates cover'} —
+          losses are rarer than wins, so a five-loss record sits half on the base and a raw 1/1/3
+          split is not reported as 20/20/60. <b style="color:var(--mute)">Shown, not used:</b> the
+          method rows above this section are still built from wins alone, and stay that way until a
+          loss-side reliability test passes.</div></div>`;})()}
     ${(()=>{
       /* The record itself, round by round, for reading rather than computing
          with. Everything above this point is a derived number - shrunk,
@@ -4089,8 +4123,8 @@ function cssEsc(s){return String(s).replace(/["\\]/g,'\\$&');}
    Shared so the chip badge and the drawer verdict cannot drift apart — they
    were about to compute the same answer twice, which is how the tile and the
    drawer ended up disagreeing on the Pulyaev bout in the first place. */
-function sbCells(ma,mb,pA,a,bb){
-  const A=sbShrinkMix(ma), B=sbShrinkMix(mb);
+function sbCells(ma,mb,pA,a,bb,b){
+  const A=sbShrinkMix(ma,b), B=sbShrinkMix(mb,b);
   if(!A||!B) return null;
   if(pA==null||!isFinite(pA)) pA=0.5;
   /* FIVE cells, with decision combined - the same claim set the model
@@ -4180,7 +4214,7 @@ function sbLengthCall(b,stIn){
     const mp = kind==='finish' ? 1-b.m_decision : b.m_decision;
     delta = p-mp;
   }
-  const cells=sbCells(st.a_m||{}, st.b_m||{}, pA, surname(b.a), surname(b.b));
+  const cells=sbCells(st.a_m||{}, st.b_m||{}, pA, surname(b.a), surname(b.b), b);
   /* The same three tiers the model's own badge uses — 12 points clear of the
      league rate is a call, 5 to 12 a lean, under 5 neither. The chip had been
      printing a bare "FINISH 71%" at every strength, so a number the model would
