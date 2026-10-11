@@ -5246,3 +5246,60 @@ That agreement is itself a finding worth keeping rather than engineering
 around: if the check's finish level rarely departs from the model's, the check
 is adding little on this axis, and the honest response is to measure that once
 the exported record exists rather than to amplify the difference for display.
+
+## Addendum 51, amendment 3 (2026-10-11): thin bouts, and a spread allocation
+
+Reported: the two highest finish reads on the card — on the check's own
+numbers — never appear on the board.
+
+**Correct, and structural.** Those bouts are the THIN ones. They publish no
+`round_of_victory` at all, so the re-levelling in amendment 1 had nothing to
+scale: a check read on a thin bout could not reach the board however high it
+was. The toggle was re-levelling five bouts and leaving the two the check had
+most to say about on the floor.
+
+### Placing a bout the model would not split
+
+With the check on, a thin bout carrying a complete five-cell read is now placed
+from that read alone, spread across rounds by a borrowed shape.
+
+**The shape is pooled from this card's other bouts at the same scheduled
+length**, from the model's own survival output, normalised — measured at
+`[.489, .324, .187]` for three rounds on the live card, summing to 1.
+
+It is NOT taken from the league table, and that is a deliberate refusal.
+`market_bases.ends_before` gives round one and round two cleanly but leaves the
+final round as a residual against a finish rate the table does not carry at
+that scheduled length; for five rounds the residual comes out **negative**.
+Estimating that tail to fill the gap would be inventing precisely the number
+the extrapolation rests on. The card's own bouts need no estimate and come from
+the same model.
+
+It is still an extrapolation — the level is a real read, the round shape is
+borrowed from neighbouring fights — so those rows are marked **shape borrowed**
+and the note says what that means. A thin bout with no check read stays off the
+board entirely; nothing is placed from a borrowed shape alone.
+
+### Two ways to spend the 25
+
+**Cell** (default, unchanged): the top 25 cells straight down. What you would
+bet individually, with the known dilution from amendment 2.
+
+**Spread**: bouts ranked by their own finish probability, then one pick each
+per pass until the 25 are gone — every bout covered before any is doubled, and
+because the passes run in finish order the higher bouts collect their seconds
+first. Measured on the live card with check on: 11 bouts covered at 2-3 picks
+each against 8 bouts at 1-5 under cell ranking.
+
+The two modes genuinely disagree, and neither is more correct in the abstract:
+cell ranking answers "what are the biggest individual bets", spread answers
+"cover the card's likeliest finishes". The second is what was being asked for
+and was not available.
+
+### Still true, and unchanged by any of this
+
+The round shape is never read off a fighter's own round history, in any mode,
+with or without the check. 0.21 split-half falling to 0.05. The check sets how
+often a route happens; the shape across rounds comes from the model, or on a
+borrowed row from the model's other bouts — never from the counts in "where
+their fights have ended".
