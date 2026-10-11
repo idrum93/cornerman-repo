@@ -1965,14 +1965,38 @@ function finishPicks(d){
    in finish order the higher bouts collect their second and third picks first.
    This is the mode that answers "cover the card's likeliest finishes" rather
    than "take the biggest individual cells", and the two genuinely disagree. */
+/* HEDGE FIRST, then depth. A bout's picks are ordered so the SECOND one is the
+   other fighter's best cell, not the same fighter's next round - because with
+   one pick a bout you are backing a man, and with two on the same man you are
+   backing him twice. The hedge is the thing that makes a row a position rather
+   than a bet, and it was not happening: the per-bout list was sorted by
+   probability alone, so a dominant fighter took the first three picks.
+
+   "Unless completely unwarranted" is the ratio below: if the other corner's
+   best finish is under a quarter of the leading corner's, the hedge is not
+   worth a slot and the order falls back to plain probability. Declared, not
+   fitted - there is no sample here to fit it on, and a constant that looks
+   measured when it is not is worse than one that admits what it is. */
+const FB_HEDGE_MIN_RATIO=0.25;
+function fbBoutOrder(arr){
+  const s=arr.slice().sort((a,b)=>b.p-a.p);
+  if(!s.length) return s;
+  const lead=s[0].who;
+  const otherIdx=s.findIndex(x=>x.who!==lead);
+  if(otherIdx<1) return s;                       // one corner only: nothing to hedge
+  if(s[otherIdx].p < s[0].p*FB_HEDGE_MIN_RATIO) return s;   // not worth a slot
+  const out=[s[0], s[otherIdx]];
+  s.forEach((x,i)=>{ if(i!==0&&i!==otherIdx) out.push(x); });
+  return out;
+}
 function fbAllocate(all,d){
   if(FB_MODE!=='spread') return all.slice(0,FB_N);
   const by={};
   all.forEach(x=>{(by[x.bout]=by[x.bout]||[]).push(x);});
   const order=Object.keys(by).map(k=>{
-    const arr=by[k].slice().sort((a,b)=>b.p-a.p);
+    const arr=fbBoutOrder(by[k]);
     // the bout's own finish probability, from whichever source placed it
-    const fin=arr.reduce((t,x)=>t+x.p,0);
+    const fin=by[k].reduce((t,x)=>t+x.p,0);
     return {bout:k,arr:arr,fin:fin};
   }).sort((a,b)=>b.fin-a.fin);
   const out=[]; let i=0;
@@ -1995,14 +2019,28 @@ function finishBoard(d){
   const by={}; picks.forEach(x=>{(by[x.bout]=by[x.bout]||[]).push(x);});
   /* A bout earns a row if the model split it OR the check placed it. A thin
      bout the check reached is a real row with real cells, not a footnote. */
-  const withRv=(d.bouts||[]).filter(b=>b.round_of_victory||(by[b.bout]||[]).length);
-  const noRv=(d.bouts||[]).filter(b=>!b.round_of_victory&&!(by[b.bout]||[]).length);
+  /* ONLY bouts that actually drew a pick, highest finish probability first.
+     A row with no cells was carrying its verdict as an explanation, but on a
+     board of the card's likeliest finishes an empty row reads as a bout the
+     tool forgot about - and the "left out" line underneath already names every
+     one of them with its figure, so nothing is lost by removing the rows. */
+  const withRv=(d.bouts||[]).filter(b=>(by[b.bout]||[]).length)
+    .sort((x,y)=>fbBoutFinish(y)-fbBoutFinish(x));
+  const noRv=[];
   /* Bouts the floor removed. Listed by name: a bout dropping off a board of
      "the card's likeliest finishes" must not look like an oversight. */
   const leaned=(d.bouts||[]).filter(b=>{
     if((by[b.bout]||[]).length) return false;
     const pf=fbBoutFinish(b); if(!(pf>0)) return false;
     return !fbLean(b,pf).pass;});
+  /* Qualified on the floor and still drew nothing - only possible under
+     optimal, where every slot can be taken by a bigger cell elsewhere. Named
+     for the same reason as the floor list: a bout that is eligible and absent
+     must not look like an omission. */
+  const unpicked=(d.bouts||[]).filter(b=>{
+    if((by[b.bout]||[]).length) return false;
+    const pf=fbBoutFinish(b); if(!(pf>0)) return false;
+    return fbLean(b,pf).pass;});
   const maxR=Math.max.apply(null,withRv.map(b=>b.rounds||3).concat([3]));
   /* TWO numbers per row, because one was doing the work of both and doing it
      wrong. "Combined" was the sum of the cells that made the top 25, and it
@@ -2060,7 +2098,8 @@ function finishBoard(d){
     <div class="fbhd"><b>Finish board</b>
       <span class="lbl">${picks.length} picks · <b style="color:var(--gold)">${exp.toFixed(1)} expected to land</b>
         · cut-off ${P0(cut)}%</span>
-      <label class="fbtog"><span>spread across bouts</span>
+      <label class="fbtog" title="Off: the biggest individual cells on the card. On: every qualifying bout covered, both corners before either is doubled.">
+        <span>${FB_MODE==='spread'?'hedged spread':'optimal picks'}</span>
         <input type="checkbox" class="fbmode"${FB_MODE==='spread'?' checked':''}></label>
       <label class="fbtog${avail?'':' off'}" title="${avail?'':'No UFC.com check entered for any bout on this card'}">
         <input type="checkbox" class="fbck"${FB_CHECK?' checked':''}${avail?'':' disabled'}>
@@ -2082,6 +2121,10 @@ function finishBoard(d){
       <b style="color:var(--mute)">picked</b> is only the part these 25 cover — they differ because
       the 25 are ranked cell by cell, so a five-round bout spreads the same probability across twenty
       cells and draws fewer picks than a shorter fight that concentrates it.
+      ${unpicked.length?`<b style="color:var(--mute)">Eligible, unpicked:</b> ${unpicked.map(b=>
+          `${esc(surname(b.a))} v ${esc(surname(b.b))} (${P0(fbBoutFinish(b))}% finish)`).join(', ')} —
+        ${unpicked.length===1?'it clears':'they clear'} the floor but every slot went to a bigger cell
+        elsewhere. Hedged spread would cover ${unpicked.length===1?'it':'them'}. `:''}
       ${leaned.length?`<b style="color:var(--mute)">Left out:</b> ${leaned.map(b=>
           `${esc(surname(b.a))} v ${esc(surname(b.b))} (${P0(fbBoutFinish(b))}% finish)`).join(', ')} —
         ${leaned.length===1?'this bout leans':'these bouts lean'} toward the distance on the same rule
@@ -2098,10 +2141,17 @@ function finishBoard(d){
         declined to split is placed from the check's method cells alone, spread over rounds using the
         shape of this card's other bouts at the same scheduled length. The level is a real read; the
         round shape is an extrapolation from neighbouring fights, and those rows say so. `:''}
-      ${FB_MODE==='spread'?`<b style="color:var(--mute)">Spread:</b> bouts are ranked by their own
-        finish probability and each takes one pick per pass, so every bout is covered before any bout
-        is doubled. Switch it off to rank the card's individual cells straight down instead — the two
-        disagree, and the cell ranking favours shorter fights that concentrate their probability. `:''}
+      ${FB_MODE==='spread'
+        ? `<b style="color:var(--mute)">Hedged spread:</b> bouts ranked by their own finish
+           probability, each taking one pick per pass, and within a bout the second pick is the OTHER
+           corner's best finish — so every bout is covered before any is doubled, and both men are
+           covered before either is. The hedge is skipped only where the other corner's best finish
+           is under a quarter of the leading corner's, which is a declared cut-off and not a measured
+           one. `
+        : `<b style="color:var(--mute)">Optimal picks:</b> the card's biggest individual cells,
+           straight down, with no attempt to cover both corners or spread across bouts — several
+           picks can land on one man. Switch it on for coverage and hedging instead; the two
+           genuinely disagree. `}
       ${FB_CHECK&&nCk?`<b style="color:var(--gold)">Check on:</b> on the ${nCk} bout${nCk===1?'':'s'}
         marked <b style="color:var(--gold)">check</b>, each route's LEVEL is the UFC.com read's and
         only the shape across rounds stays the model's. The check sets how often a route happens; it
