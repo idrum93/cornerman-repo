@@ -192,7 +192,40 @@
      its box and the text beside it ran under the neighbouring block. Here it
      takes whatever is left instead of demanding 120px. */
   .spline.spfit{gap:6px}
-  .spbar.spfit{width:auto;flex:1 1 auto;min-width:30px}
+  /* A FLEX BASIS, not width:auto. .spcol is flex:0 0 auto, so it sizes to its
+     children's max-content, and an auto-basis item contributes nothing - the
+     bar collapsed to zero width and the row looked like a legend with a gap
+     where the bar had been. A basis keeps the space reserved while still
+     letting the bar give way in a narrow column. */
+  .spbar.spfit{width:auto;flex:1 1 90px;min-width:30px}
+  /* Three segments on one track: round one, the rounds after it, and the
+     cards. Same track and same colour language as .spbar - gold is a finish,
+     the blue showing through is the distance - with round one at full strength
+     and the later rounds dimmed, so earliest reads brightest. */
+  .r3bar{position:relative;width:120px;height:7px;flex:none;border-radius:4px;
+    background:rgba(90,140,200,.30);overflow:hidden}
+  .r3bar.spfit{width:auto;flex:1 1 90px;min-width:40px}
+  .r3bar i{position:absolute;top:0;bottom:0}
+  .r3bar .s1{left:0;background:var(--gold);border-radius:4px 0 0 4px}
+  /* Solid, not gold at 42% over a blue track - that blend came out a muddy
+     olive that read as a third unrelated colour rather than a dimmer gold. */
+  .r3bar .s2{background:#8E7026}
+  .spline .spw.m ~ .r3bar .s1{background:#7f8da3}
+  .spline .spw.m ~ .r3bar .s2{background:#58616E}
+  /* Where the league's own boundaries fall. A reference, not a verdict: it
+     makes a deviation visible without the page asserting that the deviation
+     means anything. */
+  .r3bar u{position:absolute;top:0;bottom:0;width:1px;text-decoration:none;
+    background:rgba(236,232,224,.70)}
+  /* The numbers go UNDER the bar, not beside it. Beside it they are nowrap and
+     .spcol sizes to content, which squeezed the bar to its 40px minimum at the
+     drawer's real width - correct proportions, unreadable. Indented to line up
+     with the bar's left edge (.spw 44px + the row's 6px gap). */
+  .r3leg{font-size:9.5px;color:var(--dim);margin:2px 0 0 50px;white-space:normal}
+  .r3leg b{color:var(--bone)}
+  /* This row's column takes the space left over instead of hugging its
+     content, so the bar is as wide as the drawer allows. */
+  .spcol.wide{flex:1 1 auto;min-width:0}
   @media(max-width:520px){ .sbsplit{align-items:flex-start;flex-direction:column;gap:5px}
     .spbar{width:96px} .spn{font-size:9.5px} }
   .sbout{display:flex;align-items:baseline;gap:20px;flex-wrap:wrap;margin-top:12px;
@@ -3648,7 +3681,6 @@ function sbMethodBlock(b,st,pA){
            call from the base rate, which is the whole job of this row. */
         const lgR1=t.base!=null?t.base:(b.rounds===5?0.1555:0.2533);
         const lgCond=b.rounds===5?0.376:0.517;
-        const anch=v=>`<span style="color:var(--dim)">· league ${P0(v)}%</span>`;
         /* Where the fight ends, as three shares of ALL outcomes that add to
            100. It was two rows that could not be read together: "ends in round
            one" over ALL outcomes, and "of the finishes, in round one" over the
@@ -3663,7 +3695,6 @@ function sbMethodBlock(b,st,pA){
            does not replicate (0.21 falling to 0.05), so a per-round column
            would be rendering noise at three decimal places of confidence. */
         const clamp=v=>(v==null||!isFinite(v))?null:Math.max(0,Math.min(1,v));
-        const midLab=b.rounds===5?'ends in rounds 2–5':'ends in rounds 2–3';
         const mDec=mk?mk.dec:null;
         /* The middle row is shown as the RESIDUAL of the two rounded figures
            beside it, not as its own rounded number. Three values rounded
@@ -3676,16 +3707,48 @@ function sbMethodBlock(b,st,pA){
           :clamp((100-P0(r1)-P0(dec))/100);
         const mMid=(b.p_end_r1!=null&&mDec!=null)?resid(b.p_end_r1,mDec):null;
         const rMid=(t.p!=null&&read.dec!=null)?resid(t.p,read.dec):null;
-        return row((hasM||b.p_end_r1==null?'ends in round one'
-            :`ends in round one <span style="color:var(--dim)">· model ${P0(b.p_end_r1)}%</span>`)
-            +' '+anch(lgR1),
-            b.p_end_r1,t.p)
-          + row(midLab,mMid,rMid)
-          + row('goes to decision',mDec,read.dec)
-          + `<div class="note" style="margin:4px 0 0">Those three are every way the fight can end,
-              so each column adds to 100%.${cond!=null?` Put the other way round: <b
-              style="color:var(--mute)">if</b> it finishes, round one is ${P0(Math.min(0.99,cond))}%
-              of those finishes, against a league ${P0(lgCond)}%.`:''}</div>`
+        /* One stacked bar per source rather than three rows per source. The
+           three shares sum to 100 by construction, which is what a stacked bar
+           is for, and it matches the two bars already on this tab. The numbers
+           stay in a legend underneath: this tab's job is model AGAINST records,
+           and comparing two segment widths by eye is worse than reading two
+           numbers - the bar is there for the shape, the legend for the
+           comparison.
+           What is deliberately NOT here is a highlight on any segment that runs
+           above the league. The three are mechanically locked - round one high
+           forces the other two low - so a single real deviation would colour
+           all three and show one fact as three signals, which is the same
+           defect as the cards row in the losses panel above. And three segments
+           across two sources and a dozen bouts is seventy-odd chances per card
+           to look unusual, which is how a reference table turns into a machine
+           for rendering noise. The league ticks give the reader the deviation
+           and leave the verdict alone. */
+        const lgDec=(typeof sbBaseMix==='function'?sbBaseMix().dec:0.50);
+        const lgMid=clamp(1-lgR1-lgDec);
+        const seg=(r1,mid,dec,nm,cls)=>{
+          if(r1==null||mid==null||dec==null) return '';
+          const a=100*r1, bq=100*mid;
+          return `<div style="margin-bottom:2px"><div class="spline spfit">
+            <span class="spw ${cls}">${nm}</span>
+            <span class="r3bar spfit">
+              <i class="s1" style="width:${a.toFixed(1)}%"></i>
+              <i class="s2" style="left:${a.toFixed(1)}%;width:${bq.toFixed(1)}%"></i>
+              <u style="left:${(100*lgR1).toFixed(1)}%"></u>
+              <u style="left:${(100*(lgR1+lgMid)).toFixed(1)}%"></u>
+            </span>
+            </div>
+          <div class="r3leg mono"><b>${P0(r1)}%</b> round one · <b>${P0(mid)}%</b> ${
+              b.rounds===5?'rounds 2–5':'rounds 2–3'} · <b>${P0(dec)}%</b> on the cards</div></div>`;};
+        return `<div class="sbrow sbsplit"><span class="sbl">where it ends</span>
+            <div class="spcol wide">${seg(b.p_end_r1,mMid,mDec,'model','m')}${
+              seg(t.p,rMid,read.dec,'records','r')}</div></div>
+          <div class="note" style="margin:4px 0 0">Every way the fight can end, so each bar is the
+            whole 100%. The two ticks mark where the LEAGUE's boundaries fall — ${P0(lgR1)}% in round
+            one, ${P0(lgDec)}% on the cards — so a segment running past a tick is this pair departing
+            from the league, and nothing more than that: no claim is made that the departure predicts
+            anything.${cond!=null?` Put the other way round: <b style="color:var(--mute)">if</b> it
+            finishes, round one is ${P0(Math.min(0.99,cond))}% of those finishes, against a league
+            ${P0(lgCond)}%.`:''}</div>`
           + (t.both?'':'<div class="note" style="margin:4px 0 0">Round-one figure uses one corner only — add the other record for both.</div>')
           + prov;   // under the rows it explains, not wedged above them
       })()}`
