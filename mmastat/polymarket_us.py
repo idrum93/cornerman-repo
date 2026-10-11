@@ -256,9 +256,22 @@ def parse(events):
                 "line": m.get("line"),
                 "volume": _num(m.get("volume") if m.get("volume") is not None
                                else m.get("volumeNum")),
-                "sides": sides, "shape": shape, "book": _quote(m)})
+                "sides": sides, "shape": shape, "book": _quote(m),
+                # Field inventory, carried for the audit only. The capture's own
+                # log is the only place the payload can be inspected, and three
+                # fixes were shipped against a feed whose shape was assumed.
+                "keys": sorted(m.keys()),
+                "liq": {k: m.get(k) for k in m
+                        if any(w in k.lower() for w in
+                               ("volume", "liquid", "trade", "interest",
+                                "open", "depth", "size", "shares"))}})
     return rows
 
+
+# A moneyline with no liquidity signal is refused rather than quoted. See the
+# gate in moneylines() for what the capture log showed. Set False to go back to
+# publishing untraded books.
+PUS_REQUIRE_VOLUME = True
 
 # Questions naming a method, a round or a length are not the moneyline, however
 # their two sides happen to be labelled.
@@ -317,9 +330,28 @@ def moneylines(rows, max_spread=0.06, min_volume=200.0, require_book=True):
                 continue
             if bk["spread"] > max_spread:
                 continue
-            # Absent volume is not low volume. These markets arrived with a
-            # two-sided book and no volume field at all, and the gate rejected
-            # every one of them — "no card-keyed venues to record".
+            # "Absent volume is not low volume" - the exception written when
+            # these markets arrived with a two-sided book and no volume field,
+            # and the gate rejected every one of them. It is what has been
+            # publishing untraded books ever since, and the capture log finally
+            # shows it: one candidate per event, correctly typed
+            # ufc_fight_winner, correct question text, nothing refused, every
+            # price inside a point of the seed, and volume absent on all of
+            # them. Nothing was being mistaken for the moneyline. The moneyline
+            # was simply not trading yet, and a seeded book was quoted as if it
+            # were a price.
+            #
+            # A market with no evidence of a trade is not a price, and the
+            # honest output is no row. Gating on LIQUIDITY, not on the number:
+            # refusing anything near .50 was rejected for good reason, since a
+            # real pick'em sits there too.
+            #
+            # This will publish NOTHING from this venue until the feed carries a
+            # liquidity signal - which is the correct result while every row it
+            # does publish is wrong, and is one flag to revert once the audit
+            # below says which field to read.
+            if PUS_REQUIRE_VOLUME and r["volume"] is None:
+                continue
             if r["volume"] is not None and r["volume"] < min_volume:
                 continue
             # The listed price, not the mid of the book: the exchange shows the
@@ -382,6 +414,20 @@ def ml_audit(rows, limit=14):
     for ev, lines in list(per.items())[:limit]:
         out.append(f"    {ev}")
         out.extend(lines)
+    # What the feed actually carries, printed once. The audit answered "which
+    # market set this price" and the answer was "the right one, untraded" - so
+    # the open question is now whether ANY field distinguishes a market that has
+    # traded from one that has not. If one appears here, it becomes the gate and
+    # PUS_REQUIRE_VOLUME goes back off; if the liq block is empty on every
+    # market, this feed cannot support a moneyline and the venue is moneyline
+    # -dead by its own payload, which is also an answer.
+    first = next((r for r in rows if r["kind"] == "winner" and len(r["sides"]) == 2),
+                 None)
+    if first is not None:
+        out.append("    -- payload shape, first declared winner market --")
+        out.append(f"      volume={first['volume']!r}  book={first['book']}")
+        out.append(f"      liquidity-ish fields: {first.get('liq') or '(none)'}")
+        out.append(f"      all keys: {', '.join(first.get('keys') or [])[:400]}")
     return "\n".join(out)
 
 

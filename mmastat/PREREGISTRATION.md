@@ -4910,3 +4910,74 @@ Any test conditions on card segment and year, or it measures those instead. The
 prior is low: nine families have now come back null, this one has already failed
 in its interaction form, and the two confounds both push the same direction.
 Registered as a candidate, not scheduled.
+
+## Addendum 47, amendment 2 (2026-10-11): the market was never misread
+
+The classifier fix of amendment 1 shipped. Ninety more moneyline rows were
+captured between 2026-10-09T01:42 and 2026-10-11T00:38 and **every one of them
+fell between .495 and .505** — Meerschaert at .503 against the books' .280,
+unchanged. Third fix, third failure.
+
+The `ml_audit()` dump added in amendment 1 then answered it in one read:
+
+```
+ufc-katcer-macsti-2026-10-17
+  CANDIDATE rank=(1,0)  p=0.489  type=ufc_fight_winner  q=Who will win in the upcoming mma event Katly
+ufc-julleb-gilurb-2026-10-17
+  CANDIDATE rank=(1,0)  p=0.172  type=ufc_fight_winner  q=Who will win in the upcoming mma event Julie
+```
+
+Fourteen events, **one candidate each, no refusals anywhere**. Every one typed
+`ufc_fight_winner`, every question a real moneyline question, `rank=(1,0)`.
+
+**Nothing was ever being mistaken for the moneyline.** There was no second
+market to lose a ranking contest to, so neither the ranking in addendum 47 nor
+the classifier in amendment 1 could have changed any price — both were fixes to
+real defects that were not causing this. The defect they were blamed for did
+not exist.
+
+What is actually true: the right market was selected every time and **it is not
+trading**. Volume is `None` on all of them — provable without the feed, because
+the capture runs `min_volume=200.0` and the gate rejects any volume *below* it,
+so a `0.0` would have produced no rows at all. Prices sit within a point of the
+seed with a uniform one-cent book. The single outlier, `.172`, is the one market
+that has seen a trade.
+
+The "absent volume is not low volume" exception — written when these markets
+first arrived with a two-sided book and no volume field, and the gate rejected
+all of them — is what has been publishing untraded books ever since.
+
+**Fixed by gating on liquidity**: `PUS_REQUIRE_VOLUME` refuses a moneyline with
+no volume signal. This publishes NOTHING from the venue until the feed carries
+one, which is the correct output while every row it does publish is wrong, and
+it is one flag to revert. Verified both directions: an untraded book yields zero
+rows, a market with volume still comes through at the book's figure.
+
+Gating on liquidity and not on the number, for the reason amendment 1 already
+gave: Bonfim vs. Prado is a real pick'em at .497, and a rule keyed to the value
+would discard genuine coin-flips. **The price is never the evidence; the market
+is.**
+
+`BAD_PUS_ML_BEFORE` moves to 2026-10-12T00:00:00Z, covering those 90 rows.
+
+### The standing lesson, now that it has cost three attempts
+
+Each of the three fixes was reasoned from the ledger — the only artifact
+reachable from where the work happens — and each diagnosis was a mechanism that
+could have produced the symptom, confirmed against no observation of the feed.
+All three were wrong in the same way: they explained the number without ever
+looking at the thing producing it. The audit dump cost one capture cycle and
+settled it immediately.
+
+**A venue fix is not confirmed by the code reading correctly, and a cause is not
+established by being sufficient to explain the symptom.** Where the data source
+cannot be reached from here, the first shipped change is the one that makes the
+source describe itself.
+
+The remaining open question is narrow and is recorded rather than guessed at:
+whether any field in this payload distinguishes a market that has traded from
+one that has not. The audit now prints the full key inventory of the first
+declared winner market. If such a field exists it becomes the gate; if the
+inventory is bare on every market, this feed cannot support a moneyline at all
+and the venue is moneyline-dead by its own payload — which is also an answer,
+and a publishable one.

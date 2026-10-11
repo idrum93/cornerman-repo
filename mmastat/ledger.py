@@ -911,7 +911,20 @@ def settle(fights, path=None, date_tol_days=4, verbose=True):
 # often just the bare bout name. Captures run at 02/10/16/22 UTC, so 20:00
 # excludes every run made with the broken classifier today and admits the 22:00
 # run, which is the first with the token-based one.
-BAD_PUS_ML_BEFORE = "2026-10-08T20:00:00+00:00"
+# Moved again, from 20:00 on the 8th to midnight on the 12th. The classifier
+# fix shipped and 90 more rows were captured between 2026-10-09T01:42 and
+# 2026-10-11T00:38, every one of them between .495 and .505 - Meerschaert at
+# .503 against the books' .280. The capture log then showed why, and it was
+# neither the ranking nor the classifier: ONE candidate per event, declared
+# ufc_fight_winner, correct question text, nothing refused, volume absent on
+# every market and every price within a point of the seed. The right market,
+# not trading. Those 90 rows are the same non-prices as the 662 before them.
+#
+# From here the venue publishes nothing without a liquidity signal
+# (PUS_REQUIRE_VOLUME), so a row captured after this instant is one an actual
+# trade stands behind. If the gate ships after midnight UTC on the 12th, this
+# constant needs moving once more.
+BAD_PUS_ML_BEFORE = "2026-10-12T00:00:00+00:00"
 
 
 def _drop_bad_pus_ml(L):
