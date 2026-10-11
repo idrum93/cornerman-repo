@@ -4981,3 +4981,268 @@ declared winner market. If such a field exists it becomes the gate; if the
 inventory is bare on every market, this feed cannot support a moneyline at all
 and the venue is moneyline-dead by its own payload — which is also an answer,
 and a publishable one.
+
+# Addendum 50: the check's league base was pooled across divisions (2026-10-11)
+
+Raised from the outside, about the loss panel: "I wouldn't want heavyweights to
+show conflated lack of sub losses when the weight class has fewer subs on
+average."
+
+## Confirmed, and the submission axis is the smallest part of it
+
+`sbBaseMix()` returned ONE mix, volume-weighted across all eleven divisions,
+and every shrinkage and every "league" comparison on the check tab used it. The
+divisions are nowhere near each other:
+
+| division | n | ko | sub | dec |
+|---|---|---|---|---|
+| Heavyweight | 509 | .505 | .128 | .367 |
+| Light Heavyweight | 520 | .450 | .165 | .385 |
+| Middleweight | 814 | .376 | .179 | .445 |
+| Lightweight | 1089 | .322 | .191 | .487 |
+| Flyweight | 418 | .232 | .211 | .557 |
+| Women's Strawweight | 378 | .140 | .198 | .662 |
+| **POOLED — what was used** | 6855 | **.319** | **.177** | **.504** |
+
+Submissions span .128 to .211, an 8-point spread. **KO spans 36 points and
+decision 30.** A heavyweight was being shrunk toward a decision rate 14 points
+above his division's and a KO rate 19 below it.
+
+Worse than the shrinkage: the "league" column he was being COMPARED against
+carried the same error, so a heavyweight whose losses are 45% by KO was flagged
+`+13 above league` when he is in fact below his division's 50.5%. **The flag
+could point the wrong way**, which is worse than no flag.
+
+Measured on the same synthetic record — six KO wins, two KO losses — shrunk
+under each base:
+
+| base | loss ko | loss dec | win ko |
+|---|---|---|---|
+| Heavyweight | .646 | .262 | .775 |
+| Flyweight | .405 | .453 | .621 |
+| pooled (old) | .514 | .360 | .690 |
+
+The identical record moves 24 points on KO-loss and 19 on decision by division.
+Under the old base both read the same number.
+
+**Fixed**: `sbBaseMix(bout)` returns the bout's own division where the payload
+has one (all eleven carry n >= 251, ample for a three-way share) and falls back
+to pooled for a catchweight or an unrecognised name, reporting which it used so
+the panel can name it. All eleven bouts on the live card resolve to their own
+division. This changes the check's method read going forward; reads already
+captured keep the values they were captured with.
+
+## Registered, not changed: is the 0.5 tier weight calibrated?
+
+Asked in the same breath — the weighted decision share runs ~10 points above
+the raw one on some bouts, which makes a fight look likelier to go the distance
+than the plain record says.
+
+Part of that gap was the division error above, and the bout cited (Boser vs.
+Diniz) is a **heavyweight**, so it was carrying the full 14-point decision
+error. That part is now gone.
+
+The rest is the tier weight, and the honest status is:
+
+- **The direction is principled.** Regional opposition is weaker, regional
+  records are finish-heavy, and a fighter's non-UFC finishes overstate what he
+  does at this level. Down-weighting them raises the decision share on purpose.
+- **The magnitude is not measured.** UFC/DWCS/TUF = 1.0 and everything else =
+  0.5 is **declared, not fitted** — the same standing caveat the tier weight
+  has carried since it was introduced.
+- **This project has already been bitten here once.** Addendum 45 moved the
+  decision-curve marker to UFC-only unweighted precisely because regional
+  records "drag a prospect's career share left into buckets predicting a higher
+  finish rate than his UFC record supports". So the curve marker uses UFC-only
+  while the method mix uses all-fights-at-half-weight: **two populations on one
+  panel**, which is an inconsistency on its own terms.
+
+It is measurable: for fighters holding both regional and UFC records, the ratio
+of regional finish rate to UFC finish rate implies the weight directly, and 0.5
+is a hypothesis that ratio can confirm or refuse. Registered as a candidate
+with that as the stated test. **Not changed on a guess** — a weight moved to
+make a number look better is the same error as a gate keyed to the price.
+
+Not run in this session: the UFCStats CSVs are not in the repo.
+
+# Addendum 51: the finish board, and making the check falsifiable (2026-10-11)
+
+Two builds from the same session. Neither changes a model.
+
+## The finish board
+
+A grid below the upcoming card: bouts down, rounds across, the card's 25
+likeliest finishes. Built from `round_of_victory`, which the competing-risks
+model already publishes per corner, per family, per round, and which sums
+exactly to `p_finish`. Finish-only; decisions are excluded by construction.
+
+Two things are stated on the panel rather than in a footnote, because without
+them the grid misleads:
+
+**It is ranked by probability, not by value.** No venue this tool reads prices
+a method-and-round contract, so there is no price to beat. Calling these
+"optimal" would invent the half of the comparison that decides it. They are the
+model's likeliest finishes and nothing stronger.
+
+**Twenty-five picks are worth about 1.5 expected hits.** The largest single
+cell on a typical card is 10-12% and most sit at 4-6%, so the 25 sum to roughly
+1.5. A grid of twenty-five confident-looking chips implies a hit rate it cannot
+deliver, so the expectation is printed in the header at the same weight as the
+count. Within a bout the picks are mutually exclusive — a fight ends once — so
+a row's combined figure is a true probability while the card total is an
+expected count, and the two are labelled differently.
+
+The panel also carries the round claim's own weakness: it went 2 of 4 on the
+last card, and the round split remains the least-tested thing the model says.
+
+## The check record was unfalsifiable
+
+`cornerman.checkreads.v1` lived in one browser's localStorage. No export, no
+copy, and nothing in `mmastat/` read it — verified by grep. So the question the
+check exists to answer, whether a UFC.com read beats the model, could not be
+settled across cards by anyone, and clearing site data erased the record
+silently.
+
+**Export and import added.** Import MERGES and the entry with the earlier
+`first_ts` wins, because `first_ts` decides whether a read counts as a forecast
+and a restore must not become a way to make a late read look early. The
+consequence, stated on the panel: re-importing an old file can move a read's
+timestamp backwards, never forwards.
+
+The buttons render in their own row, NOT inside `ckStrip()`. ckStrip returns
+nothing until a gradeable record exists, which is exactly the state of the
+browser someone restoring a backup is sitting at — the import has to exist
+before the record does. The first build put them inside ckStrip and they were
+invisible when needed most.
+
+## A storage ceiling that would have arrived quietly
+
+Raised in the same breath, and real. Every stored read carried `sig` — the full
+JSON of both pasted stat blocks, both records and both parsed ESPN histories —
+and `CKR` is the permanent record and is never pruned. About 3KB a bout, a
+dozen bouts a card, forty-odd cards a year: roughly 1.4MB a year against a 5MB
+localStorage ceiling, so the record would have begun failing to save in about
+three seasons, silently, which is the worst available failure for a forecasting
+record.
+
+`sig` is only ever compared for equality, so it is now a 32-bit hash plus the
+source length — **12 bytes against 3,008 measured**. A stored read is ~300
+bytes, which puts the ceiling decades out instead of seasons.
+
+The migration was the delicate part: an entry from an earlier build holds the
+full string, and comparing it against a hash reads as "inputs changed", which
+restamps `first_ts` to now and silently reclassifies genuine pre-fight reads as
+after-the-fact — the exact failure the `first_ts` mechanism was built to
+prevent. A stored signature therefore matches EITHER form and is rewritten as a
+hash once seen. Verified: an old full-string entry is treated as unchanged and
+its `first_ts` survives.
+
+## Addendum 51, amendment 1 (2026-10-11): the check may re-level the board, not reshape it
+
+Asked for next: make the check a selectable inclusion on the finish board, and
+use the check's round-by-round record — "where their fights have ended", six
+KOs in round one, four in round two — to set the finish probabilities per
+round.
+
+**Half of that is sound and is built. The other half is a recorded null.**
+
+### What the toggle does
+
+The model's round cells decompose exactly into the four route totals
+(`a_ko`, `a_sub`, `b_ko`, `b_sub`) — verified against the payload, not assumed,
+to within 0.0002. The check publishes those same four cells, shrunk and
+tier-weighted. So with the toggle on, each route's round cells are multiplied
+by `check_route / model_route`: **the level of each route becomes the check's,
+the shape across rounds within that route stays the model's.**
+
+This is not a new mechanism. It is `k_fin` — which already rescales the
+survival model's shape to a separately calibrated finish level — applied per
+route instead of once overall.
+
+Verified: with a planted check of .40/.02/.05/.03 against model routes of
+.108/.187/.198/.042, the re-levelled route totals land on .40/.02/.05/.03
+exactly, and the within-route round shares are unchanged to 1e-4 on all four.
+
+Off by default; a bout with no check, or a read whose five cells fail
+`cells_ok`, stays model-only and is not marked. The toggle disables itself when
+no bout on the card has a check.
+
+### Why the round history is refused
+
+Reading round probabilities off a fighter's own round counts is the exact thing
+addendum 45 measured and rejected. Split-half reliability of a fighter's
+round-one share is **0.21, falling to 0.05 as the sample grows**, against
+**0.54 rising to 0.60** for whether he finishes at all. Whether a man finishes
+replicates. When he finishes does not.
+
+That table is in the panel captioned as evidence "for reading rather than
+computing with" for this reason. Putting a checkbox in front of it would not
+make it replicate — it would re-introduce a recorded null behind a control that
+implies it was tested. So the check sets how often a route happens and never
+which round, and the panel says so on screen.
+
+### The loss side is already wired, pending its test
+
+"How they have been beaten" is not folded in here either, for a different
+reason: it is display-only pending the split-half test registered as addendum
+48, which has not been run. Nothing about this board needs changing when it
+passes — the board reads the check's method cells, so if the loss side earns
+its way into those cells it reaches the board automatically.
+
+That is the intended path for durability: not a second input to the board, but
+a better method read feeding the one input it already has.
+
+## Addendum 51, amendment 2 (2026-10-11): the board ranked cells and read as if it ranked bouts
+
+Reported from the outside: the same bouts appear whether the check is on or
+off, and some of the bouts shown are not the likeliest finishes on either side.
+
+Both halves of that were fair, and the second one was a real defect.
+
+### The dilution, measured
+
+The 25 are ranked CELL by cell. A five-round bout spreads the same finish
+probability across twenty cells; a three-round bout concentrates it in twelve.
+On the live card:
+
+| bout | rds | p_finish | cells | max cell | picks in top 25 |
+|---|---|---|---|---|---|
+| Buckley v. Malott | 5 | **.593** | 20 | .072 | 6 |
+| Boser v. Diniz | 3 | .527 | 12 | .120 | 5 |
+| Barriault v. Daukaus | 3 | .514 | 12 | .087 | **7** |
+
+The likeliest finish on the card drew fewer picks than a bout seven points
+behind it, purely from being scheduled for five rounds.
+
+Worse, the only per-bout number on the panel was headed "combined" and was the
+sum of the cells that made the 25 — which reads as the bout's finish
+probability and is not. A bout could be the best finish bet on the card and
+show a small figure.
+
+**Fixed as a display change, not a ranking change.** The bout's whole finish
+probability now has its own `finish` column beside `picked`, and the note says
+why they differ. Cell ranking is kept, because a cell is what you would
+actually bet; what was wrong was a panel that reported one quantity under a
+heading that implied the other.
+
+### Bouts with no round split are now rows
+
+Four of eleven publish no `round_of_victory`. They were dropped from the grid
+and mentioned only as a count in the footnote, so a bout the model had declined
+to split looked identical to a bout it had no opinion about. They appear at the
+foot with empty cells and the reason stated.
+
+### The toggle does reallocate — verified
+
+The report that the check changes nothing is explained by the reads agreeing
+with the model, not by the toggle being inert. Planting a check of .90 finish
+on a bout the model puts at .297 moves that bout from 2 picks to 7 and drops
+two other bouts by three and three. The mechanism reallocates across the whole
+card; it only looks inert when the check and the model agree about how often a
+fight ends, which on real reads they often will — both are shrunk toward the
+same divisional base.
+
+That agreement is itself a finding worth keeping rather than engineering
+around: if the check's finish level rarely departs from the model's, the check
+is adding little on this axis, and the honest response is to measure that once
+the exported record exists rather than to amplify the difference for display.
