@@ -5303,3 +5303,303 @@ with or without the check. 0.21 split-half falling to 0.05. The check sets how
 often a route happens; the shape across rounds comes from the model, or on a
 borrowed row from the model's other bouts — never from the counts in "where
 their fights have ended".
+
+## Addendum 51, amendment 4 (2026-10-11): the board had no floor and contradicted the verdict panel
+
+Asked: why are bouts at 44% and 58% finish on a board of likeliest finishes,
+when 61% is the threshold that marks a bout FINISH LIKELY?
+
+**The board had no finish threshold at all.** It ranked and allocated and never
+filtered. So it was offering finish picks on a bout the verdict panel, on the
+same page, labels DISTANCE LEANS. One tool, two opposite readings of one fight.
+
+### What the 61% actually is
+
+Not an absolute. `finBase = 1 - decBase = 49.5%`, and the badge fires at twelve
+points above it:
+
+| | rule | finish |
+|---|---|---|
+| finish likely | `fin - finBase >= .12` | >= 61.5% |
+| finish leans | `fin - finBase >= .05` | >= 54.5% |
+| distance leans | `dec - decBase >= .05` | <= 44.5% |
+| distance likely | `dec - decBase >= .12` | <= 37.5% |
+
+So of the two asked about: **Blanchfield at 44% is DISTANCE LEANS** — six
+points under the league's own base — and had no business on the board.
+**Croden at 58% is FINISH LEANS**, above the base, and belongs there.
+
+### The floor
+
+A bout is excluded when a decision is five points or more likelier than the
+league rate — the exact line at which this tool starts saying "distance". Not a
+number invented for this panel, and deliberately NOT the 61.5% badge bar, which
+was never the inclusion test: a bout at the league base rate still qualifies.
+
+Verified on the live card: Godínez/Souza (32%), Pereira/Zheleznyakova (34%) and
+Prado/Bonfim (42%) drop out; Camilo/Herbert at 49% and Allen/Duncan at 54% stay.
+The excluded bouts remain as rows with their verdict and no cells, and are named
+in the note with their finish figure, so nothing disappears silently.
+
+The check can still carry a bout back in, which is the point of having it: a
+30% model bout given a 72% check read reads FINISH LIKELY and qualifies.
+
+**This is a consistency rule, not a betting rule.** It cannot say a pick is
+good. It only stops the board recommending finishes on fights this tool has
+already called the other way, which is a defect of coherence rather than of
+calibration — and the honest fix for that is to make the two panels obey one
+rule, not to tune either of them.
+
+### The cost, stated
+
+On a decision-heavy card the floor leaves few qualifying bouts, and spread mode
+then pushes 25 picks into three or four of them, reaching further down each
+bout's cells than it otherwise would. Coverage is traded for coherence. The
+lowest pick is printed in the header for exactly this reason.
+
+## Addendum 51, amendment 5 (2026-10-11): hedging, ordering, and naming the two modes
+
+Three corrections, all to allocation and presentation. No model changes.
+
+### The second pick in a bout is now the other corner
+
+Spread covered every BOUT before doubling any, but inside a bout it ordered by
+probability alone — so a dominant fighter took the first three picks and the
+row was three bets on one man rather than a position on the fight. With one
+pick you are backing a man; with two on the same man you are backing him twice.
+
+The per-bout order now puts the **other corner's best finish second**, then
+falls back to probability for depth. Verified at the boundary: a second corner
+at 50% of the leader is hedged into slot two ahead of the leader's larger
+second cell; at exactly 25% it is still hedged; at 24.5% it is not; a lone
+corner is untouched.
+
+`FB_HEDGE_MIN_RATIO = 0.25` is the "unless completely unwarranted" clause —
+below a quarter of the leading corner, a hedge is not worth a slot. **Declared,
+not fitted.** There is no sample to fit it on, and a constant that looks
+measured when it is not is worse than one that admits what it is.
+
+### Rows sorted by finish probability, empty rows removed
+
+Rows were in card order and included bouts with no picks, carrying their
+verdict as an explanation. On a board of the card's likeliest finishes an empty
+row reads as an oversight. Rows are now only bouts that drew a pick, ordered by
+their own finish probability, highest first.
+
+Nothing is hidden by this: the note already named every floor-excluded bout
+with its figure, and a second clause now names bouts that **cleared** the floor
+and still drew nothing — only possible under optimal, where every slot can go
+to a bigger cell elsewhere, and worth saying because an eligible absent bout
+would otherwise look like an omission.
+
+### The modes are now named for what they do
+
+Spread-off was never "cell ranking" to anyone but me — it is **optimal picks**,
+the biggest individual cells with no attempt at coverage or hedging, and
+several picks can land on one man. Spread-on is **hedged spread**. The label
+reads whichever is active, and the note describes that mode rather than both.
+
+The underlying values stay `cell` and `spread` so a stored preference survives
+the rename; only what the reader sees changed.
+
+## Addendum 51, amendment 6 (2026-10-11): the check was never recorded on the bouts it matters most for
+
+Reported: Mahjoub and Leblanc, at 61% and 64% finish on the check's own read,
+are absent from the board while Croden at 58% is on it.
+
+**Neither bout is modelled.** On the live card they sit in `no_read` — "name
+not in UFCStats corpus" — along with four others:
+
+| | |
+|---|---|
+| modelled | 7 (2 of them thin) |
+| no_read | **6** |
+
+Six of thirteen bouts on this card have no model number at all.
+
+### Two defects, one cause
+
+`finishPicks` walked `d.bouts`. A no_read bout is not in `d.bouts`, so it could
+never be placed however high its read — the same shape as the thin-bout gap in
+amendment 3, one level further out.
+
+The one underneath it is worse. **`ckCapture` built its index from `d.bouts`
+and the last card only, so a read entered on a no_read bout was never captured
+at all** — not stored, not graded, not counted in the record. The sandbox has
+always accepted these bouts and the panel has always shown a read, so the reads
+existed; they had nowhere to go.
+
+That is exactly backwards. A bout the model cannot price is the case the check
+exists FOR: it is the only read available, and the one place a UFC.com paste is
+not a second opinion on a model number but the entire read. Excluding precisely
+those from the record meant the check was unmeasured where it has the most to
+add — and on this card that is nearly half the bouts.
+
+### Fixed
+
+`ckCapture` now indexes `no_read` bouts through `sbSynthetic`, so their reads
+enter `CKR`, the graded record and the export like any other. The board walks
+them alongside the thin bouts, placed from the check's cells and a borrowed
+round shape, and the row universe was widened to match or a bout could earn
+picks with nowhere to be drawn.
+
+Those rows are marked **check only** rather than "shape borrowed": the
+distinction is real and worth the extra word. A thin bout has a model that
+declined to split a number it does have; a no_read bout has no rating, no age,
+no reach, nothing. Verified: a no_read bout given a 64% check read is captured,
+placed, marked, and sorts to the top of the board on its own figure.
+
+### What this does not fix
+
+These bouts are absent from the model for a reason — the fighters are not in
+the corpus — so nothing about this gives them a model number, and the finish
+board rows built this way rest entirely on a pasted record plus a round shape
+borrowed from other fights. That is the most extrapolated thing on the panel
+and it says so on the row.
+
+## Addendum 51, amendment 7 (2026-10-11): the floor becomes a control, and why Croden belongs
+
+Reported: Croden (58%), Jourdain (56%) and Chovancek (50%, "no lean") look
+wrong on a board alongside 72% and 69% bouts — and they survive even under
+optimal.
+
+Two different things, and only one is a defect.
+
+### Croden under optimal is correct
+
+From the live board, bout finish against that bout's largest single cell:
+
+| bout | finish | top cell |
+|---|---|---|
+| **Croden v. Chandler** | **58%** | **17%** |
+| Barriault v. Daukaus | 69% | 15% |
+| Buckley v. Malott | 69% | 11% |
+| Leblanc v. Galanti | 64% | 7% |
+| Chovancek v. Su-young | 50% | 7% |
+
+**The 58% bout holds the biggest single bet on the card** — a three-round fight
+with the finish mass concentrated in one corner — while the 69% five-rounder
+spreads the same probability across twenty cells and tops out at 11%. Optimal
+ranks cells, so Croden belongs there. Removing it would mean removing the best
+available finish bet because the fight it sits in is unexceptional, which is
+the dilution of amendment 2 running the other way.
+
+Chovancek is the honest weak case: 50% finish, "no lean", 7% top cell.
+
+### The floor is now selectable, with the tool's own tiers as stops
+
+| stop | needs | bouts on the live card |
+|---|---|---|
+| not distance | > 44.5% | 10 |
+| **finish leans** (default) | >= 54.5% | 9 |
+| finish likely | >= 61.5% | 6 |
+
+Default moved to **finish leans**, which drops the 50% bout. The stops are the
+length tiers the verdict panel already uses, so at any setting the board agrees
+with the rest of the page.
+
+### What a floor cannot do here, stated rather than papered over
+
+**No tier separates a 61% bout from a 58% one.** They are three points apart
+and sit on the same side of every boundary available. Setting the floor to
+"finish likely" removes Croden at 58% — and also removes Mahjoub at 61%, which
+was specifically asked for two amendments ago.
+
+A line at 60% would do exactly what was wanted on this card and would be fitted
+to one Saturday; it would move next week and there is no sample to justify it.
+So it is not offered. If Croden and Mahjoub should land differently, the thing
+separating them is not the bout figure — it is the cell size, where Croden has
+the largest on the card and Mahjoub the third smallest. That is what optimal
+already ranks on, and it is the mode where the distinction is real.
+
+## Addendum 51, amendment 8 (2026-10-11): bout-priority allocation, measured and rejected
+
+Proposed: give priority to the highest-finish bouts and descend from there, so
+picks are not "wasted on decision-likely or decently probable bouts in place of
+covering more probable outcomes on a higher finish % bout". The reasoning came
+off the decision-share curve — 70% finish in the lowest decision-share bucket
+falling to 33% in the highest.
+
+Measured on the model's real cells for the live card, 25 picks, three rules:
+
+| rule | expected hits | P(nothing lands) | bouts | deepest |
+|---|---|---|---|---|
+| optimal (top cells) | **1.53** | **15.0%** | 5 | 7 |
+| hedged spread | 1.50 | 16.3% | 5 | 5 |
+| **bout-priority** | **1.01** | **23.7%** | 2 | 20 |
+
+**Bout-priority is worse on both.** A third fewer expected hits AND a higher
+chance of going nought for twenty-five. It is not a trade-off; it loses twice.
+
+The reason is the dilution of amendment 2 pointing the other way. Filling the
+highest-finish bout first means buying that bout's TWENTIETH-best cell — around
+a point apiece on a five-rounder — while 12% and 8.7% cells sit untouched in
+other fights. Concentrating on the likeliest fight to finish means buying its
+worst contracts in preference to other fights' best ones.
+
+**What the decision-share curve does and does not license.** It says which
+BOUTS finish. That justifies a floor, which now exists and is selectable. It
+says nothing about which of a bout's twelve-to-twenty (fighter, method, round)
+contracts to buy, and a 70% bout scheduled for five rounds spreads that 70%
+across twenty cells.
+
+Optimal already prioritises high-finish bouts to exactly the degree their cells
+earn it — on this card it went seven deep in one bout unprompted. The
+prioritisation is done by cell size, which is the quantity being bet, rather
+than by a bout-level label that does not survive contact with the scheduled
+length.
+
+**Kept as is.** Recorded so it is not re-proposed.
+
+### One addition from the question
+
+The header now carries **P(nothing lands)** beside expected hits. "1.5 expected"
+and "a one-in-six chance of 0 for 25" are the same slate described twice, and
+only the second answers what is actually being asked when twenty-five bets are
+being spent. It is also the only place the two modes meaningfully differ —
+hedging costs 0.03 expected hits and buys 1.3 points of bust risk — so the
+trade-off is now visible rather than argued about.
+
+## Addendum 51, amendment 9 (2026-10-11): a 60% floor, measured and offered as a preference
+
+Asked for after amendment 7 declined to invent it. The decline was about
+fitting a threshold to one card; the question deserved a number rather than a
+restatement of the objection.
+
+Measured on the live card's own check finishes
+(72/69/69/65/65/64/61/58/56/50), 25 picks, optimal:
+
+| floor | bouts | expected hits | P(nothing lands) | lowest pick |
+|---|---|---|---|---|
+| 44.5% (not distance) | 10 | 2.73 | 3.6% | 7.9% |
+| **54.5% (finish leans)** | 9 | **2.73** | **3.4%** | 7.8% |
+| 60% | 7 | 2.60 | 3.4% | 6.9% |
+| 61.5% (finish likely) | 6 | 2.44 | 3.9% | 6.4% |
+
+**54.5% remains the best of the four on both measures** — identical expected
+hits to no floor at all, with the lowest bust risk. Dropping the 50% bout costs
+nothing because its cells were never going to be bought anyway.
+
+**60% costs about 5% of expected hits and buys nothing measurable.** Raising
+the floor removes eligible bouts, so the same 25 picks reach further down each
+surviving one: the lowest pick falls from 7.8% to 6.9%. The mechanism is the
+dilution of amendment 2 for a third time, and it is also why 61.5% is worse
+still — fewer bouts, deeper reach, and bust risk going back UP to 3.9%.
+
+### Added anyway, and labelled
+
+The cost is small and the choice is not mine. The distinction that resolves it:
+
+- A threshold **discovered in data** to maximise something needs a sample. 60%
+  has none, and the measurement says it maximises nothing.
+- A threshold **chosen** because someone only wants to bet fights clearly
+  likely to finish needs no sample at all. It is a preference, it is
+  legitimate, and it costs what the table says it costs.
+
+So it is a fourth stop reading **"60% (preference)"**, it is absolute rather
+than derived from the league base like the other three, and the note says so
+whenever it is active — including the 5% figure. Nobody reading this later
+should mistake it for a measured bar.
+
+Verified: at 60% the card keeps 72/69/69/65/65/64/61 and drops 58/56/50, which
+is the split that prompted the question.
