@@ -253,11 +253,15 @@
   .fbtog{display:inline-flex;align-items:center;gap:5px;margin-left:auto;cursor:pointer;
     font-size:9.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--mute)}
   .fbtog input{accent-color:var(--gold);cursor:pointer;margin:0}
-  .fbtog select{font:inherit;font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;
-    color:var(--bone);background:var(--soft);border:1px solid var(--line);
-    border-radius:4px;padding:2px 4px;cursor:pointer}
+  .fbtog select,.fbtog input[type=number]{font:inherit;font-size:9.5px;text-transform:uppercase;
+    letter-spacing:.04em;color:var(--bone);background:var(--soft);
+    border:1px solid var(--line);border-radius:4px;padding:2px 4px;cursor:pointer}
+  .fbtog input[type=number]{width:44px;text-align:right;cursor:text}
   .fbtog+.fbtog{margin-left:14px}
   .fbtog.off{opacity:.45;cursor:default} .fbtog.off input{cursor:default}
+  .fbpick{float:left;margin:1px 7px 0 0}
+  .fbpick input{accent-color:var(--gold);cursor:pointer;margin:0}
+  .fbg-b.fboff{opacity:.5}
   .fbnone{color:var(--dim);font-size:11px}
   .fbna{background:var(--ink)}
   @media(max-width:620px){ .fbp{font-size:9px} .fbg-b{font-size:10px} }
@@ -1791,7 +1795,20 @@ function cardShapeStrip(){
    one bout the picks are mutually exclusive - a fight ends once - so a row's
    combined figure is a true probability, while the card total is an expected
    count and is labelled as one. */
-const FB_N=25;
+/* How many picks to spend. Twenty-five is the ceiling and the default; the
+   control only reduces.
+
+   Reducing is the better lever than raising the floor, and the measurements in
+   amendments 8 and 9 are why. A higher floor removes whole bouts and then
+   sends the same 25 picks deeper into the survivors, so the lowest pick FALLS
+   - 7.8% to 6.9% between the 54.5% and 60% floors. Asking for fewer picks
+   removes the worst cells and nothing else: the lowest pick rises, expected
+   hits fall by exactly the cells given up, and no bout is excluded on a rule
+   that cannot see Friday's weigh-in. */
+const FB_NKEY='cornerman.finishboard.n.v1';
+const FB_NMAX=25;
+let FB_N=(function(){ try{ const v=parseInt(localStorage.getItem(FB_NKEY),10);
+  return (isFinite(v)&&v>=1&&v<=FB_NMAX)?v:FB_NMAX; }catch(e){ return FB_NMAX; } })();
 const FB_KEY='cornerman.finishboard.check.v1';
 const FB_MKEY='cornerman.finishboard.mode.v1';
 /* The floor is a CONTROL, not a constant I picked. Its three stops are the
@@ -1805,6 +1822,19 @@ const FB_MKEY='cornerman.finishboard.mode.v1';
    answer is that the bout-level figure is not what is deciding it - see the
    cell-size note, where the 58% bout holds the largest single cell on the
    card and the 69% five-rounder does not. */
+/* Bouts switched off by hand. A floor is a rule and cannot know that a man
+   missed weight on Friday, that a replacement came in on short notice, or that
+   you simply will not bet a particular fight. Switching one off returns its
+   slots to the pool, so the 25 are always spent on bouts you would actually
+   back - which is a better use of the manual override than silently betting
+   fewer than 25.
+
+   Kept per bout name, so it survives a reload but means nothing on the next
+   card, which is the correct lifetime for a judgement about one fight. */
+const FB_OKEY='cornerman.finishboard.off.v1';
+let FB_OFF=(function(){ try{ const v=JSON.parse(localStorage.getItem(FB_OKEY)||'[]');
+  return new Set(Array.isArray(v)?v:[]); }catch(e){ return new Set(); } })();
+function fbOffSave(){ try{ localStorage.setItem(FB_OKEY, JSON.stringify([...FB_OFF])); }catch(e){} }
 const FB_FKEY='cornerman.finishboard.floor.v1';
 /* Three of these are the tool's own length tiers, expressed as points above
    the league finish base. `high` is NOT a tier - it is an absolute 60%, and it
@@ -1951,6 +1981,7 @@ function finishPicks(d){
   if(FB_CHECK) (d&&d.bouts||[]).filter(b=>!b.round_of_victory)
     .concat(((d&&d.no_read)||[]).map(n=>sbSynthetic(n)))
     .forEach(b=>{
+    if(FB_OFF.has(b.bout)) return;
     const ck=fbCheckCells(b); if(!ck) return;
     if(!fbLean(b,ck.a_ko+ck.a_sub+ck.b_ko+ck.b_sub).pass) return;
     const R=b.rounds||3, sh=fbShape(d,R);
@@ -1965,6 +1996,7 @@ function finishPicks(d){
   });
   (d&&d.bouts||[]).forEach(b=>{
     const rv=b.round_of_victory; if(!rv) return;
+    if(FB_OFF.has(b.bout)) return;
     if(!fbLean(b,fbBoutFinish(b)).pass) return;
     const R=b.rounds||3;
     const ck=fbCheckCells(b);
@@ -2084,7 +2116,10 @@ function finishBoard(d){
      picks and still have nowhere to be drawn. no_read bouts are not in d.bouts
      at all, so they are folded in here as the same synthetics. */
   const universe=(d.bouts||[]).concat(((d&&d.no_read)||[]).map(n=>sbSynthetic(n)));
-  const withRv=universe.filter(b=>(by[b.bout]||[]).length)
+  /* A row survives if it drew picks OR was switched off by hand - the second
+     because a switched-off bout with no row would have no checkbox to switch
+     back on, and would look identical to one the floor removed. */
+  const withRv=universe.filter(b=>(by[b.bout]||[]).length||FB_OFF.has(b.bout))
     .sort((x,y)=>fbBoutFinish(y)-fbBoutFinish(x));
   const noRv=[];
   /* Bouts the floor removed. Listed by name: a bout dropping off a board of
@@ -2144,9 +2179,12 @@ function finishBoard(d){
       : Object.keys(b.round_of_victory||{}).reduce((t,k)=>{
           const mm=/^[ab]_(?:ko|sub)_r([1-5])$/.exec(k);
           return t+((mm&&+mm[1]<=R)?(+b.round_of_victory[k]||0):0);},0);
-    return `<div class="fbg-b"><b>${esc(surname(b.a))} v ${esc(surname(b.b))}</b>
+    const off=FB_OFF.has(b.bout);
+    return `<div class="fbg-b${off?' fboff':''}"><label class="fbpick"><input type="checkbox"
+        class="fbon" data-bout="${esc(b.bout)}"${off?'':' checked'}></label><b>${
+        esc(surname(b.a))} v ${esc(surname(b.b))}</b>
       <span class="lbl">${esc(divShort(b.weight_class||''))} · ${R} rds${
-        mine.length?'':' · no pick'} · ${esc(fbLean(b,pFin).lean)}${
+        off?' · <b style="color:var(--warn)">switched off</b>':(mine.length?'':' · no pick')} · ${esc(fbLean(b,pFin).lean)}${
         (ckd&&!noread)?' · <b style="color:var(--gold)">check</b>':''}${
         borrowed?` · <b style="color:var(--warn)">${noread?'check only':'shape borrowed'}</b>`:''}</span></div>${cells}<div class="fbg-t" style="color:${
         ckd?'var(--gold)':'var(--mute)'}">${P0(pFin)}%</div><div class="fbg-t">${
@@ -2159,6 +2197,9 @@ function finishBoard(d){
     <div class="fbhd"><b>Finish board</b>
       <span class="lbl">${picks.length} picks · <b style="color:var(--gold)">${exp.toFixed(1)} expected to land</b>
         · <b style="color:var(--mute)">${P0(pNone)}% chance none do</b> · lowest ${P0(cut)}%</span>
+      <label class="fbtog" title="How many picks to spend. 25 is the ceiling; reducing drops the weakest cells and nothing else.">
+        <span>picks</span>
+        <input type="number" class="fbn" min="1" max="${FB_NMAX}" step="1" value="${FB_N}"></label>
       <label class="fbtog" title="Lowest bout finish probability allowed onto the board. The stops are this tool's own length tiers.">
         <span>floor</span>
         <select class="fbfloor">
@@ -2988,6 +3029,16 @@ document.addEventListener('change',function(e){
   } else if(cl.contains('fbmode')){
     FB_MODE=e.target.checked?'spread':'cell';
     try{ localStorage.setItem(FB_MKEY, FB_MODE); }catch(err){}
+  } else if(cl.contains('fbn')){
+    let v=parseInt(e.target.value,10);
+    if(!isFinite(v)) v=FB_NMAX;
+    v=Math.max(1,Math.min(FB_NMAX,v));
+    FB_N=v; e.target.value=v;
+    try{ localStorage.setItem(FB_NKEY, String(v)); }catch(err){}
+  } else if(cl.contains('fbon')){
+    const k=e.target.getAttribute('data-bout');
+    if(e.target.checked) FB_OFF.delete(k); else FB_OFF.add(k);
+    fbOffSave();
   } else if(cl.contains('fbfloor')){
     FB_FLOOR=FB_FLOORS[e.target.value]!=null?e.target.value:'leans';
     try{ localStorage.setItem(FB_FKEY, FB_FLOOR); }catch(err){}
