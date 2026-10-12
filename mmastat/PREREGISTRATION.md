@@ -5603,3 +5603,77 @@ should mistake it for a measured bar.
 
 Verified: at 60% the card keeps 72/69/69/65/65/64/61 and drops 58/56/50, which
 is the split that prompted the question.
+
+## Addendum 51, amendment 10 (2026-10-11): per-bout override, and the head-to-head grid already exists
+
+### Switching a bout off by hand
+
+A floor is a rule and cannot know that a man missed weight on Friday, that a
+replacement came in on short notice, or that you simply will not bet a given
+fight. Each row now carries a checkbox; switching one off **returns its slots
+to the pool** rather than leaving the slate short.
+
+Verified: a bout holding 4 of the 25 switched off, the total stayed at 25, and
+its four slots went +1 each to four other bouts; switching it back restored the
+original allocation exactly. The row stays visible, dimmed and marked
+**switched off**, because a hidden row has no checkbox to switch back on and
+would look identical to one the floor removed. The list is per bout name, so it
+survives a reload and means nothing next week — the correct lifetime for a
+judgement about one fight.
+
+### The head-to-head strengths comparison is already what the board is made of
+
+Asked whether a fighter could earn a method pick in a round by having a higher
+share of that finish in that round than his opponent, and whether both could
+earn one where both are strong.
+
+**That is `round_of_victory`, and it is already built that way.**
+`method_round(sa, sb, n_rounds)` builds its features from BOTH fighters and
+predicts a five-class hazard every minute — `survive`, `a_ko`, `b_ko`,
+`a_sub`, `b_sub` — so `a_ko_r1` against `b_ko_r1` is precisely "which of these
+two is likelier to win by knockout in round one, against this opponent". Every
+cell on the board is a head-to-head comparison already, and the hedge rule of
+amendment 5 is exactly "where both corners are strong, both earn a pick".
+
+What does not exist is **visibility**: the board shows the 25 picks, not the
+full twelve-to-twenty cell grid per bout, so the comparison driving the picks
+cannot be read off the page. A strengths view would be pure display of numbers
+already computed, and is a safe addition.
+
+**The version to refuse** is the one phrased as a fighter's own share of that
+finish in that round, taken from the record. That is the counts in "where their
+fights have ended", and it is the recorded null for the fourth time in this
+addendum: 0.21 split-half falling to 0.05, against 0.54 rising to 0.60 for
+whether he finishes at all. The model's per-round hazards are a different
+quantity — fitted across the corpus against opponent state, not read off one
+man's dozen fights — which is why they are usable where his own round counts
+are not.
+
+## Addendum 51, amendment 11 (2026-10-11): the pick count becomes a control
+
+Twenty-five stays the ceiling and the default; the control only reduces.
+
+Measured on the live card, check on, floor at finish leans, optimal:
+
+| picks | expected hits | lowest pick | P(nothing lands) | bouts covered |
+|---|---|---|---|---|
+| 25 | 3.45 | 7.1% | 1% | 9 |
+| 15 | 2.56 | 12.3% | 5% | 9 |
+| 10 | 1.90 | 13.8% | 11% | 9 |
+| 5 | 1.08 | 19.3% | 29% | 5 |
+
+**This is the better lever than the floor, and the table shows why.** Raising
+the floor removes whole bouts and then sends the same 25 picks deeper into the
+survivors, so the worst pick gets WORSE — 7.8% to 6.9% between the 54.5% and
+60% stops in amendment 9. Reducing the count removes the weakest cells and
+nothing else: the lowest pick climbs from 7.1% to 12.3%, and coverage holds at
+nine bouts until the count falls below about ten.
+
+Both reduce expected hits, since fewer or worse cells is fewer or worse cells.
+The difference is what gets given up. The floor gives up whole fights on a rule
+that cannot see Friday's weigh-in; the count gives up the cells you were least
+likely to win. The second is almost always the right thing to surrender.
+
+The header reports the picks actually placed, not the number requested, so a
+card with fewer qualifying cells than the setting says so rather than implying
+it found 25.
