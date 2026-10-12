@@ -1855,7 +1855,13 @@ const FB_FKEY='cornerman.finishboard.floor.v1';
    no longer a reason to refuse to SHOW a bout, only a reason to default to
    hiding it. Paired with optimal it answers "the best cells on the card,
    regardless of which fight they sit in", which no other combination gives. */
-const FB_FLOORS={all:'none', any:0.00, leans:0.05, high:'abs60', likely:0.12};
+/* `dist` is the odd one out and is not a floor at all: it shows ONLY the bouts
+   the others exclude. all = dist + any, a clean partition, which is why it sits
+   between them in the list. It is for looking at what the board is leaving
+   behind - the finish cells that exist inside fights expected to go the
+   distance - not for building a slate from. Those are the longest shots on the
+   card by construction. */
+const FB_FLOORS={all:'none', dist:'only', any:0.00, leans:0.05, high:'abs60', likely:0.12};
 let FB_FLOOR=(function(){ try{ const v=localStorage.getItem(FB_FKEY);
   return (v&&FB_FLOORS[v]!=null)?v:'leans'; }catch(e){ return 'leans'; } })();
 let FB_MODE=(function(){ try{ return localStorage.getItem(FB_MKEY)==='spread'?'spread':'cell'; }
@@ -1964,6 +1970,7 @@ function fbLean(b,p){
   const need=FB_FLOORS[FB_FLOOR]==null?0.05:FB_FLOORS[FB_FLOOR];
   let pass, floorP;
   if(need==='none'){ floorP=0; pass=true; }
+  else if(need==='only'){ floorP=0; pass=(dec-decBase>=0.05); }
   else if(need==='abs60'){ floorP=0.60; pass=p>=0.60; }
   else if(need>0){ floorP=finBase+need; pass=p-finBase>=need; }
   else { floorP=1-(decBase+0.05); pass=!(dec-decBase>=0.05); }
@@ -2105,9 +2112,17 @@ function finishBoard(d){
 
      It is here because "1.5 expected" and "a one-in-six chance of going 0 for
      25" describe the same slate, and only the second answers the question
-     anyone actually has about spending twenty-five bets. It is also the number
-     that separates the two modes: hedging barely moves expected hits and is
-     bought almost entirely here. */
+     anyone actually has about spending twenty-five bets.
+
+     CORRECTION, recorded because it was stated the other way round first:
+     spreading does NOT buy a lower bust risk. Swept across 25, 15, 10, 5 and 3
+     picks, optimal beat the spread on BOTH expected hits and P(nothing lands)
+     every time - at ten picks it covered six bouts to the spread's ten and
+     still busted less often, 19.4% against 26.4%. Diversifying helps when the
+     positions are comparable; these run from 17% to 2%, so the mass given up
+     by thinning the good bouts exceeds anything the extra bouts return.
+     Hedged spread is kept because covering both corners is a preference worth
+     having, not because it reduces risk - it does not. */
   const perB={}; picks.forEach(x=>{perB[x.bout]=(perB[x.bout]||0)+x.p;});
   const pNone=Object.keys(perB).reduce((t,k)=>t*(1-Math.min(perB[k],0.999)),1);
   const cut=picks.length?Math.min.apply(null,picks.map(x=>x.p)):0;
@@ -2211,6 +2226,7 @@ function finishBoard(d){
         <span>floor</span>
         <select class="fbfloor">
           <option value="all"${FB_FLOOR==='all'?' selected':''}>all bouts</option>
+          <option value="dist"${FB_FLOOR==='dist'?' selected':''}>distance only</option>
           <option value="any"${FB_FLOOR==='any'?' selected':''}>not distance</option>
           <option value="leans"${FB_FLOOR==='leans'?' selected':''}>finish leans</option>
           <option value="high"${FB_FLOOR==='high'?' selected':''}>60% (preference)</option>
@@ -2252,6 +2268,10 @@ function finishBoard(d){
         contradict what this tool says about ${leaned.length===1?'it':'them'} elsewhere.
         ${(()=>{const MBx=(typeof BR==='object'&&BR&&BR.market_bases)||{};
           const db=(MBx.dec==null?0.505:MBx.dec), fb=1-db;
+          if(FB_FLOOR==='dist') return `Showing <b style="color:var(--mute)">distance only</b> — the
+            inverse of every other setting, and not a floor: these are the bouts the board normally
+            excludes, so every pick here sits inside a fight this tool expects to go the cards. They
+            are the longest shots available and are shown for inspection rather than as a slate.`;
           if(FB_FLOOR==='all') return `The floor is <b style="color:var(--mute)">all bouts</b> — every
             fight with finish cells is eligible, including ones this tool calls distance-leaning. Use
             the per-bout checkboxes to drop the ones you would not back; switching one off returns its
@@ -2898,7 +2918,31 @@ function sbSave(){
    set, and n is always shown. */
 const CK_KEY='cornerman.checkreads.v1';
 let CKR={};
-function ckLoad(){ try{ return JSON.parse(localStorage.getItem(CK_KEY)||'{}')||{}; }catch(e){ return {}; } }
+function ckLoad(){
+  let o={};
+  try{ o=JSON.parse(localStorage.getItem(CK_KEY)||'{}')||{}; }catch(e){ return {}; }
+  /* COMPACT THE LEGACY SIGNATURES ONCE, ON LOAD.
+
+     ckCapture writes a hash now, but it only rewrites a read whose bout is
+     still on the current card or the last one. A read for any earlier card is
+     never touched again, so it keeps the full pasted-input string it was
+     written with - forever. Measured on a real 34-read store: 21 legacy reads
+     held 31,471 of the 34,803 bytes, an average of 1,498 each against 263 for
+     a hashed one. Ninety percent of the record was signatures nobody will ever
+     compare again.
+
+     Rewriting them here is safe because the signature is only ever tested for
+     equality and ckCapture already treats a stored full string and its hash as
+     the same value - this just does eagerly what a re-capture would have done,
+     without touching first_ts, which is the field that must never move. */
+  let n=0;
+  Object.keys(o).forEach(k=>{
+    const v=o[k];
+    if(v&&typeof v.sig==='string'&&v.sig.length>40){ v.sig=ckSig(v.sig); n++; }
+  });
+  if(n){ try{ localStorage.setItem(CK_KEY, JSON.stringify(o)); }catch(e){} }
+  return o;
+}
 /* 32-bit hash plus the source length, which is all an equality test needs.
    The length is carried because a bare 32-bit hash collides once in about
    four billion and two different pastes colliding would freeze first_ts on a
