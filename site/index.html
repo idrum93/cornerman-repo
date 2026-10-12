@@ -1849,7 +1849,13 @@ const FB_FKEY='cornerman.finishboard.floor.v1';
    clearly likely to finish needs no sample at all; it is a preference, it is
    legitimate, and it is labelled as one so nobody later reads 60% as a
    measured bar. */
-const FB_FLOORS={any:0.00, leans:0.05, high:'abs60', likely:0.12};
+/* `all` is the bottom stop: every bout with finish cells, including ones this
+   tool calls distance-leaning. It exists because the per-bout checkboxes now
+   do the pruning a floor used to have to do - with a manual override there is
+   no longer a reason to refuse to SHOW a bout, only a reason to default to
+   hiding it. Paired with optimal it answers "the best cells on the card,
+   regardless of which fight they sit in", which no other combination gives. */
+const FB_FLOORS={all:'none', any:0.00, leans:0.05, high:'abs60', likely:0.12};
 let FB_FLOOR=(function(){ try{ const v=localStorage.getItem(FB_FKEY);
   return (v&&FB_FLOORS[v]!=null)?v:'leans'; }catch(e){ return 'leans'; } })();
 let FB_MODE=(function(){ try{ return localStorage.getItem(FB_MKEY)==='spread'?'spread':'cell'; }
@@ -1957,7 +1963,8 @@ function fbLean(b,p){
   // two stops require the bout to clear the matching finish tier.
   const need=FB_FLOORS[FB_FLOOR]==null?0.05:FB_FLOORS[FB_FLOOR];
   let pass, floorP;
-  if(need==='abs60'){ floorP=0.60; pass=p>=0.60; }
+  if(need==='none'){ floorP=0; pass=true; }
+  else if(need==='abs60'){ floorP=0.60; pass=p>=0.60; }
   else if(need>0){ floorP=finBase+need; pass=p-finBase>=need; }
   else { floorP=1-(decBase+0.05); pass=!(dec-decBase>=0.05); }
   return {lean:lean, pass:pass, floorP:floorP};
@@ -2203,6 +2210,7 @@ function finishBoard(d){
       <label class="fbtog" title="Lowest bout finish probability allowed onto the board. The stops are this tool's own length tiers.">
         <span>floor</span>
         <select class="fbfloor">
+          <option value="all"${FB_FLOOR==='all'?' selected':''}>all bouts</option>
           <option value="any"${FB_FLOOR==='any'?' selected':''}>not distance</option>
           <option value="leans"${FB_FLOOR==='leans'?' selected':''}>finish leans</option>
           <option value="high"${FB_FLOOR==='high'?' selected':''}>60% (preference)</option>
@@ -2244,6 +2252,10 @@ function finishBoard(d){
         contradict what this tool says about ${leaned.length===1?'it':'them'} elsewhere.
         ${(()=>{const MBx=(typeof BR==='object'&&BR&&BR.market_bases)||{};
           const db=(MBx.dec==null?0.505:MBx.dec), fb=1-db;
+          if(FB_FLOOR==='all') return `The floor is <b style="color:var(--mute)">all bouts</b> — every
+            fight with finish cells is eligible, including ones this tool calls distance-leaning. Use
+            the per-bout checkboxes to drop the ones you would not back; switching one off returns its
+            slots to the rest rather than shortening the slate.`;
           const line=FB_FLOOR==='high'?0.60:(FB_FLOOR==='any'?(1-(db+0.05)):(fb+FB_FLOORS[FB_FLOOR]));
           const nm={any:'not distance',leans:'finish leans',high:'60%',likely:'finish likely'}[FB_FLOOR];
           return `The floor is set to <b style="color:var(--mute)">${nm}</b>, so a bout needs <b
