@@ -149,6 +149,15 @@
     background:var(--panel2);color:var(--bone);border:1px solid var(--line);
     border-radius:4px;padding:5px 8px;font:11px ui-monospace,Menlo,monospace}
   .sbrec:focus{outline:none;border-color:#3B4557}
+  /* Division picker, shown ONLY when the card did not supply one. Gold-dashed
+     because the value is the operator's, not the card's, and a borrowed number
+     that looks like a scraped one is the thing to avoid here. */
+  .sbwcrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+    margin:0 0 9px;padding:7px 9px;border:1px dashed var(--gold);
+    border-radius:4px;background:rgba(205,164,58,.06)}
+  .sbwc{background:var(--panel2);color:var(--bone);border:1px solid var(--line);
+    border-radius:4px;padding:4px 7px;font:11px ui-monospace,Menlo,monospace}
+  .sbwc:focus{outline:none;border-color:#3B4557}
   /* the plain-language verdict. Bordered on one side rather than filled, so it
      reads as a summary of the rows under it and not as another chip competing
      with the tile's own badges. */
@@ -2176,7 +2185,7 @@ function finishBoard(d){
      board of "the card's likeliest finishes" reads as the model having no
      opinion, when the truth is that it declined to split one. */
   const thinRows=noRv.map(b=>`<div class="fbg-b"><b>${esc(surname(b.a))} v ${esc(surname(b.b))}</b>
-      <span class="lbl">${esc(divShort(b.weight_class||''))} · ${b.rounds||3} rds · no round split</span></div>`
+      <span class="lbl">${esc(divShort(sbWcOf(b)||''))}${sbWcIsManual(b)?'<i style="color:var(--gold);font-style:normal"> (set)</i>':''} · ${b.rounds||3} rds · no round split</span></div>`
     + [...Array(maxR)].map(()=>`<div class="fbg-c fbna"></div>`).join('')
     + `<div class="fbg-t"><span class="fbnone">—</span></div><div class="fbg-t"><span class="fbnone">—</span></div>`).join('');
   const rows=withRv.map(b=>{
@@ -2205,7 +2214,7 @@ function finishBoard(d){
     return `<div class="fbg-b${off?' fboff':''}"><label class="fbpick"><input type="checkbox"
         class="fbon" data-bout="${esc(b.bout)}"${off?'':' checked'}></label><b>${
         esc(surname(b.a))} v ${esc(surname(b.b))}</b>
-      <span class="lbl">${esc(divShort(b.weight_class||''))} · ${R} rds${
+      <span class="lbl">${esc(divShort(sbWcOf(b)||''))}${sbWcIsManual(b)?'<i style="color:var(--gold);font-style:normal"> (set)</i>':''} · ${R} rds${
         off?' · <b style="color:var(--warn)">switched off</b>':(mine.length?'':' · no pick')} · ${esc(fbLean(b,pFin).lean)}${
         (ckd&&!noread)?' · <b style="color:var(--gold)">check</b>':''}${
         borrowed?` · <b style="color:var(--warn)">${noread?'check only':'shape borrowed'}</b>`:''}</span></div>${cells}<div class="fbg-t" style="color:${
@@ -3707,10 +3716,48 @@ function sbR1Read(st,b,pFin){
    three-way share; the floor below is for a future division that does not.
    A catchweight or an unrecognised name falls back to pooled, and the caller
    can tell which it got from `div`. */
+/* The card's division, or the one entered by hand when the card has none.
+
+   WHY THIS IS NEEDED AT ALL, because it looks like a scraper bug and is not.
+   `data/upcoming.txt` is regenerated from Wikipedia on every refresh, and when
+   the card itself does not state a division `infer_division` falls back to the
+   most recent REAL division each fighter fought in. That fallback returns ""
+   only when NEITHER fighter has a prior bout in a known division - which is to
+   say, for a debutant. The same absence of history is why the model declines to
+   read the bout. So the missing division and the missing read are one cause,
+   not two, and no amount of scraping fixes it: there is nothing upstream to
+   scrape. Editing upcoming.txt by hand does not survive the next refresh.
+
+   Without this the panel silently fell back to the POOLED league mix, which is
+   the error addendum 50 already caught once in a different place: pooled ko is
+   .317 against heavyweight's .506, so "how they have been beaten" was being
+   compared to the wrong league and the above/below flag could point the wrong
+   way. A debutant heavyweight was getting flyweight-inflected league numbers.
+
+   Entered values are kept per bout in SBOX and never written into DATA, so
+   nothing captured, graded or exported inherits an operator's guess as if the
+   card had stated it. */
+function sbWcOf(b){
+  if(!b) return null;
+  const own=b.weight_class?String(b.weight_class).trim():'';
+  if(own) return own;
+  // guarded: sbBaseMix can be reached from a code path that runs before the
+  // sandbox store is initialised, and a TDZ throw here would take the panel out
+  const st=(typeof SBOX==='object'&&SBOX)?SBOX[b.bout]:null;
+  const man=(st&&st.wc)?String(st.wc).trim():'';
+  return man||null;
+}
+function sbWcIsManual(b){ return !!(b&&!b.weight_class&&sbWcOf(b)); }
+function sbDivOptions(){
+  const D=(BR||{}).divisions||[];
+  return D.filter(d=>d.division&&d.n>=150&&d.ko!=null&&d.sub!=null)
+          .map(d=>String(d.division));
+}
 function sbBaseMix(b){
   const D=(BR||{}).divisions;
   if(D&&D.length){
-    const wc=(b&&b.weight_class)?String(b.weight_class).trim().toLowerCase():null;
+    const w0=sbWcOf(b);
+    const wc=w0?String(w0).trim().toLowerCase():null;
     if(wc){
       const hit=D.find(d=>String(d.division||'').trim().toLowerCase()===wc);
       if(hit&&hit.n>=150&&hit.ko!=null&&hit.sub!=null)
@@ -4184,6 +4231,20 @@ function sandboxPanel(b){
       replace it. The rates here are also raw career averages where the model uses
       opponent-adjusted, shrunk ones, so a swap changes what the number means.
       Nothing you enter is saved, published or graded.</div>
+    ${b.weight_class?'':(()=>{
+      const opts=sbDivOptions(), cur=sbWcOf(b)||'';
+      if(!opts.length) return '';
+      return `<div class="sbwcrow">
+        <span class="lbl" style="margin:0">division
+          <span style="color:var(--dim)">— the card does not state one${
+            cur?'':', so the league is pooled across all eleven'}</span></span>
+        <select class="sbwc"><option value="">— pooled league —</option>
+          ${opts.map(o=>`<option value="${esc(o)}"${o===cur?' selected':''}>${esc(o)}</option>`).join('')}
+        </select>
+        ${cur?`<span class="lbl" style="margin:0;color:var(--gold)">yours, not the card's</span>`
+             :`<span class="lbl" style="margin:0;color:var(--dim)">a debutant has no prior
+                division to infer from — set it and the method reads compare to the right league</span>`}
+      </div>`;})()}
     <div class="sbgrid">
       <label class="lbl">${nA}
         <input class="sbrec" data-c="a" placeholder="record, e.g. 10-3-0 (W-L-D)">
@@ -4838,6 +4899,22 @@ function bindSandbox(b){
     st.a={};st.b={};st.a_raw='';st.b_raw='';st.a_m={};st.b_m={};
     st.a_h=null;st.b_h=null;st.a_histraw='';st.b_histraw='';
     st.a_rec=null;st.b_rec=null;st.a_recraw='';st.b_recraw='';st.on=false;st.blend=1;
+    sbSave(); redraw();
+    if(typeof render==='function') render();
+  });
+
+  /* The division commits on change rather than waiting for "Read both", because
+     it is not one of the pasted reads - it changes which league every number in
+     the panel is compared against, so the panel must not sit there showing
+     comparisons against a league the operator has just replaced.
+
+     Deliberately NOT cleared by Clear. Clear exists to drop the pasted blocks;
+     the division is a fact about the card that the card failed to supply, and
+     making it a casualty of clearing a bad paste would mean re-entering it
+     every time. */
+  const wcs=box.querySelector('.sbwc');
+  if(wcs) wcs.addEventListener('change',()=>{
+    st.wc=wcs.value||'';
     sbSave(); redraw();
     if(typeof render==='function') render();
   });
