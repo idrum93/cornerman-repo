@@ -253,6 +253,10 @@
   .fbtog{display:inline-flex;align-items:center;gap:5px;margin-left:auto;cursor:pointer;
     font-size:9.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--mute)}
   .fbtog input{accent-color:var(--gold);cursor:pointer;margin:0}
+  .fbtog select{font:inherit;font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;
+    color:var(--bone);background:var(--soft);border:1px solid var(--line);
+    border-radius:4px;padding:2px 4px;cursor:pointer}
+  .fbtog+.fbtog{margin-left:14px}
   .fbtog.off{opacity:.45;cursor:default} .fbtog.off input{cursor:default}
   .fbnone{color:var(--dim);font-size:11px}
   .fbna{background:var(--ink)}
@@ -1790,6 +1794,21 @@ function cardShapeStrip(){
 const FB_N=25;
 const FB_KEY='cornerman.finishboard.check.v1';
 const FB_MKEY='cornerman.finishboard.mode.v1';
+/* The floor is a CONTROL, not a constant I picked. Its three stops are the
+   tool's own length tiers, so whatever it is set to the board agrees with the
+   verdict panel; there is no fourth stop at some number tuned to one card.
+
+   Worth stating because it came up: no tier separates a 61% bout from a 58%
+   one. They are three points apart and fall on the same side of every
+   boundary here, so a line between them would be fitted to a single Saturday
+   and would move next week. If both should not be on the board, the honest
+   answer is that the bout-level figure is not what is deciding it - see the
+   cell-size note, where the 58% bout holds the largest single cell on the
+   card and the 69% five-rounder does not. */
+const FB_FKEY='cornerman.finishboard.floor.v1';
+const FB_FLOORS={any:0.00, leans:0.05, likely:0.12};
+let FB_FLOOR=(function(){ try{ const v=localStorage.getItem(FB_FKEY);
+  return (v&&FB_FLOORS[v]!=null)?v:'leans'; }catch(e){ return 'leans'; } })();
 let FB_MODE=(function(){ try{ return localStorage.getItem(FB_MKEY)==='spread'?'spread':'cell'; }
                          catch(e){ return 'cell'; } })();
 let FB_CHECK=(function(){ try{ return localStorage.getItem(FB_KEY)==='1'; }catch(e){ return false; } })();
@@ -1891,7 +1910,11 @@ function fbLean(b,p){
   else if(dec-decBase>=0.12) lean='distance likely';
   else if(p-finBase>=0.05) lean='finish leans';
   else if(dec-decBase>=0.05) lean='distance leans';
-  return {lean:lean, pass:!(dec-decBase>=0.05)};
+  // 'any' keeps everything that is not actively distance-leaning; the other
+  // two stops require the bout to clear the matching finish tier.
+  const need=FB_FLOORS[FB_FLOOR]==null?0.05:FB_FLOORS[FB_FLOOR];
+  const pass = need>0 ? (p-finBase>=need) : !(dec-decBase>=0.05);
+  return {lean:lean, pass:pass, floorP:need>0?(finBase+need):(decBase+0.05>0?1-(decBase+0.05):0)};
 }
 function fbBoutFinish(b){
   const ck=fbCheckCells(b);
@@ -2020,6 +2043,18 @@ function finishBoard(d){
   if(!all.length) return '';
   const picks=fbAllocate(all,d);
   const exp=picks.reduce((t,x)=>t+x.p,0);
+  /* The chance the whole slate returns nothing. Within a bout the picks are
+     mutually exclusive, so a bout's hit probability is the sum of its picked
+     cells; across bouts they are treated as independent, which is close enough
+     on a card of unrelated fights.
+
+     It is here because "1.5 expected" and "a one-in-six chance of going 0 for
+     25" describe the same slate, and only the second answers the question
+     anyone actually has about spending twenty-five bets. It is also the number
+     that separates the two modes: hedging barely moves expected hits and is
+     bought almost entirely here. */
+  const perB={}; picks.forEach(x=>{perB[x.bout]=(perB[x.bout]||0)+x.p;});
+  const pNone=Object.keys(perB).reduce((t,k)=>t*(1-Math.min(perB[k],0.999)),1);
   const cut=picks.length?Math.min.apply(null,picks.map(x=>x.p)):0;
   const by={}; picks.forEach(x=>{(by[x.bout]=by[x.bout]||[]).push(x);});
   /* A bout earns a row if the model split it OR the check placed it. A thin
@@ -2107,7 +2142,14 @@ function finishBoard(d){
   return `<div class="fbwrap">
     <div class="fbhd"><b>Finish board</b>
       <span class="lbl">${picks.length} picks · <b style="color:var(--gold)">${exp.toFixed(1)} expected to land</b>
-        · cut-off ${P0(cut)}%</span>
+        · <b style="color:var(--mute)">${P0(pNone)}% chance none do</b> · lowest ${P0(cut)}%</span>
+      <label class="fbtog" title="Lowest bout finish probability allowed onto the board. The stops are this tool's own length tiers.">
+        <span>floor</span>
+        <select class="fbfloor">
+          <option value="any"${FB_FLOOR==='any'?' selected':''}>not distance</option>
+          <option value="leans"${FB_FLOOR==='leans'?' selected':''}>finish leans</option>
+          <option value="likely"${FB_FLOOR==='likely'?' selected':''}>finish likely</option>
+        </select></label>
       <label class="fbtog" title="Off: the biggest individual cells on the card. On: every qualifying bout covered, both corners before either is doubled.">
         <span>${FB_MODE==='spread'?'hedged spread':'optimal picks'}</span>
         <input type="checkbox" class="fbmode"${FB_MODE==='spread'?' checked':''}></label>
@@ -2126,7 +2168,9 @@ function finishBoard(d){
       "+EV" picks. A fight ends once, so within a row the picks are alternatives and the combined
       figure is a real probability; across the card the ${exp.toFixed(1)} is an <b
       style="color:var(--mute)">expected count</b>, not a chance of anything — most of these lose,
-      and at most ${withRv.filter(b=>(by[b.bout]||[]).length).length} can ever land.
+      and at most ${withRv.filter(b=>(by[b.bout]||[]).length).length} can ever land. The
+      <b style="color:var(--mute)">${P0(pNone)}%</b> beside it is the chance the slate returns
+      nothing at all, treating bouts as independent.
       <b style="color:var(--mute)">finish</b> is the bout's whole finish probability and
       <b style="color:var(--mute)">picked</b> is only the part these 25 cover — they differ because
       the 25 are ranked cell by cell, so a five-round bout spreads the same probability across twenty
@@ -2141,12 +2185,14 @@ function finishBoard(d){
         the verdict panel uses, so offering finish picks ${leaned.length===1?'on it':'on them'} would
         contradict what this tool says about ${leaned.length===1?'it':'them'} elsewhere.
         ${(()=>{const MBx=(typeof BR==='object'&&BR&&BR.market_bases)||{};
-          const db=(MBx.dec==null?0.505:MBx.dec);
-          return `The line is a decision <b style="color:var(--mute)">5 points</b> likelier than the
-            league's own ${P0(db)}% — so a bout is left out below about <b
-            style="color:var(--mute)">${P0(1-(db+0.05))}%</b> finish. That is far short of the
-            ${P0(1-db+0.12)}% that earns a FINISH LIKELY badge, which was never the inclusion test
-            and is not being made into one.`;})()} `:''}
+          const db=(MBx.dec==null?0.505:MBx.dec), fb=1-db;
+          const line=FB_FLOOR==='any'?(1-(db+0.05)):(fb+FB_FLOORS[FB_FLOOR]);
+          const nm={any:'not distance',leans:'finish leans',likely:'finish likely'}[FB_FLOOR];
+          return `The floor is set to <b style="color:var(--mute)">${nm}</b>, so a bout needs <b
+            style="color:var(--mute)">${P0(line)}%</b> finish to appear. The stops are this tool's own
+            length tiers against a league base of ${P0(fb)}%, not a number chosen for this card —
+            and no tier separates a 61% bout from a 58% one, so if both should not be here it is the
+            cell sizes deciding that, not the bout figure.`;})()} `:''}
       ${picks.some(x=>x.borrowed)?`<b style="color:var(--warn)">Shape borrowed / check only:</b> a bout
         the model would not split is placed from the check's method cells alone, spread over rounds
         using the shape of this card's other bouts at the same scheduled length. A row marked
@@ -2923,6 +2969,9 @@ document.addEventListener('change',function(e){
   } else if(cl.contains('fbmode')){
     FB_MODE=e.target.checked?'spread':'cell';
     try{ localStorage.setItem(FB_MKEY, FB_MODE); }catch(err){}
+  } else if(cl.contains('fbfloor')){
+    FB_FLOOR=FB_FLOORS[e.target.value]!=null?e.target.value:'leans';
+    try{ localStorage.setItem(FB_FKEY, FB_FLOOR); }catch(err){}
   } else return;
   if(typeof render==='function') render();
 });
