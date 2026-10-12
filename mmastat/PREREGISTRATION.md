@@ -5677,3 +5677,140 @@ likely to win. The second is almost always the right thing to surrender.
 The header reports the picks actually placed, not the number requested, so a
 card with fewer qualifying cells than the setting says so rather than implying
 it found 25.
+
+## Addendum 51, amendment 12 (2026-10-12): an "all bouts" stop, and what the board is not
+
+### The bottom stop
+
+`all bouts` added below `not distance`: every fight with finish cells is
+eligible, including ones this tool calls distance-leaning. It exists because
+the per-bout checkboxes of amendment 10 now do the pruning a floor used to have
+to do — with a manual override there is no longer a reason to refuse to SHOW a
+bout, only a reason to default to hiding it. Paired with optimal it is the
+answer to "the best cells on the card regardless of which fight they sit in",
+which no other combination gave.
+
+Verified across all five stops on the live card: 11 / 10 / 9 / 7 / 6 bouts.
+
+### This is not a simulation, and the distinction matters
+
+Asked whether anything like digital-twin modelling produces the finish paths.
+It does not, and the reason is worth recording.
+
+`method_round(sa, sb, n_rounds)` builds ONE covariate vector from both
+fighters, then evaluates a five-class hazard — survive, a_ko, b_ko, a_sub,
+b_sub — at every minute of the scheduled distance, varying only `t` and `rnd`.
+Each minute's contribution is `survival-so-far x hazard`, accumulated into the
+round. It is an **analytic competing-risks calculation, exact, with no
+sampling**: run it twice and it returns the same number to the last decimal.
+A Monte Carlo twin would approximate the same integral with noise.
+
+**What a true twin would add, and why it is not here.** The covariates are
+static across the fight: only the baseline hazard moves with time and round.
+So nothing models a knockdown in round one raising the round-two KO hazard, or
+a grappler fading after a hard first. Within-fight state evolution is exactly
+what a simulation would buy.
+
+Buying it means SPECIFYING those dynamics — how much a knockdown shifts the
+subsequent hazard, how fatigue maps to takedown defence — and there is no
+within-fight state data in this corpus to fit any of it. The parameters would
+be chosen rather than estimated, and a simulation with invented dynamics
+produces confident, detailed, wrong paths that look far more sophisticated than
+the honest calculation they replace. It is the "machine for rendering noise"
+risk with better graphics.
+
+Registered as a null-by-construction rather than tested: it cannot be tested
+without data this project does not hold.
+
+### What the board actually neglects
+
+Two things, named so they are not mistaken for oversights:
+
+1. **Price.** These are ranked by probability because no venue this tool reads
+   quotes a method-and-round contract. Without a price there is no edge, only a
+   likelihood. That is the single biggest gap and it is not fixable from here.
+2. **Agreement between the model and the check.** Both produce method cells,
+   and a cell both back is better founded than one only a single source
+   supports — but nothing currently uses the agreement as a ranking input. It
+   is available and unused. It is NOT proposed until the exported check record
+   can show the agreement is worth something, which is the same discipline the
+   loss-side panel is waiting on.
+
+# Addendum 52: the check's first forecasting sample (2026-10-12)
+
+The export built in addendum 51 arrived. 34 reads, and for the first time the
+check can be scored as a forecaster rather than described.
+
+## What is in it
+
+| group | n | entered | status |
+|---|---|---|---|
+| UFC 332 (3 Oct) | 10 | 6 Oct | **post-hoc**, excluded, as designed |
+| Fight Night 10 Oct | 11 | **6 Oct, 22:25–23:38** | **genuine forecasts** — four days early |
+| Fight Night 17 Oct | 12 | 11–12 Oct | pre-fight, unresolved |
+| stale | 1 | — | no `first_ts`, all-zero cells |
+
+The middle group is the thing that did not exist before: eleven reads entered
+four days ahead of a card that is now graded.
+
+## Winner, on the ten gradeable bouts
+
+| | right | Brier |
+|---|---|---|
+| model | 5/10 | 0.3005 |
+| **check** | **5/10** | **0.3053** |
+
+The check matched the model's hit rate and was fractionally worse on Brier.
+
+## All three, scored on the same five bouts
+
+| | right | Brier |
+|---|---|---|
+| **market** | **4/5** | **0.2181** |
+| model | 3/5 | 0.2599 |
+| check | 2/5 | 0.2825 |
+
+The market beat both, which is the standing result holding. The check was last.
+
+Where it moved: it had Walker at .862 against the model's .725 and was right;
+Price at .532 against .322 and was right; Franco at .120 against .268 and was
+wrong. It is not tracking the model — it disagrees by up to 21 points — it
+simply is not disagreeing in a profitable direction yet.
+
+## Method
+
+Check top pick **3/10**. It said "decision" on seven of ten, on a card that
+produced eight finishes. Same structural problem the model's method metric has:
+decision is one bucket against four finish buckets.
+
+## Verdict: none, and that is the point
+
+Ten bouts against a registered floor of twelve, and 5-vs-5 on the winner would
+not separate two coins. **What has changed is that the question is now
+answerable at all** — before this export the check generated no evidence that
+could leave one browser.
+
+The honest early read is that the check is not beating the model and neither is
+beating the market. If that holds to a real sample, the conclusion is that a
+UFC.com paste re-prices seven of fourteen inputs and the other seven carry more
+weight — which is what the panel has said in prose since it was built, and
+would then be measured rather than argued.
+
+**Standing bar unchanged**: no claim about the check until the sample clears
+CK_MIN, and the post-hoc group stays out of every count no matter how much it
+would flatter the record.
+
+## A defect the export exposed
+
+Two keys for one bout: `Matheus Camilo vs. Jai Herbert` and
+`Jai Herbert vs. Matheus Camilo`. The reversed one carries no `first_ts`,
+all-zero method cells and no `cells_ok` — a legacy artifact of the
+`sbMethodRead` bug, stored under the other corner order from a payload that
+listed the fighters the other way round.
+
+It is inert: `ckGrade` gates on `cells_ok === true` and skips it. But the bout
+key being corner-order dependent means a card that flips the order silently
+orphans a read rather than updating it, and the record keeps both. Logged here
+rather than fixed, because the fix is an identity join on the bout the same way
+`grade_archive` already prefers fighter ids over names, and that is a change
+worth making deliberately rather than in passing.
