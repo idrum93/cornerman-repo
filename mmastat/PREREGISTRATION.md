@@ -5814,3 +5814,155 @@ orphans a read rather than updating it, and the record keeps both. Logged here
 rather than fixed, because the fix is an identity join on the bout the same way
 `grade_archive` already prefers fighter ids over names, and that is a change
 worth making deliberately rather than in passing.
+
+## Addendum 52, amendment 1 (2026-10-12): storage measured on the real store, and a distance-only view
+
+### Ninety percent of the record was dead signatures
+
+The export made this measurable for the first time. On the real 34-read store:
+
+| | reads | bytes | avg |
+|---|---|---|---|
+| legacy full-string `sig` | 21 | 31,471 | 1,498 |
+| hashed `sig` | 12 | 3,162 | 263 |
+| no sig | 1 | 170 | — |
+
+The hash of amendment 51 only ever rewrites a read whose bout is still on the
+current card or the last one. A read for any earlier card is never touched
+again, so it keeps the full pasted-input string forever — and those 21 reads
+held **90% of the whole record**.
+
+`ckLoad` now compacts them once, on load. Verified against the actual exported
+store: **33,887 bytes to 7,929, a 76.6% reduction, 34 of 34 reads intact, and
+not one `first_ts` moved** — which is the field that decides whether a read
+counts as a forecast and the only one that must never shift.
+
+### The ceiling, now with real numbers rather than an estimate
+
+At 260 bytes a compacted read:
+
+| | reads | store | against a 5MB cap |
+|---|---|---|---|
+| 1 year (40 cards) | 520 | 0.13 MB | 2.6% |
+| 5 years | 2,600 | 0.65 MB | 13% |
+| 25 years | 13,000 | 3.2 MB | 65% |
+
+Storage is not a constraint on this record and will not become one. The earlier
+concern was correct about the mechanism and is now closed by measurement rather
+than by argument.
+
+### `distance only`
+
+A sixth stop, between `all bouts` and `not distance`, showing ONLY what the
+others exclude. It is not a floor: `all = dist + any` is a clean partition,
+verified on the live card — all [56,54,49,42,34,32,30], dist [42,34,32,30],
+any [56,54,49].
+
+It is for inspecting what the board leaves behind — the finish cells inside
+fights expected to go the cards — and the note says so rather than presenting
+it as a slate. Those are the longest shots on any card by construction, and
+without a price there is no way to tell a longshot worth taking from one that
+is simply unlikely.
+
+## Addendum 51, amendment 13 (2026-10-12): skew swept and rejected, and a correction
+
+Proposed: a skew control distributing picks evenly, top-heavy or bottom-heavy
+by the bouts' finish probabilities.
+
+Skew is a parameter, so it was swept rather than argued about. Weighting each
+bout by `finish^k` and allocating quotas in proportion, 25 picks, live card:
+
+| allocation | expected hits | P(nothing lands) | bouts |
+|---|---|---|---|
+| **optimal (cells)** | **2.734** | **3.6%** | 10 |
+| even (round-robin) | 2.691 | 4.1% | 10 |
+| bottom-heavy k=-3 | 2.631 | 4.6% | 10 |
+| bottom-heavy k=-1 | 2.677 | 4.3% | 10 |
+| even k=0 | 2.723 | 3.9% | 10 |
+| top-heavy k=1 | 2.708 | 3.9% | 10 |
+| top-heavy k=2 | 2.708 | 3.9% | 10 |
+| top-heavy k=4 | 2.677 | 3.9% | 10 |
+| top-heavy k=8 | 2.538 | 3.8% | 8 |
+
+**Every setting of the dial is dominated by optimal on both metrics.** Not a
+trade-off at any value of k, in either direction. Not built.
+
+The reason it cannot help: at 25 picks across ten eligible bouts, optimal
+already covers all ten. There is no coverage left for a skew to buy back, so
+every constraint it imposes can only move picks onto worse cells.
+
+### The correction, which matters more than the skew
+
+Checking whether skew helps at lower counts produced a result that contradicts
+what was said in amendment 11 and in the panel's own note:
+
+| picks | optimal: exp / bust / bouts | even: exp / bust / bouts |
+|---|---|---|
+| 25 | 2.734 / 3.6% / 10 | 2.691 / 4.1% / 10 |
+| 15 | 1.895 / 10.8% / 7 | 1.791 / 13.2% / 10 |
+| 10 | 1.412 / 19.4% / 6 | 1.239 / 26.4% / 10 |
+| 5 | 0.792 / 40.8% / 4 | 0.682 / 47.8% / 5 |
+| 3 | 0.502 / 57.7% / 3 | 0.422 / 63.2% / 3 |
+
+**Optimal wins on BOTH axes at every count.** At ten picks it covers six bouts
+against the spread's ten and still busts less often — 19.4% to 26.4%.
+
+So the earlier claim that "hedging costs 0.03 expected hits and buys 1.3 points
+of bust risk" was **wrong, and wrong in the flattering direction**: the figures
+it was drawn from (optimal 15.0%, spread 16.3%) say the spread busts MORE. The
+spread was being credited with buying variance reduction it does not deliver.
+
+Diversification reduces variance when the positions are comparable. These run
+from 17% to 2%, so thinning the good bouts gives up more mass than the extra
+bouts return. Spreading across more bouts raises the ceiling on how many CAN
+land and lowers the chance any of them do.
+
+**Hedged spread is kept**, because covering both corners of a fight is a
+legitimate preference — you may want a position on a bout rather than a bet on
+a man. It is no longer described as reducing risk, in the code or on the panel,
+because it does not.
+
+## Addendum 51, amendment 14 (2026-10-12): skew swept at every pick count, and a conflation to own
+
+Amendment 13 swept skew at 25 picks only, then — in the next breath — showed a
+pick-count table that was comparing **optimal against hedged spread**, not
+optimal against skew. Two different controls, presented adjacently, and the
+reasonable reading of that pairing is "skew fails at 25 but the lower counts
+are where it lives." That reading was invited by the way it was written, so the
+sweep it implies has now actually been run.
+
+Eligible set: the live payload at the `all` floor — five bouts, 68 cells,
+finish probabilities .593 / .527 / .514 / .338 / .334. A narrower set than
+amendment 13's ten bouts, which makes it the HARDER test for skew: with fewer
+bouts and a wider spread between them, a quota rule has more room to matter.
+
+Weighting each bout by `finish^k`, largest-remainder quotas, cells taken
+best-first within each bout:
+
+| picks | optimal | best k by exp hits | best k by bust |
+|---|---|---|---|
+| 25 | **1.533 / 20.4%** | k=1 → 1.502 / 21.1% | k=1 → 21.1% |
+| 15 | **1.097 / 31.9%** | k=1 → 1.082 / 32.4% | k=1 → 32.4% |
+| 10 | **0.820 / 42.4%** | k=4 → 0.787 / 43.9% | k=4 → 43.9% |
+| 5 | **0.486 / 60.0%** | k=4 → 0.451 / 62.2% | k=4 → 62.2% |
+| 3 | **0.319 / 71.3%** | k=0 → 0.278 / 74.6% | k=0 → 74.6% |
+
+Twelve values of k from -3 to +8, five pick counts, two floors: **sixty
+allocations, and not one of them beat optimal on either axis.** Optimal is
+strictly best everywhere. The dial has no setting that is ever right.
+
+### The one thing skew does buy, and why it is still not a control
+
+Skew does move one number: coverage. At 15 picks optimal touches four bouts
+and even quotas touch five; at 5 picks, three against five. So the dial buys
+breadth — and pays for it in both expected hits and bust risk, which is the
+same bill the hedged-spread mode already itemizes.
+
+That is the argument against building it. Coverage is a legitimate thing to
+want, it is already a checkbox, and the checkbox states what it costs. A skew
+dial would be a second, blurrier route to the same place, with the cost spread
+across a continuous parameter where it is harder to see. Three controls that
+each do one legible thing beat four where two overlap.
+
+**Not built.** The finding is recorded so it is not re-proposed: this is now
+the second sweep to reject it, on a different eligible set, by a wider margin.
