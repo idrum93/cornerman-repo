@@ -2415,6 +2415,19 @@
    "status": "ok",
    "title": "UFC Fight Night: Allen vs. Curtis 2"
   },
+  "UFC Fight Night: Allen vs. Duncan ": {
+   "date": "2026-10-10",
+   "fotn": [],
+   "none_awarded": false,
+   "potn": [
+    "Brendan Allen",
+    "Andre Fili",
+    "Otari Tanzilovi",
+    "Alice Pereira"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Allen vs. Duncan"
+  },
   "UFC Fight Night: Almeida vs Garbrandt ": {
    "date": "2016-05-29",
    "fotn": [
@@ -6298,6 +6311,6 @@
   }
  },
  "parser": 5,
- "updated_utc": "2026-10-05T15:37:22+00:00",
+ "updated_utc": "2026-10-12T16:32:39+00:00",
  "version": 1
 }
