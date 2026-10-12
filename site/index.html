@@ -253,6 +253,23 @@
   .fbp i{font-style:normal;color:var(--bone);font-weight:700}
   .fbp u{text-decoration:none;color:var(--mute)}
   .fbp.ko i{color:var(--redsoft)} .fbp.sub i{color:var(--bluesoft)}
+  /* Exclusion controls. A live cell gets a hover cue only - the board is read
+     far more often than it is edited, and 25 permanently outlined cells would
+     turn a chart into a form. A switched-off one is loud on purpose: it is a
+     decision, and a decision you cannot see is one you will forget you made. */
+  .fbg-c.fbhot{cursor:pointer}
+  .fbg-c.fbhot:hover{background:var(--soft);box-shadow:inset 0 0 0 1px var(--line)}
+  .fbg-c.fbxc{cursor:pointer;background:var(--soft);opacity:.5}
+  .fbg-c.fbxc .fbp{text-decoration:line-through}
+  .fbg-c.fbxc:hover{opacity:.78}
+  .fbg-c.fbxc.fbxr{cursor:not-allowed;opacity:.34}
+  .fbg-c.fbxc.fbxr:hover{opacity:.34}
+  .fbg-h.fbrh{cursor:pointer;user-select:none}
+  .fbg-h.fbrh:hover{color:var(--bone)}
+  .fbg-h.fbrhoff{color:var(--warn);text-decoration:line-through}
+  .fbg-h.fbrhoff i{font-style:normal;text-decoration:none;letter-spacing:.07em}
+  .fbg-h.fbrh:focus-visible,.fbg-c.fbhot:focus-visible,
+  .fbg-c.fbxc:focus-visible{outline:1px solid var(--gold);outline-offset:-1px}
   .ckio{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:8px 0 2px;
     padding:7px 10px;border:1px solid var(--line);border-radius:7px;background:var(--panel)}
   .ckbtn{font:inherit;font-size:10px;letter-spacing:.04em;text-transform:uppercase;
@@ -1844,6 +1861,50 @@ const FB_OKEY='cornerman.finishboard.off.v1';
 let FB_OFF=(function(){ try{ const v=JSON.parse(localStorage.getItem(FB_OKEY)||'[]');
   return new Set(Array.isArray(v)?v:[]); }catch(e){ return new Set(); } })();
 function fbOffSave(){ try{ localStorage.setItem(FB_OKEY, JSON.stringify([...FB_OFF])); }catch(e){} }
+/* TWO MORE EXCLUSION AXES, below the bout switch: a single cell, and a round
+   across the whole card.
+
+   What they are NOT: a claim about probability. Switching off round 3 does not
+   say round 3 is less likely than the model has it, and nothing here reweights
+   anything. The cell keeps the probability it had; it is simply not somewhere
+   you are willing to put money, and the 25 go to the next best cells that are.
+   That distinction is the whole reason this is safe to add — an exclusion that
+   quietly rescaled the remaining cells would be a model change wearing a
+   checkbox, and the board would stop meaning what its header says.
+
+   WHY THE EXCLUDED CELL STILL RENDERS. The obvious implementation drops the
+   cell and lets it show as "—", which is wrong twice: an excluded cell becomes
+   indistinguishable from a bout that never had a pick there, and there is then
+   nothing to click to put it back. So excluded cells keep their place, struck
+   through, carrying what they would have been worth.
+
+   LIFETIME differs between the two on purpose. Cell exclusions are judgements
+   about one fight, so they are pruned to the bouts on the current card the same
+   way SBOX is. Round exclusions are a standing betting preference - "I do not
+   bet round 5" - so they persist, and because a preference you have forgotten
+   is worse than one you have to re-enter, the panel names every switched-off
+   round in its own line rather than only striking the column. */
+const FB_XKEY='cornerman.finishboard.cells.v1';
+const FB_RKEY='cornerman.finishboard.rounds.v1';
+const fbCellKey=(bout,r)=>bout+'\u0000'+r;
+let FB_XOFF=(function(){ try{ const v=JSON.parse(localStorage.getItem(FB_XKEY)||'[]');
+  return new Set(Array.isArray(v)?v:[]); }catch(e){ return new Set(); } })();
+let FB_ROFF=(function(){ try{ const v=JSON.parse(localStorage.getItem(FB_RKEY)||'[]');
+  return new Set((Array.isArray(v)?v:[]).map(Number).filter(n=>n>=1&&n<=5)); }
+  catch(e){ return new Set(); } })();
+function fbXSave(){
+  /* Pruned here rather than on load, because on load DATA may not be parsed
+     yet. Keys for bouts that are no longer on the card are dropped, so the
+     store cannot grow without bound across a season of cards. */
+  try{
+    const live=new Set(((DATA&&DATA.bouts)||[]).map(b=>b.bout));
+    if(live.size) [...FB_XOFF].forEach(k=>{
+      if(!live.has(String(k).split('\u0000')[0])) FB_XOFF.delete(k); });
+    localStorage.setItem(FB_XKEY, JSON.stringify([...FB_XOFF]));
+  }catch(e){}
+}
+function fbRSave(){ try{ localStorage.setItem(FB_RKEY, JSON.stringify([...FB_ROFF])); }catch(e){} }
+function fbCellOff(bout,r){ return FB_ROFF.has(+r)||FB_XOFF.has(fbCellKey(bout,+r)); }
 const FB_FKEY='cornerman.finishboard.floor.v1';
 /* Three of these are the tool's own length tiers, expressed as points above
    the league finish base. `high` is NOT a tier - it is an absolute 60%, and it
@@ -2088,7 +2149,14 @@ function fbBoutOrder(arr){
   s.forEach((x,i)=>{ if(i!==0&&i!==otherIdx) out.push(x); });
   return out;
 }
-function fbAllocate(all,d){
+function fbAllocate(all0,d){
+  /* Excluded cells are removed HERE and not in finishPicks, so the board still
+     holds the full eligible set and can draw a struck-through cell where one
+     was switched off. The bout's own finish probability in the `finish` column
+     is likewise computed from the full set elsewhere: switching a round off is
+     a decision about where you will bet, not a claim that the fight became
+     less likely to end. */
+  const all=all0.filter(x=>!fbCellOff(x.bout,x.r));
   if(FB_MODE!=='spread') return all.slice(0,FB_N);
   const by={};
   all.forEach(x=>{(by[x.bout]=by[x.bout]||[]).push(x);});
@@ -2136,6 +2204,11 @@ function finishBoard(d){
   const pNone=Object.keys(perB).reduce((t,k)=>t*(1-Math.min(perB[k],0.999)),1);
   const cut=picks.length?Math.min.apply(null,picks.map(x=>x.p)):0;
   const by={}; picks.forEach(x=>{(by[x.bout]=by[x.bout]||[]).push(x);});
+  /* Every ELIGIBLE cell, picked or not, so a switched-off cell can be drawn in
+     its own place instead of vanishing into the same "—" a bout with no cell
+     there shows. Without this there is no way to tell the two apart and no way
+     to put one back. */
+  const allBy={}; all.forEach(x=>{(allBy[x.bout]=allBy[x.bout]||[]).push(x);});
   /* A bout earns a row if the model split it OR the check placed it. A thin
      bout the check reached is a real row with real cells, not a footnote. */
   /* ONLY bouts that actually drew a pick, highest finish probability first.
@@ -2178,7 +2251,11 @@ function finishBoard(d){
      that dilution. So the bout's own finish probability now has its own
      column, and the picked total is labelled as what it is. */
   const head=`<div class="fbg-h l">bout</div>`
-    + [...Array(maxR)].map((_,i)=>`<div class="fbg-h">round ${i+1}</div>`).join('')
+    + [...Array(maxR)].map((_,i)=>{const r=i+1, roff=FB_ROFF.has(r);
+        return `<div class="fbg-h fbrh${roff?' fbrhoff':''}" data-round="${r}" role="button" tabindex="0"
+          title="${roff?'Round '+r+' is switched off across the whole card. Click to bet it again.'
+                      :'Switch round '+r+' off across the whole card. Its picks go to the next best cells elsewhere.'}"
+          >round ${r}${roff?' <i>off</i>':''}</div>`;}).join('')
     + `<div class="fbg-h">finish</div><div class="fbg-h">picked</div>`;
   /* Bouts the model publishes no round split for are shown as a row rather
      than dropped to a footnote. They were invisible, and a bout missing from a
@@ -2192,13 +2269,27 @@ function finishBoard(d){
     const mine=by[b.bout]||[];
     const R=b.rounds||3;
     const sum=mine.reduce((t,x)=>t+x.p,0);
+    const every=allBy[b.bout]||[];
     const cells=[...Array(maxR)].map((_,i)=>{
       const r=i+1;
       if(r>R) return `<div class="fbg-c fbna"></div>`;   // cannot be reached
       const here=mine.filter(x=>x.r===r);
+      const could=every.filter(x=>x.r===r);
+      const roff=FB_ROFF.has(r), xoff=FB_XOFF.has(fbCellKey(b.bout,r));
+      const lab=a=>a.map(x=>`<span class="fbp ${x.fam}"><i>${
+        x.fam==='ko'?'KO/TKO':'SUB'}</i> <u>${esc(surname(x.who))} ${P0(x.p)}%</u></span>`).join('');
+      /* A cell switched off keeps its place and its numbers, struck through.
+         The round switch wins over the per-cell one and says so, because a cell
+         that looks individually clickable while a column switch is holding it
+         off is a control that appears not to work. */
+      if(could.length&&(roff||xoff))
+        return `<div class="fbg-c fbxc${roff?' fbxr':''}" ${roff?'':`data-cell="${esc(b.bout)}" data-r="${r}"`}
+          role="button" tabindex="0" title="${roff?'Held off by the round '+r+' switch in the header.'
+            :'Switched off. Click to put it back.'}">${lab(could)}</div>`;
       if(!here.length) return `<div class="fbg-c"><span class="fbnone">—</span></div>`;
-      return `<div class="fbg-c">${here.map(x=>`<span class="fbp ${x.fam}"><i>${
-        x.fam==='ko'?'KO/TKO':'SUB'}</i> <u>${esc(surname(x.who))} ${P0(x.p)}%</u></span>`).join('')}</div>`;
+      return `<div class="fbg-c fbhot" data-cell="${esc(b.bout)}" data-r="${r}" role="button" tabindex="0"
+        title="Click to not bet this round in this bout. The picks go to the next best cells elsewhere."
+        >${lab(here)}</div>`;
     }).join('');
     const ckd=!!fbCheckCells(b);
     const borrowed=!b.round_of_victory;
@@ -2249,6 +2340,27 @@ function finishBoard(d){
         <span>use UFC.com check${avail?` (${FB_CHECK?nCk:avail} bout${(FB_CHECK?nCk:avail)===1?'':'s'})`:' — none entered'}</span></label></div>
     <div class="fbgrid" style="grid-template-columns:minmax(118px,1.5fr) repeat(${maxR},minmax(84px,1fr)) minmax(52px,.6fr) minmax(52px,.6fr)">
       ${head}${rows}${thinRows}</div>
+    ${(()=>{
+      /* The exclusion state, stated in words. A struck column is visible while
+         you are looking at the board; it is invisible the moment you scroll
+         past, and a round switched off three cards ago that is quietly still
+         off is exactly the failure this line exists to prevent. The shortfall
+         warning sits here too, because "19 picks" in the header does not say
+         WHY it is not 25. */
+      const nR=FB_ROFF.size, nX=FB_XOFF.size;
+      const short=picks.length<FB_N;
+      if(!nR&&!nX&&!short) return '';
+      const rl=[...FB_ROFF].sort((a,b)=>a-b).join(', ');
+      return `<div class="note" style="padding:7px 11px 0">
+        ${nR?`<b style="color:var(--warn)">Round${nR===1?'':'s'} ${rl} switched off</b> across the whole
+            card — those cells are struck through and their picks went to the next best elsewhere. `:''}
+        ${nX?`<b style="color:var(--warn)">${nX} cell${nX===1?'':'s'} switched off</b> individually. `:''}
+        ${short?`<b style="color:var(--warn)">Only ${picks.length} of ${FB_N} picks placed</b> — the
+            exclusions and the floor between them leave nothing else eligible, so the rest are not
+            being spent rather than being spent on worse cells. `:''}
+        ${(nR||nX)?`<span class="fbreset" role="button" tabindex="0" style="color:var(--gold);
+            cursor:pointer;text-decoration:underline">reinstate everything</span>`:''}
+      </div>`;})()}
     <div class="note" style="padding:7px 11px 9px">${FB_MODE==='spread'
       ? `${FB_N} finish picks shared across <b style="color:var(--mute)">${
           Object.keys(by).length}</b> bouts, finish-only — no decision, lowest pick ${P0(cut)}%.`
@@ -3109,6 +3221,38 @@ document.addEventListener('change',function(e){
     try{ localStorage.setItem(FB_FKEY, FB_FLOOR); }catch(err){}
   } else return;
   if(typeof render==='function') render();
+});
+/* Cell and round switches. Delegated, because the board is re-rendered whole on
+   every change and any listener bound to a cell would die with it. */
+function fbToggleFrom(t){
+  if(!t||!t.closest) return false;
+  const rh=t.closest('.fbrh');
+  if(rh){
+    const r=+rh.getAttribute('data-round');
+    if(!(r>=1&&r<=5)) return false;
+    if(FB_ROFF.has(r)) FB_ROFF.delete(r); else FB_ROFF.add(r);
+    fbRSave(); return true;
+  }
+  const c=t.closest('.fbg-c[data-cell]');
+  if(c){
+    const k=fbCellKey(c.getAttribute('data-cell'), +c.getAttribute('data-r'));
+    if(FB_XOFF.has(k)) FB_XOFF.delete(k); else FB_XOFF.add(k);
+    fbXSave(); return true;
+  }
+  // "reinstate everything" - one control for both axes, because remembering
+  // which of the two is holding a cell off is not the operator's job
+  if(t.closest('.fbreset')){ FB_XOFF.clear(); FB_ROFF.clear(); fbXSave(); fbRSave(); return true; }
+  return false;
+}
+document.addEventListener('click',function(e){
+  if(fbToggleFrom(e.target)){ if(typeof render==='function') render(); return; }
+});
+document.addEventListener('keydown',function(e){
+  if(e.key!=='Enter'&&e.key!==' ') return;
+  const t=e.target;
+  if(!t||!t.closest||!t.closest('.fbrh,.fbg-c[data-cell],.fbreset')) return;
+  e.preventDefault();
+  if(fbToggleFrom(t)){ if(typeof render==='function') render(); }
 });
 document.addEventListener('click',function(e){
   const x=e.target.closest&&e.target.closest('.ckexp,.ckimp');
