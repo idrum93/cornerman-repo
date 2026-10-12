@@ -1806,7 +1806,20 @@ const FB_MKEY='cornerman.finishboard.mode.v1';
    cell-size note, where the 58% bout holds the largest single cell on the
    card and the 69% five-rounder does not. */
 const FB_FKEY='cornerman.finishboard.floor.v1';
-const FB_FLOORS={any:0.00, leans:0.05, likely:0.12};
+/* Three of these are the tool's own length tiers, expressed as points above
+   the league finish base. `high` is NOT a tier - it is an absolute 60%, and it
+   is here as a stated preference rather than a discovered threshold.
+
+   The difference matters and is worth the comment. A threshold found in data
+   to maximise something needs a sample, and this one has none; measured on the
+   live card it costs about 5% of expected hits (2.73 to 2.60) and improves
+   nothing, because a higher floor leaves fewer eligible bouts and the same 25
+   picks then reach further down each one - the lowest pick falls from 7.8% to
+   6.9%. A threshold chosen because someone only wants to bet fights that are
+   clearly likely to finish needs no sample at all; it is a preference, it is
+   legitimate, and it is labelled as one so nobody later reads 60% as a
+   measured bar. */
+const FB_FLOORS={any:0.00, leans:0.05, high:'abs60', likely:0.12};
 let FB_FLOOR=(function(){ try{ const v=localStorage.getItem(FB_FKEY);
   return (v&&FB_FLOORS[v]!=null)?v:'leans'; }catch(e){ return 'leans'; } })();
 let FB_MODE=(function(){ try{ return localStorage.getItem(FB_MKEY)==='spread'?'spread':'cell'; }
@@ -1913,8 +1926,11 @@ function fbLean(b,p){
   // 'any' keeps everything that is not actively distance-leaning; the other
   // two stops require the bout to clear the matching finish tier.
   const need=FB_FLOORS[FB_FLOOR]==null?0.05:FB_FLOORS[FB_FLOOR];
-  const pass = need>0 ? (p-finBase>=need) : !(dec-decBase>=0.05);
-  return {lean:lean, pass:pass, floorP:need>0?(finBase+need):(decBase+0.05>0?1-(decBase+0.05):0)};
+  let pass, floorP;
+  if(need==='abs60'){ floorP=0.60; pass=p>=0.60; }
+  else if(need>0){ floorP=finBase+need; pass=p-finBase>=need; }
+  else { floorP=1-(decBase+0.05); pass=!(dec-decBase>=0.05); }
+  return {lean:lean, pass:pass, floorP:floorP};
 }
 function fbBoutFinish(b){
   const ck=fbCheckCells(b);
@@ -2148,6 +2164,7 @@ function finishBoard(d){
         <select class="fbfloor">
           <option value="any"${FB_FLOOR==='any'?' selected':''}>not distance</option>
           <option value="leans"${FB_FLOOR==='leans'?' selected':''}>finish leans</option>
+          <option value="high"${FB_FLOOR==='high'?' selected':''}>60% (preference)</option>
           <option value="likely"${FB_FLOOR==='likely'?' selected':''}>finish likely</option>
         </select></label>
       <label class="fbtog" title="Off: the biggest individual cells on the card. On: every qualifying bout covered, both corners before either is doubled.">
@@ -2186,13 +2203,15 @@ function finishBoard(d){
         contradict what this tool says about ${leaned.length===1?'it':'them'} elsewhere.
         ${(()=>{const MBx=(typeof BR==='object'&&BR&&BR.market_bases)||{};
           const db=(MBx.dec==null?0.505:MBx.dec), fb=1-db;
-          const line=FB_FLOOR==='any'?(1-(db+0.05)):(fb+FB_FLOORS[FB_FLOOR]);
-          const nm={any:'not distance',leans:'finish leans',likely:'finish likely'}[FB_FLOOR];
+          const line=FB_FLOOR==='high'?0.60:(FB_FLOOR==='any'?(1-(db+0.05)):(fb+FB_FLOORS[FB_FLOOR]));
+          const nm={any:'not distance',leans:'finish leans',high:'60%',likely:'finish likely'}[FB_FLOOR];
           return `The floor is set to <b style="color:var(--mute)">${nm}</b>, so a bout needs <b
-            style="color:var(--mute)">${P0(line)}%</b> finish to appear. The stops are this tool's own
-            length tiers against a league base of ${P0(fb)}%, not a number chosen for this card —
-            and no tier separates a 61% bout from a 58% one, so if both should not be here it is the
-            cell sizes deciding that, not the bout figure.`;})()} `:''}
+            style="color:var(--mute)">${P0(line)}%</b> finish to appear.${FB_FLOOR==='high'
+            ? ` That one is a <b style="color:var(--mute)">stated preference, not a tier</b> — it is
+                not derived from the league base the others use, and on a card like this it costs
+                roughly 5% of expected hits, because fewer eligible bouts means these 25 picks reach
+                further down each one.`
+            : ` The stops are this tool's own length tiers against a league base of ${P0(fb)}%.`}`;})()} `:''}
       ${picks.some(x=>x.borrowed)?`<b style="color:var(--warn)">Shape borrowed / check only:</b> a bout
         the model would not split is placed from the check's method cells alone, spread over rounds
         using the shape of this card's other bouts at the same scheduled length. A row marked
