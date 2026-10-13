@@ -495,6 +495,12 @@
   .ckbig{font-size:20px;font-weight:800;line-height:1.2}
   .cksub{font-size:10.5px;color:var(--dim)}
   .cknote{font-size:11px;color:var(--dim);margin-top:7px}
+  .fbg2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:11px;align-items:start}
+  @media(max-width:700px){.fbg2{grid-template-columns:1fr}}
+  /* The agreement mark. A thin left rule, not a ring: a gold ring around a pick
+     is read as "this is a good one" whatever the caption says, and agreement was
+     measured NOT to predict accuracy. It marks concurrence and nothing more. */
+  .fbp.fbagr{border-left:2px solid var(--mute);padding-left:5px;margin-left:-7px}
   .cktab{width:100%;border-collapse:collapse;font-size:12px;margin-top:4px}
   .cktab th{text-align:left;font-size:10px;letter-spacing:.05em;text-transform:uppercase;
     color:var(--mute);font-weight:600;padding:4px 6px;border-bottom:1px solid var(--line)}
@@ -2086,12 +2092,18 @@ function finishPicks(d){
     const ck=fbCheckCells(b);
     // Per-route scale factors. A route the model gives no weight at all cannot
     // be scaled into existence, so it stays absent rather than being invented.
-    const sc={};
+    const sc={}, agr={};
     if(ck){
       ['a_ko','a_sub','b_ko','b_sub'].forEach(route=>{
         let tot=0;
         Object.keys(rv).forEach(k=>{ if(k.indexOf(route+'_r')===0) tot+=(+rv[k]||0); });
         sc[route]=tot>1e-6?ck[route]/tot:0;
+        /* Concurrence, recorded at the ROUTE because that is the only level at
+           which the two sources hold separate opinions - the round shape is the
+           model's in both arms. Measured on 36 graded routes NOT to predict
+           whether a pick lands, so it is a navigational mark and is styled as
+           one. */
+        agr[route]=Math.abs((ck[route]||0)-tot)<=FB_AGREE;
       });
     }
     Object.keys(rv).forEach(k=>{
@@ -2105,7 +2117,8 @@ function finishPicks(d){
       const route=m[1]+'_'+m[2];
       if(ck) p=p*(sc[route]||0);
       if(!(p>0)) return;
-      out.push({bout:b.bout,who:(m[1]==='a'?b.a:b.b),fam:m[2],r:r,p:p,rounds:R,ck:!!ck,borrowed:false});
+      out.push({bout:b.bout,who:(m[1]==='a'?b.a:b.b),fam:m[2],r:r,p:p,rounds:R,ck:!!ck,
+                agr:!!(ck&&agr[route]),borrowed:false});
     });
   });
   out.sort((x,y)=>y.p-x.p || (x.bout<y.bout?-1:1) || x.r-y.r);
@@ -2176,6 +2189,250 @@ function fbAllocate(all0,d){
     i++;
   }
   return out;
+}
+/* ------------------------------------------------- the finish board, graded
+
+   THE INTEGRITY PROBLEM THIS SOLVES FIRST. The obvious implementation grades
+   "what the board picked" by running the live board over an archived card. That
+   is wrong, and wrong in a way that would not look wrong: the board's picks
+   depend on the floor, the pick count, the mode and the exclusions, so turning
+   a knob today would silently rewrite what the record says you picked in
+   September. That is the ledger-you-can-edit problem in a new costume.
+
+   So grading runs against a FROZEN configuration, declared here and not reading
+   any of the live controls: the top 25 cells, every bout eligible, no
+   exclusions, no hedging. It is one fixed question asked of every card - "are
+   the model's biggest 25 finish cells calibrated" - and the answer cannot be
+   moved by a setting. The live board is for placing bets; this is for finding
+   out whether the thing placing them is any good.
+
+   Grading needs the round split, which history.json now carries per bout.
+   Cards archived before that key existed simply do not grade, and are counted
+   as such rather than silently dropped. */
+const FB_CANON={n:25};
+function fbCanonCells(b){
+  const rv=b&&b.round_of_victory; if(!rv) return null;
+  const R=b.rounds||3, out=[];
+  Object.keys(rv).forEach(k=>{
+    const m=/^([ab])_(ko|sub)_r([1-5])$/.exec(k); if(!m) return;
+    const r=+m[3]; if(r>R) return;
+    const p=+rv[k]; if(!isFinite(p)||p<=0) return;
+    out.push({bout:b.bout,who:m[1]==='a'?b.a:b.b,fam:m[2],r:r,p:p,route:m[1]+'_'+m[2]});
+  });
+  return out;
+}
+/* The check variant rescales each route to the check's own total, exactly as
+   the live board does with the check on. Worth being precise about what this
+   compares, because the names invite a wrong reading: it is NOT "check picks
+   against model picks". The round shape is the model's in BOTH arms - the check
+   has no round opinion at all - so what is being graded is the board WITH the
+   check's route weights against the board WITHOUT them. */
+function fbCanonCellsCk(b){
+  const base=fbCanonCells(b); if(!base) return null;
+  const c=(typeof CKR==='object'&&CKR)?CKR[b.bout]:null;
+  if(!c||c.cells_ok!==true) return null;
+  const ck={a_ko:+c.a_ko||0,a_sub:+c.a_sub||0,b_ko:+c.b_ko||0,b_sub:+c.b_sub||0};
+  if(ck.a_ko+ck.a_sub+ck.b_ko+ck.b_sub<=0.001) return null;
+  const tot={};
+  base.forEach(x=>{tot[x.route]=(tot[x.route]||0)+x.p;});
+  return base.map(x=>Object.assign({},x,
+    {p:x.p*(tot[x.route]>1e-6?(ck[x.route]||0)/tot[x.route]:0)})).filter(x=>x.p>0);
+}
+function fbFamOf(meth){
+  const m=String(meth||'').toUpperCase();
+  if(m.indexOf('KO')>=0||m.indexOf('TKO')>=0) return 'ko';
+  if(m.indexOf('SUB')>=0) return 'sub';
+  return 'dec';
+}
+function fbLanded(x,g){
+  return g.winner===x.who && fbFamOf(g.method)===x.fam && +g.round===x.r;
+}
+function fbGrade(){
+  const H=(typeof HIST==='object'&&HIST&&HIST.cards)||null;
+  if(!H||!H.length) return null;
+  const cards=[], tot={n:0,exp:0,hit:0}, ckTot={n:0,exp:0,hit:0,cards:0};
+  const cov={fin:0,onPick:0,onAny:0};
+  const actR={}, expR={};
+  let ungraded=0;
+  H.forEach(c=>{
+    const bs=(c.bouts||[]).filter(b=>b.round_of_victory);
+    if(!bs.length){ ungraded++; return; }
+    let pool=[];
+    bs.forEach(b=>{ const q=fbCanonCells(b); if(q) pool=pool.concat(q); });
+    if(!pool.length) return;
+    pool.sort((x,y)=>y.p-x.p);
+    const pick=pool.slice(0,FB_CANON.n);
+    const res={}; bs.forEach(b=>{res[b.bout]=b;});
+    const hits=pick.filter(x=>fbLanded(x,res[x.bout]));
+    const exp=pick.reduce((t,x)=>t+x.p,0);
+    pick.forEach(x=>{expR[x.r]=(expR[x.r]||0)+x.p;});
+    /* Coverage: of the finishes that happened, how many did the board hold a
+       cell on. The honest companion to a hit rate - a board can be perfectly
+       calibrated and still never have the right cell, and the two failures
+       want different fixes. */
+    const pkey=new Set(pick.map(x=>x.bout+'|'+x.who+'|'+x.fam+'|'+x.r));
+    const akey=new Set(pool.map(x=>x.bout+'|'+x.who+'|'+x.fam+'|'+x.r));
+    bs.forEach(b=>{
+      const fam=fbFamOf(b.method); if(fam==='dec') return;
+      cov.fin++; actR[b.round]=(actR[b.round]||0)+1;
+      const k=b.bout+'|'+b.winner+'|'+fam+'|'+b.round;
+      if(pkey.has(k)) cov.onPick++;
+      if(akey.has(k)) cov.onAny++;
+    });
+    // the same card with the check's route weights, where reads exist
+    let ck=null;
+    let cpool=[], nCk=0;
+    bs.forEach(b=>{ const q=fbCanonCellsCk(b); if(q){ cpool=cpool.concat(q); nCk++; } });
+    if(nCk){
+      cpool.sort((x,y)=>y.p-x.p);
+      const cp=cpool.slice(0,FB_CANON.n);
+      ck={n:cp.length, nb:nCk,
+          exp:cp.reduce((t,x)=>t+x.p,0),
+          hit:cp.filter(x=>fbLanded(x,res[x.bout])).length};
+      ckTot.n+=ck.n; ckTot.exp+=ck.exp; ckTot.hit+=ck.hit; ckTot.cards++;
+    }
+    tot.n+=pick.length; tot.exp+=exp; tot.hit+=hits.length;
+    cards.push({event:c.event,date:c.date,nb:bs.length,n:pick.length,
+                exp:exp,hit:hits.length,hits:hits,ck:ck});
+  });
+  if(!cards.length) return {cards:[],ungraded:ungraded,none:true};
+  /* z on a Poisson-ish approximation. The cells within a bout are mutually
+     exclusive and across bouts near-independent, so the variance of the hit
+     count is close to the expected count itself; the 0.9 is the (1-p) factor at
+     these small p. Good to a tenth of a sd at this scale, which is far finer
+     than the sample justifies reading. */
+  return {cards:cards,tot:tot,ckTot:ckTot,cov:cov,actR:actR,expR:expR,
+          ungraded:ungraded,z:(tot.hit-tot.exp)/Math.sqrt(Math.max(tot.exp*0.9,0.5))};
+}
+/* The route-level comparison between the check and the model.
+
+   THE LEVEL MATTERS AND IT IS NOT THE CELL. With the check on, a cell is the
+   model's round shape multiplied by the check's route total: the round
+   dimension is entirely the model's and the route dimension entirely the
+   check's. Comparing them cell by cell would be comparing a number with
+   itself. The route - "how much of this fight is A winning by knockout" - is
+   the only place the two hold separate opinions. */
+function fbRouteGaps(bouts){
+  const out=[];
+  (bouts||[]).forEach(b=>{
+    const base=fbCanonCells(b); if(!base) return;
+    const c=(typeof CKR==='object'&&CKR)?CKR[b.bout]:null;
+    if(!c||c.cells_ok!==true) return;
+    const tot={};
+    base.forEach(x=>{tot[x.route]=(tot[x.route]||0)+x.p;});
+    ['a_ko','a_sub','b_ko','b_sub'].forEach(route=>{
+      out.push({bout:b.bout,route:route,fam:route.slice(2),
+                who:route[0]==='a'?b.a:b.b,
+                ck:+c[route]||0, md:tot[route]||0});
+    });
+    if(c.dec!=null&&b.m_decision!=null)
+      out.push({bout:b.bout,route:'dec',fam:'dec',who:null,ck:+c.dec,md:+b.m_decision});
+  });
+  return out;
+}
+const FB_AGREE=0.03;     // declared, not fitted: three points is "the same read"
+
+/* The panel. Deliberately in the LAST CARD zone and not on the board itself:
+   the board is the instrument you place bets with, this is the record of
+   whether it works, and mixing a retrospective into a live slate makes the
+   slate harder to read without making the record easier to find. The one thing
+   that belongs beside the picks - the accumulated calibration, in a sentence -
+   is carried up to the board's own note instead, because that is the number
+   that should change how confident you are while you are choosing. */
+function fbResults(){
+  const G=fbGrade();
+  if(!G) return '';
+  if(G.none) return `<div class="seg ckcard"><div class="seghd"><h2>Finish board, graded</h2>
+    <span class="lbl">no graded card carries a round split yet — the record starts
+      on the next pipeline run, and backfills every archived card at once</span></div></div>`;
+  const pc=x=>(100*x).toFixed(0)+'%';
+  const p1=x=>(100*x).toFixed(1)+'%';
+  const T=G.tot, rate=T.n?T.hit/T.n:0, pred=T.n?T.exp/T.n:0;
+  const rows=G.cards.map(c=>`<tr><td>${esc(c.event)}<div class="lbl">${
+      c.date?esc(dayET(c.date)):''} · ${c.nb} bouts with a split</div></td>
+    <td class="mono">${c.n}</td><td class="mono">${c.exp.toFixed(2)}</td>
+    <td class="mono"><b style="color:${c.hit>=1?'var(--gold)':'var(--dim)'}">${c.hit}</b></td>
+    <td class="lbl">${c.hits.length?c.hits.map(h=>`${esc(surname(h.who))} ${
+      h.fam==='ko'?'KO':'SUB'} r${h.r} <span style="color:var(--dim)">${pc(h.p)}</span>`).join('<br>')
+      :'<span class="ckna">—</span>'}</td>
+    <td class="mono">${c.ck?c.ck.hit+' / '+c.ck.exp.toFixed(2):'<span class="ckna">—</span>'}</td></tr>`).join('');
+  /* Round calibration, which is the diagnostic the early data actually points
+     at. Shown as counts and not a curve: at these numbers a curve would draw a
+     shape out of single-digit tallies. */
+  const maxR=Math.max(5,...Object.keys(G.actR).map(Number),...Object.keys(G.expR).map(Number));
+  const rr=[...Array(maxR)].map((_,i)=>i+1).filter(r=>(G.actR[r]||0)||(G.expR[r]||0));
+  const expTot=rr.reduce((t,r)=>t+(G.expR[r]||0),0)||1;
+  const actTot=rr.reduce((t,r)=>t+(G.actR[r]||0),0)||1;
+  /* SHARES lead and the raw numbers are parenthetical, because the two columns
+     are not the same kind of count and side by side they invite a comparison
+     that is simply wrong: one is every finish that happened, the other is the
+     expected hits inside 25 selected cells. Only their SHAPES are comparable. */
+  const rtab=rr.map(r=>{
+    const a=(G.actR[r]||0)/actTot, e=(G.expR[r]||0)/expTot, d=a-e;
+    return `<tr><td>round ${r}</td>
+      <td class="mono">${pc(a)} <span style="color:var(--dim)">(${G.actR[r]||0})</span></td>
+      <td class="mono">${pc(e)} <span style="color:var(--dim)">(${(G.expR[r]||0).toFixed(2)})</span></td>
+      <td class="mono" style="color:${Math.abs(d)>=0.10?'var(--gold)':'var(--dim)'}">${
+        (d>=0?'+':'')}${(100*d).toFixed(0)}</td></tr>`;}).join('');
+  /* The check-against-model route offset. The single most load-bearing number
+     on this panel once there are enough reads, because it is a SYSTEMATIC
+     difference rather than a scatter: the two sources do not disagree at
+     random about how often fights end. */
+  const gaps=fbRouteGaps((HIST&&HIST.cards||[]).reduce((a,c)=>a.concat(c.bouts||[]),[]));
+  const dec=gaps.filter(g=>g.fam==='dec');
+  const mean=a=>a.length?a.reduce((t,x)=>t+x,0)/a.length:0;
+  let off='';
+  if(dec.length>=4){
+    const d=dec.map(g=>g.ck-g.md), lower=d.filter(x=>x<0).length;
+    const byFam=f=>{const q=gaps.filter(g=>g.fam===f).map(g=>g.ck-g.md);
+      return q.length?`${(100*mean(q)>=0?'+':'')}${(100*mean(q)).toFixed(1)} pts over ${q.length} routes`:'—';};
+    off=`<div class="note" style="margin-top:9px">
+      <b style="color:var(--gold)">The two sources disagree systematically, not randomly.</b>
+      On ${dec.length} bouts with a check read, the check's decision share sits
+      <b style="color:var(--mute)">${(100*mean(d)).toFixed(1)} points</b> from the model's, lower in
+      <b style="color:var(--mute)">${lower} of ${dec.length}</b> — that is, the check thinks fights
+      finish more often than the model does. It flows into KO/TKO (${byFam('ko')}) more than
+      submissions (${byFam('sub')}). One of them is wrong about how often fights end, and the
+      graded record above is what will say which. Selection is the caveat: these are the bouts
+      you chose to paste, not a random sample.</div>`;
+  }
+  const z=G.z;
+  return `<div class="seg ckcard"><div class="seghd"><h2>Finish board, graded</h2>
+    <span class="lbl">the top ${FB_CANON.n} cells on every graded card — a frozen question,
+      not the live board's settings, so no control on this page can move this record</span></div>
+    <table class="cktab"><thead><tr><th>card</th><th>cells</th><th>expected</th>
+      <th>landed</th><th>which</th>
+      <th title="the same 25 with the check's route weights, where reads exist">check on<br>hit / exp</th></tr></thead>
+      <tbody>${rows}</tbody></table>
+    <div class="note" style="margin-top:9px">
+      <b style="color:var(--gold)">${T.hit} landed against ${T.exp.toFixed(2)} expected</b>
+      on ${T.n} cells across ${G.cards.length} card${G.cards.length===1?'':'s'} —
+      ${p1(rate)} actual against ${p1(pred)} predicted, <b style="color:var(--mute)">${
+        (z>=0?'+':'')}${z.toFixed(1)} sd</b>.
+      ${Math.abs(z)<2?`<b style="color:var(--warn)">That is not a result yet.</b> At roughly two
+        expected hits a card, it takes about <b style="color:var(--mute)">11 cards</b> to confirm a
+        rate this far off and some eighty to catch a 20% miscalibration. Read it as accumulating,
+        not as a verdict.`:`That is outside two standard deviations — large enough to be worth
+        taking seriously, and worth re-reading before acting on.`}
+      ${G.ungraded?` ${G.ungraded} card${G.ungraded===1?'':'s'} carry no round split and cannot be graded.`:''}
+    </div>
+    <div class="fbg2">
+      <div><div class="lbl" style="margin-bottom:4px">Did it have a cell on the finishes at all?</div>
+        <div class="note" style="margin:0">Of <b style="color:var(--mute)">${G.cov.fin}</b> finishes on
+          graded cards, the 25 picks held the exact cell for <b style="color:var(--gold)">${G.cov.onPick}</b>
+          and the full eligible set held it for <b style="color:var(--mute)">${G.cov.onAny}</b>.
+          The gap between those two is the cost of the 25-pick budget, not a modelling miss —
+          they are different failures and they want different fixes.</div></div>
+      <div><div class="lbl" style="margin-bottom:4px">Which round the finishes came in</div>
+        <table class="cktab" style="margin-top:0"><thead><tr><th>round</th>
+          <th title="share of all finishes on graded cards that came in this round">finishes<br>came</th>
+          <th title="share of the board's expected hits that sat in this round">board<br>weighted</th>
+          <th>gap</th></tr></thead><tbody>${rtab}</tbody></table>
+        <div class="note" style="margin-top:5px">Only the SHARES compare — the left column is every
+          finish that happened, the right is expected hits inside 25 selected cells, so the raw
+          numbers in brackets are different kinds of thing. A positive gap means finishes arrived
+          earlier than the board placed its weight.</div></div>
+    </div>${off}</div>`;
 }
 function finishBoard(d){
   const all=finishPicks(d);
@@ -2276,8 +2533,9 @@ function finishBoard(d){
       const here=mine.filter(x=>x.r===r);
       const could=every.filter(x=>x.r===r);
       const roff=FB_ROFF.has(r), xoff=FB_XOFF.has(fbCellKey(b.bout,r));
-      const lab=a=>a.map(x=>`<span class="fbp ${x.fam}"><i>${
-        x.fam==='ko'?'KO/TKO':'SUB'}</i> <u>${esc(surname(x.who))} ${P0(x.p)}%</u></span>`).join('');
+      const lab=a=>a.map(x=>`<span class="fbp ${x.fam}${x.agr?' fbagr':''}"${
+        x.agr?' title="check and model put the same weight on this route, within 3 points — concurrence, not a confidence tier"':''
+        }><i>${x.fam==='ko'?'KO/TKO':'SUB'}</i> <u>${esc(surname(x.who))} ${P0(x.p)}%</u></span>`).join('');
       /* A cell switched off keeps its place and its numbers, struck through.
          The round switch wins over the per-cell one and says so, because a cell
          that looks individually clickable while a column switch is holding it
@@ -2366,6 +2624,23 @@ function finishBoard(d){
           Object.keys(by).length}</b> bouts, finish-only — no decision, lowest pick ${P0(cut)}%.`
       : `The card's ${FB_N} likeliest finishes${FB_CHECK?'':' by the model\'s own round-by-round split'},
          finish-only — no decision, and every cell above ${P0(cut)}%.`}
+      ${(()=>{
+        /* The one line from the graded record that belongs beside live picks:
+           how the cells have actually landed. It is here and the rest is in the
+           Last card zone, because this number should change your confidence
+           while you are choosing and the per-card table should not be in the
+           way while you do it. */
+        const G=(typeof fbGrade==='function')?fbGrade():null;
+        if(!G||G.none||!G.tot||!G.tot.n) return '';
+        const nAgr=picks.filter(x=>x.agr).length;
+        return `<b style="color:var(--gold)">The record so far:</b> across ${G.cards.length} graded
+          card${G.cards.length===1?'':'s'} these cells have landed
+          <b style="color:var(--mute)">${G.tot.hit} times against ${G.tot.exp.toFixed(1)} expected</b>
+          — ${Math.abs(G.z)<2?'inside noise at this sample, so it neither confirms nor refutes the numbers below'
+            :'outside two standard deviations, which is worth a look'}. Graded in full under Last card.
+          ${nAgr?`<b style="color:var(--mute)">${nAgr}</b> pick${nAgr===1?'':'s'} carry a left rule:
+            the check and the model put the same weight on that route. That is concurrence only —
+            agreement was measured not to predict whether a pick lands. `:''}`;})()}
       <b style="color:var(--mute)">Ranked by probability, not by value:</b> nothing on the venues this
       tool reads prices a method-and-round contract, so there is no price to beat and these are not
       "+EV" picks. A fight ends once, so within a row the picks are alternatives and the combined
@@ -2544,7 +2819,7 @@ function render(){
     zone('z-res','z-results', lc?`Last card — ${esc(lc.event)}`:'Last card',
       (lc&&lc.date?`${dayET(lc.date)} · `:'')+
       'graded against what happened · click any fight',
-      lastCard()+(lc?ckCardPanel(lc.event):''))+
+      lastCard()+(lc?ckCardPanel(lc.event):'')+fbResults())+
     zone('z-hist','z-history','What usually happens','history of every fight since 2012, not predictions',
       /* Collapsed by default. This zone is context, not a read, and at full
          height it pushed the card's own numbers off the screen. The division
