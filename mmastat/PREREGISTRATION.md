@@ -6275,3 +6275,145 @@ record easier to find.
 The single exception is carried up: one sentence of accumulated calibration sits
 in the board's own note, because that number should change how confident you are
 while you are choosing. The per-card table should not be in the way while you do.
+
+# Addendum 55: the check was not beating anything — two denominator bugs (2026-10-12)
+
+Three questions from one message. The first two were display faults. The third
+was a reading of the page that the page had invited, and it is wrong.
+
+## 1. The card totals were model-only, and the check had no total at all
+
+`card_tally` scores the model's card-level claims against the base rate. The
+check appeared on the fight tiles and nowhere else, so any impression of how it
+was doing came from reading twenty individual rows by eye.
+
+That is the subset error this project already warns about in writing, committed
+by the page's LAYOUT rather than by its arithmetic. A read only exists on bouts
+interesting enough to paste; totalling them by eye against the model's whole-card
+record flatters the check by construction.
+
+**Fixed**: a matched tally, restricted to the bouts carrying a read, with model,
+check and market all scored on exactly those bouts, and post-hoc reads held out
+on their own line.
+
+## 2. The check's pick row was restating its own ends row
+
+The model's pick row prints a per-corner contract — "Blanchfield by DEC 52%".
+The check's printed the COMBINED decision — "by DEC 56%". Two different
+quantities on one row labelled `pick`: 52% is one fighter winning on the cards,
+56% is anybody winning on the cards. Side by side that invites reading 56 > 52
+as more confidence about the same claim.
+
+Worse: the check's combined decision IS its distance number, so the pick row was
+restating the ends row directly above it and carrying **no information at all**.
+
+**Fixed**: the decision cell renders by corner when one corner leads by the same
+6 points used for "no clear favorite" elsewhere, with THAT corner's probability,
+and as "split DEC" at the combined figure when neither does. Verified: a bout at
+pA 0.80 with decision-heavy records now reads "Alvarez by DEC 58.6%" rather than
+"by DEC 72.8%".
+
+The GRADED cell set is untouched — five cells, decision combined, matching the
+model's `m_decision` — and so is `norm()`. A display fix is not allowed to move
+the record.
+
+## 3. "The check beats the model and the market" — it does not
+
+### The second denominator bug, which produced the impression
+
+`pastGrid`'s "claims called" row counted each side over the claims IT answered.
+On a bout where the model publishes no method report, the check was scored on
+four claims and the model on two, and **the two rates were then ranked against
+each other**. A side that answers more questions is not a side that is more often
+right. The row was reading the first as the second.
+
+### Matched, and split by whether the read could have seen the result
+
+| | claims | check | model |
+|---|---|---|---|
+| all graded reads | 56 | **32** | 23 |
+| **entered before the card** | 22 | **11** | 9 |
+| entered after the card | 34 | **21** | 14 |
+
+**The entire advantage is in the post-hoc reads.** On reads entered before the
+fights the gap is two claims out of twenty-two, which is nothing. On finish type
+specifically — the field a UFC.com page contaminates most directly, since the
+Win-by-Method counts then contain the fight — live reads are **2/6 against 2/6,
+exactly level**, while post-hoc reads are 6/9 against 3/9.
+
+That is the leak behaving precisely as the as-of guard predicted in writing:
+"it will look sharpest exactly where the leak is largest — method, and the
+winner's own rates." This is confirmation of the leak hypothesis, not evidence
+about the check's skill.
+
+### On the winner, where a market price exists to compare against
+
+| | n | right | Brier | log loss | mean p on winner |
+|---|---|---|---|---|---|
+| model | 20 | 11 | **0.2623** | **0.7271** | .513 |
+| check | 20 | 11 | 0.2775 | 0.7730 | .512 |
+
+Level on winners called, slightly WORSE on both proper scoring rules. On the 12
+bouts carrying a price: model 8/12 (Brier 0.2257), check 7/12 (0.2566), **market
+10/12 (0.1796)**. The market beats both comfortably and it is not close.
+
+**So: no, there is nothing here to work with yet.** The check's apparent edge was
+two denominator faults and a leak. Both faults are fixed; the leak was already
+being flagged per bout and is now separated in the totals as well.
+
+What remains true and unaffected is addendum 54's finding: the check and the
+model disagree **systematically** about how often fights end, 15 of 15 in one
+direction. That is still worth settling, and it is a different claim from "the
+check is more accurate" — which, on matched claims and live reads, it is not.
+
+## Addendum 54, amendment 1 (2026-10-12): the model arm was already there, and it was unmatched
+
+Asked: should the graded panel show the model's hit/exp beside the check's?
+
+**It already did** — the `expected` and `landed` columns ARE the model arm. The
+asymmetry was formatting: the model got two labelled columns, the check one
+compressed cell, which made the comparison hard to make by eye and the question
+inevitable.
+
+### The latent bug the question exposed
+
+The check arm can only draw cells from bouts carrying a read; the model arm drew
+from the whole card. **Two different universes in adjacent columns.** On the
+cards in hand they coincide (6 of 6, 9 of 9, and 0 of 8 where no read exists), so
+nothing was visibly wrong — but paste five bouts of ten and the check arm draws
+from half the pool while the model draws from all of it, and the column reads as
+a verdict on the check.
+
+Same subset error as the card totals and the claims-called row. **Third time in
+one session**, so it is written down as a rule: *any time two sides are placed in
+adjacent columns, the first question is whether they were asked the same question
+about the same bouts.*
+
+**Fixed**: the model is re-run over exactly the bouts carrying a read, and both
+arms are shown side by side with the read count beside them.
+
+### What the matched comparison says
+
+Over 15 bouts with a read across 2 cards:
+
+| arm | expected | landed |
+|---|---|---|
+| model, same bouts | 3.87 | 8 |
+| check's route weights | 5.30 | 8 |
+
+**Identical hits; both under-called it; the check's claim was closer.** This is
+the first evidence bearing on addendum 54's 15-of-15 finding — finishes arrived
+more often than the model expected, which is the direction the check reads them.
+Fifty cells settles nothing, but the direction is now on the record.
+
+### A wording error caught before shipping
+
+The first draft of that generated sentence read *"the check is more confident and
+no more often right, which is a calibration difference, not an accuracy one."*
+On identical hits that sounds like the extra confidence was unearned — and it is
+**the opposite of what the figures beside it said**, since both arms under-called
+the count and the higher claim was therefore the nearer one.
+
+Recorded because it is the worst error this panel can make: wrong, in a voice
+that sounds measured, directly above the numbers that contradict it. The line now
+computes which arm was closer rather than asserting a verdict.
