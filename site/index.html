@@ -1963,6 +1963,56 @@ function cardShapeStrip(){
             Separately, card-to-card variance is ${C.overdispersion!=null?`<b style="color:var(--mute)">${
               C.overdispersion}×</b>`:''} what independent bouts would give, so there is no
             "finish night" clustering on top of this.</div>`;})()}
+      ${(()=>{
+        /* DOES THE FIGHT FOLLOW ONE MAN RATHER THAN THE PAIR'S AVERAGE?
+
+           The tool averages the two career decision shares. That is a modelling
+           CHOICE and the competing hypothesis is commonly asserted: that a
+           finisher drags a fight toward a finish harder than averaging implies,
+           or that a grinder can impose the cards on anyone. Three predictors on
+           the same bouts settle it - the pair's average, the more finish-prone
+           man's share alone, and the more decision-prone man's alone. Whichever
+           separates the buckets furthest is the one the fight follows. */
+        const S=(BR||{}).style;
+        if(!S||!S.avg) return `<div class="note" style="margin-top:12px">
+          <b style="color:var(--mute)">Does the fight follow one fighter rather than the pair?</b>
+          Not in this build's base rates — the test appears once the pipeline has run with the new
+          <span class="mono">baserates.py</span>. It compares three predictors of whether a fight
+          finishes: the pair's average career decision share (what the tool uses now), the more
+          finish-prone fighter's alone, and the more decision-prone fighter's alone.</div>`;
+        const row=(k,lab)=>{const q=S[k]; return q?`<tr><td>${lab}</td>
+          <td class="mono">${q.r.toFixed(3)}</td>
+          <td class="mono"${Math.abs(q.spread)>=Math.abs((S.avg||{}).spread||0)+0.02?' style="color:var(--gold)"':''}>${
+            (100*q.spread).toFixed(1)} pts</td></tr>`:'';};
+        const best=['avg','min','max'].filter(k=>S[k])
+          .sort((a,b)=>Math.abs(S[b].spread)-Math.abs(S[a].spread))[0];
+        const nm={avg:'the pair average',min:'the finisher alone',max:'the grinder alone'}[best];
+        const beats=best!=='avg'&&Math.abs(S[best].spread)>=Math.abs(S.avg.spread)+0.02;
+        const W=S.who;
+        return `<div class="lbl" style="margin-top:12px">Does the fight follow one fighter, or the pair?
+            · ${S.n.toLocaleString()} bouts</div>
+          <div style="overflow-x:auto"><table class="dtab" style="margin-top:5px">
+            <thead><tr><th>predictor of finishing</th><th>r</th><th>spread, top to bottom bucket</th>
+            </tr></thead><tbody>
+            ${row('avg','the pair\'s average decision share')}
+            ${row('min','the more finish-prone fighter alone')}
+            ${row('max','the more decision-prone fighter alone')}
+          </tbody></table></div>
+          <div class="note" style="margin-top:6px">${beats
+            ? `<b style="color:var(--gold)">${nm}</b> separates the buckets further than averaging
+               does, which is evidence the fight follows one man rather than the pair. Worth acting
+               on only after it is re-read on a later build — a single table is where this kind of
+               claim usually goes wrong.`
+            : `<b style="color:var(--mute)">Averaging holds.</b> Neither fighter alone separates the
+               buckets further than the pair's mean, so there is no "he imposes his style" effect to
+               carry — the tool's existing treatment is right.`}
+          ${W?` Among the ${W.finishes.toLocaleString()} bouts that finished,
+            <b style="color:var(--mute)">${(100*W.to_finisher).toFixed(1)}%</b> went to the more
+            finish-prone fighter — against <b style="color:var(--mute)">${(100*W.wins_overall).toFixed(1)}%</b>
+            of all bouts he simply won. The gap between those two is the part that is about METHOD
+            rather than about being the better fighter${W.wide_to_finisher!=null
+              ? `; where the two differ by 20 points or more it is ${(100*W.wide_to_finisher).toFixed(1)}%`:''}.`:''}
+          </div>`;})()}
       <div class="note" style="margin-top:9px">A typical card is
         ${C.bouts_median} bouts, of which <b>${C.r1_mean}</b> end in round one and
         <b>${C.fin_mean}</b> end inside the distance. Eight cards in ten land between
@@ -6032,11 +6082,38 @@ function abGrid(b){
   const cPick=L&&L.top?{t:`${sbNameShort(L.top)} ${P0(sbPickP(L.top))}%`,
                         p:sbPickP(L.top),k:norm(L.top.name||'',L.top.how)}:null;
   const differ = !!(mPick&&cPick&&mPick.k!==cPick.k);
+  /* WHY A 55%-FINISH FIGHT CAN PICK A DECISION, said where it is read.
+
+     This was already explained - in the method tab, next to the gold row - and
+     the explanation was in the wrong place. Reported as "55% finish but the pick
+     says Jourdain by DEC 28%, which reads as wrong". It is not wrong: the four
+     finish routes split the finish probability between them while a decision
+     splits only two ways, so on a fight barely over the line the biggest single
+     CONTRACT is routinely a decision. Reconstructed at the reported shape: 51%
+     finish, biggest contract "Jourdain by DEC 33%", the largest finish route
+     17%.
+
+     The two rows answer different questions - ENDS is a two-way split of the
+     whole fight, PICK is the biggest of five contracts - and stacked without a
+     word between them they read as a contradiction. So the row says so, and
+     only when it actually happens. */
+  const famOf=t=>!t?null:(/\bDEC\b/.test(t)?'dec':'fin');
+  const endsFin=(()=>{ const q=L?L.kind:null; return q?(q==='finish'?'fin':'dec'):null; })();
+  const clash=(()=>{
+    const f=famOf(cPick?cPick.t:null)||famOf(mPick?mPick.t:null);
+    return (f&&endsFin&&f!==endsFin);
+  })();
   rows.push(['pick',
     cell(mPick?mPick.t:`<span class="abnone">${b.thin?'not tested this thin':'no clear pick'}</span>`,
          mPick&&cPick&&mPick.p>cPick.p+0.01, mPick&&cPick&&mPick.p<cPick.p-0.01),
     cell(cPick?cPick.t:none, mPick&&cPick&&cPick.p>mPick.p+0.01, mPick&&cPick&&cPick.p<mPick.p-0.01),
     differ]);
+  if(clash) rows.push(['', `<div class="abc" style="grid-column:2/4"><span class="lbl"
+      style="display:block;line-height:1.45;text-align:left;color:var(--dim);text-transform:none;letter-spacing:0;font-size:10.5px">Not a contradiction with
+      the row above: <b style="color:var(--mute)">ends</b> splits the fight two ways, <b
+      style="color:var(--mute)">pick</b> is the biggest of five contracts. Four finish routes share
+      the finish probability between them; a decision is shared by only two, so the largest single
+      bet on a fight that usually ends early is often still a decision.</span></div>`, '', false]);
   const anyDiff=rows.some(r=>r[3]);
   return `<div class="abgrid${anyDiff?' hasdiff':''}" title="the model and the UFC.com check, answering the same questions side by side">
     <div class="abh"></div><div class="abh">model</div><div class="abh${pc==null?' off':''}">ufc.com check</div>
