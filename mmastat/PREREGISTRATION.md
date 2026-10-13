@@ -6417,3 +6417,60 @@ the count and the higher claim was therefore the nearer one.
 Recorded because it is the worst error this panel can make: wrong, in a voice
 that sounds measured, directly above the numbers that contradict it. The line now
 computes which arm was closer rather than asserting a verdict.
+
+# Addendum 56: the check had no card-level finish count (2026-10-13)
+
+Asked: is the check's expected finish amount stated anywhere on the upcoming
+card, so it can be read against the graded board?
+
+**The model's was; the check's was not.** The card-shape panel has projected
+"first-round finishes" and "finishes inside the distance" since it was built,
+and `card_tally` grades both afterwards. The check makes exactly the same claim
+— every read carries a `dec`, so `sum(1 - dec)` is its expected finish count —
+and it was never stated, so there was nothing to grade and nothing to compare.
+
+**Added**, matched to the bouts carrying both a check read and a model decision
+share. Third matched-denominator fix in two sessions, and this one was caught
+before writing the code rather than after: the unmatched version summed the
+check over ten bouts and the model over the six it had split, and the larger
+number would have read as the bolder call when it was only the longer sum.
+
+## The comparison asked for cannot be made yet, and the panel says so
+
+"What happened when a similar amount was projected" needs a spread of
+projections to bucket on. The three graded cards projected **2.7, 4.4 and 4.2**.
+There is no "similar amount" to match against — any bucketing would be one card
+per bucket wearing the clothes of a distribution.
+
+What is available is the running total, matched the same way, and the panel
+states it as a direction rather than a finding.
+
+## What the running total says — third independent confirmation
+
+Over 15 graded bouts carrying both reads:
+
+| | finishes called | actual |
+|---|---|---|
+| model | 7.08 | **11** |
+| check | 9.37 | **11** |
+
+**Both under-called it; the model by 3.92 against the check's 1.63.**
+
+This is now the third independent measurement pointing the same way:
+
+1. Addendum 54: the check's decision share sits 15.3 points below the model's,
+   lower in **15 of 15** bouts.
+2. Addendum 54 amendment 1: on the graded board, matched, both arms landed 8 —
+   the model having claimed 3.87 and the check 5.30, so the check's claim was
+   the nearer one.
+3. Here: card-level finish counts, matched — the model under-calls finishes by
+   more than twice what the check does.
+
+Three different slices of the same ~15 bouts, so these are **not independent
+samples** and must not be treated as compounding evidence. What they do
+establish is that the discrepancy is consistent across every level it can be
+measured at — route, cell and card — rather than an artifact of one of them.
+
+Registered: at ten graded cards, the question "is the model's finish rate too
+low" gets re-read against all three. If it holds, the correction belongs in the
+survival model's finish scaling, not in the check.
