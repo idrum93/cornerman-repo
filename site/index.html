@@ -264,6 +264,11 @@
   .fbg-c.fbxc:hover{opacity:.78}
   .fbg-c.fbxc.fbxr{cursor:not-allowed;opacity:.34}
   .fbg-c.fbxc.fbxr:hover{opacity:.34}
+  .fbp i.fbrt{cursor:pointer;border-bottom:1px dotted transparent}
+  .fbp i.fbrt:hover{border-bottom-color:currentColor}
+  .fbp i.fbrt:focus-visible{outline:1px solid var(--gold);outline-offset:1px}
+  .fbp.fbtoff{opacity:.42;text-decoration:line-through}
+  .fbp.fbtoff i.fbrt{text-decoration:line-through;color:var(--warn)}
   .fbg-h.fbrh{cursor:pointer;user-select:none}
   .fbg-h.fbrh:hover{color:var(--bone)}
   .fbg-h.fbrhoff{color:var(--warn);text-decoration:line-through}
@@ -2081,6 +2086,35 @@ function fbXSave(){
 }
 function fbRSave(){ try{ localStorage.setItem(FB_RKEY, JSON.stringify([...FB_ROFF])); }catch(e){} }
 function fbCellOff(bout,r){ return FB_ROFF.has(+r)||FB_XOFF.has(fbCellKey(bout,+r)); }
+/* A FOURTH axis: the route. "Buckley by submission", off in every round at once.
+
+   This was deferred in amendment 15 as a per-method switch INSIDE a cell, and
+   the unit asked for here is the better one. The route is what the model and the
+   check both hold opinions in, it is what the concurrence mark is computed on,
+   and it is the way the thought actually arrives - "I do not believe he
+   submits anyone" is a statement about a man and a method, not about round
+   three. Switching it off cell by cell would take five clicks to say one thing.
+
+   Four axes is a lot, and the risk named in amendment 15 is real: a cell can now
+   be held off by its bout, its round, itself or its route, and a reader who
+   cannot tell which has a form rather than an instrument. Mitigated two ways -
+   every switched-off cell names its reason in the tooltip, and the status line
+   enumerates all four with one control that clears them together. */
+const FB_TKEY='cornerman.finishboard.routes.v1';
+const fbRouteKey=(bout,who,fam)=>bout+'\u0000'+who+'\u0000'+fam;
+let FB_TOFF=(function(){ try{ const v=JSON.parse(localStorage.getItem(FB_TKEY)||'[]');
+  return new Set(Array.isArray(v)?v:[]); }catch(e){ return new Set(); } })();
+function fbTSave(){
+  try{
+    const live=new Set(((DATA&&DATA.bouts)||[]).map(b=>b.bout));
+    if(live.size) [...FB_TOFF].forEach(k=>{
+      if(!live.has(String(k).split('\u0000')[0])) FB_TOFF.delete(k); });
+    localStorage.setItem(FB_TKEY, JSON.stringify([...FB_TOFF]));
+  }catch(e){}
+}
+function fbRouteOff(x){ return FB_TOFF.has(fbRouteKey(x.bout,x.who,x.fam)); }
+/* One predicate for all four, so no consumer can check three of them. */
+function fbPickOff(x){ return fbCellOff(x.bout,x.r)||fbRouteOff(x); }
 const FB_FKEY='cornerman.finishboard.floor.v1';
 /* Three of these are the tool's own length tiers, expressed as points above
    the league finish base. `high` is NOT a tier - it is an absolute 60%, and it
@@ -2339,7 +2373,7 @@ function fbAllocate(all0,d){
      is likewise computed from the full set elsewhere: switching a round off is
      a decision about where you will bet, not a claim that the fight became
      less likely to end. */
-  const all=all0.filter(x=>!fbCellOff(x.bout,x.r));
+  const all=all0.filter(x=>!fbPickOff(x));
   if(FB_MODE!=='spread') return all.slice(0,FB_N);
   const by={};
   all.forEach(x=>{(by[x.bout]=by[x.bout]||[]).push(x);});
@@ -2868,9 +2902,21 @@ function finishBoard(d){
       const here=mine.filter(x=>x.r===r);
       const could=every.filter(x=>x.r===r);
       const roff=FB_ROFF.has(r), xoff=FB_XOFF.has(fbCellKey(b.bout,r));
-      const lab=a=>a.map(x=>`<span class="fbp ${x.fam}${x.agr?' fbagr':''}"${
-        x.agr?' title="check and model put the same weight on this route, within 3 points — concurrence, not a confidence tier"':''
-        }><i>${x.fam==='ko'?'KO/TKO':'SUB'}</i> <u>${esc(surname(x.who))} ${P0(x.p)}%</u></span>`).join('');
+      /* The method word is the switch for the route. No new furniture: the
+         affordance is already on every cell, and the thing you click is exactly
+         the thing it turns off - "SUB" next to a man's name kills his
+         submissions in every round of this bout. The rest of the cell keeps the
+         single-cell toggle it already had. */
+      const lab=a=>a.map(x=>{
+        const toff=fbRouteOff(x);
+        const why=toff?'This route is switched off for the whole bout. Click the method to bet it again.'
+          :'Click the method to switch this fighter\'s '+(x.fam==='ko'?'knockouts':'submissions')+
+           ' off in every round of this bout.';
+        return `<span class="fbp ${x.fam}${x.agr?' fbagr':''}${toff?' fbtoff':''}"${
+          x.agr&&!toff?' title="check and model put the same weight on this route, within 3 points — concurrence, not a confidence tier"':''
+          }><i class="fbrt" role="button" tabindex="0" data-rb="${esc(x.bout)}" data-rw="${esc(x.who)}"
+            data-rf="${x.fam}" title="${esc(why)}">${x.fam==='ko'?'KO/TKO':'SUB'}</i> <u>${
+            esc(surname(x.who))} ${P0(x.p)}%</u></span>`;}).join('');
       /* A cell switched off keeps its place and its numbers, struck through.
          The round switch wins over the per-cell one and says so, because a cell
          that looks individually clickable while a column switch is holding it
@@ -2879,6 +2925,15 @@ function finishBoard(d){
         return `<div class="fbg-c fbxc${roff?' fbxr':''}" ${roff?'':`data-cell="${esc(b.bout)}" data-r="${r}"`}
           role="button" tabindex="0" title="${roff?'Held off by the round '+r+' switch in the header.'
             :'Switched off. Click to put it back.'}">${lab(could)}</div>`;
+      /* A cell whose routes are individually off still has to draw, or the
+         struck route vanishes and there is nothing left to click to restore it.
+         The cell itself stays live - its other route may still be running. */
+      if(could.length&&could.some(x=>fbRouteOff(x))){
+        const shown=could.filter(x=>fbRouteOff(x)||here.some(h=>h.who===x.who&&h.fam===x.fam&&h.r===x.r));
+        return `<div class="fbg-c${here.length?' fbhot':''}"${here.length?` data-cell="${esc(b.bout)}" data-r="${r}"`:''}
+          ${here.length?'role="button" tabindex="0" title="Click to not bet this round in this bout."':''}
+          >${lab(shown)}</div>`;
+      }
       if(!here.length) return `<div class="fbg-c"><span class="fbnone">—</span></div>`;
       return `<div class="fbg-c fbhot" data-cell="${esc(b.bout)}" data-r="${r}" role="button" tabindex="0"
         title="Click to not bet this round in this bout. The picks go to the next best cells elsewhere."
@@ -2940,18 +2995,22 @@ function finishBoard(d){
          off is exactly the failure this line exists to prevent. The shortfall
          warning sits here too, because "19 picks" in the header does not say
          WHY it is not 25. */
-      const nR=FB_ROFF.size, nX=FB_XOFF.size;
+      const nR=FB_ROFF.size, nX=FB_XOFF.size, nT=FB_TOFF.size;
       const short=picks.length<FB_N;
-      if(!nR&&!nX&&!short) return '';
+      if(!nR&&!nX&&!nT&&!short) return '';
       const rl=[...FB_ROFF].sort((a,b)=>a-b).join(', ');
       return `<div class="note" style="padding:7px 11px 0">
         ${nR?`<b style="color:var(--warn)">Round${nR===1?'':'s'} ${rl} switched off</b> across the whole
             card — those cells are struck through and their picks went to the next best elsewhere. `:''}
         ${nX?`<b style="color:var(--warn)">${nX} cell${nX===1?'':'s'} switched off</b> individually. `:''}
+        ${nT?`<b style="color:var(--warn)">${nT} route${nT===1?'':'s'} switched off</b> — ${
+          [...FB_TOFF].slice(0,4).map(k=>{const q=String(k).split('\u0000');
+            return esc(surname(q[1]))+' by '+(q[2]==='ko'?'KO':'SUB');}).join(', ')}${
+          nT>4?` and ${nT-4} more`:''}, in every round of their bout. `:''}
         ${short?`<b style="color:var(--warn)">Only ${picks.length} of ${FB_N} picks placed</b> — the
             exclusions and the floor between them leave nothing else eligible, so the rest are not
             being spent rather than being spent on worse cells. `:''}
-        ${(nR||nX)?`<span class="fbreset" role="button" tabindex="0" style="color:var(--gold);
+        ${(nR||nX||nT)?`<span class="fbreset" role="button" tabindex="0" style="color:var(--gold);
             cursor:pointer;text-decoration:underline">reinstate everything</span>`:''}
       </div>`;})()}
     <div class="note" style="padding:7px 11px 9px">${FB_MODE==='spread'
@@ -3836,6 +3895,14 @@ document.addEventListener('change',function(e){
    every change and any listener bound to a cell would die with it. */
 function fbToggleFrom(t){
   if(!t||!t.closest) return false;
+  /* FIRST, before the cell, because the method word sits inside the cell and
+     the inner control has to win or it can never be reached. */
+  const rt=t.closest('.fbrt');
+  if(rt){
+    const k=fbRouteKey(rt.getAttribute('data-rb'), rt.getAttribute('data-rw'), rt.getAttribute('data-rf'));
+    if(FB_TOFF.has(k)) FB_TOFF.delete(k); else FB_TOFF.add(k);
+    fbTSave(); return true;
+  }
   const rh=t.closest('.fbrh');
   if(rh){
     const r=+rh.getAttribute('data-round');
@@ -3851,7 +3918,8 @@ function fbToggleFrom(t){
   }
   // "reinstate everything" - one control for both axes, because remembering
   // which of the two is holding a cell off is not the operator's job
-  if(t.closest('.fbreset')){ FB_XOFF.clear(); FB_ROFF.clear(); fbXSave(); fbRSave(); return true; }
+  if(t.closest('.fbreset')){ FB_XOFF.clear(); FB_ROFF.clear(); FB_TOFF.clear();
+    fbXSave(); fbRSave(); fbTSave(); return true; }
   return false;
 }
 document.addEventListener('click',function(e){
@@ -3860,7 +3928,7 @@ document.addEventListener('click',function(e){
 document.addEventListener('keydown',function(e){
   if(e.key!=='Enter'&&e.key!==' ') return;
   const t=e.target;
-  if(!t||!t.closest||!t.closest('.fbrh,.fbg-c[data-cell],.fbreset')) return;
+  if(!t||!t.closest||!t.closest('.fbrt,.fbrh,.fbg-c[data-cell],.fbreset')) return;
   e.preventDefault();
   if(fbToggleFrom(t)){ if(typeof render==='function') render(); }
 });
