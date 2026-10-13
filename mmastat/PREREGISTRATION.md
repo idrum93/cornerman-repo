@@ -6474,3 +6474,141 @@ measured at — route, cell and card — rather than an artifact of one of them.
 Registered: at ten graded cards, the question "is the model's finish rate too
 low" gets re-read against all three. If it holds, the correction belongs in the
 survival model's finish scaling, not in the check.
+
+## Addendum 54, amendment 2 (2026-10-13): the spread arm, and why it is shown rather than toggled
+
+Asked: does the graded panel account for optimal AND hedged spread, perhaps with
+a toggle?
+
+**It accounted only for optimal.** The frozen configuration was the top 25 cells
+straight down — which is cell mode — so hedged spread, a mode in actual use, had
+no graded record at all.
+
+### Added, as a second frozen question — not as a setting
+
+The frozen-config rule from addendum 54 was never "only one question". It was
+"the question must not move with a live control". Two declared configurations,
+each immutable, satisfy it exactly as one does; a toggle wired to `FB_MODE`
+would not.
+
+`FB_CANON.hedge = 0.25` pins the hedge ratio in the grader rather than reading
+`FB_HEDGE_MIN_RATIO`. If that live constant were ever retuned, every past card's
+spread record would otherwise move with it — the same silent-rewrite problem the
+frozen config exists to prevent, one level down.
+
+### Shown side by side, not behind a toggle
+
+The request was for a toggle; both arms are shown instead. A toggle hides half
+the answer and turns the panel into a place to find out which arrangement reads
+better, which is the failure mode the whole frozen design is guarding against.
+Side by side, the comparison IS the content. Cheap, and it removes the
+temptation rather than relying on restraint.
+
+### What it says
+
+| arm | optimal | hedged spread |
+|---|---|---|
+| model | **10** / 6.06 | 9 / 5.72 |
+| check on | **8** / 5.30 | 7 / 5.04 |
+
+Spread lands **one fewer in both arms**, on lower expectation. The DIRECTION
+matches amendment 13's sweep, which found optimal ahead on expected hits and on
+bust risk at every pick count. The MARGIN is one pick and means nothing.
+
+Stated on the panel in those terms, with the structural fact that explains it:
+spread covers more bouts by construction; it does not land more.
+
+# Addendum 57: what each slice of the 25 is worth, and card size (2026-10-13)
+
+## The "minimum picks" number was declined, and what replaced it
+
+Asked: show the fewest optimal/hedged picks it would have taken to produce the
+same hit rate as 25.
+
+**Measured first.** Where the hits actually fell inside the ranking:
+
+| card | ranks of the hits | deepest |
+|---|---|---|
+| Allen vs. Duncan | 7, 17, 20 | 20 |
+| UFC 332 | 4, 8, 9, 14, 16 | 16 |
+| UFC 331 | 8, 14 | 14 |
+
+Pooled: **4, 7, 8, 8, 9, 14, 14, 16, 17, 20** — three of ten at rank sixteen or
+deeper, and the check arm carries one at 21. So the answer is "about twenty",
+which is no saving.
+
+**It would have been declined even had the number looked good.** It is hindsight
+wearing the clothes of guidance: where a hit fell on a settled card says nothing
+about where the next one falls, and a figure sitting beside the cells readout
+would read as advice. It also degrades with evidence — as cards accumulate the
+worst case drifts deeper and the number creeps toward 25 while never having said
+anything. Same shape as the skew dial and the 60% floor: a parameter that looks
+measured because a number came out of it.
+
+**Built instead**: marginal expected hits by band of five, from the
+probabilities rather than the outcomes.
+
+| band | expected | share | landed |
+|---|---|---|---|
+| cells 1–5 | 2.12 | 35% | 1 |
+| cells 6–10 | 1.31 | 22% | 4 |
+| cells 11–15 | 1.03 | 17% | 2 |
+| cells 16–20 | 0.87 | 14% | 3 |
+| cells 21–25 | 0.74 | 12% | 0 |
+
+**No elbow.** 35, 22, 17, 14, 12 — a smooth decline with no rank beyond which
+cells stop contributing, and the last five still carry an eighth of the
+expectation. That is the honest answer to "could I place fewer": yes, at a cost
+readable from this table, which is the trade the picks box already makes.
+
+The `landed` column is far too thin to read and is labelled as such. It is there
+to accumulate: if the deep bands keep under-landing across ten cards, that is a
+real finding about the tail of the ranking — and precisely the finding the
+post-hoc minimum would have buried.
+
+## Card size: the premise did not hold, and the question underneath it is real
+
+Observed: the card with the most bouts also had the most finishes.
+
+**The premise is not in the data.** All three graded cards carry ten bouts in
+`history.json`. UFC 332 did not have more than the others, and its eight
+finishes tie Allen vs. Duncan's eight on the same ten.
+
+**And the count could not have carried information anyway.** Finishes scale with
+bouts, so "more bouts, more finishes" is near-tautological. Only the per-bout
+RATE can say anything — which is a real question with arguments both ways: a big
+numbered card carries more ranked fighters, who may be harder to finish, while a
+prelim-heavy card carries more mismatches.
+
+**Not previously tracked. Added** to `card_shape()` in `baserates.py`, which
+already groups by event with bouts/r1/fin — bucketed by card size rather than
+fitted, since a slope through the available spread of sizes would claim more
+precision than it has, and reported with its own n per bucket so a thin bucket
+cannot read as a trend. The display states that the count is uninformative and
+only the rate can move.
+
+Note what is already known and is a DIFFERENT question: `overdispersion` is
+**1.03**, so card-to-card variance is what independent bouts would give. There is
+no "finish night" clustering to find. That says nothing about whether the rate
+shifts with size, which is what the new table answers.
+
+## The thing that turned up while checking
+
+| card | bouts | finishes | rate |
+|---|---|---|---|
+| Allen vs. Duncan | 10 | 8 | 80% |
+| UFC 332 | 10 | 8 | 80% |
+| UFC 331 | 10 | 6 | 60% |
+| **pooled** | **30** | **22** | **73%** |
+
+Against a league finish rate of about **50%** (pooled divisions: ko .319 + sub
+.177). Expected 14.9, observed 22, sd 2.74 — **z ≈ +2.6**.
+
+That is past two standard deviations and it is the fourth measurement tonight
+pointing the same way: finishes are arriving more often than the model expects.
+It is also three cards, and these are the bouts that graded rather than every
+bout scheduled, so it may be nothing but a hot run.
+
+Registered with the rest: at ten graded cards, re-read the route split, the board
+arms, the card-level counts and this rate together. If all four hold, the
+correction belongs in the survival model's finish scaling.

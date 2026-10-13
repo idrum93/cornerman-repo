@@ -409,8 +409,36 @@ def card_shape(fights, min_date="2012-01-01"):
                       "by_round": [round(float((rounds == i).mean()), 4)
                                    for i in range(1, 6)]}
 
+    # Does the FINISH RATE move with how many bouts a card carries?
+    #
+    # The question is not whether bigger cards produce more finishes - they do,
+    # near-tautologically, since finishes scale with bouts. It is whether the
+    # per-bout RATE differs, which is a real empirical question with arguments
+    # both ways: a big numbered card carries more ranked fighters, who may be
+    # harder to finish, while a prelim-heavy card carries more mismatches.
+    #
+    # Reported as a rate with its own n so a thin bucket cannot be read as a
+    # trend, and bucketed rather than fitted - a slope through six points would
+    # claim more precision than the spread of card sizes supports.
+    by_size = []
+    if len(g) >= 40:
+        edges = [(6, 9), (10, 11), (12, 12), (13, 99)]
+        for lo, hi in edges:
+            q = g[(g.bouts >= lo) & (g.bouts <= hi)]
+            if len(q) < 15:
+                continue
+            nb = int(q.bouts.sum())
+            by_size.append({
+                "lo": lo, "hi": (None if hi >= 99 else hi),
+                "cards": int(len(q)), "bouts": nb,
+                "fin_rate": round(float(q.fin.sum()) / nb, 4),
+                "r1_rate": round(float(q.r1.sum()) / nb, 4),
+                "fin_mean": round(float(q.fin.mean()), 2),
+            })
+
     return {
         "n_cards": int(len(g)), "min_date": min_date,
+        "by_size": by_size,
         "bouts_median": int(g.bouts.median()),
         "bouts_lo": int(g.bouts.quantile(0.25)),
         "bouts_hi": int(g.bouts.quantile(0.75)),
