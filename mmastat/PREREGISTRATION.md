@@ -6612,3 +6612,50 @@ bout scheduled, so it may be nothing but a hot run.
 Registered with the rest: at ten graded cards, re-read the route split, the board
 arms, the card-level counts and this rate together. If all four hold, the
 correction belongs in the survival model's finish scaling.
+
+## Addendum 51, amendment 16 (2026-10-13): the route switch — the fourth axis, built
+
+Amendment 15 deferred a per-method exclusion "inside a cell" and registered it as
+available if wanted. The unit asked for here is **the route** — a fighter and a
+method across the whole bout — and it is the better one.
+
+The route is what the model and the check both hold opinions in; it is what the
+concurrence mark is computed on; and it is the way the thought actually arrives.
+"I do not believe he submits anyone" is a statement about a man and a method, not
+about round three. Switching it off cell by cell would take five clicks to say
+one thing.
+
+### The affordance is the method word itself
+
+No new furniture. Clicking **SUB** or **KO/TKO** beside a name switches that
+fighter's submissions or knockouts off in every round of that bout; clicking
+anywhere else in the cell keeps the single-cell toggle it already had. The thing
+you click is exactly the thing it turns off.
+
+The inner control is tested first in the delegated handler, or it could never be
+reached — the method word sits inside the cell that also listens.
+
+### The risk named in amendment 15 is real, and is mitigated rather than denied
+
+A cell can now be held off by its bout, its round, itself, or its route. Four
+axes, and a reader who cannot tell which one is holding a cell has a form rather
+than an instrument. Two mitigations:
+
+- **every switched-off cell names its reason in its tooltip** — the round switch,
+  the cell switch, or the route;
+- **the status line enumerates all four**, naming the switched-off routes
+  ("Buckley by KO, in every round of their bout"), with one control that clears
+  everything together.
+
+### A rendering case that had to be handled
+
+A cell whose routes are individually off still has to draw, or the struck route
+vanishes and there is nothing left to click to restore it — the same failure
+amendment 15 fixed for whole cells, one level down. Such a cell stays live,
+because its *other* route may still be running: on the live card, Buckley's
+knockouts strike through in all five rounds while Malott's knockouts in the same
+cells keep their picks.
+
+Verified: switching off Buckley by KO removed its 3 picks, struck 5 cells,
+redistributed to hold 25, and moved bust risk 15% → 16% — the same smooth cost
+every exclusion carries.
