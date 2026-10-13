@@ -501,6 +501,10 @@
      is read as "this is a good one" whatever the caption says, and agreement was
      measured NOT to predict accuracy. It marks concurrence and nothing more. */
   .fbp.fbagr{border-left:2px solid var(--mute);padding-left:5px;margin-left:-7px}
+  /* The check's card count, gold-keyed like every other number that came from
+     a pasted read rather than from the pipeline. */
+  .cnum.ckn b{color:var(--gold)}
+  .cnum.ckn{border-left:1px dashed var(--gold);padding-left:10px}
   .cktab{width:100%;border-collapse:collapse;font-size:12px;margin-top:4px}
   .cktab th{text-align:left;font-size:10px;letter-spacing:.05em;text-transform:uppercase;
     color:var(--mute);font-weight:600;padding:4px 6px;border-bottom:1px solid var(--line)}
@@ -1840,10 +1844,69 @@ function cardShapeStrip(){
     ${rs[k].by_round.map(v=>`<td class="mono">${(100*v).toFixed(0)}%</td>`).join('')}
     <td class="mono" style="color:var(--dim)">${rs[k].n.toLocaleString()}</td></tr>`:'';
 
+  /* THE CHECK'S OWN CARD-LEVEL COUNT, which did not exist anywhere.
+
+     The model has said "this many finishes" on the upcoming card since the
+     panel was built, and that claim is graded afterwards in `card_tally`. The
+     check makes exactly the same claim - every read carries a `dec`, so
+     sum(1-dec) is the check's expected finish count - and it was never stated,
+     so there was nothing to grade and nothing to compare.
+
+     MATCHED, for the third time in two sessions. Both counts are summed over
+     the bouts carrying BOTH a check read and a model decision share. Summing
+     the check over ten bouts and the model over the six it split would put two
+     different cards side by side, and the larger number would look like the
+     bolder read when it is only the longer sum. */
+  const ckShape=(()=>{
+    const q=(d.bouts||[]).map(b=>({b:b, c:(typeof CKR==='object'&&CKR)?CKR[b.bout]:null}))
+      .filter(x=>x.c && x.c.dec!=null && x.b.m_decision!=null);
+    if(!q.length) return null;
+    return {n:q.length,
+      ck:q.reduce((t,x)=>t+(1-x.c.dec),0),
+      md:q.reduce((t,x)=>t+(1-x.b.m_decision),0),
+      ckr1:q.reduce((t,x)=>t+(+x.c.r1||0),0),
+      mdr1:q.reduce((t,x)=>t+(+x.b.p_end_r1||0),0)};
+  })();
+  /* How these two counts have actually landed. Not bucketed by "a card that
+     projected about this many", which is what you would want and cannot have:
+     three graded cards projecting 2.68, 4.41 and 4.16 give no spread to match
+     against. What IS available is the running total, matched the same way. */
+  const shapeRec=(()=>{
+    const H=(typeof HIST==='object'&&HIST&&HIST.cards)||null; if(!H) return null;
+    let n=0, ck=0, md=0, act=0, ckr=0, actr=0;
+    H.forEach(c=>(c.bouts||[]).forEach(g=>{
+      const r=(typeof CKR==='object'&&CKR)?CKR[g.bout]:null;
+      if(!r||r.dec==null||g.m_decision==null||!g.method) return;
+      n++; ck+=1-r.dec; md+=1-g.m_decision; ckr+=(+r.r1||0);
+      const finished=String(g.method).toUpperCase().indexOf('DEC')<0;
+      if(finished){ act++; if(+g.round===1) actr++; }
+    }));
+    return n?{n:n,ck:ck,md:md,act:act,ckr:ckr,actr:actr}:null;
+  })();
+  const shapeNote=shapeRec&&shapeRec.n>=6?`<div class="note" style="margin-top:7px">
+    <b style="color:var(--gold)">How these two counts have landed:</b> over
+    <b style="color:var(--mute)">${shapeRec.n}</b> graded bouts carrying both reads,
+    <b style="color:var(--mute)">${shapeRec.act}</b> finished. The model called
+    <b style="color:var(--mute)">${shapeRec.md.toFixed(2)}</b> and the check
+    <b style="color:var(--gold)">${shapeRec.ck.toFixed(2)}</b> —
+    ${(shapeRec.act>shapeRec.ck&&shapeRec.act>shapeRec.md)
+      ? `both under-called it, the model by ${(shapeRec.act-shapeRec.md).toFixed(2)} against the
+         check's ${(shapeRec.act-shapeRec.ck).toFixed(2)}.`
+      : `the ${Math.abs(shapeRec.act-shapeRec.ck)<Math.abs(shapeRec.act-shapeRec.md)?'check':'model'}
+         was closer.`}
+    Too few cards to bucket by "a card that projected about this many", which is the comparison
+    worth having — the graded cards projected 2.7, 4.4 and 4.2, so there is no spread to match
+    against yet. This is the running total instead, and at ${shapeRec.n} bouts it is a direction,
+    not a finding.</div>`:'';
+
   return `<div class="cshape">
     <div class="cshape-row">
       ${num(r1,expR1,'first-round finishes projected')}
       ${fh.length?num(fin,expFin,'finishes inside the distance'):''}
+      ${ckShape?`<div class="cnum ckn"><b class="mono">${ckShape.ck.toFixed(1)}</b>
+        <span>finishes — the check's count</span>
+        <span class="vs mono">model ${ckShape.md.toFixed(1)} on the same ${ckShape.n} bout${
+          ckShape.n===1?'':'s'} · ${ckShape.ck>=ckShape.md?'+':''}${(ckShape.ck-ckShape.md).toFixed(1)}</span></div>`:''}
       <button class="more" id="cmore" aria-expanded="false">How often ▾</button>
     </div>
     <div class="cdetail" id="cdet">
@@ -1851,6 +1914,7 @@ function cardShapeStrip(){
       <div class="cmark"><i style="left:${left.toFixed(1)}%">▼ this card ${r1.toFixed(1)}</i></div>
       <div class="chist">${bars}</div>
       <div class="lbl" style="text-align:center">first-round finishes on the card</div>
+      ${shapeNote}
       <div class="note" style="margin-top:9px">A typical card is
         ${C.bouts_median} bouts, of which <b>${C.r1_mean}</b> end in round one and
         <b>${C.fin_mean}</b> end inside the distance. Eight cards in ten land between
