@@ -1519,13 +1519,25 @@ function pastGrid(g){
      counts the claims each side actually got right. The winner line stays
      separate underneath because the market prices that one and nothing else,
      so it cannot be ranked against the others on equal terms. */
-  const tot=f=>rows.filter(r=>r[f]!=null).length, hit=f=>rows.filter(r=>r[f]===true).length;
-  const sides=[{n:'model',r:hit('okA'),t:tot('okA')}];
-  if(cr) sides.push({n:'check',r:hit('okB'),t:tot('okB')});
-  sides.sort((x,y)=>(y.r/(y.t||1))-(x.r/(x.t||1)));
-  const called=sides.length>1
-    ? `<span class="lbl rrl">claims called</span><span class="rc rrk">${
-        sides.map(x=>`<b class="${x.n}">${x.n}</b> ${x.r}/${x.t}`).join(' › ')}</span>` : '';
+  /* MATCHED DENOMINATORS, which this was not doing and which inverted the
+     answer. Each side was counted over the claims IT answered - so on a bout
+     where the model publishes no method report, the check was scored on four
+     claims and the model on two, and the two rates were then ranked against
+     each other. A side that answers more questions is not a side that is more
+     often right, and the ranking was reading the first as the second.
+
+     Only claims BOTH sides answered are counted now. Measured over the graded
+     record the difference is not cosmetic: on unmatched denominators the check
+     led the model on finish type 9/20 to 5/15; matched, it is 8/15 to 5/15, and
+     on reads entered before the card it is 2/6 to 2/6 - level. */
+  const both=rows.filter(r=>r.okA!=null&&r.okB!=null);
+  const sides=[{n:'model',r:both.filter(r=>r.okA===true).length,t:both.length},
+               {n:'check',r:both.filter(r=>r.okB===true).length,t:both.length}];
+  sides.sort((x,y)=>y.r-x.r);
+  const called=(cr&&both.length)
+    ? `<span class="lbl rrl">claims called<span style="color:var(--dim)"> · both answered</span></span><span class="rc rrk">${
+        sides.map(x=>`<b class="${x.n}">${x.n}</b> ${x.r}/${x.t}`).join(' › ')}${
+        cr.post?' <span class="posth">after the fact</span>':''}</span>` : '';
   const mkt=g.market, who=[{n:'model',p:g.p_winner_model}];
   if(cr) who.push({n:'check',p:cr.win.check});
   if(mkt) who.push({n:'market',p:mkt.p_winner_market});
@@ -1598,6 +1610,56 @@ function lastCard(){
       <span class="mono" style="color:var(--dim)">base rate ${bse.toFixed(1)}</span>
       <span class="rc ${miss<bmiss-0.25?'ok':bmiss<miss-0.25?'no':''}">${verdict}</span></div>`;
   };
+  /* THE CHECK, TOTALLED - and totalled the only way that means anything.
+
+     The card totals were model and market only. The check appeared on the
+     fight tiles and nowhere else, so the impression of how it was doing came
+     from reading twenty individual rows by eye - and by eye it looks strong,
+     because a read only exists on bouts that were interesting enough to paste.
+     Comparing the check's record on ITS bouts against the model's on ALL bouts
+     is the subset error this project already warns about in writing, committed
+     by the page's own layout rather than by its arithmetic.
+
+     So: restricted to the bouts carrying a read, all three scored on exactly
+     those, and the post-hoc reads held out. A UFC.com page pulled after the
+     card contains the fight, so a read entered late is partly reading the
+     answer and belongs in its own line, not in the total. */
+  const ckT=(()=>{
+    const bs=(c.bouts||[]).map(g=>({g:g,cr:ckRow(g.bout)})).filter(x=>x.cr);
+    if(!bs.length) return null;
+    const live=bs.filter(x=>!x.cr.post), post=bs.filter(x=>x.cr.post);
+    const score=set=>{
+      const mk=set.filter(x=>x.g.market);
+      const mean=(a,f)=>a.length?a.reduce((t,x)=>t+f(x),0)/a.length:null;
+      return {n:set.length,
+        model:set.filter(x=>x.g.p_winner_model>0.5).length,
+        check:set.filter(x=>x.cr.win.check>0.5).length,
+        mkn:mk.length, market:mk.filter(x=>x.g.market.p_winner_market>0.5).length,
+        pM:mean(set,x=>x.g.p_winner_model), pC:mean(set,x=>x.cr.win.check),
+        pK:mean(mk,x=>x.g.market.p_winner_market)};
+    };
+    return {live:live.length?score(live):null, post:post.length?score(post):null,
+            nLive:live.length, nPost:post.length};
+  })();
+  const pp=x=>x==null?'—':(100*x).toFixed(0)+'%';
+  const ckLine=(S,lab,dim)=>`<div class="ctally"${dim?' style="opacity:.6"':''}>
+      <span class="ctl">${lab}</span>
+      <span class="mono">model <b>${S.model}/${S.n}</b> <span style="color:var(--dim)">${pp(S.pM)}</span></span>
+      <span class="mono">check <b style="color:var(--gold)">${S.check}/${S.n}</b> <span style="color:var(--dim)">${pp(S.pC)}</span></span>
+      <span class="mono">${S.mkn?`market <b>${S.market}/${S.mkn}</b> <span style="color:var(--dim)">${pp(S.pK)}</span>`
+        :'<span style="color:var(--dim)">no price</span>'}</span></div>`;
+  const ckTally=ckT?`<div class="lbl tothd" style="margin:16px 0 6px">the check, on the bouts it covers —
+      all three scored on exactly those bouts</div>
+    ${ckT.live?ckLine(ckT.live,'entered before the card'):''}
+    ${ckT.post?ckLine(ckT.post,'entered after the card — not evidence',true):''}
+    <div class="note" style="margin-top:7px">The percentage is the average probability each put on
+      the fighter who actually won, which separates a narrow call from a confident one.
+      <b style="color:var(--mute)">This is the only fair way to read the check</b>: it exists
+      only where a read was pasted, and those are the bouts that looked interesting, not a random
+      sample — so its record on its own bouts against the model's on the whole card would flatter
+      it by construction.${ckT.nPost?` ${ckT.nPost} read${ckT.nPost===1?'':'s'} ${
+      ckT.nPost===1?'was':'were'} entered after the fights, when the UFC.com page already contained
+      the result; ${ckT.nPost===1?'it is':'they are'} shown but not counted.`:''}</div>`:'';
   const tally=ct?`<div class="lbl tothd" style="margin:16px 0 6px">how the card broke — against what was said beforehand</div>
     ${ct.r1_n?cline(ct.r1_said,ct.r1_hit,ct.r1_base,'first-round finishes'):''}
     ${ct.fin_n?cline(ct.fin_said,ct.fin_hit,ct.fin_base,'ended inside the distance'):''}
@@ -1606,6 +1668,7 @@ function lastCard(){
       more five-round fights is not graded against a three-round number.</div>`:'';
 
   return `<div class="totals"><div class="lbl tothd">card totals</div>${head}</div>
+    ${ckTally}
     ${tally}
     <div class="lbl tothd" style="margin:16px 0 6px">fight by fight</div>
     <div class="grid">${tiles}</div>`;
@@ -2797,7 +2860,7 @@ function render(){
                 <div class="abc lit">${w}${L.round?`<span class="abr"> ${L.round}</span>`:''}${
                   L.thin?` · thin ${L.wins}W`:''}</div>
                 ${L.top?`<div class="abl">pick</div><div class="abc dim">${none}</div>
-                  <div class="abc lit">${sbNameShort(L.top)} ${P0(L.top.p)}%</div>`:''}
+                  <div class="abc lit">${sbNameShort(L.top)} ${P0(sbPickP(L.top))}%</div>`:''}
               </div>`;
             }
           }
@@ -5376,22 +5439,57 @@ function sbCells(ma,mb,pA,a,bb,b){
      decision - three answers, none of them wrong under its own rule, and no
      rule shared between them. A decision cell carries no fighter because the
      model's does not either; consumers render it by name-less `how`. */
+  /* The decision cell stays ONE cell, because that is the set ckGrade scores
+     and the set the model's m_decision matches. Splitting it into six would
+     move the graded record, which is not a thing a display fix gets to do.
+     The corner split rides along as a fourth element for DISPLAY only. */
   return [[pA*A.ko,a,'KO/TKO'],     [pA*A.sub,a,'submission'],
           [(1-pA)*B.ko,bb,'KO/TKO'],[(1-pA)*B.sub,bb,'submission'],
-          [pA*A.dec+(1-pA)*B.dec,null,'decision']]
+          [pA*A.dec+(1-pA)*B.dec,null,'decision',
+           {a:pA*A.dec, b:(1-pA)*B.dec, an:a, bn:bb}]]
          .sort((x,y)=>y[0]-x[0]);
 }
-/* "Gatto by KO" / "decision" - the decision cell names no fighter. */
-const sbName=t=>!t?'':(t.name?`${esc(t.name)} by ${t.how}`:'decision');
-const sbNameShort=t=>!t?'':(t.name
-  ? `${esc(t.name)} by ${t.how==='KO/TKO'?'KO':t.how==='submission'?'SUB':'DEC'}`
-  : 'by DEC');
+/* "Gatto by KO" / "Gatto by DEC" / "split decision".
+
+   THE BUG THIS FIXES, which was worse than the missing name. The model's pick
+   row prints a per-corner contract - "Blanchfield by DEC 52%" - while the
+   check's printed the COMBINED decision, "by DEC 56%". Two different
+   quantities on one row labelled `pick`: 52% is one fighter winning on the
+   cards, 56% is anybody winning on the cards. Side by side that invites
+   reading 56 > 52 as the check being more confident about the same claim, when
+   it is not the same claim. Worse, the check's pick row was then just
+   restating its own ENDS row, since its combined decision IS its distance
+   number - it carried no information at all.
+
+   So the decision cell is rendered by corner when one corner leads, with THAT
+   corner's probability, and as "split decision" when neither does. The bar is
+   the same 6 points used for "no clear favorite" elsewhere: a difference too
+   small to mean anything should not put a name on the card.
+
+   The GRADED cell set is untouched - five cells, decision combined - and so is
+   `norm()`, which still keys DEC without a fighter for the disagreement mark.
+   This is a display fix and it is not allowed to move the record. */
+const sbDecLead=t=>{
+  if(!t||t.name||!t.split) return null;
+  const S=t.split;
+  if(Math.abs(S.a-S.b)<0.06) return null;
+  return S.a>S.b?{n:S.an,p:S.a}:{n:S.bn,p:S.b};
+};
+const sbName=t=>{ if(!t) return '';
+  if(t.name) return `${esc(t.name)} by ${t.how}`;
+  const L=sbDecLead(t); return L?`${esc(L.n)} by decision`:'split decision'; };
+const sbNameShort=t=>{ if(!t) return '';
+  if(t.name) return `${esc(t.name)} by ${t.how==='KO/TKO'?'KO':t.how==='submission'?'SUB':'DEC'}`;
+  const L=sbDecLead(t); return L?`${esc(L.n)} by DEC`:'split DEC'; };
+/* The probability that belongs beside that label. Naming a corner and then
+   printing the combined figure would be the same mismatch in reverse. */
+const sbPickP=t=>{ if(!t) return null; const L=sbDecLead(t); return L?L.p:t.p; };
 function sbTop(cells,fam){
   const pool = fam==null ? cells
     : cells.filter(c=> fam==='dec' ? c[2]==='decision' : c[2]!=='decision');
   const top=pool[0], second=pool[1];
   if(!top) return null;
-  return {name:top[1], how:top[2], p:top[0],
+  return {name:top[1], how:top[2], p:top[0], split:top[3]||null,
           clear:(!second||(top[0]-second[0])>=0.06)};
 }
 function sbLengthCall(b,stIn){
@@ -5591,8 +5689,8 @@ function abGrid(b){
   const mHow=c&&c.label?(c.label.split(/\sby\s/i)[1]||''):'';
   const mPick=c&&c.routeClear?{t:`${esc(shortMethod(c.label))}${c.round?' R'+c.round.n:''} ${P0(c.p)}%`,
                                p:c.p,k:norm(c.label.split(/\sby\s/i)[0],mHow)}:null;
-  const cPick=L&&L.top?{t:`${sbNameShort(L.top)} ${P0(L.top.p)}%`,
-                        p:L.top.p,k:norm(L.top.name||'',L.top.how)}:null;
+  const cPick=L&&L.top?{t:`${sbNameShort(L.top)} ${P0(sbPickP(L.top))}%`,
+                        p:sbPickP(L.top),k:norm(L.top.name||'',L.top.how)}:null;
   const differ = !!(mPick&&cPick&&mPick.k!==cPick.k);
   rows.push(['pick',
     cell(mPick?mPick.t:`<span class="abnone">${b.thin?'not tested this thin':'no clear pick'}</span>`,
