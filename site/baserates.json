@@ -1,5 +1,5 @@
 {
- "built_utc": "2026-10-13T05:12:38+00:00",
+ "built_utc": "2026-10-13T05:33:30+00:00",
  "min_cell": 200,
  "conditions": [
   {
@@ -898,6 +898,44 @@
  "card": {
   "n_cards": 600,
   "min_date": "2012-01-01",
+  "by_size": [
+   {
+    "lo": 6,
+    "hi": 9,
+    "cards": 26,
+    "bouts": 223,
+    "fin_rate": 0.4709,
+    "r1_rate": 0.2332,
+    "fin_mean": 4.04
+   },
+   {
+    "lo": 10,
+    "hi": 11,
+    "cards": 219,
+    "bouts": 2340,
+    "fin_rate": 0.503,
+    "r1_rate": 0.2538,
+    "fin_mean": 5.37
+   },
+   {
+    "lo": 12,
+    "hi": 12,
+    "cards": 205,
+    "bouts": 2460,
+    "fin_rate": 0.4951,
+    "r1_rate": 0.2553,
+    "fin_mean": 5.94
+   },
+   {
+    "lo": 13,
+    "hi": null,
+    "cards": 150,
+    "bouts": 1991,
+    "fin_rate": 0.4927,
+    "r1_rate": 0.2426,
+    "fin_mean": 6.54
+   }
+  ],
   "bouts_median": 12,
   "bouts_lo": 11,
   "bouts_hi": 12,
