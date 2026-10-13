@@ -3006,7 +3006,32 @@ function finishBoard(d){
       <span class="lbl">${esc(divShort(sbWcOf(b)||''))}${sbWcIsManual(b)?'<i style="color:var(--gold);font-style:normal"> (set)</i>':''} · ${R} rds${
         off?' · <b style="color:var(--warn)">switched off</b>':(mine.length?'':' · no pick')} · ${esc(fbLean(b,pFin).lean)}${
         (ckd&&!noread)?' · <b style="color:var(--gold)">check</b>':''}${
-        borrowed?` · <b style="color:var(--warn)">${noread?'check only':'shape borrowed'}</b>`:''}</span></div>${cells}<div class="fbg-t" style="color:${
+        borrowed?` · <b style="color:var(--warn)">${noread?'check only':'shape borrowed'}</b>`:''}${(()=>{
+          /* THIN RECORD, said on the board rather than only on the tile.
+
+             Asked for as a size-adjusted finish estimate for the thinner
+             fighter - shrink his round counts toward the league so a small
+             sample stops misleading the method/round picks. Declined, and the
+             reason is a result already on the record: a fighter's own ROUND
+             history has split-half reliability 0.21 falling to 0.05 as the
+             sample grows, against 0.54 rising to 0.60 for whether he finishes
+             at all. At reliability 0.05 the optimal weight on his own rounds is
+             about 5%, so a "size-adjusted" column would be 95% league prior -
+             the league distribution, printed per fighter, inviting exactly the
+             fighter-specific reading it cannot support. Shrinkage makes a thin
+             record LOOK trustworthy; where the quantity replicates that is the
+             point, and where it does not it hides the thinness without adding
+             anything.
+
+             What the request actually needs is already done one layer down: the
+             board's round shape for a thin or no-split bout is pooled from the
+             card's other bouts at the same scheduled length, not taken from the
+             fighter. What was missing is this - saying so on the row. */
+          const ck=(typeof CKR==='object'&&CKR)?CKR[b.bout]:null;
+          const t=(ck&&ck.thin!=null)?ck.thin:null;
+          if(t!=null&&t<3) return ` · <b style="color:var(--warn)">thin ${t}W</b>`;
+          if(b.thin) return ` · <b style="color:var(--warn)">thin record</b>`;
+          return '';})()}</span></div>${cells}<div class="fbg-t" style="color:${
         ckd?'var(--gold)':'var(--mute)'}">${P0(pFin)}%</div><div class="fbg-t">${
         mine.length?P0(sum)+'%':'<span class="fbnone">—</span>'}</div>`;
   }).join('');
