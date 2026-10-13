@@ -2,7 +2,7 @@
  "event": "UFC Fight Night: Buckley vs. Malott",
  "date": "2026-10-17",
  "venue": "Rogers Place, Edmonton , Alberta , Canada",
- "generated_utc": "2026-10-13T23:04:09.309823+00:00",
+ "generated_utc": "2026-10-13T23:17:19.407765+00:00",
  "bouts": [
   {
    "bout": "Joaquin Buckley vs. Mike Malott",
@@ -827,9 +827,9 @@
      "log_layoff": 4.836282
     }
    },
-   "p_market": 0.3541,
+   "p_market": 0.3549,
    "books": 23,
-   "edge": -0.0987,
+   "edge": -0.0996,
    "p_finish_survival_raw": 0.5123,
    "m_a_ko": 0.1103,
    "m_b_ko": 0.1457,
@@ -1135,9 +1135,9 @@
      "log_layoff": 5.247024
     }
    },
-   "p_market": 0.7011,
+   "p_market": 0.7018,
    "books": 25,
-   "edge": -0.1563,
+   "edge": -0.1569,
    "p_finish_survival_raw": null,
    "m_a_ko": null,
    "m_b_ko": null,
