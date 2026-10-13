@@ -300,6 +300,96 @@ def r1_curve(fights, min_date="2010-01-01", min_fights=8):
             "five_round_scale": round(float(scale), 4)}
 
 
+def style_imposition(fights, min_date="2012-01-01", min_wins=3):
+    """Does the fight follow ONE fighter's habits rather than the pair's average?
+
+    `decision_curve` averages the two career decision shares. That is a
+    modelling CHOICE, not a measured fact, and the obvious competing hypothesis
+    is that one man drives it - that a finisher drags a fight toward a finish
+    harder than averaging implies, or that a decision-heavy fighter can impose
+    the cards on anyone. Both are commonly asserted and neither has been tested
+    here.
+
+    Three predictors of P(finish) on the same bouts, so they are directly
+    comparable:
+      avg  - the pair's mean decision share, what the tool uses today
+      min  - the MORE finish-prone fighter's decision share (the finisher leads)
+      max  - the MORE decision-prone fighter's (the grinder leads)
+
+    Scored by correlation and by the spread between the extreme buckets. If
+    `min` beats `avg`, the finisher imposes; if `max` does, the grinder does; if
+    neither separates, averaging is right and the question is answered.
+
+    Second output, the direct form of the question: among bouts that FINISHED,
+    how often did the finish go to the fighter with the higher career finish
+    rate - and how often did he simply win, finish or not. The gap between those
+    two is the part that is about METHOD rather than about being better.
+
+    Strict as-of: every share is built from fights strictly before the bout, the
+    same discipline decision_curve uses.
+    """
+    F = fights.sort_values(["date", "fight_id"]).copy()
+    F["date"] = pd.to_datetime(F.date)
+    cut = pd.Timestamp(min_date)
+    wins, rows = {}, []
+    for r in F.itertuples():
+        if r.winner not in ("r", "b"):
+            continue
+        a, b = r.r_id, r.b_id
+        wa, wb = wins.get(a, [0, 0]), wins.get(b, [0, 0])
+        if r.date >= cut and wa[0] >= min_wins and wb[0] >= min_wins:
+            da, db = wa[1] / wa[0], wb[1] / wb[0]
+            fin = r.method in ("KO/TKO", "SUB")
+            a_won = r.winner == "r"
+            # the more finish-prone man is the one with the LOWER decision share
+            fin_prone_is_a = da < db
+            rows.append({
+                "avg": (da + db) / 2.0, "min": min(da, db), "max": max(da, db),
+                "gap": abs(da - db), "finished": fin,
+                "finisher_won": (fin_prone_is_a == a_won),
+                "tie": abs(da - db) < 1e-9,
+            })
+        w = a if r.winner == "r" else b
+        c = wins.get(w, [0, 0])
+        wins[w] = [c[0] + 1, c[1] + (1 if r.method == "DEC" else 0)]
+        for x in (a, b):
+            wins.setdefault(x, [0, 0])
+    if len(rows) < 500:
+        return None
+    d = pd.DataFrame(rows)
+    d = d[~d.tie]
+    edges = [0, .15, .30, .45, .60, .75, 1.01]
+    out = {"n": int(len(d))}
+    for key in ("avg", "min", "max"):
+        cuts = pd.cut(d[key], edges, right=False)
+        g = d.groupby(cuts, observed=True).finished.agg(["mean", "size"])
+        g = g[g["size"] >= 60]
+        if len(g) < 3:
+            continue
+        out[key] = {
+            "r": round(float(np.corrcoef(d[key], d.finished.astype(float))[0, 1]), 4),
+            "spread": round(float(g["mean"].iloc[0] - g["mean"].iloc[-1]), 4),
+            "buckets": [{"lo": round(float(i.left), 2), "hi": round(float(i.right), 2),
+                         "fin": round(float(m), 4), "n": int(nn)}
+                        for i, m, nn in zip(g.index, g["mean"], g["size"])],
+        }
+    # the direct question, restricted to bouts that actually ended early
+    f = d[d.finished]
+    if len(f) >= 200:
+        wide = d[d.gap >= 0.20]
+        out["who"] = {
+            "finishes": int(len(f)),
+            # among finishes, did the more finish-prone man get it
+            "to_finisher": round(float(f.finisher_won.mean()), 4),
+            # among ALL bouts, did he simply win - the control
+            "wins_overall": round(float(d.finisher_won.mean()), 4),
+            "wide_n": int(len(wide)),
+            "wide_to_finisher": (round(float(wide[wide.finished].finisher_won.mean()), 4)
+                                 if len(wide[wide.finished]) >= 60 else None),
+        }
+    return out
+
+
 def decision_curve(fights, min_date="2012-01-01", min_wins=2):
     """Average the pair's career decision share; how often does the fight finish?
 
@@ -465,6 +555,7 @@ def write_json(fights, fighters, path="site/baserates.json", verbose=True):
          "divisions": divisions(fights),
          "card": card_shape(fights),
          "decision_curve": decision_curve(fights),
+         "style": style_imposition(fights),
          "r1_curve": r1_curve(fights),
          "market_bases": market_bases(fights)}, indent=1), encoding="utf-8")
     if verbose:

@@ -6659,3 +6659,69 @@ cells keep their picks.
 Verified: switching off Buckley by KO removed its 3 picks, struck 5 cells,
 redistributed to hold 25, and moved bust risk 15% → 16% — the same smooth cost
 every exclusion carries.
+
+# Addendum 58: a correct number that reads wrong, and a test for style imposition (2026-10-13)
+
+## "55% finish but the pick says Jourdain by DEC 28%"
+
+**Not wrong. Reconstructed at the reported shape** — 66/34 winner, decision-heavy
+favorite — and the cells come out: finish 51.3%, decision 48.7%, largest finish
+route 17%, largest single contract **Jourdain by DEC 33%**.
+
+Four finish routes share the finish probability between them; a decision is
+shared by only two. So on any fight near the line the biggest single CONTRACT is
+routinely a decision even though the fight more often ends early. The two rows
+answer different questions: `ends` is a two-way split of the whole fight, `pick`
+is the biggest of five contracts.
+
+**This was already explained — in the wrong place.** The identical note has sat
+in `marketTabs` beside the gold row since that panel was built. The reader was in
+the A–B grid, where ENDS and PICK are stacked with nothing between them.
+
+**Fixed**: the grid now says it, inline, and only when the pick's family actually
+contradicts the ends call. Worth recording as a class of defect: an explanation
+written once, in the place the author happened to be working, does not cover the
+other three places the same confusion arises.
+
+## Does the fight follow ONE fighter, or the pair?
+
+Asked: do finishes go to the fighter with the higher finish rate, and decisions
+to the one with the higher decision rate — is there a pattern of outcomes
+attaching to a man rather than to a matchup?
+
+**Not previously testable; the tool assumes the answer.** `decision_curve`
+averages the two career decision shares, and averaging is a modelling CHOICE that
+has never been checked against the obvious competing hypothesis — that a finisher
+drags a fight toward a finish harder than averaging implies, or that a
+decision-heavy fighter imposes the cards.
+
+**Built** as `style_imposition()` in `baserates.py`: three predictors of P(finish)
+scored on the same bouts, so they are directly comparable.
+
+| predictor | what it claims |
+|---|---|
+| the pair's average decision share | the fight is a blend — current treatment |
+| the more finish-prone fighter alone | **the finisher imposes** |
+| the more decision-prone fighter alone | **the grinder imposes** |
+
+Scored by correlation and by the spread between extreme buckets. If either single
+fighter separates further than the average, the fight follows one man and the
+tool's blend is wrong. If neither does, averaging is right and the question is
+closed — which is a result worth having either way.
+
+Second output, the direct form of the question: among bouts that FINISHED, how
+often the finish went to the more finish-prone fighter, **against how often he
+simply won at all**. The gap between those two is the part that is about METHOD
+rather than about being the better fighter — without that control, "the finisher
+usually gets the finish" is mostly a restatement of "the better fighter usually
+wins". A 20-point-gap subset is reported too, where the effect should be largest
+if it exists.
+
+Strict as-of throughout: every share is built from fights strictly before the
+bout, the same discipline `decision_curve` uses.
+
+**No result yet.** The corpus is not in this repo, so the table fills on the next
+pipeline run and the panel says so rather than showing nothing. Registered now,
+before the numbers exist, with the reading rule stated in advance: a single table
+is not enough to move the model off averaging — if a single-fighter predictor
+wins, it gets re-read on a later build before anything changes.
