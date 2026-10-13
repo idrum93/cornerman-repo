@@ -6725,3 +6725,123 @@ pipeline run and the panel says so rather than showing nothing. Registered now,
 before the numbers exist, with the reading rule stated in advance: a single table
 is not enough to move the model off averaging — if a single-fighter predictor
 wins, it gets re-read on a later build before anything changes.
+
+# Addendum 59: ape index — registered, with the reason it cannot be fitted yet (2026-10-13)
+
+Proposed: height should inform how much a reach differential means. A fighter two
+inches taller than an opponent with two inches more reach is not in the same
+position as one the same height or shorter with that deficit.
+
+**The proposal is sound and the variable is well defined.** It is the ape index —
+reach minus height — differenced between corners.
+
+## It survives the objection that killed height
+
+`d_height` sits in `DROPPED` as "carried by d_reach", removed because the two
+correlate above 0.85 and keeping both pushed the design matrix condition number
+from ~10 to ~42. That is a collinearity decision, not a claim that height is
+irrelevant.
+
+**Ape index is the residual of reach on height**, so it is near-orthogonal to
+both by construction and the collinearity that disqualified `d_height` does not
+apply. This is a genuinely different variable, not height returning under
+another name. The observation behind the request is correct: `d_reach` alone
+cannot distinguish a tall fighter with long arms from a short one with longer.
+
+## The finding that matters more than the proposal
+
+**Reach is imputed from height for about 26% of fighters.** `loaders.py` fits
+`reach = a + b * height` and fills the missing quarter from it.
+
+For every one of those fighters the ape index is **exactly the regression line —
+zero residual by construction.** A model handed this feature on the full corpus
+would be partly fitting *was this fighter's reach imputed*, not how long his arms
+are, and the fitted effect would be a measurement artifact wearing the shape of
+anatomy.
+
+The `reach_imputed` flag already exists, with a comment saying it is there "so
+the effect of the imputation can be measured later". This is that later.
+
+## Registered, not adopted
+
+`ape_index_test()` added to `features.py`, restricted to bouts where **both**
+corners carry a measured reach. Time-ordered split, no shuffling. WIN_FEATURES as
+control, WIN_FEATURES + `d_ape` as treatment, held-out log loss, bootstrap
+interval and P(better) — the same protocol that rejected the style features at
+-0.0009, 95% CI [-0.0041, +0.0022], P(better) = 0.293.
+
+**Decision rule, fixed before any number exists**: adopt only if the interval
+excludes zero AND P(better) ≥ 0.95 AND it survives a re-run on a later corpus.
+Anything short of that is recorded and the frozen fourteen are left alone.
+
+The prior matters here and is stated up front: a reach effect in MMA is small to
+begin with, and a residual on a small effect is smaller still. A result that
+merely leans is exactly what noise looks like at this effect size. The function
+also refuses rather than proceeding if fewer than 800 usable bouts survive the
+measured-reach restriction, and returns the count so the restriction's cost is
+visible instead of silent.
+
+Not run: the corpus CSVs are not in this repo.
+
+## What the site does today, unchanged
+
+The check panel parses height and uses it only to impute reach when reach is
+missing, then discards it — `delete out.height` — which is consistent with
+`d_height` not being a model input. That stays as it is. Nothing on the page
+changes until the test says something.
+
+## Addendum 59, amendment 1 (2026-10-13): the span was got wrong, and the real hypothesis is an interaction
+
+The clarification — "two inches shorter with one inch longer arms may cancel the
+taller man's advantage; a way to measure the SEVERITY of the reach discrepancy" —
+exposed an error in the addendum written an hour earlier.
+
+### The error
+
+Addendum 59 said the ape index "is the residual of reach on height, so it is
+near-orthogonal to both by construction, and the collinearity that disqualified
+d_height does not apply."
+
+**That is wrong in the part that matters.**
+
+```
+d_ape = (ra - ha) - (rb - hb) = d_reach - d_height
+```
+
+so `span{d_reach, d_ape} == span{d_reach, d_height}` — rank 2 either way,
+verified numerically. **Adding the ape index to a model that already carries
+`d_reach` is the same model as adding `d_height` back**, reparameterised, with
+identical predictions. It is not near-orthogonal either: r ≈ 0.6 against
+`d_reach` on simulated anthropometry, not 0.
+
+What the reparameterisation does buy is conditioning — 3.2 against 2.5 — which is
+interpretability, not information. The claim that it escaped the collinearity
+objection was the flattering reading, and it was not checked before it was
+written.
+
+### The hypothesis that is actually new
+
+The proposal splits in two, and only one of them is a new degree of freedom:
+
+| | claim | status |
+|---|---|---|
+| **H1, net length** | height offsets reach additively | **= restoring d_height**, rank 2 |
+| **H2, severity** | the VALUE of a reach edge depends on height context | `d_reach × d_height`, **rank 3** |
+
+H2 is the one the proposal describes, and the only one that can tell the tool
+something `d_height` could not have.
+
+H1 is still worth testing, for a reason unrelated to the proposal: **`d_height`
+was dropped by a correlation rule (r > 0.85 with something kept), never by a
+held-out comparison.** Whether it adds anything has never actually been measured.
+
+### Rebuilt
+
+`ape_index_test()` replaced by `length_test()`: three arms on identical rows —
+WIN_FEATURES, + `d_ape` (H1), + `d_ape` and the centred interaction (H2). The
+interaction is centred before multiplying, or it proxies the main effects.
+
+Same restriction (both corners measured, not imputed), same protocol, same
+decision rule, same prior against. The result now reports per arm, so "the net
+length term did nothing but the interaction did" is a readable outcome rather
+than one hidden inside a single number.

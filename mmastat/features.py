@@ -97,6 +97,132 @@ def make_features(sa, sb):
     return f
 
 
+def length_test(fights, fighters, min_date="2012-01-01", n_boot=400, seed=7):
+    """Does height change what a reach edge is worth? Registered, not adopted.
+
+    THE PROPOSAL, in the proposer's words: a fighter two inches shorter with one
+    inch longer arms may cancel the taller man's advantage - a way to measure the
+    SEVERITY of a reach discrepancy rather than its raw size. `d_reach` alone
+    cannot express that, and the observation is correct.
+
+    IT SPLITS INTO TWO HYPOTHESES, and they are not the same question.
+
+    H1, NET LENGTH. Height offsets reach additively, so the quantity that matters
+    is the ape index, reach minus height, differenced between corners. Note the
+    algebra, because it was initially got wrong here:
+
+        d_ape = (ra - ha) - (rb - hb) = d_reach - d_height
+
+    so span{d_reach, d_ape} == span{d_reach, d_height}, rank 2 either way. Adding
+    the ape index to a model that already carries d_reach is THE SAME MODEL as
+    adding d_height back, reparameterised. It is not a new degree of freedom and
+    it is not orthogonal to d_reach (r is about 0.6, not 0). What the
+    reparameterisation does buy is conditioning - 3.2 against 2.5 on simulated
+    anthropometry - which is interpretability, not information.
+
+    That makes H1 worth testing anyway, for a reason unrelated to the proposal:
+    `d_height` was dropped by a CORRELATION RULE (r > 0.85 with something kept),
+    never by a held-out comparison. Nobody has measured whether it adds anything.
+
+    H2, SEVERITY. The VALUE of a reach edge depends on the height context - an
+    inch of reach on a shorter man is not worth an inch on a taller one. That is
+    an interaction, d_reach x d_height, and it IS a new direction: rank 3 against
+    the pair. This is the hypothesis the proposal actually describes, and the
+    only one of the two that can tell the tool something d_height could not.
+
+    THE DATA LIMIT, which is the finding that matters most. `loaders.py` imputes
+    reach from height for about 26% of fighters as reach = a + b * height. For
+    every one of them the ape index is EXACTLY the regression line - zero
+    residual by construction - and the interaction is a deterministic function of
+    height alone. Both arms would be partly fitting "was this reach imputed".
+    Restricted, therefore, to bouts where BOTH corners carry a measured reach.
+
+    PROTOCOL, fixed before any number exists. Time-ordered split, no shuffling.
+    Three arms on identical rows: WIN_FEATURES; + d_ape (H1); + d_ape and the
+    centred interaction (H2). Held-out log loss, bootstrap 95% interval and
+    P(better) - the protocol that rejected the style features at -0.0009,
+    95% CI [-0.0041, +0.0022], P(better) = 0.293.
+
+    DECISION RULE, also fixed in advance: adopt an arm only if its interval
+    excludes zero AND P(better) >= 0.95 AND it survives a re-run on a later
+    corpus. Otherwise record and leave the frozen fourteen alone. The prior is
+    against: reach effects in MMA are small, an interaction on a small effect is
+    smaller, and a result that merely leans is what noise looks like here.
+    """
+    import numpy as np
+    from sklearn.linear_model import LogisticRegression
+    from sklearn.preprocessing import StandardScaler
+    from sklearn.metrics import log_loss
+
+    if "reach_imputed" not in fighters.columns:
+        return {"error": "fighters table carries no reach_imputed flag; the test "
+                         "cannot separate measured reach from imputed"}
+    real = set(fighters.loc[~fighters.reach_imputed, "fighter_id"])
+
+    X, y, dates = [], [], []
+    for f, sa, sb, n_prior in walk(fights, fighters):
+        if min(n_prior) < 2 or f.winner not in ("r", "b"):
+            continue
+        if pd.Timestamp(f.date) < pd.Timestamp(min_date):
+            continue
+        if f.r_id not in real or f.b_id not in real:
+            continue
+        row = make_features(sa, sb)
+        row["d_ape"] = (sa["reach"] - sa["height"]) - (sb["reach"] - sb["height"])
+        row["_dr"] = sa["reach"] - sb["reach"]
+        row["_dh"] = sa["height"] - sb["height"]
+        X.append(row)
+        y.append(1 if f.winner == "r" else 0)
+        dates.append(f.date)
+
+    if len(X) < 800:
+        return {"error": f"only {len(X)} bouts with measured reach on both sides; "
+                         "too few to separate a residual effect from noise",
+                "n": len(X)}
+
+    d = pd.DataFrame(X)
+    d["_y"], d["_date"] = y, pd.to_datetime(dates)
+    d = d.sort_values("_date")
+    # Centred before multiplying, or the interaction proxies the main effects.
+    d["d_rxh"] = (d._dr - d._dr.mean()) * (d._dh - d._dh.mean())
+    cut = int(len(d) * 0.80)
+    tr, te = d.iloc[:cut], d.iloc[cut:]
+    yv = te._y.to_numpy()
+
+    def fit_score(cols):
+        sc = StandardScaler().fit(tr[cols])
+        m = LogisticRegression(max_iter=2000, fit_intercept=False)
+        m.fit(sc.transform(tr[cols]), tr._y)
+        return m.predict_proba(sc.transform(te[cols]))[:, 1]
+
+    base_cols = [c for c in WIN_FEATURES if c in d.columns]
+    preds = {"base": fit_score(base_cols),
+             "h1_net_length": fit_score(base_cols + ["d_ape"]),
+             "h2_severity": fit_score(base_cols + ["d_ape", "d_rxh"])}
+
+    rng = np.random.default_rng(seed)
+    boots = [rng.integers(0, len(yv), len(yv)) for _ in range(n_boot)]
+    out = {"n_bouts": int(len(d)), "n_test": int(len(te)),
+           "base_logloss": round(float(log_loss(yv, preds["base"])), 5),
+           "arms": {}}
+    for name in ("h1_net_length", "h2_severity"):
+        diffs = np.asarray([log_loss(yv[i], preds[name][i]) - log_loss(yv[i], preds["base"][i])
+                            for i in boots if len(set(yv[i])) > 1])
+        lo, hi = float(np.percentile(diffs, 2.5)), float(np.percentile(diffs, 97.5))
+        pb = float((diffs < 0).mean())
+        out["arms"][name] = {
+            "logloss": round(float(log_loss(yv, preds[name])), 5),
+            # negative delta = it helped
+            "delta": round(float(log_loss(yv, preds[name]) - log_loss(yv, preds["base"])), 5),
+            "ci95": [round(lo, 5), round(hi, 5)], "p_better": round(pb, 3),
+            "adopt": bool(hi < 0 and pb >= 0.95),
+        }
+    out["note"] = ("h1 is algebraically the same model as restoring d_height; only h2 "
+                   "is a new degree of freedom. adopt=True still requires a re-run on a "
+                   "later corpus before the frozen feature set is touched.")
+    return out
+
+
 def _init_states(fighters):
     st = {}
     for r in fighters.itertuples():
