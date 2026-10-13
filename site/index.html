@@ -2342,17 +2342,39 @@ function fbGrade(){
       if(pkey.has(k)) cov.onPick++;
       if(akey.has(k)) cov.onAny++;
     });
-    // the same card with the check's route weights, where reads exist
+    /* The same card with the check's route weights - and the MODEL re-run over
+       exactly the same bouts beside it.
+
+       The check arm can only draw cells from bouts carrying a read, so comparing
+       it against the model's whole-card arm compares two different universes.
+       On the cards in hand they happen to coincide (6 of 6, 9 of 9), which is
+       precisely why this had to be fixed before it bit: paste five bouts of ten
+       and the check arm is drawing from half the pool while the model arm draws
+       from all of it, and the column would read as a verdict on the check.
+
+       Same subset error as the card totals and the claims-called row. Third time
+       in one session, so it is written down as a rule: any time two sides are
+       put in adjacent columns, the first question is whether they were asked the
+       same question about the same bouts. */
     let ck=null;
-    let cpool=[], nCk=0;
-    bs.forEach(b=>{ const q=fbCanonCellsCk(b); if(q){ cpool=cpool.concat(q); nCk++; } });
+    let cpool=[], mpool=[], nCk=0;
+    bs.forEach(b=>{
+      const q=fbCanonCellsCk(b); if(!q) return;
+      const m=fbCanonCells(b); if(!m) return;
+      cpool=cpool.concat(q); mpool=mpool.concat(m); nCk++;
+    });
     if(nCk){
-      cpool.sort((x,y)=>y.p-x.p);
-      const cp=cpool.slice(0,FB_CANON.n);
+      cpool.sort((x,y)=>y.p-x.p); mpool.sort((x,y)=>y.p-x.p);
+      const cp=cpool.slice(0,FB_CANON.n), mp=mpool.slice(0,FB_CANON.n);
       ck={n:cp.length, nb:nCk,
           exp:cp.reduce((t,x)=>t+x.p,0),
-          hit:cp.filter(x=>fbLanded(x,res[x.bout])).length};
+          hit:cp.filter(x=>fbLanded(x,res[x.bout])).length,
+          mexp:mp.reduce((t,x)=>t+x.p,0),
+          mhit:mp.filter(x=>fbLanded(x,res[x.bout])).length,
+          full:(nCk===bs.length)};
       ckTot.n+=ck.n; ckTot.exp+=ck.exp; ckTot.hit+=ck.hit; ckTot.cards++;
+      ckTot.mexp=(ckTot.mexp||0)+ck.mexp; ckTot.mhit=(ckTot.mhit||0)+ck.mhit;
+      ckTot.nb=(ckTot.nb||0)+nCk;
     }
     tot.n+=pick.length; tot.exp+=exp; tot.hit+=hits.length;
     cards.push({event:c.event,date:c.date,nb:bs.length,n:pick.length,
@@ -2418,7 +2440,10 @@ function fbResults(){
     <td class="lbl">${c.hits.length?c.hits.map(h=>`${esc(surname(h.who))} ${
       h.fam==='ko'?'KO':'SUB'} r${h.r} <span style="color:var(--dim)">${pc(h.p)}</span>`).join('<br>')
       :'<span class="ckna">—</span>'}</td>
-    <td class="mono">${c.ck?c.ck.hit+' / '+c.ck.exp.toFixed(2):'<span class="ckna">—</span>'}</td></tr>`).join('');
+    <td class="mono">${c.ck?`${c.ck.mhit} / ${c.ck.mexp.toFixed(2)}`:'<span class="ckna">—</span>'}</td>
+    <td class="mono">${c.ck?`<b style="color:var(--gold)">${c.ck.hit}</b> / ${c.ck.exp.toFixed(2)}`
+      :'<span class="ckna">—</span>'}</td>
+    <td class="lbl">${c.ck?`${c.ck.nb}${c.ck.full?'':' of '+c.nb}`:''}</td></tr>`).join('');
   /* Round calibration, which is the diagnostic the early data actually points
      at. Shown as counts and not a curve: at these numbers a curve would draw a
      shape out of single-digit tallies. */
@@ -2465,7 +2490,9 @@ function fbResults(){
       not the live board's settings, so no control on this page can move this record</span></div>
     <table class="cktab"><thead><tr><th>card</th><th>cells</th><th>expected</th>
       <th>landed</th><th>which</th>
-      <th title="the same 25 with the check's route weights, where reads exist">check on<br>hit / exp</th></tr></thead>
+      <th title="the model's own cells, restricted to the bouts carrying a check read">model, same<br>bouts</th>
+      <th title="the same 25 cells with the check's route weights applied">check on<br>hit / exp</th>
+      <th title="how many bouts carried a read">bouts<br>read</th></tr></thead>
       <tbody>${rows}</tbody></table>
     <div class="note" style="margin-top:9px">
       <b style="color:var(--gold)">${T.hit} landed against ${T.exp.toFixed(2)} expected</b>
@@ -2479,6 +2506,39 @@ function fbResults(){
         taking seriously, and worth re-reading before acting on.`}
       ${G.ungraded?` ${G.ungraded} card${G.ungraded===1?'':'s'} carry no round split and cannot be graded.`:''}
     </div>
+    ${(()=>{
+      /* The check arm, stated as a matched comparison in words, because a pair
+         of adjacent columns is read as a verdict and this one is nowhere near
+         being one. Both arms here are over the SAME bouts - the ones carrying a
+         read - so the two numbers answer the same question. */
+      const K=G.ckTot; if(!K||!K.cards) return '';
+      const d=K.hit-K.mhit, de=K.exp-K.mexp;
+      return `<div class="note" style="margin-top:7px">
+        <b style="color:var(--gold)">With the check's route weights</b>, over the ${K.nb} bouts
+        carrying a read on ${K.cards} card${K.cards===1?'':'s'}: the check's 25 landed
+        <b style="color:var(--mute)">${K.hit} against ${K.exp.toFixed(2)} expected</b>, the model's
+        own 25 on those same bouts landed <b style="color:var(--mute)">${K.mhit} against ${
+        K.mexp.toFixed(2)}</b>. ${(()=>{
+          /* WHICH ARM WAS CLOSER, not which claimed more. The first draft read
+             "the check is more confident and no more often right" on identical
+             hits - which sounds like the extra confidence was unearned, and is
+             the opposite of what the figures beside it said: both arms
+             UNDER-called the hit count, so the HIGHER claim was the nearer one.
+             Caught before shipping. Recorded because a generated sentence that
+             contradicts the numbers next to it is the worst error this panel
+             can make - it is wrong in a voice that sounds measured. */
+          const dm=Math.abs(K.mhit-K.mexp), dc=Math.abs(K.hit-K.exp);
+          const closer=Math.abs(dm-dc)<0.25?null:(dc<dm?'check':'model');
+          const hits=d===0?'Identical hits':`${Math.abs(d)} ${Math.abs(d)===1?'pick':'picks'} apart`;
+          if(!closer) return `${hits}, and the two claims sit about equally far from what landed.`;
+          const under=K.hit>K.exp&&K.mhit>K.mexp;
+          return `${hits} — but <b style="color:var(--mute)">the ${closer}'s claim was closer to
+            what landed</b>${under?', and both under-called it':''}. ${closer==='check'
+              ? `That is the first evidence bearing on the 15-of-15 split: finishes arrived more
+                 often than the model expected, which is the direction the check reads them.`
+              : `The model's lower claim was the better prediction of how many would land.`}`;})()}
+        Both arms are restricted to the same bouts; comparing the check against the model's
+        whole-card record would compare two different sets of fights.</div>`;})()}
     <div class="fbg2">
       <div><div class="lbl" style="margin-bottom:4px">Did it have a cell on the finishes at all?</div>
         <div class="note" style="margin:0">Of <b style="color:var(--mute)">${G.cov.fin}</b> finishes on
