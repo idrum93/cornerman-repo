@@ -495,7 +495,8 @@
   .ckbig{font-size:20px;font-weight:800;line-height:1.2}
   .cksub{font-size:10.5px;color:var(--dim)}
   .cknote{font-size:11px;color:var(--dim);margin-top:7px}
-  .fbg2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:11px;align-items:start}
+  .fbg2{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:11px;align-items:start}
+  @media(max-width:1180px){.fbg2{grid-template-columns:1fr 1fr}}
   @media(max-width:700px){.fbg2{grid-template-columns:1fr}}
   /* The agreement mark. A thin left rule, not a ring: a gold ring around a pick
      is read as "this is a good one" whatever the caption says, and agreement was
@@ -1915,6 +1916,48 @@ function cardShapeStrip(){
       <div class="chist">${bars}</div>
       <div class="lbl" style="text-align:center">first-round finishes on the card</div>
       ${shapeNote}
+      ${(()=>{
+        /* DOES THE RATE MOVE WITH CARD SIZE?
+
+           Asked because the card with the most bouts also had the most
+           finishes. It would, almost tautologically - finishes scale with
+           bouts, so the count carries no information and only the per-bout RATE
+           can. Whether that rate moves is a real question with arguments both
+           ways: a big numbered card carries more ranked fighters, who may be
+           harder to finish; a prelim-heavy card carries more mismatches.
+
+           Note what is already known and is a different question:
+           `overdispersion` is 1.03, so card-to-card variance is what
+           independent bouts would give. There is no "finish night" clustering
+           to find. That says nothing about whether the RATE shifts with size,
+           which is what this table answers. */
+        const BS=(C&&C.by_size)||[];
+        if(!BS.length) return `<div class="note" style="margin-top:9px">
+          <b style="color:var(--mute)">Finish rate by card size</b> is not in this build's
+          base rates — it appears once the pipeline has run with the new
+          <span class="mono">baserates.py</span>.</div>`;
+        const lab=x=>x.hi==null?`${x.lo}+ bouts`:(x.lo===x.hi?`${x.lo} bouts`:`${x.lo}–${x.hi} bouts`);
+        const all=BS.reduce((t,x)=>t+x.fin_rate*x.bouts,0)/BS.reduce((t,x)=>t+x.bouts,0);
+        const spread=Math.max.apply(null,BS.map(x=>x.fin_rate))-Math.min.apply(null,BS.map(x=>x.fin_rate));
+        return `<div class="lbl" style="margin-top:12px">Finish rate by how many bouts the card carries</div>
+          <div style="overflow-x:auto"><table class="dtab" style="margin-top:5px">
+            <thead><tr><th>card size</th><th>cards</th><th>bouts</th><th>finish rate</th>
+              <th>round one</th></tr></thead><tbody>${BS.map(x=>`<tr><td>${lab(x)}</td>
+              <td class="mono">${x.cards}</td><td class="mono">${x.bouts.toLocaleString()}</td>
+              <td class="mono"${Math.abs(x.fin_rate-all)>=0.03?' style="color:var(--gold)"':''}>${
+                (100*x.fin_rate).toFixed(1)}%</td>
+              <td class="mono">${(100*x.r1_rate).toFixed(1)}%</td></tr>`).join('')}</tbody></table></div>
+          <div class="note" style="margin-top:6px">More bouts produce more finishes almost by
+            definition, so the COUNT carries no information — only this rate can.
+            ${spread<0.03?`Across these buckets it moves by under three points, so card size is not
+              worth carrying as a factor: the projection above, which simply adds each fight's own
+              finish chance, is already the right shape.`
+             :`It moves by <b style="color:var(--gold)">${(100*spread).toFixed(1)} points</b> across
+              these buckets, which is large enough to be worth a look before it is trusted — a
+              bucket is not a fitted effect, and card size correlates with who is on the card.`}
+            Separately, card-to-card variance is ${C.overdispersion!=null?`<b style="color:var(--mute)">${
+              C.overdispersion}×</b>`:''} what independent bouts would give, so there is no
+            "finish night" clustering on top of this.</div>`;})()}
       <div class="note" style="margin-top:9px">A typical card is
         ${C.bouts_median} bouts, of which <b>${C.r1_mean}</b> end in round one and
         <b>${C.fin_mean}</b> end inside the distance. Eight cards in ten land between
@@ -2336,7 +2379,37 @@ function fbAllocate(all0,d){
    Grading needs the round split, which history.json now carries per bout.
    Cards archived before that key existed simply do not grade, and are counted
    as such rather than silently dropped. */
-const FB_CANON={n:25};
+/* Two frozen questions, not one, and the hedge ratio is pinned HERE rather than
+   read from FB_HEDGE_MIN_RATIO - if that live constant were ever retuned, every
+   past card's spread record would silently move with it. */
+const FB_CANON={n:25, hedge:0.25};
+/* The spread allocation, reimplemented against the frozen constants. Hedge
+   first - the second pick in a bout is the other corner's best cell - then
+   depth, with bouts entered in finish order. */
+function fbCanonSpread(pool){
+  const by={};
+  pool.forEach(x=>{(by[x.bout]=by[x.bout]||[]).push(x);});
+  const ord=Object.keys(by).map(k=>{
+    const a=by[k].slice().sort((x,y)=>y.p-x.p);
+    let arr=a;
+    if(a.length){
+      const lead=a[0].who, i=a.findIndex(x=>x.who!==lead);
+      if(i>=1 && a[i].p>=a[0].p*FB_CANON.hedge){
+        arr=[a[0],a[i]]; a.forEach((x,j)=>{ if(j!==0&&j!==i) arr.push(x); });
+      }
+    }
+    return {arr:arr, fin:by[k].reduce((t,x)=>t+x.p,0)};
+  }).sort((a,b)=>b.fin-a.fin);
+  const out=[]; let i=0;
+  while(out.length<FB_CANON.n){
+    let placed=false;
+    for(const o of ord){ if(o.arr.length>i){ out.push(o.arr[i]); placed=true;
+      if(out.length>=FB_CANON.n) break; } }
+    if(!placed) break;
+    i++;
+  }
+  return out;
+}
 function fbCanonCells(b){
   const rv=b&&b.round_of_victory; if(!rv) return null;
   const R=b.rounds||3, out=[];
@@ -2378,6 +2451,9 @@ function fbGrade(){
   const H=(typeof HIST==='object'&&HIST&&HIST.cards)||null;
   if(!H||!H.length) return null;
   const cards=[], tot={n:0,exp:0,hit:0}, ckTot={n:0,exp:0,hit:0,cards:0};
+  const modeT={opt:{n:0,exp:0,hit:0}, spr:{n:0,exp:0,hit:0},
+               ckopt:{n:0,exp:0,hit:0}, ckspr:{n:0,exp:0,hit:0}};
+  const bandT=[0,1,2,3,4].map(()=>({n:0,exp:0,hit:0}));
   const cov={fin:0,onPick:0,onAny:0};
   const actR={}, expR={};
   let ungraded=0;
@@ -2390,6 +2466,29 @@ function fbGrade(){
     pool.sort((x,y)=>y.p-x.p);
     const pick=pool.slice(0,FB_CANON.n);
     const res={}; bs.forEach(b=>{res[b.bout]=b;});
+    /* The same cells allocated the other way. Both are frozen configurations,
+       so this is a SECOND fixed question rather than a setting - and both are
+       shown rather than toggled, because a toggle hides half the answer and
+       invites picking whichever arrangement reads better. */
+    const sprM=fbCanonSpread(pool);
+    /* Marginal value by band of five, FORWARD-LOOKING: the expectation each
+       slice of the ranking carries, from the probabilities rather than from
+       what happened. This replaces the thing it was asked for - "the fewest
+       picks that would have produced the same hits" - which is hindsight
+       wearing the clothes of guidance. Where a hit fell in the ranking on a
+       settled card says nothing about where the next one falls, and the
+       measured ranks say so plainly: 4, 7, 8, 8, 9, 14, 14, 16, 17, 20, with
+       three of ten at rank sixteen or deeper. */
+    for(let q=0;q<5;q++){
+      const seg=pick.slice(q*5,(q+1)*5); if(!seg.length) continue;
+      const B=bandT[q];
+      B.n+=seg.length; B.exp+=seg.reduce((t,x)=>t+x.p,0);
+      B.hit+=seg.filter(x=>fbLanded(x,res[x.bout])).length;
+    }
+    modeT.opt.n+=pick.length; modeT.opt.exp+=pick.reduce((t,x)=>t+x.p,0);
+    modeT.opt.hit+=pick.filter(x=>fbLanded(x,res[x.bout])).length;
+    modeT.spr.n+=sprM.length; modeT.spr.exp+=sprM.reduce((t,x)=>t+x.p,0);
+    modeT.spr.hit+=sprM.filter(x=>fbLanded(x,res[x.bout])).length;
     const hits=pick.filter(x=>fbLanded(x,res[x.bout]));
     const exp=pick.reduce((t,x)=>t+x.p,0);
     pick.forEach(x=>{expR[x.r]=(expR[x.r]||0)+x.p;});
@@ -2430,6 +2529,11 @@ function fbGrade(){
     if(nCk){
       cpool.sort((x,y)=>y.p-x.p); mpool.sort((x,y)=>y.p-x.p);
       const cp=cpool.slice(0,FB_CANON.n), mp=mpool.slice(0,FB_CANON.n);
+      const csp=fbCanonSpread(cpool);
+      modeT.ckopt.n+=cp.length; modeT.ckopt.exp+=cp.reduce((t,x)=>t+x.p,0);
+      modeT.ckopt.hit+=cp.filter(x=>fbLanded(x,res[x.bout])).length;
+      modeT.ckspr.n+=csp.length; modeT.ckspr.exp+=csp.reduce((t,x)=>t+x.p,0);
+      modeT.ckspr.hit+=csp.filter(x=>fbLanded(x,res[x.bout])).length;
       ck={n:cp.length, nb:nCk,
           exp:cp.reduce((t,x)=>t+x.p,0),
           hit:cp.filter(x=>fbLanded(x,res[x.bout])).length,
@@ -2450,7 +2554,7 @@ function fbGrade(){
      count is close to the expected count itself; the 0.9 is the (1-p) factor at
      these small p. Good to a tenth of a sd at this scale, which is far finer
      than the sample justifies reading. */
-  return {cards:cards,tot:tot,ckTot:ckTot,cov:cov,actR:actR,expR:expR,
+  return {cards:cards,tot:tot,ckTot:ckTot,modeT:modeT,bandT:bandT,cov:cov,actR:actR,expR:expR,
           ungraded:ungraded,z:(tot.hit-tot.exp)/Math.sqrt(Math.max(tot.exp*0.9,0.5))};
 }
 /* The route-level comparison between the check and the model.
@@ -2610,6 +2714,50 @@ function fbResults(){
           and the full eligible set held it for <b style="color:var(--mute)">${G.cov.onAny}</b>.
           The gap between those two is the cost of the 25-pick budget, not a modelling miss —
           they are different failures and they want different fixes.</div></div>
+      <div><div class="lbl" style="margin-bottom:4px">What each slice of the 25 is worth</div>
+        ${(()=>{
+          const B=G.bandT; if(!B||!B[0].n) return '<div class="note" style="margin:0">—</div>';
+          const tot=B.reduce((t,x)=>t+x.exp,0)||1;
+          const rows=B.map((x,i)=>!x.n?'':`<tr><td>cells ${i*5+1}–${i*5+5}</td>
+            <td class="mono">${x.exp.toFixed(2)}</td>
+            <td class="mono" style="color:${100*x.exp/tot>=20?'var(--gold)':'var(--mute)'}">${
+              (100*x.exp/tot).toFixed(0)}%</td>
+            <td class="mono" style="color:var(--dim)">${x.hit}</td></tr>`).join('');
+          const last=B[4].n?100*B[4].exp/tot:null;
+          return `<table class="cktab" style="margin-top:0"><thead><tr><th>band</th>
+              <th>expected</th><th>share</th><th title="too few to read; shown so the column is not hidden">landed</th></tr></thead>
+            <tbody>${rows}</tbody></table>
+          <div class="note" style="margin-top:5px">Forward-looking — from the probabilities, not from
+            where hits happened to fall. ${last!=null?`<b style="color:var(--mute)">No elbow</b>: the
+            last five cells still carry ${last.toFixed(0)}% of the expectation, so there is no rank
+            beyond which picks stop contributing. Cutting the count has a smooth cost, which is the
+            trade the picks box makes.`:''}
+            The <i>landed</i> column is far too thin to read and is here only so it accumulates —
+            if the deep bands keep under-landing across ten cards, that is a real finding about the
+            tail of the ranking.</div>`;})()}
+      </div>
+      <div><div class="lbl" style="margin-bottom:4px">Optimal against hedged spread</div>
+        ${(()=>{
+          const M=G.modeT; if(!M||!M.opt.n) return '<div class="note" style="margin:0">—</div>';
+          const row=(lab,o,sp)=>!o.n?'':`<tr><td>${lab}</td>
+            <td class="mono"><b style="color:${o.hit>=sp.hit?'var(--gold)':'var(--mute)'}">${o.hit}</b>
+              <span style="color:var(--dim)"> / ${o.exp.toFixed(2)}</span></td>
+            <td class="mono"><b style="color:${sp.hit>=o.hit?'var(--gold)':'var(--mute)'}">${sp.hit}</b>
+              <span style="color:var(--dim)"> / ${sp.exp.toFixed(2)}</span></td></tr>`;
+          const dM=M.opt.hit-M.spr.hit, dC=M.ckopt.hit-M.ckspr.hit;
+          return `<table class="cktab" style="margin-top:0"><thead><tr><th>arm</th>
+              <th>optimal<br>hit / exp</th><th>hedged spread<br>hit / exp</th></tr></thead>
+            <tbody>${row('model',M.opt,M.spr)}${row('check on',M.ckopt,M.ckspr)}</tbody></table>
+          <div class="note" style="margin-top:5px">Both are FROZEN configurations, so this is a
+            second fixed question rather than a setting — and both are shown rather than toggled,
+            because a toggle hides half the answer and invites keeping whichever arrangement reads
+            better. ${(dM===0&&dC===0)?'Level so far.':
+              `Spread is ${Math.abs(dM)||Math.abs(dC)} behind on realized hits in
+               ${(dM>0&&dC>0)?'both arms':'one arm'}, which at this sample is noise — the
+               <b style="color:var(--mute)">direction</b> matches the swept expectation, the
+               <b style="color:var(--mute)">margin</b> does not mean anything yet.`}
+            Spread covers more bouts by construction; it does not land more.</div>`;})()}
+      </div>
       <div><div class="lbl" style="margin-bottom:4px">Which round the finishes came in</div>
         <table class="cktab" style="margin-top:0"><thead><tr><th>round</th>
           <th title="share of all finishes on graded cards that came in this round">finishes<br>came</th>
