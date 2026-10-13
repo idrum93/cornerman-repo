@@ -5966,3 +5966,312 @@ each do one legible thing beat four where two overlap.
 
 **Not built.** The finding is recorded so it is not re-proposed: this is now
 the second sweep to reject it, on a different eligible set, by a wider margin.
+
+# Addendum 53: the missing division, and a promotion-tier list declined (2026-10-12)
+
+## The missing division is not a scraper bug
+
+Reported: a check-only bout — no model read — showed the POOLED league mix in
+"how they have been beaten" rather than its division's.
+
+The cause is structural, and worth stating because it looks like something to
+fix upstream and is not. `data/upcoming.txt` is regenerated from Wikipedia on
+every refresh. When the card itself does not name a division, `infer_division`
+falls back to the most recent REAL division each fighter fought in, skipping
+catchweights. That fallback returns `""` only when NEITHER fighter has a prior
+bout in a known division — a debutant. And the same absence of fight history is
+why the model declines to read the bout at all.
+
+**One cause, two symptoms.** There is nothing upstream to scrape, and editing
+`upcoming.txt` by hand does not survive the next refresh — the same constraint
+that produced `data/corner_order.txt` as a separate override file.
+
+### Why it mattered more than it looked
+
+This is the error addendum 50 caught in a different place. Falling back to
+pooled is not a mild approximation:
+
+| base | ko | sub | n |
+|---|---|---|---|
+| pooled | .319 | .177 | 6,866 |
+| Heavyweight | .506 | .127 | 510 |
+
+**A 19-point error on KO and 5 on submission**, in the column a fighter's loss
+mix is compared AGAINST. As addendum 50 put it, the above/below flag could point
+the wrong way — which is worse than no flag. A debutant heavyweight was being
+measured against a league that is 60% flyweights and bantamweights by volume.
+
+### The fix
+
+A division picker in the check panel, shown **only** when the card states none.
+Options come from `baserates.json`'s own division list, so a value that cannot
+resolve cannot be entered. Stored per bout in `SBOX`.
+
+Three properties it has on purpose:
+
+- **It never writes into `DATA`.** Verified: `b.weight_class` stays null after a
+  pick. Nothing captured, graded or exported inherits an operator's guess as if
+  the card had stated it.
+- **It is marked as the operator's.** Gold dashed border, "yours, not the
+  card's", and "(set)" beside it on the finish board. A borrowed number that
+  looks like a scraped one is exactly the failure to avoid.
+- **It commits on change, not on "Read both"**, because it changes which league
+  every number in the panel is compared against; and **Clear does not clear it**,
+  because clearing a bad paste should not cost a fact about the card.
+
+Confirmed end to end in the browser: pooled `{div:null, n:6866, ko:.319}` →
+`{div:"Heavyweight", n:510, ko:.506}`, persisted across reload, no page errors.
+The panel already names the division it used, so setting it is self-confirming.
+
+## A five-tier promotion list, considered and declined
+
+Supplied: an LLM-generated ranking of MMA promotions into five tiers — UFC/PFL/
+ONE at the top, through regional and amateur — with the question of whether the
+0.5 tier weight is being assigned properly.
+
+**Declined, for two reasons that are different from each other.**
+
+### 1. It ranks the wrong axis
+
+`espnTier()` is not a stature rating. It is an **exchangeability** rating with
+respect to the thing being predicted: UFC fights. The question each fight in a
+history has to answer is "how much does this tell me about what happens in the
+Octagon", and by that measure a PFL or ONE knockout is not equal evidence to a
+UFC one however major those promotions genuinely are. Promoting them to 1.0
+because they are "global elite" would be a category error — correct on stature,
+wrong on the only axis the weight exists to express.
+
+### 2. It converts one unmeasured constant into four
+
+The 0.5 is already flagged in addendum 50 as **declared, not fitted**, and
+registered there as a candidate with a stated test: for fighters holding both
+regional and UFC records, the ratio of regional finish rate to UFC finish rate
+implies the weight directly. That test has not been run (the UFCStats CSVs are
+not in the repo).
+
+Replacing one declared constant with a four-step declared ladder does not move
+it closer to measured. It makes it **look** calibrated while adding three more
+unfitted parameters, each of which would then need its own test. This project's
+own rule applies: a weight moved to make a number look better is the same error
+as a gate keyed to the price.
+
+### What the list did surface, and is worth a check
+
+The binary classifier sends **everything that is not UFC/TUF/Contender Series to
+0.5**, which means an amateur bout — if one appears in an ESPN history table —
+counts the same as a Cage Warriors bout. The Wikipedia parser already excludes
+amateur records explicitly (`wiki record parser` test: "3 pro rows parsed,
+amateur excluded"); the ESPN path has no equivalent exclusion.
+
+ESPN's fight-history tables are believed to be professional-only, so this may be
+a non-issue. **Registered as a check, not a change**: if an amateur row is ever
+observed in a pasted ESPN history, amateur goes to 0, not 0.5 — it is not weaker
+evidence about UFC performance, it is evidence about a different sport's
+qualifying tier. Not acted on before it is observed.
+
+## Addendum 51, amendment 15 (2026-10-12): two more exclusion axes, and what they do NOT do
+
+Requested: switch off a single cell (one bout, one round), and switch off a
+round across the whole card, with the freed picks redistributing.
+
+Built. It joins the per-bout switch from amendment 9, so the board now has three
+exclusion axes: bout, round, cell.
+
+### The line this does not cross
+
+An exclusion is **not a claim about probability**. Switching off round 3 does not
+say round 3 is less likely than the model has it, and nothing here reweights
+anything. The cell keeps the probability it had; it is simply not somewhere the
+operator will put money, and the 25 go to the next best cells that are.
+
+That distinction is the entire reason this was safe to build. An exclusion that
+quietly rescaled the remaining cells would be a model change wearing a checkbox,
+and the board would stop meaning what its header says. Verified on screen: with
+round 3 off the `finish` column still reads 59% / 53% / 51%, unchanged, because
+it is computed from the full eligible set and not from the picked one.
+
+### The cost, stated because the control has one
+
+Exclusions can only make the slate worse on its own terms — they remove cells by
+preference and backfill with weaker ones. Measured live at the `all` floor:
+
+| state | expected hits | P(nothing lands) |
+|---|---|---|
+| nothing excluded | 1.5 | 15% |
+| one cell off | 1.5 | 17% |
+| one cell + round 3 off | 1.4 | 20% |
+
+**Five points of bust risk for one round.** That is not an argument against the
+control — a bet you do not want to make is worth more than 5 points of anything
+— but it is the number, and the board should not hide it. The header already
+recomputes both figures, so the cost is visible at the moment of the click.
+
+### Three decisions inside it worth recording
+
+**The excluded cell still renders.** The obvious implementation drops it and lets
+it show as "—", which is wrong twice over: an excluded cell becomes
+indistinguishable from a bout that never had a pick there, and there is nothing
+left to click to put it back. Excluded cells keep their place, struck through,
+carrying what they would have been worth.
+
+**The round switch wins over the per-cell one, and says so.** A cell held off by
+its column is drawn dimmer, is not clickable, and its tooltip names the round
+switch. A control that appears clickable and does nothing is worse than one that
+is visibly disabled.
+
+**Lifetimes differ on purpose.** Cell exclusions are judgements about one fight,
+so they are pruned to the current card's bouts, the same way SBOX is — the store
+cannot grow across a season. Round exclusions are a standing betting preference
+("I do not bet round 5"), so they persist; and because a preference you have
+forgotten is worse than one you have to re-enter, the panel names every
+switched-off round in words rather than only striking the column.
+
+A shortfall line was added with them: when exclusions and the floor together
+leave fewer than `FB_N` eligible cells, the panel says so explicitly. "19 picks"
+in the header does not explain why it is not 25, and the honest answer — the
+rest are **not being spent** rather than being spent on worse cells — is the
+one worth showing.
+
+### Not built: a fourth axis
+
+Per-method exclusion within a cell (take the KO in round 3, not the submission)
+was considered and left out. The request was for a round in a bout, the cell is
+the unit the board is drawn in, and a fourth axis interacting with three others
+is how an instrument becomes a form. Registered as available if wanted; not
+added speculatively.
+
+# Addendum 54: the finish board graded, and the check-model offset (2026-10-12)
+
+Four things from one session: a graded record for the finish board, a coverage
+and round-calibration decomposition, a route-level comparison between the check
+and the model, and a concurrence mark. The last of those is the smallest and the
+third is the one that matters.
+
+## The integrity problem, solved before anything was built
+
+The obvious implementation grades "what the board picked" by running the LIVE
+board over an archived card. That is wrong in a way that would not look wrong:
+the board's picks depend on the floor, the pick count, the mode and the
+exclusions, so turning a knob today would silently rewrite what the record says
+was picked in September. **It is the ledger-you-can-edit problem in a new
+costume** — and this project's standing rule is that a ledger you can edit is a
+ledger you will edit.
+
+So grading runs against a FROZEN configuration that reads none of the live
+controls: the top 25 cells, every bout eligible, no exclusions, no hedging. One
+fixed question asked of every card — *are the model's biggest 25 finish cells
+calibrated* — and no setting on the page can move the answer.
+
+## It backfills, which is why it was worth building now
+
+`history.json` already carried winner, method and round per bout; it did not
+carry the round split to grade them against. One key added to the graded row in
+`upcoming.py` fixes that, and because `grade_archive()` re-grades every archived
+card from scratch on each run, **the whole existing record backfills on the next
+pipeline pass** rather than starting from zero. Cost measured at +2.3 KB per
+card, about 90 KB a year.
+
+## What it says so far, which is not much
+
+| card | cells | expected | landed |
+|---|---|---|---|
+| Allen vs. Duncan | 25 | 1.68 | 3 |
+| UFC 332 | 25 | 2.19 | 5 |
+| UFC 331 | 25 | 2.19 | 2 |
+| **total** | **75** | **6.06** | **10** |
+
+13.3% actual against 8.1% predicted — **+1.7 sd, which is not a result.** The
+panel says so in those words. At roughly two expected hits a card it takes about
+eleven cards to confirm a rate this far off and some eighty to catch a 20%
+miscalibration, and a panel that let "10 against 6.06" read as the model beating
+its own numbers would be worse than no panel.
+
+### Coverage, which is the better early number
+
+Of 15 finishes on graded cards, the 25 picks held the exact cell for **10**; the
+full eligible set held it for **15 of 15**. The model has not once failed to put
+weight on the cell that happened. The gap is the cost of the 25-pick budget, not
+a modelling miss — different failures, different fixes, and a hit rate alone
+cannot tell them apart.
+
+### Round shape, which is where the early signal is
+
+| round | finishes came | board weighted | gap |
+|---|---|---|---|
+| 1 | 67% (10) | 55% (3.31) | **+12** |
+| 2 | 13% (2) | 40% (2.41) | **−26** |
+| 3 | 13% (2) | 6% (0.34) | +8 |
+| 5 | 7% (1) | 0% | +7 |
+
+The round-two column is the sharp one: the board puts **40% of its weight in
+round two and 13% of finishes arrived there**. Direction matches the recorded
+finding that P(round one | finish) climbs 0.402 to 0.569 across decision-share
+buckets. Fifteen finishes settles nothing. Registered as the first thing to
+re-read at ten graded cards.
+
+Only the SHARES compare, and the panel says so: the left column is every finish
+that happened, the right is expected hits inside 25 selected cells. Printing the
+raw counts side by side without that warning would invite a comparison between
+two different kinds of quantity.
+
+## The route offset — the real finding
+
+The check and the model were compared at the **route** level (`a_ko`, `a_sub`,
+`b_ko`, `b_sub`, `dec`), and the level is the whole point. With the check on, a
+cell is the model's round shape times the check's route total: the round
+dimension is entirely the model's, the route dimension entirely the check's.
+Comparing cell by cell would compare a number with itself.
+
+On 15 bouts carrying a check read:
+
+| | gap (check − model) | direction |
+|---|---|---|
+| decision share | **−15.3 pts** | check lower in **15 of 15** |
+| KO/TKO routes | +6.2 pts over 30 | — |
+| SUB routes | +1.5 pts over 30 | — |
+
+**Fifteen of fifteen in one direction is p ≈ 0.00003.** The two sources do not
+disagree at random about how often fights end: the check reads finishes about
+fifteen points hotter than the model, flowing into knockouts far more than
+submissions. One of them is wrong, and the graded record is what will say which.
+
+Caveat recorded on the panel itself: these are the bouts the operator chose to
+paste, not a random sample, so selection cannot be excluded — though a clean
+15/15 on direction is hard to produce from selection alone.
+
+## Concurrence marked, and deliberately not promoted
+
+Tested first, on 36 graded routes:
+
+| | n | landed | they said |
+|---|---|---|---|
+| agree ≤3 pts | 8 | 1 (12.5%) | ~9% |
+| disagree >3 pts | 28 | 6 (21.4%) | ~16% |
+
+Both land about what they claimed. **Agreement carries no information about
+whether a pick is better** — the apparent edge for disagreement is entirely that
+disagreed routes carry higher probabilities. Weak at n=36, but there is certainly
+no evidence for the intuition that convergence means confidence.
+
+So the mark is a **thin left rule, not a ring**. A gold ring around a pick reads
+as "this is a good one" whatever the caption says, and that reading is not
+supported. The caption on the board states in words that it is concurrence only.
+
+`FB_AGREE = 0.03` is declared, not fitted.
+
+One consequence worth recording: on the live card only 1 of the 25 picks carries
+the mark while 38 of 152 eligible cells do. **Picks concentrate on disagreement**,
+because a route the check pushes above the model is exactly what lifts its cells
+up the ranking. The board is, structurally, mostly betting the check's
+disagreements with the model.
+
+## Placement
+
+The graded panel sits in the **Last card** zone, not on the board. The board is
+the instrument bets are placed with; the record of whether it works is a
+retrospective, and mixing them makes the slate harder to read without making the
+record easier to find.
+
+The single exception is carried up: one sentence of accumulated calibration sits
+in the board's own note, because that number should change how confident you are
+while you are choosing. The per-card table should not be in the way while you do.

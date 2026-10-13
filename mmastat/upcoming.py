@@ -1216,6 +1216,21 @@ def _grade_bout(b, row, a_is_red, base):
            # model inputs that were never saved.
            "m_decision": b.get("m_decision"), "p_end_r1": b.get("p_end_r1"),
            "fin": b.get("fin"),
+           # The round-by-round split, carried so the finish board can be graded
+           # in the browser against what actually happened. history.json already
+           # holds winner/method/round; without the split there is nothing to
+           # grade them against, and the board would have to start its record
+           # from zero instead of from every card already archived.
+           #
+           # grade_archive() re-grades every archived card from scratch on each
+           # run, so adding this key backfills the whole record on the next pass
+           # rather than only applying to cards from here on.
+           #
+           # Pruned and rounded: cells under 0.05% are dropped and the rest go
+           # to four places. Measured at +2.3 KB per card, ~90 KB a year.
+           "round_of_victory": ({k: round(float(v), 4)
+                                 for k, v in (b.get("round_of_victory") or {}).items()
+                                 if float(v) > 0.0005} or None),
            "winner": a if a_won else bb, "method": meth, "round": rnd,
            "seconds": int(row.total_sec), "model_right": bool((b["p_a"] > 0.5) == a_won),
            "p_winner_model": round(p_win_model, 3), "report": rep,
