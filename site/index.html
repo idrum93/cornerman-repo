@@ -2751,6 +2751,47 @@ const FB_AGREE=0.03;     // declared, not fitted: three points is "the same read
    that belongs beside the picks - the accumulated calibration, in a sentence -
    is carried up to the board's own note instead, because that is the number
    that should change how confident you are while you are choosing. */
+/* DOES A FIGHT CALLED LIKELY TO FINISH ACTUALLY FINISH?
+
+   The most basic question the finish side rests on, and nothing on the page was
+   asking it. `track_record.json` carried winner, takedown, knockdown and ranges
+   — nothing for the finish probability itself, so "60% finish" was published
+   with no evidence anywhere that 60% means 60%.
+
+   The data was already there and unused: every graded bout carries a "Go the
+   distance" prop with the model's own number, so 1 - said is its finish
+   probability and the result is already scored beside it.
+
+   Bands, not a correlation. The question is calibration - does the number mean
+   what it says at each level - and a single r would hide a model that orders
+   fights correctly while sitting systematically low, which is what these cards
+   currently suggest. */
+function fbFinishCal(){
+  const H=(typeof HIST==='object'&&HIST&&HIST.cards)||null; if(!H) return null;
+  const rows=[];
+  H.forEach(c=>(c.bouts||[]).forEach(g=>{
+    (g.report||[]).forEach(r=>{
+      if(r.kind!=='prop') return;
+      if(String(r.label||'').toLowerCase()!=='go the distance') return;
+      if(r.said==null) return;
+      rows.push({p:1-(+r.said), fin:!r.happened, base:1-(+r.base||0.504)});
+    });
+  }));
+  if(rows.length<8) return null;
+  const bands=[[0,.40,'under 40%'],[.40,.50,'40–50%'],[.50,.60,'50–60%'],[.60,1.01,'60% and up']]
+    .map(([lo,hi,lab])=>{
+      const q=rows.filter(x=>x.p>=lo&&x.p<hi);
+      if(!q.length) return null;
+      return {lab:lab, n:q.length, fin:q.filter(x=>x.fin).length,
+              said:q.reduce((t,x)=>t+x.p,0)/q.length};
+    }).filter(Boolean);
+  const n=rows.length, fin=rows.filter(x=>x.fin).length;
+  const said=rows.reduce((t,x)=>t+x.p,0)/n;
+  const sd=Math.sqrt(rows.reduce((t,x)=>t+x.p*(1-x.p),0))||1;
+  const br=rows.reduce((t,x)=>t+Math.pow(x.p-(x.fin?1:0),2),0)/n;
+  const bb=rows.reduce((t,x)=>t+Math.pow(x.base-(x.fin?1:0),2),0)/n;
+  return {n:n, fin:fin, said:said, bands:bands, z:(fin-said*n)/sd, brier:br, base:bb};
+}
 function fbResults(){
   const G=fbGrade();
   if(!G) return '';
@@ -2866,6 +2907,27 @@ function fbResults(){
               : `The model's lower claim was the better prediction of how many would land.`}`;})()}
         Both arms are restricted to the same bouts; comparing the check against the model's
         whole-card record would compare two different sets of fights.</div>`;})()}
+    ${(()=>{
+      const C=fbFinishCal(); if(!C) return '';
+      const P0b=x=>Math.round(100*x)+'%';
+      return `<div class="note" style="margin-top:9px;padding:8px 10px;border:1px solid var(--line);border-radius:6px">
+        <b style="color:var(--gold)">Does a fight called likely to finish actually finish?</b>
+        <table class="cktab" style="margin-top:5px"><thead><tr><th>the model said</th><th>bouts</th>
+          <th>avg said</th><th>finished</th></tr></thead><tbody>${C.bands.map(b=>`<tr>
+          <td>${b.lab}</td><td class="mono">${b.n}</td>
+          <td class="mono" style="color:var(--dim)">${P0b(b.said)}</td>
+          <td class="mono" style="color:${b.fin/b.n>=b.said?'var(--gold)':'var(--mute)'}">${
+            b.fin}/${b.n} · ${P0b(b.fin/b.n)}</td></tr>`).join('')}</tbody></table>
+        <div style="margin-top:6px"><b style="color:var(--mute)">${C.fin} of ${C.n}</b> finished —
+          ${P0b(C.fin/C.n)} against ${P0b(C.said)} claimed, <b style="color:var(--mute)">${
+          C.z>=0?'+':''}${C.z.toFixed(1)} sd</b>. Brier <b style="color:var(--mute)">${
+          C.brier.toFixed(3)}</b> against <b style="color:var(--mute)">${C.base.toFixed(3)}</b> for
+          always saying the league rate — ${C.brier<C.base
+            ? 'the model is ahead of that control.'
+            : '<b style="color:var(--warn)">the flat league rate is currently scoring better</b>, which on this sample is the level being low rather than the ordering being wrong.'}
+          ${Math.abs(C.z)<2?' At this many bouts none of it is a finding; it is the shape to watch.':''}
+          A proper held-out version on the full corpus arrives in
+          <span class="mono">track_record.json</span> with the next pipeline run.</div></div>`;})()}
     <div class="fbg2">
       <div><div class="lbl" style="margin-bottom:4px">Did it have a cell on the finishes at all?</div>
         <div class="note" style="margin:0">Of <b style="color:var(--mute)">${G.cov.fin}</b> finishes on
@@ -3422,8 +3484,25 @@ function render(){
               </div>`;
             }
           }
+          /* The book's line on a bout the model declined. These are the only
+             bouts where the check has had nothing to be measured against, so
+             this is the single place the pasted price earns the most. */
+          /* Built with plain concatenation, not a nested template. This sits
+             three template literals deep already and a fourth, with an IIFE
+             inside it, failed to parse - taking the entire script with it, so
+             the page rendered blank rather than wrong. Depth is a cost. */
+          const fd=fdFor({a:n.a,b:n.b});
+          let fdline='';
+          if(fd){
+            const ckp=(typeof ckP==='function')?ckP({bout:key,a:n.a,b:n.b}):null;
+            const gapTxt=(ckp==null)?'':(' \u00b7 check is '
+              +(Math.round(100*(ckp-fd.p))>=0?'+':'')+Math.round(100*(ckp-fd.p))
+              +' on '+esc(surname(n.a)));
+            fdline='<div class="lbl" style="margin-top:4px;color:var(--gold)">book '
+              +P0(fd.p)+'/'+P0(1-fd.p)+gapTxt+'</div>';
+          }
           return `<button class="noread nr-open" data-nr="${esc(key)}"><b>${esc(n.a)}</b> vs. <b>${esc(n.b)}</b>
-          <div class="lbl" style="margin-top:4px">No read — ${esc(n.reason)} · ${sum||dial?'your UFC.com read, not the model':'add UFC.com stats'}</div>${dial}${sum}</button>`;
+          <div class="lbl" style="margin-top:4px">No read — ${esc(n.reason)} · ${sum||dial?'your UFC.com read, not the model':'add UFC.com stats'}</div>${fdline}${dial}${sum}</button>`;
         }).join('')}</div></div>`;
   }).join('');
   const filt=`<div class="filt">
@@ -3436,7 +3515,7 @@ function render(){
   const lc=HIST&&HIST.cards&&HIST.cards[0];
   document.getElementById('app').innerHTML=nav+
     zone('z-up','z-upcoming','Upcoming card',`${esc(d.event||'')} · ${d.bouts.length} bouts modeled`,
-      ckStrip()+ckIO()+strip()+filt+segs+finishBoard(d))+
+      ckStrip()+ckIO()+fdPanel(d)+strip()+filt+segs+finishBoard(d))+
     zone('z-res','z-results', lc?`Last card — ${esc(lc.event)}`:'Last card',
       (lc&&lc.date?`${dayET(lc.date)} · `:'')+
       'graded against what happened · click any fight',
@@ -4163,6 +4242,18 @@ document.addEventListener('keydown',function(e){
   if(fbToggleFrom(t)){ if(typeof render==='function') render(); }
 });
 document.addEventListener('click',function(e){
+  if(e.target.closest&&e.target.closest('.fdclear')){
+    FDO={}; fdSave(); if(typeof render==='function') render(); return; }
+});
+document.addEventListener('change',function(e){
+  const t=e.target;
+  if(!t.classList||!t.classList.contains('fdpaste')) return;
+  const r=fdApply(t.value);
+  t.value='';
+  if(typeof render==='function') render();
+  if(!r.n) alert('No bouts read from that paste. Expected: two linked names, then two American prices, then the time.');
+});
+document.addEventListener('click',function(e){
   const x=e.target.closest&&e.target.closest('.ckexp,.ckimp');
   if(!x) return;
   e.preventDefault();
@@ -4180,6 +4271,149 @@ document.addEventListener('click',function(e){
    is a gradeable record, so buttons living there would be invisible on a
    browser with no reads - which is precisely the browser someone restoring a
    backup is sitting at. The import has to exist before the record does. */
+/* ------------------------------------------------- a pasted sportsbook line
+
+   WHAT THIS CAN AND CANNOT DO, first, because the request was to use it to make
+   the finish board "as precisely adjusted as possible" and a moneyline cannot do
+   that. A moneyline is P(this man wins). It carries NO information about whether
+   the fight finishes, so it cannot touch the level error the graded cards keep
+   pointing at. What it does do:
+
+     - the six check-only bouts on a typical card have no price at all. They are
+       exactly the bouts the model declined, so the check is the only read on
+       them and there has been nothing to check it against. This closes that.
+     - a winner probability REDISTRIBUTES finish probability between the corners.
+       It changes which man's routes are the big ones, not whether the fight ends
+       early - useful for route-level picks, useless for the finish rate.
+     - it accumulates toward the registered CLV threshold.
+
+   The line that WOULD calibrate the finish side is the book's "goes the
+   distance" / total-rounds market, not the moneyline. Said on the panel.
+
+   IT NEVER OVERWRITES `p_market`. That comes from the feed with its own as-of
+   discipline; a pasted price is the operator's, at an unknown moment. Stored and
+   displayed separately, or this becomes the editable-ledger problem again. */
+const FD_KEY='cornerman.fdodds.v1';
+let FDO=(function(){ try{ return JSON.parse(localStorage.getItem(FD_KEY)||'{}')||{}; }
+  catch(e){ return {}; } })();
+const fdImp=o=>o<0 ? (-o)/((-o)+100) : 100/(o+100);
+function fdParse(text){
+  const L=String(text||'').split(/\n+/).map(x=>x.trim()).filter(Boolean);
+  const nm=s=>{const m=/^\*?\s*\[([^\]]+)\]/.exec(s); return m?m[1].trim():null;};
+  const am=s=>{const m=/^([+-]\d{3,5})$/.exec(String(s).replace(/\s/g,'')); return m?+m[1]:null;};
+  /* A day-of-week or "More wagers" line is a LABEL wearing the same markdown
+     shape as a fighter. Without this the parser pairs "Sat 5:10pm ET" with the
+     next bout's first fighter and then reads two prices that belong to neither. */
+  const lab=s=>/^(mon|tue|wed|thu|fri|sat|sun)\b|more wagers/i.test(
+    String(s).replace(/^\*?\s*\[/,''));
+  const out=[]; let i=0;
+  while(i<L.length){
+    const a=nm(L[i]), b=nm(L[i+1]||'');
+    if(a&&b&&!lab(L[i])&&!lab(L[i+1])){
+      const pa=am(L[i+2]||''), pb=am(L[i+3]||'');
+      if(pa!=null&&pb!=null){
+        const ia=fdImp(pa), ib=fdImp(pb), sum=ia+ib;
+        /* VIG GATE. A correct two-way book sums to about 1.03-1.10. Anything
+           outside that means the two prices do not belong to each other - the
+           commonest symptom of a paste whose shape drifted - so the row is
+           dropped rather than de-vigged into a confident wrong number. */
+        if(sum>=1.00&&sum<=1.18) out.push({a:a,b:b,oa:pa,ob:pb,p:ia/sum,vig:sum-1});
+        i+=4; continue;
+      }
+    }
+    i++;
+  }
+  return out;
+}
+const fdSurname=s=>String(s||'').trim().split(/\s+/).pop().toLowerCase();
+function fdKeyOf(a,b){ return [fdSurname(a),fdSurname(b)].sort().join('::'); }
+function fdSave(){ try{ localStorage.setItem(FD_KEY, JSON.stringify(FDO)); }catch(e){} }
+/* Matched on the pair of surnames, order-insensitive, which is the same join the
+   sandbox migration uses - the book and the card disagree about first names
+   often enough ("Timothy" against "Timmy", "Marc-Andre" against "Marc Andre")
+   that matching on the full string drops real rows. */
+function fdFor(b){
+  if(!b) return null;
+  const r=FDO[fdKeyOf(b.a,b.b)];
+  if(!r) return null;
+  // the stored p is for whichever corner the BOOK listed first
+  const flip=fdSurname(r.a)!==fdSurname(b.a);
+  return {p:flip?1-r.p:r.p, oa:flip?r.ob:r.oa, ob:flip?r.oa:r.ob, vig:r.vig, ts:r.ts};
+}
+function fdApply(text){
+  const rows=fdParse(text);
+  let n=0;
+  rows.forEach(r=>{ FDO[fdKeyOf(r.a,r.b)]={a:r.a,b:r.b,oa:r.oa,ob:r.ob,p:r.p,
+                                           vig:r.vig,ts:Date.now()}; n++; });
+  if(n) fdSave();
+  return {n:n, rows:rows};
+}
+/* IS THE PASTE BETTER THAN THE FEED? Neither dominates, and the panel says so
+   rather than quietly picking.
+
+   RECENCY: the paste wins, and by a lot. On the live payload `generated_utc` is
+   2026-10-11 against a card on the 17th - the consensus is days old while a
+   paste is from the moment it was made.
+
+   BREADTH: the feed wins. `market_source` is the-odds-api at 15 to 20 books a
+   bout; FanDuel is one. A single book's line is not strictly sharper than a
+   twenty-book consensus, it is a different object with its own lean.
+
+   So a gap between them is EITHER staleness OR a FanDuel lean, and which one it
+   is cannot be read off the number. Both are shown with the feed's age stated,
+   because the one thing that would be wrong is to let the fresher number
+   silently replace the broader one.
+
+   NOTHING GRADED MOVES. `b.edge` and `p_market` are pipeline data with their own
+   as-of stamp; the paste is shown beside them and never into them. */
+function fdAgeDays(d){
+  const t=Date.parse((d&&d.generated_utc)||'');
+  return isFinite(t)?(Date.now()-t)/86400000:null;
+}
+/* A price pasted AFTER the fights is not a forecast, the same rule CKR applies
+   to a check read. Stored with its timestamp and marked, not silently counted. */
+function fdPost(d,r){
+  const ev=Date.parse(((d&&d.date)||'')+'T00:00:00Z');
+  return (r&&r.ts!=null&&isFinite(ev))?(r.ts>=ev+36*3600*1000):false;
+}
+function fdPanel(d){
+  const uni=(d.bouts||[]).concat(((d&&d.no_read)||[]).map(n=>sbSynthetic(n)));
+  const hit=uni.map(b=>({b:b,fd:fdFor(b)})).filter(x=>x.fd);
+  const noPrice=hit.filter(x=>x.b.p_market==null);
+  const age=fdAgeDays(d);
+  const gaps=hit.filter(x=>x.b.p_market!=null&&Math.abs(x.fd.p-x.b.p_market)>=0.05);
+  const nBooks=(()=>{const q=(d.bouts||[]).map(b=>b.books).filter(v=>v>0);
+    return q.length?Math.round(q.reduce((t,v)=>t+v,0)/q.length):null;})();
+  const post=hit.filter(x=>fdPost(d,x.fd));
+  return `<div class="ckio" style="align-items:flex-start;flex-direction:column">
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;width:100%">
+      <span class="lbl" style="margin:0">sportsbook line</span>
+      <span class="lbl" style="margin:0;color:var(--dim)">paste the card's moneylines —
+        ${hit.length?`<b style="color:var(--gold)">${hit.length} matched</b>${
+          noPrice.length?`, <b style="color:var(--gold)">${noPrice.length}</b> of them on bouts with no feed price`:''}`
+        :'none stored yet'}</span>
+      <button class="ckbtn fdclear" style="margin-left:auto">clear</button></div>
+    <textarea class="sbta fdpaste" rows="2" placeholder="paste the FanDuel card list here — names, then the two prices, then the time"></textarea>
+    <div class="note" style="margin-top:4px">${age!=null?`The feed price on this card is
+      <b style="color:${age>=1?'var(--warn)':'var(--mute)'}">${age.toFixed(1)} days old</b>${
+      nBooks?` and is a <b style="color:var(--mute)">${nBooks}-book consensus</b>`:''}; a paste is
+      from the moment you made it. <b style="color:var(--mute)">Neither is simply better</b> — the
+      paste is fresher, the feed is broader, and one book carries its own lean. `:''}
+      ${gaps.length?`<b style="color:var(--gold)">${gaps.length} bout${gaps.length===1?'':'s'}
+        disagree by 5+ points</b> — ${gaps.slice(0,3).map(x=>`${esc(surname(x.b.a))} v ${
+        esc(surname(x.b.b))} (feed ${P0(x.b.p_market)}, book ${P0(x.fd.p)})`).join('; ')}. At
+        ${age!=null?age.toFixed(1):'this'} days that is as likely to be line movement as error. `:''}
+      ${post.length?`<b style="color:var(--warn)">${post.length} price${post.length===1?'':'s'}
+        pasted after the card</b> — kept but not treated as a forecast, the same rule the check
+        reads carry. `:''}
+      A moneyline is <b style="color:var(--mute)">who wins</b>, not whether the fight finishes, so
+      this cannot correct the finish rate — it redistributes finish probability between the corners
+      and gives the check-only bouts something to be checked against. The line that would calibrate
+      the finish side is the book's <b style="color:var(--mute)">goes-the-distance</b> market; paste
+      that and it can be used. Nothing graded moves: the feed price and the edge are pipeline data
+      with their own as-of stamp, and the paste is shown beside them, never into them.</div>
+  </div>`;
+}
 function ckIO(){
   const n=Object.keys(CKR||{}).length;
   return `<div class="ckio">
