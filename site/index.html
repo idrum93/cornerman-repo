@@ -2306,6 +2306,55 @@ function fbLean(b,p){
   else { floorP=1-(decBase+0.05); pass=!(dec-decBase>=0.05); }
   return {lean:lean, pass:pass, floorP:floorP};
 }
+/* HOW CONCENTRATED a bout's finish probability is, measured at the ROUTE and
+   not the cell.
+
+   Proposed as: a fight where one man submits and the other knocks out is a
+   cleaner bet than one where both do both, even at the same finish rate. The
+   board ranked rows by finish probability alone, which hides exactly that.
+
+   Measured on the live card before building, and it carries genuinely new
+   information rather than repackaging a column already present:
+
+       corr(top route share, how lopsided the winner is) = +0.06
+       corr(top route share, the bout's finish rate)     = -0.19
+
+   and it reorders the card materially. Buckley v Malott has the HIGHEST finish
+   probability on the board at 59% and the LOWEST concentration at 37% - five
+   rounds, both men carrying two routes - while Boser v Diniz at 53% finish puts
+   56% of it in one route. The likeliest finish is not the clearest bet.
+
+   ROUTE, not cell, deliberately. Cell-level concentration would mark every
+   five-round bout as unclear for a purely mechanical reason - the same
+   probability spread over twenty boxes instead of twelve - which is a property
+   of the schedule, not of the matchup. The route is where the method question
+   actually lives.
+
+   It is a SORT and a COLUMN. It does not touch allocation: picks stay ranked by
+   absolute probability, because that is what maximises expected hits. A 56%
+   route inside a 53% finish is 30% absolute, and betting it over a bigger cell
+   elsewhere would cost hits for legibility. The panel says so. */
+function fbRouteConc(b){
+  const rv=b&&b.round_of_victory, ck=fbCheckCells(b);
+  const R=(b&&b.rounds)||3, rt={a_ko:0,a_sub:0,b_ko:0,b_sub:0};
+  if(rv){
+    Object.keys(rv).forEach(k=>{
+      const m=/^([ab])_(ko|sub)_r([1-5])$/.exec(k);
+      if(m&&+m[3]<=R) rt[m[1]+'_'+m[2]]+=(+rv[k]||0);});
+    if(ck){ ['a_ko','a_sub','b_ko','b_sub'].forEach(r=>{ rt[r]=ck[r]||0; }); }
+  } else if(ck){
+    ['a_ko','a_sub','b_ko','b_sub'].forEach(r=>{ rt[r]=ck[r]||0; });
+  } else return null;
+  const fin=rt.a_ko+rt.a_sub+rt.b_ko+rt.b_sub;
+  if(!(fin>0.001)) return null;
+  let best=null;
+  Object.keys(rt).forEach(r=>{ if(!best||rt[r]>rt[best]) best=r; });
+  return {share:rt[best]/fin, p:rt[best], route:best, fin:fin,
+          who:best[0]==='a'?b.a:b.b, fam:best.slice(2)};
+}
+const FB_SKEY='cornerman.finishboard.sort.v1';
+let FB_SORT=(function(){ try{ return localStorage.getItem(FB_SKEY)==='clear'?'clear':'finish'; }
+  catch(e){ return 'finish'; } })();
 function fbBoutFinish(b){
   const ck=fbCheckCells(b);
   if(ck) return ck.a_ko+ck.a_sub+ck.b_ko+ck.b_sub;
@@ -2900,7 +2949,13 @@ function finishBoard(d){
      because a switched-off bout with no row would have no checkbox to switch
      back on, and would look identical to one the floor removed. */
   const withRv=universe.filter(b=>(by[b.bout]||[]).length||FB_OFF.has(b.bout))
-    .sort((x,y)=>fbBoutFinish(y)-fbBoutFinish(x));
+    .sort((x,y)=>{
+      if(FB_SORT==='clear'){
+        const a=fbRouteConc(x), c=fbRouteConc(y);
+        const d=((c?c.share:0)-(a?a.share:0));
+        if(Math.abs(d)>1e-9) return d;
+      }
+      return fbBoutFinish(y)-fbBoutFinish(x);});
   const noRv=[];
   /* Bouts the floor removed. Listed by name: a bout dropping off a board of
      "the card's likeliest finishes" must not look like an oversight. */
@@ -2932,7 +2987,7 @@ function finishBoard(d){
           title="${roff?'Round '+r+' is switched off across the whole card. Click to bet it again.'
                       :'Switch round '+r+' off across the whole card. Its picks go to the next best cells elsewhere.'}"
           >round ${r}${roff?' <i>off</i>':''}</div>`;}).join('')
-    + `<div class="fbg-h">finish</div><div class="fbg-h">picked</div>`;
+    + `<div class="fbg-h">finish</div><div class="fbg-h" title="the biggest single route as a share of the bout's finish probability — how concentrated the method question is, not how likely a finish is">clearest<br>route</div><div class="fbg-h">picked</div>`;
   /* Bouts the model publishes no round split for are shown as a row rather
      than dropped to a footnote. They were invisible, and a bout missing from a
      board of "the card's likeliest finishes" reads as the model having no
@@ -2940,7 +2995,7 @@ function finishBoard(d){
   const thinRows=noRv.map(b=>`<div class="fbg-b"><b>${esc(surname(b.a))} v ${esc(surname(b.b))}</b>
       <span class="lbl">${esc(divShort(sbWcOf(b)||''))}${sbWcIsManual(b)?'<i style="color:var(--gold);font-style:normal"> (set)</i>':''} · ${b.rounds||3} rds · no round split</span></div>`
     + [...Array(maxR)].map(()=>`<div class="fbg-c fbna"></div>`).join('')
-    + `<div class="fbg-t"><span class="fbnone">—</span></div><div class="fbg-t"><span class="fbnone">—</span></div>`).join('');
+    + `<div class="fbg-t"><span class="fbnone">—</span></div><div class="fbg-t"><span class="fbnone">—</span></div><div class="fbg-t"><span class="fbnone">—</span></div>`).join('');
   const rows=withRv.map(b=>{
     const mine=by[b.bout]||[];
     const R=b.rounds||3;
@@ -3032,7 +3087,13 @@ function finishBoard(d){
           if(t!=null&&t<3) return ` · <b style="color:var(--warn)">thin ${t}W</b>`;
           if(b.thin) return ` · <b style="color:var(--warn)">thin record</b>`;
           return '';})()}</span></div>${cells}<div class="fbg-t" style="color:${
-        ckd?'var(--gold)':'var(--mute)'}">${P0(pFin)}%</div><div class="fbg-t">${
+        ckd?'var(--gold)':'var(--mute)'}">${P0(pFin)}%</div><div class="fbg-t">${(()=>{
+          const K=fbRouteConc(b);
+          if(!K) return '<span class="fbnone">—</span>';
+          const hot=K.share>=0.45;
+          return `<span style="color:${hot?'var(--gold)':'var(--mute)'}">${P0(K.share)}%</span>
+            <div class="lbl" style="margin-top:1px;text-transform:none;letter-spacing:0">${
+            K.fam==='ko'?'KO':'SUB'} ${esc(surname(K.who))}</div>`;})()}</div><div class="fbg-t">${
         mine.length?P0(sum)+'%':'<span class="fbnone">—</span>'}</div>`;
   }).join('');
   const nCk=withRv.filter(b=>fbCheckCells(b)).length;
@@ -3045,6 +3106,12 @@ function finishBoard(d){
       <label class="fbtog" title="How many picks to spend. 25 is the ceiling; reducing drops the weakest cells and nothing else.">
         <span>picks</span>
         <input type="number" class="fbn" min="1" max="${FB_NMAX}" step="1" value="${FB_N}"></label>
+      <label class="fbtog" title="Row order. Finish % is the likeliest to end early; clearest route is the least ambiguous about HOW — they genuinely disagree.">
+        <span>sort</span>
+        <select class="fbsort">
+          <option value="finish"${FB_SORT==='finish'?' selected':''}>finish %</option>
+          <option value="clear"${FB_SORT==='clear'?' selected':''}>clearest route</option>
+        </select></label>
       <label class="fbtog" title="Lowest bout finish probability allowed onto the board. The stops are this tool's own length tiers.">
         <span>floor</span>
         <select class="fbfloor">
@@ -3061,7 +3128,7 @@ function finishBoard(d){
       <label class="fbtog${avail?'':' off'}" title="${avail?'':'No UFC.com check entered for any bout on this card'}">
         <input type="checkbox" class="fbck"${FB_CHECK?' checked':''}${avail?'':' disabled'}>
         <span>use UFC.com check${avail?` (${FB_CHECK?nCk:avail} bout${(FB_CHECK?nCk:avail)===1?'':'s'})`:' — none entered'}</span></label></div>
-    <div class="fbgrid" style="grid-template-columns:minmax(118px,1.5fr) repeat(${maxR},minmax(84px,1fr)) minmax(52px,.6fr) minmax(52px,.6fr)">
+    <div class="fbgrid" style="grid-template-columns:minmax(118px,1.5fr) repeat(${maxR},minmax(84px,1fr)) minmax(52px,.6fr) minmax(64px,.75fr) minmax(52px,.6fr)">
       ${head}${rows}${thinRows}</div>
     ${(()=>{
       /* The exclusion state, stated in words. A struck column is visible while
@@ -3110,6 +3177,12 @@ function finishBoard(d){
           ${nAgr?`<b style="color:var(--mute)">${nAgr}</b> pick${nAgr===1?'':'s'} carry a left rule:
             the check and the model put the same weight on that route. That is concurrence only —
             agreement was measured not to predict whether a pick lands. `:''}`;})()}
+      ${FB_SORT==='clear'?`<b style="color:var(--gold)">Sorted by clearest route.</b> That is
+        row ORDER only — the picks and their order are unchanged, still ranked by absolute
+        probability, because that is what maximises expected hits. <b style="color:var(--warn)">The
+        top row here is not the best bet</b>: on this card the clearest bout is also one of the
+        least likely to finish, and a 56% route inside a 34% finish is 19% absolute. Read this sort
+        as "where the method question has an answer", not as a betting order. `:''}
       <b style="color:var(--mute)">Ranked by probability, not by value:</b> nothing on the venues this
       tool reads prices a method-and-round contract, so there is no price to beat and these are not
       "+EV" picks. A fight ends once, so within a row the picks are alternatives and the combined
@@ -3960,6 +4033,9 @@ document.addEventListener('change',function(e){
     const k=e.target.getAttribute('data-bout');
     if(e.target.checked) FB_OFF.delete(k); else FB_OFF.add(k);
     fbOffSave();
+  } else if(cl.contains('fbsort')){
+    FB_SORT=e.target.value==='clear'?'clear':'finish';
+    try{ localStorage.setItem(FB_SKEY, FB_SORT); }catch(err){}
   } else if(cl.contains('fbfloor')){
     FB_FLOOR=FB_FLOORS[e.target.value]!=null?e.target.value:'leans';
     try{ localStorage.setItem(FB_FKEY, FB_FLOOR); }catch(err){}
