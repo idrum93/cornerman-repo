@@ -4657,9 +4657,23 @@ function sbBaseMix(b){
     const wc=w0?String(w0).trim().toLowerCase():null;
     if(wc){
       const hit=D.find(d=>String(d.division||'').trim().toLowerCase()===wc);
-      if(hit&&hit.n>=150&&hit.ko!=null&&hit.sub!=null)
+      if(hit&&hit.n>=150&&hit.ko!=null&&hit.sub!=null){
+        /* SCHEDULED LENGTH on top of division, where the cell is large enough.
+           Five-round bouts finish MORE often than three - 57.0% against 45.6%
+           across the corpus - because ten extra minutes outweigh their slower
+           start (21.6% end before round two against 25.5%). The division figure
+           pools both, and three-rounders dominate every division by volume, so
+           a five-round bout was being compared against what is effectively the
+           three-round rate. Same class of fault as addendum 50's
+           pooled-vs-division error, one axis over. */
+        const R=(b&&b.rounds)||3;
+        const L=hit[R>=5?'r5':'r3'];
+        if(L&&L.n>=60&&L.ko!=null&&L.sub!=null)
+          return {ko:L.ko,sub:L.sub,dec:Math.max(0,1-L.ko-L.sub),
+                  div:hit.division,n:L.n,sched:R>=5?5:3};
         return {ko:hit.ko,sub:hit.sub,dec:Math.max(0,1-hit.ko-hit.sub),
                 div:hit.division,n:hit.n};
+      }
     }
     let n=0,ko=0,sub=0;
     D.forEach(d=>{ if(d.n){n+=d.n; ko+=d.n*(d.ko||0); sub+=d.n*(d.sub||0);} });
@@ -5530,7 +5544,7 @@ function sbMethodBlock(b,st,pA){
           <span class="lbl">${x.n_loss} loss${x.n_loss===1?'':'es'} in ${x.n_fights} fights${
             x.off_tier?` · ${x.off_tier} outside the UFC at half weight`:''}</span></div>
         <div class="rbrow rbh"><span></span><span>when beaten</span><span>${
-          base.div?esc(divShort(base.div)):'league'}</span></div>
+          base.div?esc(divShort(base.div))+(base.sched?` · ${base.sched}R`:''):'league'}</span></div>
         ${/* Values in bone, not the record panel's .rbw/.rbo pair. Those are
               coloured green for WON and orange for LOST, and this column is a
               man's losses - borrowing .rbw would have printed a losses column
