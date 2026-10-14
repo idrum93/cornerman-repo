@@ -6980,3 +6980,297 @@ Corrected to `sched_sec`, which comes from TIME FORMAT and is what
 `projections.py` already uses for its `five` flag. Recorded because the wrong
 version would have produced a dramatic, publishable-looking result that was
 purely an artifact of the split.
+
+## Addendum 51, amendment 17 (2026-10-13): clearest route — a sort, not an allocation
+
+Proposed: bring "sure thing" bouts to the top — where one fighter submits and the
+other knocks out, the method question has an answer, and that is a cleaner bet
+than a bout with the same finish rate split evenly across four routes.
+
+**Measured before building**, and it carries information the board did not have:
+
+```
+corr(top route share, how lopsided the winner is) = +0.06
+corr(top route share, the bout's finish rate)     = -0.19
+```
+
+Near-independent of both columns already on the board, so it is not a
+repackaging. And it reorders the card materially: **Buckley v Malott has the
+highest finish probability at 59% and the lowest concentration at 37%** — five
+rounds, both men carrying two routes — while **Boser v Diniz at 53% finish puts
+56% of it in one route**. The likeliest finish is not the clearest bet, which is
+exactly the claim behind the request.
+
+### Measured at the route, not the cell
+
+Cell-level concentration would mark every five-round bout as unclear for a purely
+mechanical reason: the same probability spread over twenty boxes instead of
+twelve. That is a property of the schedule, not the matchup. The route is where
+the method question lives.
+
+### It is a sort and a column, and touches nothing else
+
+Verified: switching the sort leaves the picks identical — 25 cells, 1.533
+expected, same cells in the same order. Row order and one column changed;
+allocation did not.
+
+That line is the reason this is safe where the skew dial was not. Picks stay
+ranked by absolute probability because that is what maximises expected hits.
+
+### The caveat is on the panel, because the sort invites the error
+
+Under "clearest route" the top row on the live card is **Blanchfield v
+Jasudavicius at 34% finish** — a bout the default floor would exclude. A 56%
+route inside a 34% finish is **19% absolute**, well below cells further down the
+board. Sorting by clarity and betting top-down would cost expected hits.
+
+So the note says it in those words: the top row here is not the best bet, and the
+sort means "where the method question has an answer", not "bet these first". A
+control whose obvious misreading is more attractive than its correct one has to
+carry the correction next to it.
+
+# Addendum 62: the floor was still pooled — the fault's third and last home (2026-10-13)
+
+Asked whether addendum 61's findings reached the board and the check. Traced all
+three consumers rather than assumed:
+
+| consumer | women | five rounds |
+|---|---|---|
+| the finish/survival model | ✓ `women` in FINISH_INPUTS | ✓ `five` in FINISH_INPUTS |
+| the check's league column (`sbBaseMix`) | ✓ division-aware, addendum 50 | ✓ length-aware, addendum 61 |
+| **the board's floor (`fbLean`)** | **✗ pooled** | **✗ pooled** |
+
+`fbLean` was still comparing every bout against `market_bases.dec` — **one league
+number, 49.6%** — and it is the worst place for that fault to survive, because
+the floor does not merely label a row, it decides whether the bout reaches the
+board at all.
+
+## How wrong, concretely
+
+The same 50% finish probability, before and after:
+
+| | base | at 50% the floor now says | before |
+|---|---|---|---|
+| Women's Strawweight | 33.8% | **finish likely** — passes | no lean, excluded |
+| Women's Flyweight | 36.6% | **finish likely** — passes | no lean, excluded |
+| Middleweight | 55.5% | below its base | no lean |
+| **Heavyweight** | **63.3%** | **distance likely** — excluded | no lean, admitted |
+
+**Wrong in both directions at once, and systematically**: it admitted heavyweight
+bouts that are quiet for heavyweights and excluded women's bouts that are busy
+for their division. A 50% fight is a different object in the two divisions and
+the board was treating them as the same.
+
+**Fixed**: `fbLean` asks `sbBaseMix` for the bout's own base. The stops now mean
+what they always claimed — points above THIS bout's base. `high` is untouched: an
+absolute 60% is a stated preference, and a preference expressed in absolute terms
+should not start moving with the division.
+
+The floor explainer reported a single threshold; it now reports the range across
+the card ("a bout needs 32–58% finish to appear") and says why there is a range.
+One number there would have been the same lie the change removed.
+
+## A defect the fix caused, and closed
+
+With the bar set per division, a whole card can be quiet **for its own
+composition** — and the live card is: every bout sits at or below its division's
+base, which the pooled bar had been hiding by flattering the heavyweight and the
+middleweight. Correct, and startling.
+
+`finishBoard` returned `''` when no bout cleared the floor, so the board
+**disappeared without a word**. Survivable while almost everything cleared a
+pooled bar; not survivable now.
+
+An empty board now renders its own explanation: the floor control, every bout
+ranked by distance from its OWN base with that base printed, and a line saying a
+card with nothing busy for its divisions is a real answer rather than a failure.
+A tool that silently vanishes is worse than one that reports an empty result.
+
+## Note on the figures
+
+The five-round cells (`r3`/`r5` per division) arrive with the next pipeline run.
+Until then `sbBaseMix` falls back to the pooled division figure, which is the
+behaviour before this change for length and the corrected behaviour for division.
+
+# Addendum 63: the finish probability had never been backtested (2026-10-13)
+
+Asked whether there is a way to backtest what share of bouts over a given finish
+probability actually finish.
+
+**There was not, and the omission is the largest one found in this project.**
+`track_record.json` carries held-out records for the winner, takedowns,
+knockdowns and output ranges — and **nothing for the finish probability**, which
+is the quantity the entire finish side of the tool rests on. Every "60% finish"
+on the page was published with no evidence anywhere that 60% means 60%.
+
+The data to check it was already present and unused: every graded bout carries a
+`Go the distance` prop with the model's own number, so `1 - said` is its finish
+probability and the outcome is scored beside it.
+
+## What the graded cards say
+
+23 bouts with a finish probability:
+
+| the model said | bouts | avg said | finished |
+|---|---|---|---|
+| under 40% | 5 | 35% | 3/5 · 60% |
+| 40–50% | 9 | 46% | 6/9 · 67% |
+| 50–60% | 6 | 56% | 5/6 · 83% |
+| 60% and up | 3 | 67% | 1/3 · 33% |
+| **all** | **23** | **49%** | **15 · 65%** |
+
+**+1.6 sd**, and two things are worth separating:
+
+- **The ordering is right through the bulk** — 60%, 67%, 83% as the claim rises.
+  The top band inverts, on three bouts, which is nothing.
+- **The level is low.** 65% happened against 49% claimed.
+
+**Brier 0.276 against 0.251 for always saying the league rate** — the flat
+control is currently scoring BETTER. That is an unflattering number and it is
+recorded as found. On this sample it is the level being low rather than the
+ordering being wrong: a model that ranks correctly but sits sixteen points under
+will lose to a constant when outcomes run hot.
+
+At 23 bouts none of this is a finding. It is the fifth measurement in two days
+pointing the same way, and the first one aimed directly at the model's own finish
+number rather than at something downstream of it.
+
+## Both halves built
+
+**The panel**, in the graded zone, from the data already in `history.json` — it
+works now and accumulates with every card.
+
+**The proper backtest**, added to `reliability.build_record` as a `finish` entry:
+`fit_finish_formula` trained strictly before the cut, scored strictly after, the
+same split discipline the winner entry uses, reported as bands with a Brier
+against the league-rate control. It arrives in `track_record.json` on the next
+pipeline run, on the full corpus rather than 23 bouts.
+
+Bands rather than a correlation, deliberately: the question is calibration, and a
+single r would hide exactly the failure these cards hint at — correct ordering,
+systematically low level.
+
+Wrapped so a failure there can never break the build; an error is recorded in the
+entry instead.
+
+# Addendum 64: a pasted sportsbook line, and the suite that passed a broken page (2026-10-14)
+
+## What a moneyline can and cannot do, said before building
+
+Asked for, to make the finish board "as precisely adjusted as possible". **A
+moneyline cannot do that.** It is P(this man wins) and carries no information
+about whether a fight finishes, so it cannot touch the level error the graded
+cards keep pointing at. What it does buy:
+
+- **the check-only bouts.** On the live card 7 of 7 modelled bouts already carry
+  a feed price — but the **6 no-read bouts carry none**. Those are exactly the
+  bouts the model declined, so the check is the only read on them and there has
+  never been anything to measure it against. Verified on the real paste: 5 bouts
+  matched to the card, **2 of them with no feed price at all**.
+- **route redistribution.** A winner probability moves finish probability between
+  the corners — which man's routes are the big ones — not whether the fight ends
+  early. Useful for route picks, useless for the finish rate.
+- CLV accumulation toward the registered threshold.
+
+The line that WOULD calibrate the finish side is the book's goes-the-distance
+market. Said on the panel, with the invitation to paste that instead.
+
+**It never overwrites `p_market`.** The feed price has its own as-of discipline;
+a pasted one is the operator's at an unknown moment. Stored and shown separately,
+or this is the editable-ledger problem again.
+
+### Two guards in the parser
+
+**A vig gate.** A correct two-way book sums to about 1.03–1.10 implied; the real
+paste came in at a consistent 5.9–6.1% across all six bouts. Anything outside
+1.00–1.18 means the two prices do not belong to each other — the commonest
+symptom of a paste whose shape drifted — and the row is dropped rather than
+de-vigged into a confident wrong number.
+
+**Label lines are not fighters.** "Sat 5:10pm ET" and "More wagers" wear the same
+markdown shape as a name. Without excluding them the parser pairs a time with the
+next bout's first fighter and reads two prices belonging to neither.
+
+Matching is on the pair of surnames, order-insensitive: the book and the card
+disagree about first names often enough ("Timothy"/"Timmy",
+"Marc-Andre"/"Marc Andre") that a full-string join drops real rows.
+
+## The suite passed a page that would not run
+
+While building this I shipped — into the working copy — an `index.html` whose
+script had a duplicated `function ckIO(){` and therefore **did not parse at all**.
+The page would have rendered completely blank.
+
+**The suite reported ALL CHECKS PASSED.** Every Python test passed because none
+of them look at the JavaScript. `test_site_features` greps for the presence of
+thirty strings, and a broken file satisfies that perfectly — the strings are all
+still there, in a script that never runs. **Presence is not the same as parses,
+and nothing was checking the second.**
+
+Added `test_site_script_balances`: a bracket/brace/paren scanner that understands
+strings, template literals including nested `${}`, line and block comments, and
+regex literals. Pure Python rather than shelling out to node, because the nightly
+job has no node dependency and adding one would trade a silent failure for a
+fragile build.
+
+**Verified both ways**: re-introducing the duplicate makes it report `1 unclosed
+— first is '{' at line 3627`, and removing it returns PASS.
+
+### A false positive caught before it shipped
+
+The first version read `/^\*?\s*\[([^\]]+)\]/` as division and then counted the
+character class's brackets, failing on a file node parses happily. A checker that
+cries wolf is worse than no checker — it trains you to ignore it. Regex-literal
+handling added, with the usual heuristic for telling a literal from a division.
+
+### And a false alarm of my own, recorded
+
+Mid-debug I concluded the PREVIOUSLY shipped `index.html` was also broken and was
+about to report that. It was not. My reconstruction of the earlier file — strip
+this session's edits and re-check — cut from the inserted comment to the *first*
+`function ckIO(){`, which left the duplicate in place. The reconstruction was the
+thing that was broken.
+
+Recorded because the lesson is specific: when a bisect says the fault predates
+your change, verify the bisect before believing it. I came close to raising a
+false alarm about already-delivered work.
+
+## Addendum 64, amendment 1 (2026-10-14): fresher, yes — but not simply better
+
+Reported: FanDuel updates more often than the tool's market line, so the paste is
+the reliable one.
+
+**The recency half is right, and measurable.** On the live payload
+`generated_utc` is 2026-10-11T23:48Z against a card on the 17th — the feed price
+is **2.6 days old** while a paste is from the moment it was made. Three days out
+from a card that is a real gap, and the panel now states it instead of leaving
+the reader to assume the feed is current.
+
+**But the feed is not a stale FanDuel.** `market_source` is the-odds-api at
+**15 to 20 books a bout** (17 on average here). FanDuel is one book. A single
+book's line is not strictly sharper than a seventeen-book consensus — it is a
+different object with its own lean.
+
+So neither dominates:
+
+| | paste | feed |
+|---|---|---|
+| recency | **now** | 2.6 days |
+| breadth | 1 book | **17 books** |
+
+And a gap between them cannot be attributed from the number alone. The live card
+has exactly one: **Anheliger v Koslow, feed 51% against book 42%.** At 2.6 days
+that is as likely to be line movement as error, and the panel says so in those
+words rather than picking a winner.
+
+**What changed**: the panel reports the feed's age and book count, names every
+bout where the two disagree by 5+ points with both figures, and marks any price
+pasted after the card as not-a-forecast — the same post-hoc rule the check reads
+already carry, since a price pasted late is contaminated exactly as a late
+UFC.com read is.
+
+**What deliberately did not change**: the paste does not replace `p_market` or
+`edge` anywhere. Those are pipeline data with their own as-of stamp, and letting
+a fresher number silently overwrite a broader one — in the fields that feed the
+graded record — is the editable-ledger problem in its most tempting form yet,
+because this time the replacement would genuinely be more current.
