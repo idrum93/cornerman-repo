@@ -6845,3 +6845,138 @@ Same restriction (both corners measured, not imputed), same protocol, same
 decision rule, same prior against. The result now reports per arm, so "the net
 length term did nothing but the interaction did" is a readable outcome rather
 than one hidden inside a single number.
+
+## Addendum 59, amendment 2 (2026-10-13): the test is probably underpowered, said before it runs
+
+Asked whether backtesting shows a correlation. **It has not been run — the corpus
+CSVs are not in this repo — and no number will be quoted that has not been
+measured.** But the power can be worked out now, and it should be, because a test
+that cannot resolve the effect it is looking for is worse than no test: it
+returns "no effect" and that gets remembered as a finding.
+
+The measured-reach restriction keeps about 0.74² ≈ **55% of bouts**. Against the
+style-features test's held-out set of roughly 1,365 that leaves about **750**, and
+the 95% interval widens from 0.0063 to about **0.0085** — so the smallest
+improvement the test can distinguish from zero is roughly **0.0043 nats**.
+
+For scale: the eight style features together moved held-out log loss by
+**0.0009** and were rejected. A single reach interaction producing five times
+that is not a plausible prior.
+
+**Registered in advance, therefore**: a null result from `length_test()` means
+*this test could not see an effect of the size plausibly present*, not *there is
+no effect*. The distinction goes in the record now, before the number exists,
+because it is exactly the distinction that gets lost afterwards.
+
+# Addendum 60: size-adjusted round counts declined; the thin flag was the real gap (2026-10-13)
+
+Proposed: where two fighters have very different numbers of recorded bouts, give
+the thinner record a size-adjusted column in "Where their fights have ended", so
+a small sample stops misleading the method and round picks.
+
+**The instinct is right and the target is wrong**, and the reason is a result
+already on the record.
+
+## Shrinking rounds would be shrinking noise
+
+A fighter's own ROUND history has split-half reliability **0.21, falling to 0.05
+as the sample grows**. Whether he finishes at all runs **0.54 rising to 0.60**.
+
+At reliability 0.05 the optimal weight on a fighter's own round distribution is
+about **5%**. A "size-adjusted" column would therefore be about 95% league prior
+— the league distribution, printed under a fighter's name, inviting exactly the
+fighter-specific reading it cannot support.
+
+That is the general hazard, worth stating plainly: **shrinkage makes a thin
+record look trustworthy.** Where the underlying quantity replicates — the method
+mix, reliability 0.54-0.60, already shrunk at k=5 and beating the base rate by
++0.044 — that is the entire point. Where it does not, shrinkage hides the
+thinness without adding information, and the smoothness reads as confidence.
+
+The panel is also labelled "the full record, plain counts · unweighted and
+unshrunk — the evidence, not the read". Adding a modelled column to the one
+surface that shows raw evidence would cost the thing it exists for.
+
+## What the request actually needs was already there, one layer down
+
+The board's round shape for a thin or unsplit bout is **pooled from the card's
+other bouts at the same scheduled length**, not taken from the fighter. The
+mechanism the proposal asks for already runs where the picks are made.
+
+## The genuine gap, now closed
+
+The finish board did not SAY when a pick rested on a thin record. The row carried
+division, rounds, lean, check and "shape borrowed" — and not thinness, which is
+the one of those a bettor most needs. Thinness was visible on the tile and on the
+check chip, and absent from the surface where the bets are chosen.
+
+Added: `thin NW` from the check's own minimum win count where a read exists, or
+`thin record` from the model's flag. Two bouts on the live card carry it.
+
+# Addendum 61: women's bouts yes, five-rounders no — and a base-rate gap (2026-10-13)
+
+Two claims put to the corpus: that women's bouts and five-round fights both
+finish less often than a typical three-round fight.
+
+## Women's bouts — true, and the gap is large
+
+| | finish rate | n |
+|---|---|---|
+| men, pooled | **51.7%** | 5,945 |
+| women, pooled | **36.0%** | 910 |
+
+**A 15.7-point gap, and the ranges do not overlap**: the lowest men's division
+(Flyweight, 44.3%) sits above the highest women's (Bantamweight, 38.6%).
+Women's Strawweight is the lowest cell in the sport at 33.8%.
+
+**Already accounted for, on both sides.** The finish model carries `women` as an
+explicit input (`FINISH_INPUTS`), and `sbBaseMix` has been division-aware since
+addendum 50, so a women's bout is compared against its own division rather than
+a pooled league.
+
+## Five-round fights — false, and backwards
+
+| scheduled | finish rate | ends before round 2 |
+|---|---|---|
+| three rounds | **45.6%** | 25.5% |
+| five rounds | **57.0%** | 21.6% |
+
+**Five-round fights finish MORE often, by 11.4 points.** Ten extra minutes
+outweigh the fact that they start slower.
+
+The intuition is not baseless, though — it is tracking a real effect in the
+opposite direction. Five-rounders are **less likely to end early**: 21.6% before
+round two against 25.5%, and still behind at round three (37.5% to 40.9%). They
+only pass three-rounders by accumulating rounds four and five. Anyone betting
+round-one or round-two finishes would correctly perceive five-rounders as the
+worse bet, and then generalise it wrongly to the whole fight.
+
+The model carries `five` as an explicit input alongside `women`, and the survival
+model evaluates its hazard per minute to the scheduled length, so length is
+handled structurally there.
+
+## The gap the question exposed
+
+`sbBaseMix` is division-aware and **not length-aware**. Three-rounders dominate
+every division by volume, so a division rate is effectively a three-round rate —
+and a five-round bout's check read was being compared against a base roughly
+eleven points too low. Same class of fault as addendum 50's pooled-vs-division
+error, one axis over.
+
+**Fixed**: `divisions()` now emits `r3` and `r5` cells per division, and
+`sbBaseMix` uses the bout's own scheduled length when that cell holds at least
+60 bouts, falling back to the pooled division figure and naming which it used
+(`Welter · 5R`).
+
+### A trap caught before it ran
+
+The first version split on `n_rounds`. In this corpus `n_rounds` is rounds
+**FOUGHT** — the max round index in the per-round table — so it is 1 for every
+first-round knockout. Splitting on it would have divided the data by whether the
+fight finished and reported a finish rate near 100% for "three-round" bouts, in a
+table whose whole purpose is finish rates.
+
+Corrected to `sched_sec`, which comes from TIME FORMAT and is what
+`projections.py` already uses for its `five` flag. Recorded because the wrong
+version would have produced a dramatic, publishable-looking result that was
+purely an artifact of the split.

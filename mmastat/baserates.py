@@ -188,6 +188,36 @@ def divisions(fights, min_date="2012-01-01"):
                     "strikes": round(float(((G.r_ss_landed + G.b_ss_landed) / 2).median()), 1),
                     "takedowns": round(float(((G.r_td_landed + G.b_td_landed) / 2).mean()), 2),
                     "finish": round(float((G.method != "DEC").mean()), 3)})
+        # SCHEDULED LENGTH, which the division figure above pools over.
+        #
+        # Five-round bouts finish MORE often than three - 57.0% against 45.6%
+        # across the corpus - because ten extra minutes outweigh the fact that
+        # they start slower (21.6% end before round two against 25.5%). A check
+        # read on a five-round bout was therefore being compared against a
+        # division rate that is effectively the three-round rate, since
+        # three-rounders dominate every division by volume.
+        #
+        # Same class of error as addendum 50's pooled-vs-division fault, one
+        # axis over. Emitted per division so the panel can use the bout's own
+        # length where the cell is large enough and say so when it cannot,
+        # rather than applying a pooled ratio that would hide which divisions
+        # it does not fit.
+        #
+        # `sched_sec`, NOT `n_rounds`. n_rounds in this corpus is rounds FOUGHT
+        # (the max round index seen in the per-round table), so it is 1 for every
+        # first-round knockout - using it here would have split the data on
+        # whether the fight finished and reported a finish rate of ~100% for
+        # "three-round" bouts. Caught before it ran. sched_sec comes from TIME
+        # FORMAT and is what projections.py already uses for the `five` flag.
+        if "sched_sec" in G.columns:
+            for lab, sel in (("r3", G.sched_sec < 1500), ("r5", G.sched_sec >= 1500)):
+                Q = G[sel]
+                if len(Q) >= 60:
+                    out[-1][lab] = {
+                        "n": int(len(Q)),
+                        "ko": round(float((Q.method == "KO/TKO").mean()), 3),
+                        "sub": round(float((Q.method == "SUB").mean()), 3),
+                        "finish": round(float((Q.method != "DEC").mean()), 3)}
     return out
 
 
