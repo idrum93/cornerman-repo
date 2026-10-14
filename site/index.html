@@ -2286,9 +2286,34 @@ function fbShape(d,R){
    This is a consistency rule, not a betting rule. It cannot tell you a pick is
    good; it only stops the board recommending finishes on fights this tool
    has already called the other way. */
+/* THE BASE IS PER BOUT, not one pooled league number.
+
+   This was the last place the pooled-vs-division fault survived, and it was the
+   worst place for it: fbLean decides which bouts reach the board AT ALL, so a
+   wrong base does not merely mislabel a row, it removes one.
+
+   Pooled league finish is 49.6%. Division and scheduled length move it a long
+   way either side:
+
+     Women's Strawweight   33.8%   a 44% bout is +10 FOR ITS DIVISION,
+                                   and was being filtered out as distance-leaning
+     Heavyweight           63.3%   a 55% bout is -8 for its division,
+                                   and was being let in as finish-leaning
+     five rounds           57.0%   eleven points above the three-round rate
+
+   So the floor was wrong in both directions at once, and systematically - it
+   admitted heavyweights that are quiet for heavyweights and excluded women's
+   bouts that are busy for their division. Now it asks sbBaseMix, which has been
+   division-aware since addendum 50 and length-aware since addendum 61, so the
+   stops mean what they always claimed: points above THIS bout's own base.
+
+   `high` is untouched. It is an absolute 60%, a stated preference rather than a
+   tier, and a preference expressed in absolute terms should not start moving
+   with the division. */
 function fbLean(b,p){
+  const B=(typeof sbBaseMix==='function')?sbBaseMix(b):null;
   const MB=(typeof BR==='object'&&BR&&BR.market_bases)||{};
-  const decBase=(MB.dec==null?0.505:MB.dec), finBase=1-decBase;
+  const decBase=(B&&B.dec!=null)?B.dec:(MB.dec==null?0.505:MB.dec), finBase=1-decBase;
   const dec=1-p;
   let lean='no lean';
   if(p-finBase>=0.12) lean='finish likely';
@@ -2304,7 +2329,8 @@ function fbLean(b,p){
   else if(need==='abs60'){ floorP=0.60; pass=p>=0.60; }
   else if(need>0){ floorP=finBase+need; pass=p-finBase>=need; }
   else { floorP=1-(decBase+0.05); pass=!(dec-decBase>=0.05); }
-  return {lean:lean, pass:pass, floorP:floorP};
+  return {lean:lean, pass:pass, floorP:floorP,
+          base:finBase, div:(B&&B.div)||null, sched:(B&&B.sched)||null};
 }
 /* HOW CONCENTRATED a bout's finish probability is, measured at the ROUTE and
    not the cell.
@@ -2904,7 +2930,47 @@ function fbResults(){
 }
 function finishBoard(d){
   const all=finishPicks(d);
-  if(!all.length) return '';
+  /* AN EMPTY BOARD MUST EXPLAIN ITSELF.
+
+     Returning '' here was survivable while the floor ran against one pooled
+     league number, because something almost always cleared it. With the bar set
+     per division and per scheduled length, a whole card can be quiet FOR ITS OWN
+     COMPOSITION - this one is: every bout sits at or below its division's base,
+     which the pooled bar was hiding by flattering the heavyweight and the
+     middleweight. Correct, and startling, and the board was disappearing without
+     a word to say why. A tool that silently vanishes is worse than one that
+     reports an empty answer. */
+  if(!all.length){
+    const uni=(d.bouts||[]).concat(((d&&d.no_read)||[]).map(n=>sbSynthetic(n)));
+    const rows=uni.map(b=>({b:b,p:fbBoutFinish(b),L:fbLean(b,fbBoutFinish(b))}))
+      .filter(x=>x.p>0).sort((x,y)=>(y.p-y.L.base)-(x.p-x.L.base));
+    if(!rows.length) return '';
+    return `<div class="fbwrap"><div class="fbhd"><b>Finish board</b>
+        <span class="lbl">no bout clears the floor</span>
+        <label class="fbtog"><span>floor</span>
+          <select class="fbfloor">
+            <option value="all"${FB_FLOOR==='all'?' selected':''}>all bouts</option>
+            <option value="dist"${FB_FLOOR==='dist'?' selected':''}>distance only</option>
+            <option value="any"${FB_FLOOR==='any'?' selected':''}>not distance</option>
+            <option value="leans"${FB_FLOOR==='leans'?' selected':''}>finish leans</option>
+            <option value="high"${FB_FLOOR==='high'?' selected':''}>60% (preference)</option>
+            <option value="likely"${FB_FLOOR==='likely'?' selected':''}>finish likely</option>
+          </select></label></div>
+      <div class="note" style="padding:9px 11px">
+        <b style="color:var(--warn)">Every bout on this card is quiet for its own division.</b>
+        The floor is measured against each bout's own division and scheduled length, not one pooled
+        league number, so a card of heavyweights and women's bouts is held to two very different
+        bars. Closest first, with each bout's figure against its own base:
+        <div style="margin-top:7px">${rows.slice(0,8).map(x=>`<div class="pline"><span>${
+          esc(surname(x.b.a))} v ${esc(surname(x.b.b))} <span style="color:var(--dim)">${
+          esc(divShort(sbWcOf(x.b)||''))}${x.L.sched?' · '+x.L.sched+'R':''}</span></span>
+          <b style="color:${x.p>=x.L.base?'var(--gold)':'var(--mute)'}">${P0(x.p)}%</b>
+          <span class="lbl">vs ${P0(x.L.base)}% base · ${x.p>=x.L.base?'+':''}${
+            Math.round(100*(x.p-x.L.base))}</span></div>`).join('')}</div>
+        <div style="margin-top:7px">Switch the floor to <b style="color:var(--mute)">all bouts</b>
+          to bet it anyway, or leave it — a card with nothing busy for its own divisions is a real
+          answer, not a failure.</div></div></div>`;
+  }
   const picks=fbAllocate(all,d);
   const exp=picks.reduce((t,x)=>t+x.p,0);
   /* The chance the whole slate returns nothing. Within a bout the picks are
@@ -3214,10 +3280,23 @@ function finishBoard(d){
             fight with finish cells is eligible, including ones this tool calls distance-leaning. Use
             the per-bout checkboxes to drop the ones you would not back; switching one off returns its
             slots to the rest rather than shortening the slate.`;
-          const line=FB_FLOOR==='high'?0.60:(FB_FLOOR==='any'?(1-(db+0.05)):(fb+FB_FLOORS[FB_FLOOR]));
           const nm={any:'not distance',leans:'finish leans',high:'60%',likely:'finish likely'}[FB_FLOOR];
+          /* The threshold is PER BOUT now, so a single number here would be a
+             lie of exactly the kind the change was made to remove. The range
+             across the bouts actually on this card is the honest summary. */
+          const ls=(FB_FLOOR==='high')?[0.60]
+            :universe.map(b=>{const L=fbLean(b,fbBoutFinish(b));
+               return L.floorP;}).filter(v=>v>0);
+          const lo=ls.length?Math.min.apply(null,ls):null, hi=ls.length?Math.max.apply(null,ls):null;
+          const line=FB_FLOOR==='high'?0.60:(FB_FLOOR==='any'?(1-(db+0.05)):(fb+FB_FLOORS[FB_FLOOR]));
           return `The floor is set to <b style="color:var(--mute)">${nm}</b>, so a bout needs <b
-            style="color:var(--mute)">${P0(line)}%</b> finish to appear.${FB_FLOOR==='high'
+            style="color:var(--mute)">${(lo!=null&&hi!=null&&hi-lo>=0.01)
+              ? `${P0(lo)}–${P0(hi)}%`:P0(lo!=null?lo:line)}</b> finish to appear${
+            (lo!=null&&hi!=null&&hi-lo>=0.01)
+              ? ` — a range, because the bar is set against <b style="color:var(--mute)">each bout's own
+                 division and scheduled length</b>, not one pooled league number. A women's
+                 strawweight needs far less than a heavyweight to be busy for its division`
+              : ''}.${FB_FLOOR==='high'
             ? ` That one is a <b style="color:var(--mute)">stated preference, not a tier</b> — it is
                 not derived from the league base the others use, and on a card like this it costs
                 roughly 5% of expected hits, because fewer eligible bouts means these 25 picks reach
