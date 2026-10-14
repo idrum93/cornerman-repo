@@ -4245,13 +4245,25 @@ document.addEventListener('click',function(e){
   if(e.target.closest&&e.target.closest('.fdclear')){
     FDO={}; fdSave(); if(typeof render==='function') render(); return; }
 });
-document.addEventListener('change',function(e){
+document.addEventListener('input',function(e){
   const t=e.target;
   if(!t.classList||!t.classList.contains('fdpaste')) return;
-  const r=fdApply(t.value);
-  t.value='';
+  const box=t.parentNode&&t.parentNode.querySelector('.fdcount');
+  if(box) box.textContent=fdPreview(t.value);
+});
+document.addEventListener('click',function(e){
+  const btn=e.target.closest&&e.target.closest('.fdread');
+  if(!btn) return;
+  const ta=btn.parentNode&&btn.parentNode.parentNode&&btn.parentNode.parentNode.querySelector('.fdpaste');
+  if(!ta) return;
+  const r=fdApply(ta.value);
+  if(!r.n){
+    const box=btn.parentNode.querySelector('.fdcount');
+    if(box) box.textContent=fdPreview(ta.value)+' — nothing stored';
+    return;
+  }
+  ta.value='';
   if(typeof render==='function') render();
-  if(!r.n) alert('No bouts read from that paste. Expected: two linked names, then two American prices, then the time.');
 });
 document.addEventListener('click',function(e){
   const x=e.target.closest&&e.target.closest('.ckexp,.ckimp');
@@ -4297,19 +4309,34 @@ const FD_KEY='cornerman.fdodds.v1';
 let FDO=(function(){ try{ return JSON.parse(localStorage.getItem(FD_KEY)||'{}')||{}; }
   catch(e){ return {}; } })();
 const fdImp=o=>o<0 ? (-o)/((-o)+100) : 100/(o+100);
+/* SHAPE-TOLERANT, because the first version was not and it cost a paste.
+
+   It required markdown links - `[Name](url)` - which is what the sample happened
+   to be. Copying the same card off the FanDuel PAGE gives bare lines, so the
+   parser read nothing and the only feedback was an alert that fired on blur. A
+   parser that works on the sample it was shown is not a parser, it is a demo.
+
+   Now: a name is a name whether or not it arrived wrapped in a link. Label
+   lines - days, times, "More wagers", prices, section headers - are excluded by
+   shape, and the vig gate still catches any pairing that slipped through. */
 function fdParse(text){
   const L=String(text||'').split(/\n+/).map(x=>x.trim()).filter(Boolean);
-  const nm=s=>{const m=/^\*?\s*\[([^\]]+)\]/.exec(s); return m?m[1].trim():null;};
+  const unlink=s=>{const m=/^\*?\s*\[([^\]]+)\]/.exec(s);
+    return m?m[1].trim():String(s).replace(/^\*\s*/,'').trim();};
+  const nm=s=>{const t=unlink(s);
+    return (t.length>=3&&t.length<=46&&/[A-Za-z\u00C0-\u024F]/.test(t)&&!/\d/.test(t))?t:null;};
   const am=s=>{const m=/^([+-]\d{3,5})$/.exec(String(s).replace(/\s/g,'')); return m?+m[1]:null;};
   /* A day-of-week or "More wagers" line is a LABEL wearing the same markdown
      shape as a fighter. Without this the parser pairs "Sat 5:10pm ET" with the
      next bout's first fighter and then reads two prices that belong to neither. */
-  const lab=s=>/^(mon|tue|wed|thu|fri|sat|sun)\b|more wagers/i.test(
-    String(s).replace(/^\*?\s*\[/,''));
+  const lab=s=>{const t=unlink(s);
+    return /^(mon|tue|wed|thu|fri|sat|sun)\b/i.test(t)
+        || /more wagers/i.test(t)
+        || /^(live|open|final|draw|moneyline|total|method|odds|wagers)\b/i.test(t);};
   const out=[]; let i=0;
   while(i<L.length){
     const a=nm(L[i]), b=nm(L[i+1]||'');
-    if(a&&b&&!lab(L[i])&&!lab(L[i+1])){
+    if(a&&b&&!lab(L[i])&&!lab(L[i+1]||'')){
       const pa=am(L[i+2]||''), pb=am(L[i+3]||'');
       if(pa!=null&&pb!=null){
         const ia=fdImp(pa), ib=fdImp(pb), sum=ia+ib;
@@ -4318,6 +4345,7 @@ function fdParse(text){
            commonest symptom of a paste whose shape drifted - so the row is
            dropped rather than de-vigged into a confident wrong number. */
         if(sum>=1.00&&sum<=1.18) out.push({a:a,b:b,oa:pa,ob:pb,p:ia/sum,vig:sum-1});
+        else out.push({bad:true,a:a,b:b,oa:pa,ob:pb,vig:sum-1});
         i+=4; continue;
       }
     }
@@ -4341,12 +4369,27 @@ function fdFor(b){
   return {p:flip?1-r.p:r.p, oa:flip?r.ob:r.oa, ob:flip?r.oa:r.ob, vig:r.vig, ts:r.ts};
 }
 function fdApply(text){
-  const rows=fdParse(text);
+  const rows=fdParse(text).filter(r=>!r.bad);
   let n=0;
   rows.forEach(r=>{ FDO[fdKeyOf(r.a,r.b)]={a:r.a,b:r.b,oa:r.oa,ob:r.ob,p:r.p,
                                            vig:r.vig,ts:Date.now()}; n++; });
   if(n) fdSave();
   return {n:n, rows:rows};
+}
+/* Counted as you type, so the box never sits there silently. The old build gave
+   no signal at all until focus left it and then an alert - which is the worst
+   order: no feedback while you can still fix the paste, an interruption once you
+   have moved on. */
+function fdPreview(text){
+  const all=fdParse(text);
+  const ok=all.filter(r=>!r.bad), bad=all.filter(r=>r.bad);
+  if(!String(text||'').trim()) return 'nothing pasted yet';
+  if(!ok.length&&!bad.length) return 'no bouts found — expected two names, then the two prices';
+  let t=ok.length+' bout'+(ok.length===1?'':'s')+' found';
+  if(ok.length) t+=': '+ok.slice(0,3).map(r=>surname(r.a)+'/'+surname(r.b)).join(', ')
+    +(ok.length>3?' and '+(ok.length-3)+' more':'');
+  if(bad.length) t+=' · '+bad.length+' rejected on vig ('+bad.map(r=>surname(r.a)+'/'+surname(r.b)).join(', ')+')';
+  return t;
 }
 /* IS THE PASTE BETTER THAN THE FEED? Neither dominates, and the panel says so
    rather than quietly picking.
@@ -4393,7 +4436,10 @@ function fdPanel(d){
           noPrice.length?`, <b style="color:var(--gold)">${noPrice.length}</b> of them on bouts with no feed price`:''}`
         :'none stored yet'}</span>
       <button class="ckbtn fdclear" style="margin-left:auto">clear</button></div>
-    <textarea class="sbta fdpaste" rows="2" placeholder="paste the FanDuel card list here — names, then the two prices, then the time"></textarea>
+    <textarea class="sbta fdpaste" rows="3" placeholder="paste the card here — the two names, then the two prices. Linked or plain text both work."></textarea>
+    <div style="display:flex;align-items:center;gap:9px;margin-top:5px;width:100%">
+      <button class="ckbtn fdread" type="button">Read it</button>
+      <span class="lbl fdcount" style="margin:0;color:var(--dim)">nothing pasted yet</span></div>
     <div class="note" style="margin-top:4px">${age!=null?`The feed price on this card is
       <b style="color:${age>=1?'var(--warn)':'var(--mute)'}">${age.toFixed(1)} days old</b>${
       nBooks?` and is a <b style="color:var(--mute)">${nBooks}-book consensus</b>`:''}; a paste is
