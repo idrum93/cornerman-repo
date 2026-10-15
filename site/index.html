@@ -2225,13 +2225,63 @@ let FB_CHECK=(function(){ try{ return localStorage.getItem(FB_KEY)==='1'; }catch
    registered as addendum 48, which has not been run. When it passes it enters
    the check's own method read, and this board inherits it automatically
    because it reads that read. Nothing here needs changing for that. */
+/* AIM THE ROUTES AT THE BOOK'S WINNER, keep the check's method.
+
+   The division of labour is the point. A moneyline is the best winner estimate
+   available here and it is not close - measured on the 12 graded bouts carrying
+   a price, the market went 10/12 at Brier 0.180 against the check's 7/12 at
+   0.257. But the book's moneyline knows NOTHING about method. So: the market
+   decides WHO, the check keeps HOW.
+
+   The arithmetic is exact rather than a fudge, because the stored cells already
+   factor that way:
+
+       a_ko = P(A wins) x P(KO | A wins)
+
+   so dividing by the check's own p_a recovers each corner's conditional method
+   mix, and multiplying by the book's q re-aims it. Verified on the export: all
+   34 reads have five cells summing to 1.000, so the recovery is exact.
+
+   ONE CONSEQUENCE WORTH NAMING, because it corrects something said earlier in
+   this project. A moneyline CAN move the finish rate - not by correcting a level
+   bias, which it cannot, but mechanically, whenever the two corners finish at
+   different rates when they win. The export has bouts at .386 against .680 on
+   finish-given-win, so shifting probability between those corners moves P(finish)
+   by real amounts. Saying a moneyline "cannot touch the finish rate" was too
+   strong; it cannot correct the level, which is a narrower claim.
+
+   Off by default. The pasted price is the operator's at an unknown moment and
+   this changes what the board picks. */
+const FB_MKKEY='cornerman.finishboard.market.v1';
+let FB_MKT=(function(){ try{ return localStorage.getItem(FB_MKKEY)==='1'; }catch(e){ return false; } })();
 function fbCheckCells(b){
   if(!FB_CHECK) return null;
   const c=(typeof CKR==='object'&&CKR)?CKR[b.bout]:null;
   if(!c||c.cells_ok!==true) return null;
-  const cells={a_ko:+c.a_ko||0,a_sub:+c.a_sub||0,b_ko:+c.b_ko||0,b_sub:+c.b_sub||0};
+  let cells={a_ko:+c.a_ko||0,a_sub:+c.a_sub||0,b_ko:+c.b_ko||0,b_sub:+c.b_sub||0};
+  if(FB_MKT){
+    const fd=(typeof fdFor==='function')?fdFor(b):null;
+    const pa=+c.p_a;
+    /* Guarded at both ends: a corner the check has at 2% or less has no stable
+       conditional mix to recover - dividing by it amplifies rounding into a
+       confident number - so such a bout is left as it was. */
+    if(fd&&isFinite(pa)&&pa>0.02&&pa<0.98){
+      const q=Math.max(0.01,Math.min(0.99,fd.p));
+      cells={a_ko:q*cells.a_ko/pa, a_sub:q*cells.a_sub/pa,
+             b_ko:(1-q)*cells.b_ko/(1-pa), b_sub:(1-q)*cells.b_sub/(1-pa)};
+    }
+  }
   const fin=cells.a_ko+cells.a_sub+cells.b_ko+cells.b_sub;
   return fin>0.001?cells:null;
+}
+/* How much the re-aim actually moved this bout, for the row label. */
+function fbMktShift(b){
+  if(!FB_MKT) return null;
+  const c=(typeof CKR==='object'&&CKR)?CKR[b.bout]:null;
+  const fd=(typeof fdFor==='function')?fdFor(b):null;
+  if(!c||c.cells_ok!==true||!fd) return null;
+  const pa=+c.p_a; if(!(pa>0.02&&pa<0.98)) return null;
+  return {from:pa, to:fd.p, d:fd.p-pa};
 }
 /* A round shape for a bout the model declined to split.
 
@@ -3212,9 +3262,13 @@ function finishBoard(d){
              fighter. What was missing is this - saying so on the row. */
           const ck=(typeof CKR==='object'&&CKR)?CKR[b.bout]:null;
           const t=(ck&&ck.thin!=null)?ck.thin:null;
-          if(t!=null&&t<3) return ` · <b style="color:var(--warn)">thin ${t}W</b>`;
-          if(b.thin) return ` · <b style="color:var(--warn)">thin record</b>`;
-          return '';})()}</span></div>${cells}<div class="fbg-t" style="color:${
+          let out='';
+          const sh=fbMktShift(b);
+          if(sh&&Math.abs(sh.d)>=0.03) out+=` · <b style="color:var(--gold)">book ${
+            P0(sh.to)} (check ${P0(sh.from)})</b>`;
+          if(t!=null&&t<3) out+=` · <b style="color:var(--warn)">thin ${t}W</b>`;
+          else if(b.thin) out+=` · <b style="color:var(--warn)">thin record</b>`;
+          return out;})()}</span></div>${cells}<div class="fbg-t" style="color:${
         ckd?'var(--gold)':'var(--mute)'}">${P0(pFin)}%</div><div class="fbg-t">${(()=>{
           const K=fbRouteConc(b);
           if(!K) return '<span class="fbnone">—</span>';
@@ -3234,6 +3288,9 @@ function finishBoard(d){
       <label class="fbtog" title="How many picks to spend. 25 is the ceiling; reducing drops the weakest cells and nothing else.">
         <span>picks</span>
         <input type="number" class="fbn" min="1" max="${FB_NMAX}" step="1" value="${FB_N}"></label>
+      <label class="fbtog" title="Re-aim each bout's routes at the pasted book line, keeping the check's method mix. The market decides who wins; the check keeps how.">
+        <span>book winner</span>
+        <input type="checkbox" class="fbmkt"${FB_MKT?' checked':''}></label>
       <label class="fbtog" title="Row order. Finish % is the likeliest to end early; clearest route is the least ambiguous about HOW — they genuinely disagree.">
         <span>sort</span>
         <select class="fbsort">
@@ -4191,6 +4248,9 @@ document.addEventListener('change',function(e){
     const k=e.target.getAttribute('data-bout');
     if(e.target.checked) FB_OFF.delete(k); else FB_OFF.add(k);
     fbOffSave();
+  } else if(cl.contains('fbmkt')){
+    FB_MKT=!!e.target.checked;
+    try{ localStorage.setItem(FB_MKKEY, FB_MKT?'1':'0'); }catch(err){}
   } else if(cl.contains('fbsort')){
     FB_SORT=e.target.value==='clear'?'clear':'finish';
     try{ localStorage.setItem(FB_SKEY, FB_SORT); }catch(err){}
