@@ -5359,6 +5359,104 @@ function parseEspnHistory(text, asOfMs){
    ONE field had arrived - see the note on sbFreshen for why that could only
    work until the next field was added, which is this one. */
 const ESPN_DV = 3;
+/* TAPOLOGY, alongside ESPN, producing the identical row shape.
+
+   Worth having for two reasons ESPN cannot cover. Tapology lists REGIONAL bouts
+   - the Combate Global and EXF fights that make up most of a Contender Series
+   graduate's record - and it names the PROMOTION on every row, which is what
+   espnTier() needs and what a UFC.com page never gives at all.
+
+   Four things in the format actively bite, and all four are handled:
+
+   CANCELLED BOUTS carry a "C" result and a "Cancelled Bout" detail line. They
+   never happened and must not land in a record; two of them sit in the middle
+   of the sample.
+
+   AMATEUR BOUTS sit under an "amateur bouts" heading with the same shape as
+   everything above. The Wikipedia parser already excludes amateur and addendum
+   53 registered that amateur belongs at weight ZERO rather than 0.5 - it is
+   evidence about a different qualifying tier, not weaker evidence about this
+   one. Everything after that heading is dropped.
+
+   NON-MMA BOUTS appear in the same list: a Karate Combat fight shows a bare
+   discipline line ("Karate") where the running records normally sit. That line
+   is the signal, and such rows are skipped rather than folded into an MMA
+   method mix.
+
+   THE DATE is "2026Aug 18" - year, month, day, no separators - which no
+   general-purpose date parser reads.
+
+   Verified against the full sample: 17 pro MMA bouts, 2 cancelled skipped, 1
+   amateur dropped, 1 non-MMA skipped, giving 15-2 — which matches Tapology's
+   own running record line of 14-2 going into the most recent fight. */
+const TAP_MON={jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,sept:8,oct:9,nov:10,dec:11};
+const TAP_NONMMA=/^(karate|boxing|kickboxing|grappling|muay\s*thai|bjj|jiu[- ]?jitsu|sumo|wrestling|bare\s*knuckle|bareknuckle)$/i;
+function parseTapology(text, asOfMs){
+  const L=String(text||'').split(/\n+/).map(x=>x.trim()).filter(Boolean);
+  const link=s=>{const m=/^\[([^\]]*)\]\(/.exec(s); return m?m[1].trim():null;};
+  const junk=s=>/^(receipt_long|add_circle|expand_more|more_horiz|sports_mma)$/i.test(s);
+  const rows=[]; let dropped=0, amateur=false, nonmma=0, cancelled=0;
+  for(let i=0;i<L.length;i++){
+    if(/^amateur\s+bouts?$/i.test(L[i])){ amateur=true; continue; }
+    if(junk(L[i])) continue;
+    const res=/^(W|L|D|NC|C)$/.exec(L[i]);
+    if(!res) continue;
+    if(res[1]==='C'){ cancelled++; continue; }
+    if(amateur){ dropped++; continue; }
+    let j=i+1, fam=null;
+    const mm=/^(KO|TKO|SUB|DEC|SUBMISSION|DECISION)$/i.exec(L[j]||'');
+    if(mm){ const u=mm[1].toUpperCase();
+      fam=(u==='KO'||u==='TKO')?'ko':(u.indexOf('SUB')===0?'sub':'dec'); j++; }
+    const opp=link(L[j]||''); if(opp==null) continue; j++;
+    let skip=false;
+    while(j<L.length){
+      const t=L[j];
+      if(TAP_NONMMA.test(t)){ skip=true; j++; continue; }
+      if(/^\d+-\d+(-\d+)?$/.test(t)){ j++; continue; }
+      break;
+    }
+    let rnd=null, secs=null;
+    const det=link(L[j]||'');
+    if(det!=null){
+      if(/cancelled/i.test(det)){ cancelled++; continue; }
+      const r=/·\s*R([1-5])\b/.exec(det); if(r) rnd=+r[1];
+      const tm=/·\s*(\d{1,2}):(\d{2})\s*·/.exec(det);
+      if(tm) secs=(+tm[1])*60+(+tm[2]);
+      if(!fam){
+        if(/decision/i.test(det)) fam='dec';
+        else if(/choke|submission|armbar|kimura|triangle|hook|lock|crank/i.test(det)) fam='sub';
+        else if(/ko|tko|punch|strike|knee|elbow|kick/i.test(det)) fam='ko';
+      }
+      j++;
+    }
+    const ev=link(L[j]||'')||''; if(ev) j++;
+    let when=null;
+    const dl=link(L[j]||'');
+    if(dl){
+      const d=/^(\d{4})\s*([A-Za-z]{3,9})\.?\s*(\d{1,2})$/.exec(dl.replace(/\s+/g,' '));
+      if(d&&TAP_MON[d[2].toLowerCase()]!=null)
+        when=Date.UTC(+d[1], TAP_MON[d[2].toLowerCase()], +d[3]);
+    }
+    if(skip){ nonmma++; continue; }
+    if(!fam||when==null){ dropped++; continue; }
+    if(asOfMs!=null && when>=asOfMs){ dropped++; continue; }
+    rows.push({when:when, opp:opp, res:res[1], fam:fam, rnd:rnd, secs:secs,
+               ev:ev, w:espnTier(ev)});
+  }
+  return rows.length?{rows:rows, dropped:dropped, nonmma:nonmma,
+                      cancelled:cancelled, src:'tapology'}:null;
+}
+/* Both parsers run and the one that reads more wins. Cheaper than sniffing for
+   a signature, and it cannot be fooled by a paste that carries a stray marker
+   from the wrong site. */
+function parseHistory(text, asOfMs){
+  let e=null, t=null;
+  try{ e=parseEspnHistory(text, asOfMs); }catch(err){ e=null; }
+  try{ t=parseTapology(text, asOfMs); }catch(err){ t=null; }
+  const ne=e&&e.rows?e.rows.length:0, nt=t&&t.rows?t.rows.length:0;
+  if(!ne&&!nt) return null;
+  return nt>ne ? t : e;
+}
 function espnDerive(h){
   if(!h||!h.rows.length) return null;
   const R=h.rows, sw=f=>R.filter(f).reduce((t,x)=>t+x.w,0);
@@ -5521,7 +5619,7 @@ function sbFreshen(st,b){
     if(!m||!m.espn||m.dv===ESPN_DV) return;   // not a history read, or already current
     const raw=st[c+'_histraw'];
     let d=null;
-    try{ d=raw?espnDerive(parseEspnHistory(raw,asOf)):null; }catch(e){ d=null; }
+    try{ d=raw?espnDerive(parseHistory(raw,asOf)):null; }catch(e){ d=null; }
     if(d){ st[c+'_h']=d; st[c+'_m']=Object.assign({}, m, d); }
     else { const q=Object.assign({}, m); delete q.espn; st[c+'_m']=q; st[c+'_h']=null; }
   });
@@ -5656,12 +5754,12 @@ function sandboxPanel(b){
         <input class="sbrec" data-c="a" placeholder="record, e.g. 10-3-0 (W-L-D)">
         <textarea class="sbta" data-c="a" rows="4" placeholder="paste the UFC.com stats block"></textarea>
         <input class="sbrec sbbio" data-c="a" placeholder="paste the Age/Height/Reach block, or type 32, 74">
-        <textarea class="sbta sbhist" data-c="a" rows="3" placeholder="paste the ESPN fight history table — supersedes Win by Method"></textarea></label>
+        <textarea class="sbta sbhist" data-c="a" rows="3" placeholder="paste the fight history — ESPN table or Tapology record, both read"></textarea></label>
       <label class="lbl">${nB}
         <input class="sbrec" data-c="b" placeholder="record, e.g. 10-3-0 (W-L-D)">
         <textarea class="sbta" data-c="b" rows="4" placeholder="paste the UFC.com stats block"></textarea>
         <input class="sbrec sbbio" data-c="b" placeholder="paste the Age/Height/Reach block, or type 32, 74">
-        <textarea class="sbta sbhist" data-c="b" rows="3" placeholder="paste the ESPN fight history table — supersedes Win by Method"></textarea></label>
+        <textarea class="sbta sbhist" data-c="b" rows="3" placeholder="paste the fight history — ESPN table or Tapology record, both read"></textarea></label>
     </div>
     <div class="sbacts">
       <button class="more sbgo">Read both</button>
@@ -6281,7 +6379,7 @@ function bindSandbox(b){
     box.querySelectorAll('.sbta.sbhist').forEach(ta=>{
       const c=ta.getAttribute('data-c');
       st[c+'_histraw']=ta.value;
-      const d=espnDerive(parseEspnHistory(ta.value, asOf));
+      const d=espnDerive(parseHistory(ta.value, asOf));
       st[c+'_h']=d;
       if(d) st[c+'_m']=Object.assign({}, st[c+'_m']||{}, d);
     });
