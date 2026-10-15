@@ -5390,57 +5390,76 @@ const ESPN_DV = 3;
    amateur dropped, 1 non-MMA skipped, giving 15-2 — which matches Tapology's
    own running record line of 14-2 going into the most recent fight. */
 const TAP_MON={jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,sept:8,oct:9,nov:10,dec:11};
-const TAP_NONMMA=/^(karate|boxing|kickboxing|grappling|muay\s*thai|bjj|jiu[- ]?jitsu|sumo|wrestling|bare\s*knuckle|bareknuckle)$/i;
+const TAP_NONMMA=/^(karate|boxing|kickboxing|grappling|muay\s*thai|bjj|jiu[- ]?jitsu|sumo|wrestling|bare\s*?knuckle)$/i;
+/* MARKDOWN OR BARE, and this is the second time in two days that mattered.
+
+   The first version required `[Name](url)`, because that is how the sample
+   arrived. Copying the same record off the Tapology PAGE gives bare lines and it
+   read ZERO rows - the identical failure the FanDuel parser had twenty-four
+   hours earlier, from the identical cause: treating the one example I was shown
+   as the format.
+
+   The rule, written down after making it twice: a pasted-text parser takes the
+   sample as ONE shape, never as the specification, and is tested against the
+   stripped version before it ships.
+
+   It is also parsed BY SHAPE rather than by position now. Fields are found by
+   what they look like - a date is YYYYMon DD, a detail carries a middot, a
+   method is one of five words - so an optional line appearing or vanishing
+   cannot shift everything after it. Verified: markdown and plain text both
+   return 17 rows, 15-2, 6/6/3. */
+const tapBare=s=>{const m=/^\[([^\]]*)\]\(/.exec(s); return (m?m[1]:String(s)).trim();};
+const tapDate=s=>{const d=/^(\d{4})\s*([A-Za-z]{3,9})\.?\s*(\d{1,2})$/.exec(tapBare(s).replace(/\s+/g,' '));
+  return (d&&TAP_MON[d[2].toLowerCase()]!=null)?Date.UTC(+d[1],TAP_MON[d[2].toLowerCase()],+d[3]):null;};
 function parseTapology(text, asOfMs){
   const L=String(text||'').split(/\n+/).map(x=>x.trim()).filter(Boolean);
-  const link=s=>{const m=/^\[([^\]]*)\]\(/.exec(s); return m?m[1].trim():null;};
-  const junk=s=>/^(receipt_long|add_circle|expand_more|more_horiz|sports_mma)$/i.test(s);
+  const junk=s=>/^(receipt_long|add_circle|expand_more|more_horiz|sports_mma)$/i.test(tapBare(s));
+  const isRes=s=>/^(W|L|D|NC|C)$/.test(tapBare(s));
+  const isRec=s=>/^\d+-\d+(-\d+)?$/.test(tapBare(s));
+  const isMeth=s=>/^(KO|TKO|SUB|DEC|SUBMISSION|DECISION)$/i.test(tapBare(s));
   const rows=[]; let dropped=0, amateur=false, nonmma=0, cancelled=0;
-  for(let i=0;i<L.length;i++){
-    if(/^amateur\s+bouts?$/i.test(L[i])){ amateur=true; continue; }
-    if(junk(L[i])) continue;
-    const res=/^(W|L|D|NC|C)$/.exec(L[i]);
-    if(!res) continue;
-    if(res[1]==='C'){ cancelled++; continue; }
+  const marks=[];
+  L.forEach(function(l,i){ if(/^amateur\s+bouts?$/i.test(tapBare(l))) marks.push({am:true,i:i});
+                           else if(isRes(l)) marks.push({am:false,i:i}); });
+  for(let m=0;m<marks.length;m++){
+    if(marks[m].am){ amateur=true; continue; }
+    const i=marks[m].i, end=(m+1<marks.length?marks[m+1].i:L.length);
+    const blk=L.slice(i,end).filter(x=>!junk(x));
+    const res=tapBare(blk[0]);
+    if(res==='C'){ cancelled++; continue; }
+    if(blk.some(x=>/cancelled/i.test(tapBare(x)))){ cancelled++; continue; }
     if(amateur){ dropped++; continue; }
-    let j=i+1, fam=null;
-    const mm=/^(KO|TKO|SUB|DEC|SUBMISSION|DECISION)$/i.exec(L[j]||'');
-    if(mm){ const u=mm[1].toUpperCase();
-      fam=(u==='KO'||u==='TKO')?'ko':(u.indexOf('SUB')===0?'sub':'dec'); j++; }
-    const opp=link(L[j]||''); if(opp==null) continue; j++;
-    let skip=false;
-    while(j<L.length){
-      const t=L[j];
-      if(TAP_NONMMA.test(t)){ skip=true; j++; continue; }
-      if(/^\d+-\d+(-\d+)?$/.test(t)){ j++; continue; }
-      break;
-    }
+    if(blk.some(x=>TAP_NONMMA.test(tapBare(x)))){ nonmma++; continue; }
+    let fam=null;
+    const mi=blk.findIndex(isMeth);
+    if(mi>0){ const u=tapBare(blk[mi]).toUpperCase();
+      fam=(u==='KO'||u==='TKO')?'ko':(u.indexOf('SUB')===0?'sub':'dec'); }
+    let di=-1, when=null;
+    for(let k=blk.length-1;k>0;k--){ const w=tapDate(blk[k]); if(w!=null){ di=k; when=w; break; } }
+    const ev = di>1 ? tapBare(blk[di-1]) : '';
+    const detI = blk.findIndex(function(x,k){ return k>0 && /·|decision/i.test(tapBare(x)); });
+    const det = detI>0 ? tapBare(blk[detI]) : '';
     let rnd=null, secs=null;
-    const det=link(L[j]||'');
-    if(det!=null){
-      if(/cancelled/i.test(det)){ cancelled++; continue; }
+    if(det){
       const r=/·\s*R([1-5])\b/.exec(det); if(r) rnd=+r[1];
       const tm=/·\s*(\d{1,2}):(\d{2})\s*·/.exec(det);
       if(tm) secs=(+tm[1])*60+(+tm[2]);
       if(!fam){
         if(/decision/i.test(det)) fam='dec';
         else if(/choke|submission|armbar|kimura|triangle|hook|lock|crank/i.test(det)) fam='sub';
-        else if(/ko|tko|punch|strike|knee|elbow|kick/i.test(det)) fam='ko';
+        else fam='ko';
       }
-      j++;
     }
-    const ev=link(L[j]||'')||''; if(ev) j++;
-    let when=null;
-    const dl=link(L[j]||'');
-    if(dl){
-      const d=/^(\d{4})\s*([A-Za-z]{3,9})\.?\s*(\d{1,2})$/.exec(dl.replace(/\s+/g,' '));
-      if(d&&TAP_MON[d[2].toLowerCase()]!=null)
-        when=Date.UTC(+d[1], TAP_MON[d[2].toLowerCase()], +d[3]);
+    let opp=null;
+    for(let k=1;k<blk.length;k++){
+      if(k===mi||k===detI||k===di||(di>1&&k===di-1)) continue;
+      const t=tapBare(blk[k]);
+      if(isRec(blk[k])||isMeth(blk[k])||!/[A-Za-z]/.test(t)) continue;
+      opp=t; break;
     }
-    if(skip){ nonmma++; continue; }
     if(!fam||when==null){ dropped++; continue; }
     if(asOfMs!=null && when>=asOfMs){ dropped++; continue; }
-    rows.push({when:when, opp:opp, res:res[1], fam:fam, rnd:rnd, secs:secs,
+    rows.push({when:when, opp:opp, res:res, fam:fam, rnd:rnd, secs:secs,
                ev:ev, w:espnTier(ev)});
   }
   return rows.length?{rows:rows, dropped:dropped, nonmma:nonmma,
@@ -6357,6 +6376,38 @@ function bindSandbox(b){
   });
   box.querySelectorAll('.sbta.sbhist').forEach(ta=>{
     ta.value=st[ta.getAttribute('data-c')+'_histraw']||'';
+  });
+  /* A COUNT UNDER THE BOX, because a zero-row parse was silent.
+
+     Paste a history the parser cannot read and nothing happened at all - no
+     rows, no message, no change on screen. That is the failure mode that cost
+     two rounds on the odds box and one here, and it is the same fix: say what
+     was read, while the paste is still in front of you and fixable. */
+  box.querySelectorAll('.sbta.sbhist').forEach(ta=>{
+    const say=()=>{
+      let el=ta.nextElementSibling;
+      if(!el||!el.classList||!el.classList.contains('sbhcount')){
+        el=document.createElement('div');
+        el.className='lbl sbhcount';
+        el.style.cssText='margin-top:3px;text-transform:none;letter-spacing:0;font-size:10px';
+        ta.parentNode.insertBefore(el, ta.nextSibling);
+      }
+      const v=ta.value||'';
+      if(!v.trim()){ el.textContent=''; return; }
+      let h=null; try{ h=parseHistory(v, sbCardMs(b)); }catch(e){ h=null; }
+      if(!h||!h.rows.length){
+        el.innerHTML='<span style="color:var(--warn)">no bouts read</span> — ESPN table or Tapology record, linked or plain';
+        return;
+      }
+      const w=h.rows.filter(x=>x.res==='W').length, l=h.rows.filter(x=>x.res==='L').length;
+      el.innerHTML='<span style="color:var(--gold)">'+h.rows.length+' bouts</span> from '
+        +(h.src==='tapology'?'Tapology':'ESPN')+' · '+w+'-'+l
+        +(h.cancelled?' · '+h.cancelled+' cancelled skipped':'')
+        +(h.nonmma?' · '+h.nonmma+' non-MMA skipped':'')
+        +(h.dropped?' · '+h.dropped+' dropped (amateur or after the card)':'');
+    };
+    ta.addEventListener('input', say);
+    say();
   });
   box.querySelectorAll('.sbrec:not(.sbbio)').forEach(ip=>{
     ip.value=st[ip.getAttribute('data-c')+'_recraw']||'';
