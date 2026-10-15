@@ -5409,10 +5409,34 @@ const TAP_NONMMA=/^(karate|boxing|kickboxing|grappling|muay\s*thai|bjj|jiu[- ]?j
    cannot shift everything after it. Verified: markdown and plain text both
    return 17 rows, 15-2, 6/6/3. */
 const tapBare=s=>{const m=/^\[([^\]]*)\]\(/.exec(s); return (m?m[1]:String(s)).trim();};
-const tapDate=s=>{const d=/^(\d{4})\s*([A-Za-z]{3,9})\.?\s*(\d{1,2})$/.exec(tapBare(s).replace(/\s+/g,' '));
-  return (d&&TAP_MON[d[2].toLowerCase()]!=null)?Date.UTC(+d[1],TAP_MON[d[2].toLowerCase()],+d[3]):null;};
+/* FOUR date shapes, not one. Tapology writes "2026Aug 18" with no separators,
+   but a copy can arrive spaced, reordered or comma'd depending on the route it
+   took, and a parser that silently returns nothing is the worst way to tell
+   someone their paste was the wrong shape. */
+const tapDate=s=>{
+  const t=tapBare(s).replace(/\s+/g,' ').trim();
+  const M=w=>TAP_MON[String(w).replace(/\.$/,'').toLowerCase()];
+  let d=/^(\d{4})\s*([A-Za-z]{3,9})\.?\s*(\d{1,2})$/.exec(t);        // 2026Aug 18
+  if(d&&M(d[2])!=null) return Date.UTC(+d[1],M(d[2]),+d[3]);
+  d=/^([A-Za-z]{3,9})\.?\s*(\d{1,2}),?\s*(\d{4})$/.exec(t);          // Aug 18, 2026
+  if(d&&M(d[1])!=null) return Date.UTC(+d[3],M(d[1]),+d[2]);
+  d=/^(\d{1,2})\s*([A-Za-z]{3,9})\.?\s*(\d{4})$/.exec(t);            // 18 Aug 2026
+  if(d&&M(d[2])!=null) return Date.UTC(+d[3],M(d[2]),+d[1]);
+  d=/^(\d{4})-(\d{2})-(\d{2})$/.exec(t);                              // 2026-08-18
+  if(d) return Date.UTC(+d[1],+d[2]-1,+d[3]);
+  return null;};
+/* The detail separator is a middot on the site; a copy can carry a bullet, a
+   ring operator or a pipe depending on the route it took. */
+const TAP_SEP='[\\u00b7\\u2022\\u2219|]';
 function parseTapology(text, asOfMs){
-  const L=String(text||'').split(/\n+/).map(x=>x.trim()).filter(Boolean);
+  let raw=String(text||'');
+  /* A paste that arrives as ONE LINE. Some copy routes strip the newlines
+     entirely, and every line-oriented rule below then sees a single string and
+     finds nothing. Markdown gives the boundary back for free: a `](url)` ends a
+     field wherever it appears. */
+  if((raw.match(/\n/g)||[]).length < 3 && (raw.match(/\]\(/g)||[]).length > 3)
+    raw=raw.replace(/\)\s*(?=\[)/g,')\\n').replace(/\)\s*(?=[A-Z0-9])/g,')\\n');
+  const L=raw.split(/\n+/).map(x=>x.trim()).filter(Boolean);
   const junk=s=>/^(receipt_long|add_circle|expand_more|more_horiz|sports_mma)$/i.test(tapBare(s));
   const isRes=s=>/^(W|L|D|NC|C)$/.test(tapBare(s));
   const isRec=s=>/^\d+-\d+(-\d+)?$/.test(tapBare(s));
@@ -5437,12 +5461,14 @@ function parseTapology(text, asOfMs){
     let di=-1, when=null;
     for(let k=blk.length-1;k>0;k--){ const w=tapDate(blk[k]); if(w!=null){ di=k; when=w; break; } }
     const ev = di>1 ? tapBare(blk[di-1]) : '';
-    const detI = blk.findIndex(function(x,k){ return k>0 && /·|decision/i.test(tapBare(x)); });
+    const detI = blk.findIndex(function(x,k){
+      return k>0 && (new RegExp(TAP_SEP).test(tapBare(x)) || /decision/i.test(tapBare(x))); });
     const det = detI>0 ? tapBare(blk[detI]) : '';
     let rnd=null, secs=null;
     if(det){
-      const r=/·\s*R([1-5])\b/.exec(det); if(r) rnd=+r[1];
-      const tm=/·\s*(\d{1,2}):(\d{2})\s*·/.exec(det);
+      const r=new RegExp(TAP_SEP+'\\s*R([1-5])\\b').exec(det)||/\bR([1-5])\s*$/.exec(det);
+      if(r) rnd=+r[1];
+      const tm=/(\d{1,2}):(\d{2})/.exec(det);
       if(tm) secs=(+tm[1])*60+(+tm[2]);
       if(!fam){
         if(/decision/i.test(det)) fam='dec';
@@ -5462,8 +5488,17 @@ function parseTapology(text, asOfMs){
     rows.push({when:when, opp:opp, res:res, fam:fam, rnd:rnd, secs:secs,
                ev:ev, w:espnTier(ev)});
   }
-  return rows.length?{rows:rows, dropped:dropped, nonmma:nonmma,
-                      cancelled:cancelled, src:'tapology'}:null;
+  /* A DIAGNOSIS ON FAILURE, not a null.
+
+     Three rounds were spent guessing at a paste's shape from the outside. The
+     parser knows what it saw - how many lines, how many result markers, how
+     many readable dates - and saying so turns the next failure into a one-line
+     answer instead of another round of guessing. */
+  return {rows:rows, dropped:dropped, nonmma:nonmma, cancelled:cancelled,
+          src:'tapology',
+          saw:{lines:L.length, marks:marks.length,
+               dates:L.filter(x=>tapDate(x)!=null).length,
+               links:(raw.match(/\]\(/g)||[]).length}};
 }
 /* Both parsers run and the one that reads more wins. Cheaper than sniffing for
    a signature, and it cannot be fooled by a paste that carries a stray marker
@@ -5473,7 +5508,7 @@ function parseHistory(text, asOfMs){
   try{ e=parseEspnHistory(text, asOfMs); }catch(err){ e=null; }
   try{ t=parseTapology(text, asOfMs); }catch(err){ t=null; }
   const ne=e&&e.rows?e.rows.length:0, nt=t&&t.rows?t.rows.length:0;
-  if(!ne&&!nt) return null;
+  if(!ne&&!nt) return (t&&t.saw)?{rows:[],saw:t.saw,src:'none'}:null;
   return nt>ne ? t : e;
 }
 function espnDerive(h){
@@ -6396,7 +6431,14 @@ function bindSandbox(b){
       if(!v.trim()){ el.textContent=''; return; }
       let h=null; try{ h=parseHistory(v, sbCardMs(b)); }catch(e){ h=null; }
       if(!h||!h.rows.length){
-        el.innerHTML='<span style="color:var(--warn)">no bouts read</span> — ESPN table or Tapology record, linked or plain';
+        const d=h&&h.saw;
+        el.innerHTML='<span style="color:var(--warn)">no bouts read</span> — ESPN table or Tapology record, linked or plain.'
+          +(d?(' Saw <b>'+d.lines+'</b> line'+(d.lines===1?'':'s')+', <b>'+d.marks
+              +'</b> W/L marker'+(d.marks===1?'':'s')+', <b>'+d.dates+'</b> readable date'
+              +(d.dates===1?'':'s')+(d.links?', '+d.links+' links':'')+'.'
+              +(d.lines<4?' That looks like one long line — the copy lost its line breaks.'
+                :(d.marks===0?' No line was just W or L on its own.'
+                  :(d.dates===0?' No date matched; Tapology writes them as 2026Aug 18.':'')))):'');
         return;
       }
       const w=h.rows.filter(x=>x.res==='W').length, l=h.rows.filter(x=>x.res==='L').length;
