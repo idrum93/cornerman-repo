@@ -2,7 +2,7 @@
  "event": "UFC Fight Night: Buckley vs. Malott",
  "date": "2026-10-17",
  "venue": "Rogers Place, Edmonton , Alberta , Canada",
- "generated_utc": "2026-10-14T15:46:03.273967+00:00",
+ "generated_utc": "2026-10-15T12:27:34.644654+00:00",
  "bouts": [
   {
    "bout": "Joaquin Buckley vs. Mike Malott",
@@ -191,9 +191,9 @@
      "log_layoff": 5.209486
     }
    },
-   "p_market": 0.4581,
+   "p_market": 0.4545,
    "books": 25,
-   "edge": 0.0562,
+   "edge": 0.0598,
    "p_finish_survival_raw": 0.4763,
    "m_a_ko": 0.218,
    "m_b_ko": 0.2082,
@@ -827,9 +827,9 @@
      "log_layoff": 4.836282
     }
    },
-   "p_market": 0.3541,
+   "p_market": 0.3641,
    "books": 24,
-   "edge": -0.0987,
+   "edge": -0.1087,
    "p_finish_survival_raw": 0.5123,
    "m_a_ko": 0.1103,
    "m_b_ko": 0.1457,
@@ -1135,9 +1135,9 @@
      "log_layoff": 5.247024
     }
    },
-   "p_market": 0.7018,
+   "p_market": 0.7033,
    "books": 26,
-   "edge": -0.1569,
+   "edge": -0.1585,
    "p_finish_survival_raw": null,
    "m_a_ko": null,
    "m_b_ko": null,
@@ -1421,9 +1421,9 @@
      "log_layoff": 5.918894
     }
    },
-   "p_market": 0.3211,
+   "p_market": 0.3218,
    "books": 24,
-   "edge": 0.1158,
+   "edge": 0.1151,
    "p_finish_survival_raw": 0.5227,
    "m_a_ko": 0.1558,
    "m_b_ko": 0.2924,
@@ -1726,9 +1726,9 @@
      "log_layoff": 7.249926
     }
    },
-   "p_market": 0.4271,
+   "p_market": 0.4133,
    "books": 22,
-   "edge": -0.1282,
+   "edge": -0.1144,
    "p_finish_survival_raw": null,
    "m_a_ko": null,
    "m_b_ko": null,
@@ -2013,9 +2013,9 @@
      "log_layoff": 4.89784
     }
    },
-   "p_market": 0.7048,
+   "p_market": 0.7248,
    "books": 23,
-   "edge": 0.0993,
+   "edge": 0.0793,
    "p_finish_survival_raw": 0.4399,
    "m_a_ko": 0.1028,
    "m_b_ko": 0.071,
@@ -2191,25 +2191,25 @@
  "market_source": "the-odds-api",
  "track_record": {
   "winner": {
-   "n_tested": 836,
-   "accuracy": 0.672,
-   "tested_from": "2024-04-27",
-   "tested_to": "2026-10-03",
+   "n_tested": 835,
+   "accuracy": 0.674,
+   "tested_from": "2024-05-04",
+   "tested_to": "2026-10-10",
    "bands": [
     {
      "said": "50-60%",
-     "n": 368,
-     "right": 0.598
+     "n": 369,
+     "right": 0.599
     },
     {
      "said": "60-70%",
-     "n": 299,
-     "right": 0.676
+     "n": 297,
+     "right": 0.684
     },
     {
      "said": "70-80%",
      "n": 141,
-     "right": 0.83
+     "right": 0.823
     },
     {
      "said": "80-100%",
@@ -2220,35 +2220,35 @@
   },
   "takedown": {
    "said_likely": {
-    "n": 373,
-    "happened": 0.737,
+    "n": 376,
+    "happened": 0.739,
     "avg_said": 0.719
    },
    "said_unlikely": {
-    "n": 819,
-    "happened": 0.26,
-    "avg_said": 0.243
+    "n": 824,
+    "happened": 0.258,
+    "avg_said": 0.244
    },
-   "auc": 0.741
+   "auc": 0.743
   },
   "knockdown": {
    "said_unlikely": {
-    "n": 1580,
-    "happened": 0.175,
+    "n": 1594,
+    "happened": 0.174,
     "avg_said": 0.165
    },
-   "auc": 0.669
+   "auc": 0.67
   },
   "ranges": {
    "control time": {
     "claimed": 0.8,
     "actual": 0.793,
-    "n": 1690
+    "n": 1704
    },
    "significant strikes": {
     "claimed": 0.8,
-    "actual": 0.801,
-    "n": 1690
+    "actual": 0.802,
+    "n": 1704
    }
   }
  },
