@@ -5458,8 +5458,27 @@ function parseTapology(text, asOfMs){
     const mi=blk.findIndex(isMeth);
     if(mi>0){ const u=tapBare(blk[mi]).toUpperCase();
       fam=(u==='KO'||u==='TKO')?'ko':(u.indexOf('SUB')===0?'sub':'dec'); }
-    let di=-1, when=null;
-    for(let k=blk.length-1;k>0;k--){ const w=tapDate(blk[k]); if(w!=null){ di=k; when=w; break; } }
+    /* THE DATE CELL CAN SPAN TWO LINES, which is what actually broke this.
+       Tapology renders the year above the month and day, so a copy off the page
+       gives "2026" then "Aug 18" where the markdown gives "2026Aug 18" in one.
+       Diagnosed from the failure message rather than guessed: the report said
+       202 lines, 22 markers, ZERO readable dates, and a reconstruction with the
+       date split lands at 203 lines and 21 markers — close enough to be the
+       same document.
+
+       So the scan tries a single line, then the pair ending there, and records
+       how many lines the date consumed so the event above it is still found. */
+    let di=-1, dn=1, when=null;
+    for(let k=blk.length-1;k>0;k--){
+      let w=tapDate(blk[k]);
+      if(w!=null){ di=k; dn=1; when=w; break; }
+      if(k>0){
+        w=tapDate(tapBare(blk[k-1])+tapBare(blk[k]));           // 2026 + Aug 18
+        if(w==null) w=tapDate(tapBare(blk[k-1])+' '+tapBare(blk[k]));
+        if(w==null) w=tapDate(tapBare(blk[k])+' '+tapBare(blk[k-1]));  // Aug 18 + 2026
+        if(w!=null){ di=k-1; dn=2; when=w; break; }
+      }
+    }
     const ev = di>1 ? tapBare(blk[di-1]) : '';
     const detI = blk.findIndex(function(x,k){
       return k>0 && (new RegExp(TAP_SEP).test(tapBare(x)) || /decision/i.test(tapBare(x))); });
@@ -5478,7 +5497,7 @@ function parseTapology(text, asOfMs){
     }
     let opp=null;
     for(let k=1;k<blk.length;k++){
-      if(k===mi||k===detI||k===di||(di>1&&k===di-1)) continue;
+      if(k===mi||k===detI||k===di||(dn>1&&k===di+1)||(di>1&&k===di-1)) continue;
       const t=tapBare(blk[k]);
       if(isRec(blk[k])||isMeth(blk[k])||!/[A-Za-z]/.test(t)) continue;
       opp=t; break;
@@ -5497,7 +5516,8 @@ function parseTapology(text, asOfMs){
   return {rows:rows, dropped:dropped, nonmma:nonmma, cancelled:cancelled,
           src:'tapology',
           saw:{lines:L.length, marks:marks.length,
-               dates:L.filter(x=>tapDate(x)!=null).length,
+               dates:L.filter(function(x,i){ return tapDate(x)!=null
+                 || (i>0 && tapDate(tapBare(L[i-1])+tapBare(x))!=null); }).length,
                links:(raw.match(/\]\(/g)||[]).length}};
 }
 /* Both parsers run and the one that reads more wins. Cheaper than sniffing for
