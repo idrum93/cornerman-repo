@@ -7274,3 +7274,385 @@ UFC.com read is.
 a fresher number silently overwrite a broader one — in the fields that feed the
 graded record — is the editable-ledger problem in its most tempting form yet,
 because this time the replacement would genuinely be more current.
+
+## Addendum 64, amendment 2 (2026-10-14): a parser that only worked on the sample it was shown
+
+Reported: the paste produced "No bouts read from that paste", and the only way to
+get even that message was to click off the box.
+
+**Two defects, and the first is the embarrassing one.**
+
+### The parser required markdown
+
+It matched `[Name](url)`, because that is the shape the sample arrived in. The
+same card copied off the FanDuel **page** is bare lines, so it read nothing.
+
+A parser that works on the one example it was given is a demo, not a parser —
+and the failure mode was silent, which made it worse. The sample should have been
+treated as one of several shapes from the start, not as the specification.
+
+**Fixed**: a name is a name whether or not it arrived wrapped in a link. Verified
+on both forms of the same card — markdown 6 bouts, plain text 4 of 4.
+
+Label lines are still excluded by shape (days, times, "More wagers", prices,
+section headers), and the vig gate still catches any pairing that slips through.
+Rejected rows are now NAMED in the feedback rather than silently dropped, so a
+bout that vanishes on a bad pairing says so.
+
+### The only feedback was an alert, on blur
+
+No signal while the paste was still fixable; an interruption once you had moved
+on. Exactly the wrong order.
+
+**Fixed**: a **Read it** button, and a live count that updates as you paste —
+"4 bouts found: Chovancek/You, Croden/Chandler, Mahjoub/Faglier and 1 more". A
+paste that reads nothing says so inline, in place, with no dialog. Verified: junk
+input now reports "no bouts found — expected two names, then the two prices —
+nothing stored", and no alert is raised.
+
+# Addendum 65: the market decides WHO, the check keeps HOW (2026-10-15)
+
+Asked whether the pasted book line should decide which fighter's finish routes
+get prioritised — the observation being that a corner the book now favours can
+be carrying fewer routes on the board than his opponent.
+
+**Yes, and it is the one use of a moneyline this project can defend on measured
+grounds.**
+
+## The warrant
+
+On the 12 graded bouts carrying a price, matched: the market went **10/12 at
+Brier 0.180** against the check's **7/12 at 0.257**. The market is a materially
+better winner estimate and it is not close.
+
+But a moneyline knows **nothing** about method. So the division of labour writes
+itself: the market decides WHO wins, the check keeps HOW he wins.
+
+## The arithmetic is exact, not a fudge
+
+The stored cells already factor the right way:
+
+```
+a_ko = P(A wins) x P(KO | A wins)
+```
+
+so dividing by the check's own `p_a` recovers each corner's conditional method
+mix, and multiplying by the book's `q` re-aims it. **Verified on the export: all
+34 reads have five cells summing to 1.000**, so the recovery is exact rather than
+approximate.
+
+Guarded at both ends — a corner the check puts at 2% or less has no stable
+conditional mix to recover, since dividing by it turns rounding into a confident
+number, so those bouts are left alone.
+
+## What it does to the live card
+
+| bout | check had | book has | effect |
+|---|---|---|---|
+| **Anheliger v Koslow** | 23.7% | **42.2%** | his KO route .097 → **.172**, Koslow's sub .379 → .287 |
+| Croden v Chandler | 83.6% | 70.5% | .384 → .324 |
+| Buckley v Malott | 52.7% | 47.6% | .331 → .299 |
+
+The Anheliger row is the case the question was about: the check has him a heavy
+underdog, the book has the fight near even, and the board was pointing its routes
+at the wrong man. Bouts with no pasted price are untouched.
+
+**Off by default**, because the pasted price is the operator's at an unknown
+moment and this changes what the board picks. The row label names the shift
+wherever it exceeds 3 points, so a re-aimed bout never looks like an unaimed one.
+
+## A correction to addendum 64
+
+Addendum 64 said a moneyline "carries no information about whether the fight
+finishes" and "cannot touch the finish rate". **Too strong.**
+
+It cannot correct a LEVEL bias — that claim stands. But re-aiming moves P(finish)
+mechanically whenever the two corners finish at different rates when they win,
+and the export has bouts at **.386 against .680** on finish-given-win. On the
+live card the re-aim moved Anheliger/Koslow from .646 to .635 and Croden from
+.578 to .565.
+
+The narrower claim is the true one, and the broad version was the easier thing to
+say.
+
+## On the two bouts named
+
+From the pasted prices: **Mahjoub −120, Faglier −106**, which de-vigs to Mahjoub
+**51.5%** — so by those numbers Mahjoub is the narrow favourite, not Faglier. The
+line may well have moved since Monday; the panel reports the paste's age for
+exactly this reason. **Leblanc +420, Galanti −650** does make Galanti an **81.8%**
+favourite, which is the kind of gap that moves a board hard.
+
+# Addendum 66: Tapology as a second history source (2026-10-15)
+
+The history box read ESPN tables only. Added Tapology, producing the identical
+row shape, with both parsers run and the one that reads more rows winning —
+cheaper than sniffing for a signature and not foolable by a stray marker.
+
+## Why it is worth having rather than redundant
+
+Tapology carries two things no existing source does:
+
+- **regional bouts.** A Contender Series graduate's record is mostly Combate
+  Global and EXF. ESPN is thin there and UFC.com has nothing at all.
+- **the promotion on every row**, which is exactly what `espnTier()` needs.
+  Verified: "Contender Series 2026" resolves to weight **1.0**, "Combate Global"
+  to **0.5**, with no extra wiring.
+
+## Four things in the format that bite, all handled
+
+**Cancelled bouts** carry a `C` result and a "Cancelled Bout" detail. They never
+happened; two sit in the middle of the sample and would otherwise have entered a
+record.
+
+**Amateur bouts** sit under an "amateur bouts" heading with identical shape.
+Everything after it is dropped — the Wikipedia parser already excludes amateur,
+and addendum 53 registered that amateur belongs at weight **zero**, not 0.5: it
+is evidence about a different qualifying tier, not weaker evidence about this
+one.
+
+**Non-MMA bouts** appear in the same list. A Karate Combat fight shows a bare
+discipline line ("Karate") where the running records normally sit — that line is
+the signal, and the row is skipped rather than folded into an MMA method mix.
+
+**The date** is `2026Aug 18` — year, month, day, no separators — which no
+general date parser reads.
+
+## Validated against the source's own arithmetic
+
+Full sample: **17 pro MMA bouts, 2 cancelled skipped, 1 amateur dropped, 1
+non-MMA skipped**, giving **15-2**. Tapology's own running-record line shows
+14-2 going into the most recent fight, so 15-2 after — an independent check that
+the parse neither invented nor lost a bout, which counting rows alone cannot
+give.
+
+Derived mix: 6 KO, 6 SUB, 3 DEC from 15 wins; tier-weighted shares .438 / .375 /
+.188, the weighting pulling the two Contender Series results above the regional
+ones as intended.
+
+## The new suite check earned its place immediately
+
+Integrating this, I made the **same mistake as yesterday**: the inserted block
+ended with the anchor line and the anchor was concatenated again, producing
+`function espnDerive(h){function espnDerive(h){` and a script that did not parse.
+
+Yesterday that cost a long debugging detour and a false alarm about
+already-shipped work. Today `site script parses` reported `1 unclosed — first is
+'{' at line 4715` on the first run, and it was fixed in one edit.
+
+The habit worth recording, since twice is a pattern: **when an inserted block
+already ends with the anchor, replace the anchor with the block — do not append
+the anchor again.**
+
+## Addendum 66, amendment 1 (2026-10-15): the same mistake, twenty-four hours apart
+
+Reported: the Tapology record did not process.
+
+**I built the parser against the markdown sample again.** It required
+`[Name](url)` because that is how the record arrived in conversation. Copied off
+the Tapology **page** it is bare lines, and the parser read **zero rows** —
+verified by stripping the links from the same sample and re-running.
+
+This is the identical failure the FanDuel parser had **one day earlier**, from
+the identical cause, and I recorded the lesson then without applying it to the
+next parser I wrote. Writing it down was not the same as learning it.
+
+**The rule, now stated as a rule rather than an observation:** a pasted-text
+parser treats its sample as ONE shape, never as the specification, and is tested
+against the stripped version before it ships.
+
+### Rebuilt by shape rather than by position
+
+Fields are found by what they look like — a date is `YYYYMon DD`, a detail
+carries a middot, a method is one of five words — so an optional line appearing
+or vanishing cannot shift everything after it. The old version walked forward
+from the result marker and counted lines, which is why a single missing record
+line could derail a whole block.
+
+Verified: markdown and plain text now return **identical** results — 17 rows,
+15-2, 2 cancelled skipped, 1 non-MMA skipped, 1 amateur dropped, tier-weighted
+mix .438 / .375.
+
+### And the silence, which is the part that made it cost a round
+
+A zero-row parse produced **nothing at all** — no rows, no message, no change on
+screen. Third time this exact shape of failure has appeared in three days.
+
+A live count now sits under the history box: "17 bouts from Tapology · 15-2 · 2
+cancelled skipped · 1 non-MMA skipped · 1 dropped", and on junk input "no bouts
+read — ESPN table or Tapology record, linked or plain". It updates as you paste,
+while the text is still in front of you.
+
+**The general rule this project keeps relearning: any box that accepts a paste
+reports what it read, immediately, in place.** Silence is the worst possible
+answer because it is indistinguishable from success.
+
+## Addendum 66, amendment 2 (2026-10-15): stop guessing, make the parser say what it saw
+
+Still failing after amendment 1, and at that point **three rounds had been spent
+guessing at a paste's shape from the outside** — each one a theory about what the
+text looked like, tested against a reconstruction rather than the real thing.
+
+The parser knows what it saw. Saying so turns the next failure into a one-line
+answer instead of another round.
+
+### Tolerances widened, measured per shape
+
+| paste shape | before | after |
+|---|---|---|
+| markdown links | 17 rows | 17 rows |
+| plain text | 17 rows | 17 rows |
+| bullet instead of middot | 0 rows | **17 rows** |
+| dates as "Aug 18, 2026" / "18 Aug 2026" / ISO | 0 rows | read |
+| one long line, no breaks | 0 rows | still 0, and **says so** |
+
+Four date shapes, four separator characters. The one-line case is genuinely hard
+— the result marker, the method and the name all glue into a single token — and
+a half-working splitter for it would be worse than an honest refusal.
+
+### The failure message now diagnoses
+
+```
+no bouts read — ESPN table or Tapology record, linked or plain.
+Saw 1 line, 0 W/L markers, 0 readable dates, 82 links.
+That looks like one long line — the copy lost its line breaks.
+```
+
+and for a record whose dates do not match:
+
+```
+Saw 161 lines, 22 W/L markers, 0 readable dates, 61 links.
+No date matched; Tapology writes them as 2026Aug 18.
+```
+
+Lines, result markers, readable dates and link count, with the single most
+likely cause named. **Three failure modes now identify themselves**, where
+before all three produced the same six words.
+
+### The rule, stated for the third time and now implemented rather than noted
+
+A paste box reports what it read. When it reads nothing it reports **what it
+saw** — not a restatement of what it wanted. The first version of this message
+said what the parser expected, which is useless to someone holding text that
+does not match it: they already know it did not work, and the thing they cannot
+see is why.
+
+## Addendum 66, amendment 3 (2026-10-15): the date cell spans two lines
+
+The diagnostic earned itself back on its first use. Reported verbatim:
+
+> Saw **202 lines, 22 W/L markers, 0 readable dates**.
+
+Twenty-two markers means the blocks were being found correctly. Zero dates with
+two hundred lines — against a reconstruction of the same record at 161 — says the
+real paste carries about forty MORE lines than expected and that the extra ones
+are where the date should be.
+
+**Tapology renders the date cell across two lines**: the year above the month
+and day. Markdown collapses it to `2026Aug 18`; a copy off the page gives `2026`
+then `Aug 18`, and no single-line pattern can match either half.
+
+Reconstructed with the date split and the links stripped: **203 lines, 21
+markers** against the reported 202 and 22 — the same document.
+
+**Fixed**: the date scan tries a single line, then the pair ending there, in
+both orders, and records how many lines the date consumed so the event line
+above it is still found. The opponent scan skips both halves.
+
+Verified across every shape now known, all returning identically:
+
+| paste shape | rows | record | mix |
+|---|---|---|---|
+| markdown links | 17 | 15-2 | .438 / .375 / .188 |
+| plain text, one-line dates | 17 | 15-2 | .438 / .375 / .188 |
+| **plain text, split dates** | **17** | **15-2** | .438 / .375 / .188 |
+| bullet separator + split dates | 17 | 15-2 | .438 / .375 / .188 |
+
+### What this cost, and what fixed it
+
+Three rounds of guessing from the outside, then one round once the parser
+reported what it saw. The diagnostic did not merely point at the problem — the
+line COUNT is what identified it, because 202 against an expected 161 is a fact
+about the document that no amount of reasoning about plausible formats would
+have produced.
+
+The general form, worth keeping: **when a parser fails, report the shape of what
+it received, not the shape it wanted.** The first is evidence; the second is
+only a restatement of the failure.
+
+---
+
+## Addendum 67 (2026-10-16): time to finish, and why it is not an average fight time
+
+Asked for: a read on the check side for *average fight time* from the ESPN /
+Tapology history, "this way we can see which rounds they will likely perform
+within."
+
+**The statistic as named is not estimable from this data, and would be wrong if
+it were.** Two separate reasons, and they compound:
+
+1. **A decision is a censored observation.** A fight that reached the final
+   horn did not last fifteen minutes because that is how long the man takes to
+   finish; it lasted fifteen minutes because the clock ran out. The true
+   time-to-finish for that bout is *greater than* the scheduled length, not
+   equal to it. Averaging decisions in at their full length pulls every
+   estimate toward the horn and makes a finisher with four decisions look
+   slower than a finisher with none, when the difference is in how OFTEN he
+   finishes, not how FAST.
+2. **Tapology does not supply a time for a decision at all.** So even the wrong
+   version is unavailable without imputing the scheduled length, which is
+   exactly the imputation step 1 rules out.
+
+Mixing the two questions is the specific failure: *how fast he finishes* and
+*how often he finishes at all* are different quantities, and the second is
+already reported directly above this panel as the finish share.
+
+**What was built instead.** Time to finish **among finishes only**, with the
+decisions counted out loud and excluded. Median leads, mean follows, because
+one late stoppage drags a mean a long way on records this short. Round-one
+share is shown as a raw count (`7/13`), not a percentage, for the same reason.
+Unweighted and unshrunk, matching the "evidence, not the read" section it sits
+under — tier weighting applies to what feeds the model, and nothing here does.
+
+**Measured on the record that prompted it** (Perez, read through the Tapology
+parser from addendum 66): 17 rows, 13 finishes, 4 decisions, and **13 of 13
+finishes carry a usable round and time**. So the coverage is complete on the
+finish side and zero on the decision side — which is the asymmetry described
+above, arriving in the data exactly as predicted. Median 3:30, mean 5:45, 7 of
+13 inside round one. The gap between median and mean is the whole argument for
+leading with the median.
+
+Gate: fewer than three timed finishes prints the count and says *too few to
+read* rather than a number. Three is low, and is deliberately low — this panel
+makes no forecast, so the cost of a thin figure is a thin figure, not a bad
+bet.
+
+**The standing null applies, and is restated on screen.** A fighter's own round
+history does not replicate: split-half reliability **0.21 falling to 0.05** as
+the sample grows, against **0.54 rising to 0.60** for whether he finishes at
+all. This panel is that same unreliable quantity in continuous form. It is
+therefore **recorded as evidence, not promoted to a read**:
+
+- it does **not** feed the finish board;
+- it does **not** feed the check's round read, which stays built from the
+  pair's finish rate times the league's round shape at that finish rate;
+- it does **not** feed the model;
+- nothing downstream consumes `fin_times`.
+
+If it is ever to be promoted, the test is pre-registered here: it must beat the
+league-round-shape read on held-out bouts by a margin that survives the same
+split-half check that killed the round history in the first place. Until then
+the panel answers *what the record contains*, and the question it was asked —
+which rounds a man will perform within on Saturday — is answered above it by
+the league curve, not by this.
+
+**Harness note.** The render was verified twice over, because the first probe
+lied. `document.body.innerText` reported the panel absent while a direct call
+to `sbMethodBlock` returned 17,256 characters containing it, and a screenshot
+showed it on screen. The probe, not the panel, was broken: it injected the
+sandbox markup into a detached container that the Read handler never
+re-rendered. Recorded because the failure mode is attractive — an absent string
+reads as a missing feature, and the cheap conclusion is to go editing working
+code. **When a probe says a feature is missing, confirm the probe can see a
+feature that is definitely there before believing it.** This is the same lesson
+as the bisect in addendum 60, arriving from a different direction.

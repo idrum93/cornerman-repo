@@ -279,6 +279,145 @@ def test_site_features(_unused=None, path="site/index.html"):
                            else "MISSING: " + ", ".join(missing))
 
 
+def test_site_script_balances(path="site/index.html"):
+    """Does site/index.html's script actually PARSE?
+
+    Written the day the suite reported ALL CHECKS PASSED on an index.html whose
+    script had an unbalanced brace. Every Python test passed because none of them
+    look at the JavaScript; the page would have rendered completely blank.
+
+    `test_site_features` greps for the presence of strings, which a broken file
+    satisfies perfectly - the strings are all still there, in a script that never
+    runs. Presence is not the same as parses, and nothing was checking the
+    second.
+
+    Pure Python rather than shelling out to node: the nightly job has no node
+    dependency and adding one to catch this would trade a silent failure for a
+    fragile build. A brace/bracket/paren counter that understands strings,
+    template literals (including nested `${}`), line and block comments catches
+    the whole class - the real bug was a duplicated `function ckIO(){` with no
+    matching close, which shows up as a non-zero final depth.
+    """
+    from pathlib import Path
+    import re
+    f = Path(path)
+    if not f.exists():
+        return True, f"skipped ({path} not in this checkout)"
+    html = f.read_text(encoding="utf-8")
+    blocks = re.findall(r"<script[^>]*>(.*?)</script>", html, re.S)
+    if not blocks:
+        return False, "no <script> block found in the page"
+    issues = []
+    for bi, b in enumerate(blocks):
+        depth = 0
+        stack = []          # ( char, line ) for { [ (
+        tmpl = []           # brace depth at each open ${
+        mode = None
+        i, n, line = 0, len(b), 1
+        while i < n:
+            c = b[i]
+            if c == "\n":
+                line += 1
+            if mode == "//":
+                if c == "\n":
+                    mode = None
+            elif mode == "/*":
+                if c == "*" and b[i + 1:i + 2] == "/":
+                    mode = None
+                    i += 1
+            elif mode in ("'", '"'):
+                if c == "\\":
+                    i += 2
+                    continue
+                if c == mode:
+                    mode = None
+            elif mode == "`":
+                if c == "\\":
+                    i += 2
+                    continue
+                if c == "`":
+                    mode = None
+                elif c == "$" and b[i + 1:i + 2] == "{":
+                    tmpl.append(len(stack))
+                    stack.append(("{", line))
+                    mode = None
+                    i += 2
+                    continue
+            elif mode == "re":
+                # inside a regex literal: a class [...] can hold unbalanced
+                # brackets and / , so nothing in here counts
+                if c == "\\":
+                    i += 2
+                    continue
+                if c == "[":
+                    mode = "recls"
+                elif c == "/":
+                    mode = None
+            elif mode == "recls":
+                if c == "\\":
+                    i += 2
+                    continue
+                if c == "]":
+                    mode = "re"
+            else:
+                if c == "/" and b[i + 1:i + 2] == "/":
+                    mode = "//"
+                    i += 2
+                    continue
+                if c == "/" and b[i + 1:i + 2] == "*":
+                    mode = "/*"
+                    i += 2
+                    continue
+                if c == "/":
+                    # REGEX OR DIVISION. A '/' begins a literal when the last
+                    # meaningful token cannot end an expression. Without this the
+                    # scanner read /^\*?\s*\[([^\]]+)\]/ as division and then
+                    # counted the character class's brackets, reporting a fault
+                    # on a file node parses happily - a checker that cries wolf
+                    # is worse than no checker.
+                    j = i - 1
+                    while j >= 0 and b[j] in " \t\n":
+                        j -= 1
+                    prev = b[j] if j >= 0 else ""
+                    word = ""
+                    k = j
+                    while k >= 0 and (b[k].isalnum() or b[k] == "_"):
+                        word = b[k] + word
+                        k -= 1
+                    if (prev == "" or prev in "(,=:[!&|?{};+-*%^~<>"
+                            or word in ("return", "typeof", "case", "in", "of",
+                                        "new", "delete", "do", "else", "void")):
+                        mode = "re"
+                        i += 1
+                        continue
+                if c in "'\"`":
+                    mode = c
+                elif c in "{[(":
+                    stack.append((c, line))
+                elif c in "}])":
+                    want = {"}": "{", "]": "[", ")": "("}[c]
+                    if not stack:
+                        issues.append(f"line {line}: stray '{c}'")
+                        break
+                    op, oln = stack.pop()
+                    if op != want:
+                        issues.append(f"line {line}: '{c}' closes '{op}' opened at line {oln}")
+                        break
+                    if tmpl and len(stack) == tmpl[-1]:
+                        tmpl.pop()
+                        mode = "`"
+            i += 1
+        if not issues and stack:
+            op, oln = stack[0]
+            issues.append(f"{len(stack)} unclosed — first is '{op}' at line {oln}")
+        if not issues and mode is not None:
+            issues.append(f"file ends inside {mode!r}")
+    if issues:
+        return False, "; ".join(issues[:2])
+    total = sum(len(b) for b in blocks)
+    return True, f"{len(blocks)} script block(s), {total:,} chars, brackets balanced"
+
+
 def test_wiki_parser(_unused=None):
     """The pre-UFC record parser (addendum 18) on a realistic page: both
     Wikipedia cell layouts, a styled cell, footnotes, several date formats —
@@ -344,7 +483,8 @@ def run_all(fights=None, fighters=None, data_only=False):
     # uploaded yet should not stop the corpus refreshing and the site
     # deploying.
     if not data_only:
-        checks += [("site features intact", test_site_features()),
+        checks += [("site script parses", test_site_script_balances()),
+                   ("site features intact", test_site_features()),
                    ("wiki record parser", test_wiki_parser()),
                    ("bonus award parser", test_bonus_parser())]
     print(f"{'CHECK':<28} {'RESULT':<6}  DETAIL")

@@ -95,6 +95,56 @@ def build_record(fights, fighters, min_date="2012-01-01", test_frac=0.20):
         pr = clf.predict_proba(pte[PROJ_FEATS])[:, 1]
         rec[label] = _record((pte[t] > 0).astype(int).values, pr)
 
+    # ---- DOES A FIGHT THE MODEL CALLS LIKELY TO FINISH ACTUALLY FINISH?
+    #
+    # This was the gap: track_record carried winner, takedown, knockdown and
+    # ranges, and nothing at all for the quantity the whole finish side rests
+    # on. "60% finish" was being published with no held-out evidence that 60%
+    # means 60%.
+    #
+    # Trained strictly before the cut and scored strictly after, the same split
+    # discipline the winner entry uses. Reported as bands rather than one
+    # correlation, because the question is calibration - does the number mean
+    # what it says at each level - and a single r would hide a model that orders
+    # fights correctly while sitting systematically low, which is exactly the
+    # failure the graded cards currently hint at.
+    try:
+        from .projections import fit_finish_formula, finish_row
+        from .features import walk as _walk
+        fcut = pd.Timestamp(d.date.quantile(1 - test_frac))
+        fm = fit_finish_formula(fights[fights.date <= fcut], fighters, min_date=min_date)
+        rows, ys = [], []
+        for fight, sa, sb, npri in _walk(fights, fighters):
+            if min(npri) < 2 or fight.date <= fcut:
+                continue
+            rows.append(finish_row(sa, sb, 5 if fight.sched_sec >= 1500 else 3,
+                                   fight.weight_class))
+            ys.append(int(fight.method != "DEC"))
+        if len(ys) >= 150:
+            pf = fm.predict_proba(pd.DataFrame(rows))[:, 1]
+            yf = np.asarray(ys)
+            base = float(yf.mean())
+            ent = {"n_tested": int(len(yf)),
+                   "said_mean": round(float(pf.mean()), 3),
+                   "happened": round(float(yf.mean()), 3),
+                   "brier": round(float(((pf - yf) ** 2).mean()), 4),
+                   # the honest control: always saying the league rate
+                   "base_brier": round(float(((base - yf) ** 2).mean()), 4),
+                   "bands": []}
+            for lo_, hi_ in ((0, .40), (.40, .50), (.50, .60), (.60, 1.01)):
+                m3 = (pf >= lo_) & (pf < hi_)
+                if m3.sum() < 40:
+                    continue
+                ent["bands"].append({
+                    "said": f"{int(lo_*100)}-{int(min(hi_,1)*100)}%",
+                    "n": int(m3.sum()),
+                    "avg_said": round(float(pf[m3].mean()), 3),
+                    "finished": round(float(yf[m3].mean()), 3)})
+            ent["beats_base"] = bool(ent["brier"] < ent["base_brier"])
+            rec["finish"] = ent
+    except Exception as e:                      # never let this break the build
+        rec["finish"] = {"error": str(e)[:200]}
+
     # ---- output ranges: does an 80% range cover 80%?
     vcut = ptr.date.quantile(0.85)
     fitp, valp = ptr[ptr.date <= vcut], ptr[ptr.date > vcut]
