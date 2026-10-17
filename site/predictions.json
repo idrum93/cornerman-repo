@@ -2,7 +2,7 @@
  "event": "UFC Fight Night: Buckley vs. Malott",
  "date": "2026-10-17",
  "venue": "Rogers Place, Edmonton , Alberta , Canada",
- "generated_utc": "2026-10-16T15:18:56.639440+00:00",
+ "generated_utc": "2026-10-17T14:08:00.378009+00:00",
  "bouts": [
   {
    "bout": "Joaquin Buckley vs. Mike Malott",
@@ -827,9 +827,9 @@
      "log_layoff": 4.836282
     }
    },
-   "p_market": 0.3601,
+   "p_market": 0.3599,
    "books": 25,
-   "edge": -0.1048,
+   "edge": -0.1046,
    "p_finish_survival_raw": 0.5123,
    "m_a_ko": 0.1103,
    "m_b_ko": 0.1457,
@@ -1135,9 +1135,9 @@
      "log_layoff": 5.247024
     }
    },
-   "p_market": 0.7065,
+   "p_market": 0.7081,
    "books": 27,
-   "edge": -0.1617,
+   "edge": -0.1633,
    "p_finish_survival_raw": null,
    "m_a_ko": null,
    "m_b_ko": null,
@@ -1421,9 +1421,9 @@
      "log_layoff": 5.918894
     }
    },
-   "p_market": 0.3357,
+   "p_market": 0.3412,
    "books": 23,
-   "edge": 0.1013,
+   "edge": 0.0958,
    "p_finish_survival_raw": 0.5227,
    "m_a_ko": 0.1558,
    "m_b_ko": 0.2924,
@@ -1726,9 +1726,9 @@
      "log_layoff": 7.249926
     }
    },
-   "p_market": 0.4076,
+   "p_market": 0.402,
    "books": 21,
-   "edge": -0.1087,
+   "edge": -0.1031,
    "p_finish_survival_raw": null,
    "m_a_ko": null,
    "m_b_ko": null,
@@ -2013,9 +2013,9 @@
      "log_layoff": 4.89784
     }
    },
-   "p_market": 0.7277,
+   "p_market": 0.7374,
    "books": 22,
-   "edge": 0.0765,
+   "edge": 0.0668,
    "p_finish_survival_raw": 0.4399,
    "m_a_ko": 0.1028,
    "m_b_ko": 0.071,
