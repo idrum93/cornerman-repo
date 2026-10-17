@@ -5549,10 +5549,42 @@ function espnDerive(h){
     /* The same counts unweighted, kept only so the panel can show a number that
        reconciles against the record and against UFC.com. Nothing computes from
        these. */
+    /* HOW LONG HIS FIGHTS LAST, and why it is reported this way.
+
+       Asked for as "average fight time". Computed the obvious way that number
+       is wrong, because a DECISION IS CENSORED: the fight did not last fifteen
+       minutes because that is how long it takes him, it lasted fifteen minutes
+       because the clock ran out. Averaging decisions in at their scheduled
+       length mixes "how fast he finishes people" with "how often he finishes
+       people at all", and the second is already on the panel as the finish
+       share. Tapology makes the point for us - it gives no time at all for a
+       decision, so 24% of the sample record carries no figure to average.
+
+       So: time to finish, among finishes ONLY, uncensored and honest about its
+       denominator. MEDIAN leads because the mean is dragged by the one
+       third-round stoppage - on the sample record mean 5:45 against median
+       3:30, which is a 2:15 gap on thirteen fights.
+
+       UNWEIGHTED, matching the panel it sits under, which is explicitly the
+       evidence rather than the read.
+
+       AND IT IS NOT A FORECAST. The standing null says a fighter's own ROUND
+       history does not replicate - split-half 0.21 falling to 0.05, against
+       0.54 rising to 0.60 for whether he finishes at all. Time-to-finish is
+       that same quantity in continuous form, so it inherits the same weakness.
+       It is shown as what the record contains, not as a claim about Saturday. */
+    fin_times:(function(){
+      const t=[];
+      R.forEach(x=>{ if(x.fam!=='dec'&&x.rnd!=null&&x.secs!=null)
+        t.push((x.rnd-1)*300+x.secs); });
+      return t.sort((a,b)=>a-b);
+    })(),
     wins_n:wins.length,
     ko_raw:wins.filter(x=>x.fam==='ko').length,
     sub_raw:wins.filter(x=>x.fam==='sub').length,
     dec_raw:wins.filter(x=>x.fam==='dec').length,
+    dec_n_raw:R.filter(x=>x.fam==='dec').length,
+    bouts_n:R.length,
     /* UFC-TIER ONLY, unweighted. The decision curve's x-axis is a fighter's
        decision share over his UFC bouts and nothing else - that is the only
        population the corpus holds - so placing a man on it by his whole
@@ -6331,6 +6363,36 @@ function sbMethodBlock(b,st,pA){
       return `<div style="margin-top:14px;padding-top:11px;border-top:1px solid var(--line)">
         <div class="lbl">Where their fights have ended · the full record, plain counts</div>
         <div class="rbgrid">${H.map(block).join('')}</div>
+        ${(()=>{
+          /* TIME TO FINISH, under the counts it is derived from. */
+          const mmss=v=>Math.floor(v/60)+':'+String(Math.round(v%60)).padStart(2,'0');
+          const line=([nm,m])=>{
+            const t=(m&&m.fin_times)||[];
+            if(t.length<3) return `<div class="pline"><span>${esc(nm)}</span>
+              <span class="lbl" style="margin:0">${t.length?t.length+' timed finish'+(t.length===1?'':'es')
+                +' — too few to read':'no timed finishes in the record'}</span></div>`;
+            const med=t.length%2?t[(t.length-1)/2]:(t[t.length/2-1]+t[t.length/2])/2;
+            const mean=t.reduce((a,b)=>a+b,0)/t.length;
+            const r1=t.filter(x=>x<=300).length;
+            const dec=(m.dec_n_raw!=null&&m.bouts_n)?m.dec_n_raw:null;
+            return `<div class="pline"><span>${esc(nm)}</span>
+              <b style="color:var(--gold)">${mmss(med)}</b>
+              <span class="lbl" style="margin:0">median of ${t.length}, mean ${mmss(mean)} ·
+                <b style="color:var(--mute)">${r1}/${t.length}</b> inside round one${
+                dec!=null?` · ${dec} decision${dec===1?'':'s'} not counted`:''}</span></div>`;};
+          return `<div style="margin-top:11px">
+            <div class="lbl">When they finish, how long it takes · finishes only</div>
+            ${H.map(line).join('')}
+            <div class="note" style="margin-top:5px">Decisions are <b style="color:var(--mute)">excluded,
+              not averaged in</b>: a fight that went the distance did not last fifteen minutes because
+              that is how long he takes, it lasted fifteen minutes because the clock ran out. Counting
+              it would mix how fast he finishes with how often he finishes at all, and the second is
+              already the finish share above. Median leads because one late stoppage drags a mean a
+              long way.
+              <b style="color:var(--warn)">Not a forecast.</b> A fighter's own round history is the
+              recorded null here — split-half 0.21 falling to 0.05, against 0.54 rising to 0.60 for
+              whether he finishes at all — and this is that same quantity in continuous form. It is
+              what the record contains, not a claim about Saturday.</div></div>`;})()}
         <div class="note" style="margin-top:7px">Unweighted and unshrunk, wins and losses alike —
           the evidence, not the read. Losses by round are the part a UFC.com page does not publish
           at all, and the part that says most about how a man gets stopped.${anyFar
