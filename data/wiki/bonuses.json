@@ -2976,6 +2976,19 @@
    "status": "ok",
    "title": "UFC Fight Night: Brunson vs. Till"
   },
+  "UFC Fight Night: Buckley vs. Malott ": {
+   "date": "2026-10-17",
+   "fotn": [],
+   "none_awarded": false,
+   "potn": [
+    "Mike Malott",
+    "Marc-Andr\u00e9 Barriault",
+    "Mandel Nallo",
+    "Joel Faglier"
+   ],
+   "status": "ok",
+   "title": "UFC Fight Night: Buckley vs. Malott"
+  },
   "UFC Fight Night: Burns vs. Brady ": {
    "date": "2024-09-07",
    "fotn": [
@@ -6311,6 +6324,6 @@
   }
  },
  "parser": 5,
- "updated_utc": "2026-10-12T16:32:39+00:00",
+ "updated_utc": "2026-10-19T14:24:43+00:00",
  "version": 1
 }
