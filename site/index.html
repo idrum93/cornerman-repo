@@ -5,6 +5,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Cornerman — UFC fight analysis</title>
+<!-- The corner stool, cut out of the site's gold. Inlined as a data URI rather
+     than shipped as icon.svg: this page is deployed by uploading ONE file, and
+     a favicon that lives in a second file is a favicon that goes missing the
+     first time only index.html is uploaded. The gold field does the work - at
+     16px in a tab strip the mark is what reads, and a dark square just
+     dissolves into the browser chrome. To swap the icon, replace the base64
+     payload; nothing else references it. -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+PHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiByeD0iMTMiIGZpbGw9IiNDREE0M0EiLz48cmVjdCB4PSIxMiIgeT0iMjIiIHdpZHRoPSI0MCIgaGVpZ2h0PSI4IiByeD0iNCIgZmlsbD0iIzBDMEYxNCIvPjxwYXRoIGQ9Ik0xOSAzMCBMMTUgNTIiIHN0cm9rZT0iIzBDMEYxNCIgc3Ryb2tlLXdpZHRoPSI2IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48cGF0aCBkPSJNNDUgMzAgTDQ5IDUyIiBzdHJva2U9IiMwQzBGMTQiIHN0cm9rZS13aWR0aD0iNiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PC9zdmc+">
 <style>
   :root{
     --ink:#0C0F14; --panel:#141921; --panel2:#1A2029; --line:#252C38;
@@ -298,6 +306,22 @@
   @media(max-width:620px){ .fbp{font-size:9px} .fbg-b{font-size:10px} }
 
   .r3leg b{color:var(--bone)}
+  /* A hover explainer, not a notice. Dotted underline and the help cursor are
+     the only affordance saying there is more here - without them it reads as a
+     bare assertion with no way to find out why. */
+  .abwhy{display:inline-block;font-size:10px;letter-spacing:.04em;color:var(--dim);
+    cursor:help;border-bottom:1px dotted rgba(236,232,224,.38);padding-bottom:1px}
+  .abwhy:hover{color:var(--mute);border-bottom-color:rgba(236,232,224,.7)}
+  /* The conditional track: finishes only, so BOTH segments are gold-family and
+     the blue never shows. That is the whole visual difference from .r3bar
+     above it - a bar with no blue in it is a bar with no distance in it, which
+     is exactly what "given that it finished" means. */
+  .r3bar.r3cond{background:#8E7026}
+  /* The model's rows are grey throughout, so its conditional track has to be
+     the DIM GREY, not the dim gold. Left on the gold the model bar came out
+     half grey and half gold, which reads as two sources in one bar - and the
+     note underneath promises no blue in it. */
+  .spline .spw.m ~ .r3bar.r3cond{background:#58616E}
   /* This row's column takes the space left over instead of hugging its
      content, so the bar is as wide as the drawer allows. */
   .spcol.wide{flex:1 1 auto;min-width:0}
@@ -6182,6 +6206,33 @@ function sbMethodBlock(b,st,pA){
             </div>
           <div class="r3leg mono"><b>${P0(r1)}%</b> round one · <b>${P0(mid)}%</b> ${
               b.rounds===5?'rounds 2–5':'rounds 2–3'} · <b>${P0(dec)}%</b> on the cards</div></div>`;};
+        /* The SAME split the graded card scores, in the same form, on the page
+           where the pick is made.
+
+           The bar above is unconditional - round one as a share of every way
+           the fight can end - and the graded card asks a conditional question:
+           given that it finished, was it round one or later. Those are
+           different denominators, and the conditional one was reachable here
+           only as a clause at the end of a paragraph. Reading "30% round one"
+           before the card and "30% of its finishes in round one" after it, and
+           having to work out that the first number is not the second, is the
+           matched-denominator problem showing up as a reading problem.
+           So it gets its own track, under the one it is derived from. */
+        const seg2=(r1c,nm,cls)=>{
+          if(r1c==null||!isFinite(r1c)) return '';
+          const a=100*clamp(r1c);
+          return `<div style="margin-bottom:2px"><div class="spline spfit">
+            <span class="spw ${cls}">${nm}</span>
+            <span class="r3bar r3cond spfit">
+              <i class="s1" style="width:${a.toFixed(1)}%"></i>
+              <u style="left:${(100*lgCond).toFixed(1)}%"></u>
+            </span>
+            </div>
+          <div class="r3leg mono"><b>${P0(r1c)}%</b> round one · <b>${P0(1-r1c)}%</b>
+            after round one</div></div>`;};
+        const mFin=(mDec==null)?null:1-mDec;
+        const mCond=(b.p_end_r1!=null&&mFin!=null&&mFin>0.02)?b.p_end_r1/mFin:null;
+        const anyCond=(mCond!=null||cond!=null);
         return `<div class="sbrow sbsplit"><span class="sbl">where it ends</span>
             <div class="spcol wide">${seg(b.p_end_r1,mMid,mDec,'model','m')}${
               seg(t.p,rMid,read.dec,'records','r')}</div></div>
@@ -6190,9 +6241,18 @@ function sbMethodBlock(b,st,pA){
               ?`<b style="color:var(--mute)">${esc(sbBaseMix(b).div)}</b>'s`:`the league's`} boundaries
             fall — ${P0(lgR1)}% in round one, ${P0(lgDec)}% on the cards — so a segment running past a tick is this pair departing
             from the league, and nothing more than that: no claim is made that the departure predicts
-            anything.${cond!=null?` Put the other way round: <b style="color:var(--mute)">if</b> it
-            finishes, round one is ${P0(Math.min(0.99,cond))}% of those finishes, against a league
-            ${P0(lgCond)}%.`:''}</div>`
+            anything.</div>`
+          + (anyCond?`<div class="sbrow sbsplit" style="margin-top:7px"><span class="sbl">if it
+              finishes, how early</span>
+            <div class="spcol wide">${seg2(mCond,'model','m')}${seg2(cond,'records','r')}</div></div>
+          <div class="note" style="margin:4px 0 0"><b style="color:var(--mute)">Finishes only</b>,
+            re-based to 100% — there is no distance left in this bar, which is why no blue shows in
+            it. This is the <b style="color:var(--mute)">exact question the graded card asks</b>
+            of a bout that finished: round one, or later than round one. The tick is the
+            league's ${P0(lgCond)}% for a ${b.rounds===5?'five':'three'}-round fight. Derived from
+            the bar above by division, not measured separately — a pair who finish rarely can still
+            finish early, and these two bars will disagree about which way this fight leans for
+            exactly that reason.</div>`:'')
           + (t.both?'':'<div class="note" style="margin:4px 0 0">Round-one figure uses one corner only — add the other record for both.</div>')
           + prov;   // under the rows it explains, not wedged above them
       })()}`
@@ -6915,12 +6975,14 @@ function abGrid(b){
          mPick&&cPick&&mPick.p>cPick.p+0.01, mPick&&cPick&&mPick.p<cPick.p-0.01),
     cell(cPick?cPick.t:none, mPick&&cPick&&cPick.p>mPick.p+0.01, mPick&&cPick&&cPick.p<mPick.p-0.01),
     differ]);
-  if(clash) rows.push(['', `<div class="abc" style="grid-column:2/4"><span class="lbl"
-      style="display:block;line-height:1.45;text-align:left;color:var(--dim);text-transform:none;letter-spacing:0;font-size:10.5px">Not a contradiction with
-      the row above: <b style="color:var(--mute)">ends</b> splits the fight two ways, <b
-      style="color:var(--mute)">pick</b> is the biggest of five contracts. Four finish routes share
-      the finish probability between them; a decision is shared by only two, so the largest single
-      bet on a fight that usually ends early is often still a decision.</span></div>`, '', false]);
+  /* This sat open under the row, six lines of it, on every bout where the two
+     rows named different families. It is read once and then it is furniture.
+     Moved to the hover: the row still SAYS it is not a contradiction, which is
+     the part that has to be visible the moment the clash is seen, and the
+     reasoning is one hover away for whoever wants it. Plain text in the title
+     - a title attribute renders markup literally. */
+  if(clash) rows.push(['', `<div class="abc" style="grid-column:2/4"><span class="abwhy"
+      title="ends splits the fight two ways; pick is the biggest of five separate contracts. Four finish routes share the finish probability between them, while a decision is shared by only two — so the largest single bet on a fight that usually ends early is often still a decision.">not a contradiction</span></div>`, '', false]);
   const anyDiff=rows.some(r=>r[3]);
   return `<div class="abgrid${anyDiff?' hasdiff':''}" title="the model and the UFC.com check, answering the same questions side by side">
     <div class="abh"></div><div class="abh">model</div><div class="abh${pc==null?' off':''}">ufc.com check</div>
