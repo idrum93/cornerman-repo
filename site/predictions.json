@@ -2,7 +2,7 @@
  "event": "UFC 333",
  "date": "2026-10-24",
  "venue": "Etihad Arena, Abu Dhabi , United Arab Emirates",
- "generated_utc": "2026-10-20T02:29:26.485762+00:00",
+ "generated_utc": "2026-10-20T03:11:37.122015+00:00",
  "bouts": [
   {
    "bout": "Alexander Volkanovski vs. Movsar Evloev",
@@ -1233,9 +1233,9 @@
      "fight": 1
     }
    },
-   "p_market": 0.5223,
+   "p_market": 0.5236,
    "books": 25.0,
-   "edge": 0.1021,
+   "edge": 0.1009,
    "p_open": 0.5426
   },
   {
@@ -2420,9 +2420,9 @@
      "fight": 3
     }
    },
-   "p_market": 0.5325,
+   "p_market": 0.5339,
    "books": 22.0,
-   "edge": 0.0294,
+   "edge": 0.028,
    "p_open": 0.5224
   },
   {

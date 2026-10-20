@@ -2,7 +2,7 @@
  "event": "UFC 333",
  "date": "2026-10-24",
  "venue": "Etihad Arena, Abu Dhabi , United Arab Emirates",
- "generated_utc": "2026-10-19T17:24:18.513810+00:00",
+ "generated_utc": "2026-10-20T02:29:26.485762+00:00",
  "bouts": [
   {
    "bout": "Alexander Volkanovski vs. Movsar Evloev",
@@ -638,9 +638,9 @@
      "fight": 4
     }
    },
-   "p_market": 0.6045,
+   "p_market": 0.6071,
    "books": 25.0,
-   "edge": -0.0698,
+   "edge": -0.0724,
    "p_open": 0.6125
   },
   {
@@ -1233,9 +1233,9 @@
      "fight": 1
     }
    },
-   "p_market": 0.5224,
+   "p_market": 0.5223,
    "books": 25.0,
-   "edge": 0.102,
+   "edge": 0.1021,
    "p_open": 0.5426
   },
   {
@@ -1510,9 +1510,9 @@
      "fight": 2
     }
    },
-   "p_market": 0.5106,
-   "books": 22.0,
-   "edge": 0.0082,
+   "p_market": 0.5132,
+   "books": 23.0,
+   "edge": 0.0056,
    "p_open": null
   },
   {
@@ -1822,9 +1822,9 @@
      "fight": 1
     }
    },
-   "p_market": 0.6506,
+   "p_market": 0.6548,
    "books": 21.0,
-   "edge": -0.217,
+   "edge": -0.2211,
    "p_open": 0.6314
   },
   {
@@ -2420,9 +2420,9 @@
      "fight": 3
     }
    },
-   "p_market": 0.5312,
+   "p_market": 0.5325,
    "books": 22.0,
-   "edge": 0.0306,
+   "edge": 0.0294,
    "p_open": 0.5224
   },
   {
@@ -2697,9 +2697,879 @@
      "fight": 3
     }
    },
-   "p_market": 0.6265,
+   "p_market": 0.603,
    "books": 20.0,
-   "edge": -0.3421,
+   "edge": -0.3186,
+   "p_open": null
+  },
+  {
+   "bout": "Bolaji Oki vs. Daniel Santos",
+   "a": "Bolaji Oki",
+   "b": "Daniel Santos",
+   "a_id": "4bdedbdeedff7d1d",
+   "b_id": "b67d6bacc68d4c92",
+   "rounds": 3,
+   "segment": "Early prelims",
+   "weight_class": "Lightmweight",
+   "thin": false,
+   "p_a": 0.4824,
+   "p_b": 0.5176,
+   "stats": {
+    "a": {
+     "record": "1-3",
+     "n_fights": 4,
+     "age": 30.9,
+     "height": 70.0,
+     "reach": 73.0,
+     "stance": "Orthodox",
+     "elo": 1468,
+     "opp_elo": 1505,
+     "slpm": 4.65,
+     "sapm": 4.12,
+     "str_acc": 0.446,
+     "str_def": 0.603,
+     "td15": 1.51,
+     "td_def": 0.682,
+     "sub15": 0.25,
+     "ctrl": 0.168,
+     "kd15": 0.34,
+     "kd_against15": 0.76,
+     "ko_loss": 0.4,
+     "avg_time": 10.27
+    },
+    "b": {
+     "record": "4-2",
+     "n_fights": 6,
+     "age": 31.6,
+     "height": 67.0,
+     "reach": 67.0,
+     "stance": "Orthodox",
+     "elo": 1527,
+     "opp_elo": 1515,
+     "slpm": 5.25,
+     "sapm": 5.14,
+     "str_acc": 0.406,
+     "str_def": 0.506,
+     "td15": 2.37,
+     "td_def": 0.681,
+     "sub15": 0.18,
+     "ctrl": 0.279,
+     "kd15": 0.39,
+     "kd_against15": 0.39,
+     "ko_loss": 0.22,
+     "avg_time": 11.55
+    }
+   },
+   "record_split": {
+    "a": {
+     "wins": {
+      "ko": 0,
+      "sub": 0,
+      "dec": 1
+     },
+     "losses": {
+      "ko": 2,
+      "sub": 1,
+      "dec": 0
+     },
+     "win_rounds": {},
+     "n": 4
+    },
+    "b": {
+     "wins": {
+      "ko": 2,
+      "sub": 0,
+      "dec": 2
+     },
+     "losses": {
+      "ko": 1,
+      "sub": 0,
+      "dec": 1
+     },
+     "win_rounds": {
+      "2": {
+       "ko": 2,
+       "sub": 0
+      }
+     },
+     "n": 6
+    }
+   },
+   "evidence": {
+    "a": 4,
+    "b": 6,
+    "min": 4
+   },
+   "drivers": [
+    {
+     "label": "career quality",
+     "value": -0.3657,
+     "favors": "b",
+     "key": "d_elo"
+    },
+    {
+     "label": "losses by strikes",
+     "value": -0.3024,
+     "favors": "b",
+     "key": "d_ko_loss_rate"
+    },
+    {
+     "label": "striking vs chin, adjustment",
+     "value": 0.2423,
+     "favors": "a",
+     "key": "ko_edge",
+     "parts": {
+      "a": 1.02,
+      "b": 2.1,
+      "how": "their striking output x how often the other has been finished by strikes"
+     }
+    },
+    {
+     "label": "strikes absorbed",
+     "value": 0.1878,
+     "favors": "a",
+     "key": "d_sapm"
+    },
+    {
+     "label": "reach",
+     "value": 0.1803,
+     "favors": "a",
+     "key": "d_reach"
+    },
+    {
+     "label": "striking defense",
+     "value": 0.1311,
+     "favors": "a",
+     "key": "d_str_def"
+    }
+   ],
+   "fin": {
+    "a": {
+     "elo": 1467.753941,
+     "opp_elo": 1504.974728,
+     "log_exp": 1.609438,
+     "adj_slpm": 4.648873,
+     "sapm": 4.120095,
+     "str_acc": 0.446069,
+     "str_def": 0.602941,
+     "adj_td15": 1.514054,
+     "td_def": 0.682432,
+     "sub15": 0.253283,
+     "ko_loss_rate": 0.4,
+     "reach": 73.0,
+     "age": 30.940452,
+     "log_layoff": 5.4161
+    },
+    "b": {
+     "elo": 1527.257485,
+     "opp_elo": 1515.005172,
+     "log_exp": 1.94591,
+     "adj_slpm": 5.245943,
+     "sapm": 5.136418,
+     "str_acc": 0.406009,
+     "str_def": 0.506105,
+     "adj_td15": 2.367014,
+     "td_def": 0.68125,
+     "sub15": 0.181269,
+     "ko_loss_rate": 0.22,
+     "reach": 67.0,
+     "age": 31.619439,
+     "log_layoff": 5.087596
+    }
+   },
+   "p_finish_survival_raw": 0.4628,
+   "m_a_ko": 0.078,
+   "m_b_ko": 0.2263,
+   "m_a_sub": 0.0404,
+   "m_b_sub": 0.0362,
+   "m_decision": 0.619,
+   "m_a_dec": 0.364,
+   "m_b_dec": 0.255,
+   "p_finish": 0.381,
+   "p_end_r1": 0.1641,
+   "p_end_r2": 0.1279,
+   "p_end_r3": 0.0889,
+   "p_end_r4": null,
+   "p_end_r5": null,
+   "p_ends_before_r2": 0.1641,
+   "p_starts_r2": 0.8359,
+   "p_ends_before_r3": 0.2921,
+   "p_starts_r3": 0.7079,
+   "p_ends_before_r4": null,
+   "p_starts_r4": null,
+   "p_ends_before_r5": null,
+   "p_starts_r5": null,
+   "p_a_given_finish": 0.3108,
+   "p_b_given_finish": 0.6892,
+   "p_a_given_decision": 0.588,
+   "p_b_given_decision": 0.412,
+   "exp_minutes": 11.77,
+   "round_of_victory": {
+    "a_ko_r1": 0.0339,
+    "b_ko_r1": 0.099,
+    "a_sub_r1": 0.0169,
+    "b_sub_r1": 0.0144,
+    "a_ko_r2": 0.0257,
+    "b_ko_r2": 0.0762,
+    "a_sub_r2": 0.0139,
+    "b_sub_r2": 0.0121,
+    "a_ko_r3": 0.0183,
+    "b_ko_r3": 0.0512,
+    "a_sub_r3": 0.0096,
+    "b_sub_r3": 0.0097
+   },
+   "m_a_finish": 0.1184,
+   "m_b_finish": 0.2626,
+   "totals": {
+    "over_1_5": 0.7754,
+    "over_2_5": 0.6618
+   },
+   "a_ctrl_lo": 0.0,
+   "a_ctrl_mid": 5.21,
+   "a_ctrl_hi": 15.38,
+   "a_slpm_lo": 1.91,
+   "a_slpm_mid": 4.69,
+   "a_slpm_hi": 9.28,
+   "a_takedowns_rate": 1.357,
+   "a_strikes_rate": 5.269,
+   "a_p_takedown": 0.336,
+   "a_p_knockdown": 0.198,
+   "b_ctrl_lo": 0.0,
+   "b_ctrl_mid": 10.75,
+   "b_ctrl_hi": 28.13,
+   "b_slpm_lo": 1.8,
+   "b_slpm_mid": 4.72,
+   "b_slpm_hi": 7.88,
+   "b_takedowns_rate": 2.741,
+   "b_strikes_rate": 4.714,
+   "b_p_takedown": 0.731,
+   "b_p_knockdown": 0.293,
+   "dec_share": {
+    "a": 0.25,
+    "b": 0.5,
+    "pair": 0.375
+   },
+   "bands": {
+    "C1": {
+     "a": 3,
+     "b": 4
+    },
+    "C2": {
+     "a": 3,
+     "b": 3
+    },
+    "C3": {
+     "a": 3,
+     "b": 3
+    },
+    "C6": {
+     "a": 4,
+     "b": 1
+    },
+    "C10": {
+     "a": 1,
+     "b": 2
+    },
+    "C11": {
+     "a": 4,
+     "b": 4
+    },
+    "C12": {
+     "a": 4,
+     "b": 4
+    },
+    "C4": {
+     "fight": 3
+    },
+    "C5": {
+     "fight": 3
+    },
+    "C7": {
+     "fight": 4
+    },
+    "C8": {
+     "fight": 1
+    },
+    "C9": {
+     "fight": 1
+    },
+    "C13": {
+     "fight": 2
+    }
+   },
+   "p_market": 0.4595,
+   "books": 13.0,
+   "edge": 0.0228,
+   "p_open": 0.4499
+  },
+  {
+   "bout": "Kody Steele vs. Noah Gugnon",
+   "a": "Kody Steele",
+   "b": "Noah Gugnon",
+   "a_id": "aebaa8cec15b083d",
+   "b_id": "6266abf6e4245c72",
+   "rounds": 3,
+   "segment": "Early prelims",
+   "weight_class": "Lightweight",
+   "thin": true,
+   "p_a": 0.2201,
+   "p_b": 0.7799,
+   "stats": {
+    "a": {
+     "record": "1-1",
+     "n_fights": 2,
+     "age": 31.5,
+     "height": 69.0,
+     "reach": 71.0,
+     "stance": "Orthodox",
+     "elo": 1504,
+     "opp_elo": 1493,
+     "slpm": 2.99,
+     "sapm": 5.48,
+     "str_acc": 0.303,
+     "str_def": 0.488,
+     "td15": 1.78,
+     "td_def": 0.65,
+     "sub15": 0.67,
+     "ctrl": 0.134,
+     "kd15": 0.18,
+     "kd_against15": 0.49,
+     "ko_loss": 0.2,
+     "avg_time": 9.47
+    },
+    "b": {
+     "record": "1-0",
+     "n_fights": 1,
+     "age": 26.0,
+     "height": 70.0,
+     "reach": 71.7,
+     "stance": "Orthodox",
+     "elo": 1515,
+     "opp_elo": 1500,
+     "slpm": 3.98,
+     "sapm": 4.04,
+     "str_acc": 0.451,
+     "str_def": 0.608,
+     "td15": 1.44,
+     "td_def": 0.65,
+     "sub15": 1.05,
+     "ctrl": 0.206,
+     "kd15": 0.28,
+     "kd_against15": 0.28,
+     "ko_loss": 0.24,
+     "avg_time": 1.35
+    }
+   },
+   "record_split": {
+    "a": {
+     "wins": {
+      "ko": 0,
+      "sub": 1,
+      "dec": 0
+     },
+     "losses": {
+      "ko": 0,
+      "sub": 0,
+      "dec": 1
+     },
+     "win_rounds": {
+      "1": {
+       "ko": 0,
+       "sub": 1
+      }
+     },
+     "n": 2
+    },
+    "b": {
+     "wins": {
+      "ko": 0,
+      "sub": 1,
+      "dec": 0
+     },
+     "losses": {
+      "ko": 0,
+      "sub": 0,
+      "dec": 0
+     },
+     "win_rounds": {
+      "1": {
+       "ko": 0,
+       "sub": 1
+      }
+     },
+     "n": 1
+    }
+   },
+   "evidence": {
+    "a": 2,
+    "b": 1,
+    "min": 1
+   },
+   "drivers": [
+    {
+     "label": "age",
+     "value": -0.4314,
+     "favors": "b",
+     "key": "d_age"
+    },
+    {
+     "label": "strikes absorbed",
+     "value": -0.2669,
+     "favors": "b",
+     "key": "d_sapm"
+    },
+    {
+     "label": "striking defense",
+     "value": -0.1626,
+     "favors": "b",
+     "key": "d_str_def"
+    },
+    {
+     "label": "striking output",
+     "value": -0.1594,
+     "favors": "b",
+     "key": "d_adj_slpm"
+    },
+    {
+     "label": "striking accuracy",
+     "value": -0.1451,
+     "favors": "b",
+     "key": "d_str_acc"
+    },
+    {
+     "label": "career quality",
+     "value": -0.072,
+     "favors": "b",
+     "key": "d_elo"
+    }
+   ],
+   "fin": {
+    "a": {
+     "elo": 1503.67831,
+     "opp_elo": 1493.135953,
+     "log_exp": 1.098612,
+     "adj_slpm": 2.990904,
+     "sapm": 5.481336,
+     "str_acc": 0.303191,
+     "str_def": 0.487873,
+     "adj_td15": 1.780298,
+     "td_def": 0.65,
+     "sub15": 0.674387,
+     "ko_loss_rate": 0.2,
+     "reach": 71.0,
+     "age": 31.509925,
+     "log_layoff": 5.170484
+    },
+    "b": {
+     "elo": 1515.386218,
+     "opp_elo": 1500.0,
+     "log_exp": 0.693147,
+     "adj_slpm": 3.975535,
+     "sapm": 4.036697,
+     "str_acc": 0.451389,
+     "str_def": 0.607955,
+     "adj_td15": 1.435407,
+     "td_def": 0.65,
+     "sub15": 1.052632,
+     "ko_loss_rate": 0.24,
+     "reach": 71.678947,
+     "age": 26.015058,
+     "log_layoff": 4.442651
+    }
+   },
+   "p_finish_survival_raw": null,
+   "m_a_ko": null,
+   "m_b_ko": null,
+   "m_a_sub": null,
+   "m_b_sub": null,
+   "m_decision": null,
+   "m_a_dec": null,
+   "m_b_dec": null,
+   "p_finish": null,
+   "p_end_r1": null,
+   "p_end_r2": null,
+   "p_end_r3": null,
+   "p_end_r4": null,
+   "p_end_r5": null,
+   "p_ends_before_r2": null,
+   "p_starts_r2": null,
+   "p_ends_before_r3": null,
+   "p_starts_r3": null,
+   "p_ends_before_r4": null,
+   "p_starts_r4": null,
+   "p_ends_before_r5": null,
+   "p_starts_r5": null,
+   "p_a_given_finish": null,
+   "p_b_given_finish": null,
+   "p_a_given_decision": null,
+   "p_b_given_decision": null,
+   "exp_minutes": null,
+   "round_of_victory": null,
+   "m_a_finish": null,
+   "m_b_finish": null,
+   "totals": null,
+   "a_ctrl_lo": null,
+   "a_ctrl_mid": null,
+   "a_ctrl_hi": null,
+   "a_slpm_lo": null,
+   "a_slpm_mid": null,
+   "a_slpm_hi": null,
+   "a_takedowns_rate": null,
+   "a_strikes_rate": null,
+   "a_p_takedown": null,
+   "a_p_knockdown": null,
+   "b_ctrl_lo": null,
+   "b_ctrl_mid": null,
+   "b_ctrl_hi": null,
+   "b_slpm_lo": null,
+   "b_slpm_mid": null,
+   "b_slpm_hi": null,
+   "b_takedowns_rate": null,
+   "b_strikes_rate": null,
+   "b_p_takedown": null,
+   "b_p_knockdown": null,
+   "dec_share": null,
+   "bands": {
+    "C1": {
+     "a": 3,
+     "b": 3
+    },
+    "C2": {
+     "a": 2,
+     "b": 2
+    },
+    "C3": {
+     "a": 2,
+     "b": 2
+    },
+    "C6": {
+     "a": 2,
+     "b": 3
+    },
+    "C10": {
+     "a": 1,
+     "b": 2
+    },
+    "C11": {
+     "a": 3,
+     "b": 4
+    },
+    "C12": {
+     "a": 4,
+     "b": 4
+    },
+    "C4": {
+     "fight": 2
+    },
+    "C5": {
+     "fight": 2
+    },
+    "C7": {
+     "fight": 2
+    },
+    "C8": {
+     "fight": 3
+    },
+    "C9": {
+     "fight": 4
+    }
+   },
+   "p_market": 0.5888,
+   "books": 14.0,
+   "edge": -0.3688,
+   "p_open": null
+  },
+  {
+   "bout": "Iasmin Lucindo vs. Nicole Caliari",
+   "a": "Iasmin Lucindo",
+   "b": "Nicole Caliari",
+   "a_id": "abcf2cc6efc42031",
+   "b_id": "fc0a4053eb8a3a59",
+   "rounds": 3,
+   "segment": "Early prelims",
+   "weight_class": "Bantamweight",
+   "thin": false,
+   "p_a": 0.8473,
+   "p_b": 0.1527,
+   "stats": {
+    "a": {
+     "record": "5-2",
+     "n_fights": 7,
+     "age": 24.8,
+     "height": 63.0,
+     "reach": 66.0,
+     "stance": "Orthodox",
+     "elo": 1538,
+     "opp_elo": 1517,
+     "slpm": 3.18,
+     "sapm": 2.96,
+     "str_acc": 0.455,
+     "str_def": 0.619,
+     "td15": 2.09,
+     "td_def": 0.665,
+     "sub15": 0.26,
+     "ctrl": 0.242,
+     "kd15": 0.07,
+     "kd_against15": 0.07,
+     "ko_loss": 0.109,
+     "avg_time": 14.1
+    },
+    "b": {
+     "record": "1-2",
+     "n_fights": 3,
+     "age": 30.0,
+     "height": 63.0,
+     "reach": 62.0,
+     "stance": "Orthodox",
+     "elo": 1490,
+     "opp_elo": 1497,
+     "slpm": 2.87,
+     "sapm": 5.36,
+     "str_acc": 0.395,
+     "str_def": 0.535,
+     "td15": 2.38,
+     "td_def": 0.663,
+     "sub15": 0.47,
+     "ctrl": 0.303,
+     "kd15": 0.13,
+     "kd_against15": 0.34,
+     "ko_loss": 0.314,
+     "avg_time": null
+    }
+   },
+   "record_split": {
+    "a": {
+     "wins": {
+      "ko": 0,
+      "sub": 1,
+      "dec": 4
+     },
+     "losses": {
+      "ko": 0,
+      "sub": 0,
+      "dec": 2
+     },
+     "win_rounds": {
+      "2": {
+       "ko": 0,
+       "sub": 1
+      }
+     },
+     "n": 7
+    },
+    "b": {
+     "wins": {
+      "ko": 0,
+      "sub": 0,
+      "dec": 0
+     },
+     "losses": {
+      "ko": 0,
+      "sub": 0,
+      "dec": 0
+     },
+     "win_rounds": {},
+     "n": 0
+    }
+   },
+   "evidence": {
+    "a": 7,
+    "b": 3,
+    "min": 3
+   },
+   "drivers": [
+    {
+     "label": "strikes absorbed",
+     "value": 0.4448,
+     "favors": "a",
+     "key": "d_sapm"
+    },
+    {
+     "label": "age",
+     "value": 0.4065,
+     "favors": "a",
+     "key": "d_age"
+    },
+    {
+     "label": "losses by strikes",
+     "value": 0.3447,
+     "favors": "a",
+     "key": "d_ko_loss_rate"
+    },
+    {
+     "label": "career quality",
+     "value": 0.2942,
+     "favors": "a",
+     "key": "d_elo"
+    },
+    {
+     "label": "strength of schedule",
+     "value": 0.1835,
+     "favors": "a",
+     "key": "d_opp_elo"
+    },
+    {
+     "label": "striking vs chin, adjustment",
+     "value": -0.1547,
+     "favors": "b",
+     "key": "ko_edge",
+     "parts": {
+      "a": 1.0,
+      "b": 0.31,
+      "how": "their striking output x how often the other has been finished by strikes"
+     }
+    }
+   ],
+   "fin": {
+    "a": {
+     "elo": 1537.594965,
+     "opp_elo": 1517.100488,
+     "log_exp": 2.079442,
+     "adj_slpm": 3.182527,
+     "sapm": 2.955145,
+     "str_acc": 0.454765,
+     "str_def": 0.619032,
+     "adj_td15": 2.087428,
+     "td_def": 0.664634,
+     "sub15": 0.25641,
+     "ko_loss_rate": 0.109091,
+     "reach": 66.0,
+     "age": 24.791239,
+     "log_layoff": 6.09131
+    },
+    "b": {
+     "elo": 1489.730675,
+     "opp_elo": 1497.267352,
+     "log_exp": 1.386294,
+     "adj_slpm": 2.871201,
+     "sapm": 5.363026,
+     "str_acc": 0.394697,
+     "str_def": 0.534762,
+     "adj_td15": 2.379077,
+     "td_def": 0.663462,
+     "sub15": 0.473911,
+     "ko_loss_rate": 0.314286,
+     "reach": 62.0,
+     "age": 29.968515,
+     "log_layoff": 5.087596
+    }
+   },
+   "p_finish_survival_raw": 0.2723,
+   "m_a_ko": 0.1792,
+   "m_b_ko": 0.0277,
+   "m_a_sub": 0.0871,
+   "m_b_sub": 0.0436,
+   "m_decision": 0.6624,
+   "m_a_dec": 0.581,
+   "m_b_dec": 0.0814,
+   "p_finish": 0.3376,
+   "p_end_r1": 0.1322,
+   "p_end_r2": 0.1091,
+   "p_end_r3": 0.0962,
+   "p_end_r4": null,
+   "p_end_r5": null,
+   "p_ends_before_r2": 0.1322,
+   "p_starts_r2": 0.8678,
+   "p_ends_before_r3": 0.2414,
+   "p_starts_r3": 0.7586,
+   "p_ends_before_r4": null,
+   "p_starts_r4": null,
+   "p_ends_before_r5": null,
+   "p_starts_r5": null,
+   "p_a_given_finish": 0.7889,
+   "p_b_given_finish": 0.2111,
+   "p_a_given_decision": 0.8771,
+   "p_b_given_decision": 0.1229,
+   "exp_minutes": 12.29,
+   "round_of_victory": {
+    "a_ko_r1": 0.0682,
+    "b_ko_r1": 0.0114,
+    "a_sub_r1": 0.0324,
+    "b_sub_r1": 0.0203,
+    "a_ko_r2": 0.0601,
+    "b_ko_r2": 0.0087,
+    "a_sub_r2": 0.028,
+    "b_sub_r2": 0.0124,
+    "a_ko_r3": 0.0509,
+    "b_ko_r3": 0.0076,
+    "a_sub_r3": 0.0267,
+    "b_sub_r3": 0.0109
+   },
+   "m_a_finish": 0.2663,
+   "m_b_finish": 0.0713,
+   "totals": {
+    "over_1_5": 0.8189,
+    "over_2_5": 0.7102
+   },
+   "a_ctrl_lo": 0.0,
+   "a_ctrl_mid": 10.38,
+   "a_ctrl_hi": 25.28,
+   "a_slpm_lo": 1.33,
+   "a_slpm_mid": 4.07,
+   "a_slpm_hi": 7.21,
+   "a_takedowns_rate": 1.745,
+   "a_strikes_rate": 4.43,
+   "a_p_takedown": 0.636,
+   "a_p_knockdown": 0.141,
+   "b_ctrl_lo": 0.0,
+   "b_ctrl_mid": 9.19,
+   "b_ctrl_hi": 25.64,
+   "b_slpm_lo": 0.71,
+   "b_slpm_mid": 2.4,
+   "b_slpm_hi": 4.79,
+   "b_takedowns_rate": 2.109,
+   "b_strikes_rate": 2.082,
+   "b_p_takedown": 0.594,
+   "b_p_knockdown": 0.116,
+   "dec_share": null,
+   "bands": {
+    "C1": {
+     "a": 4,
+     "b": 4
+    },
+    "C2": {
+     "a": 3,
+     "b": 3
+    },
+    "C3": {
+     "a": 1,
+     "b": 1
+    },
+    "C6": {
+     "a": 4,
+     "b": 1
+    },
+    "C10": {
+     "a": 1,
+     "b": 1
+    },
+    "C11": {
+     "a": 4,
+     "b": 1
+    },
+    "C12": {
+     "a": 4,
+     "b": 2
+    },
+    "C4": {
+     "fight": 1
+    },
+    "C5": {
+     "fight": 4
+    },
+    "C7": {
+     "fight": 1
+    },
+    "C8": {
+     "fight": 3
+    },
+    "C9": {
+     "fight": 2
+    }
+   },
+   "p_market": null,
+   "books": null,
+   "edge": null,
    "p_open": null
   }
  ],
