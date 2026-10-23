@@ -2,7 +2,7 @@
  "event": "UFC 333",
  "date": "2026-10-24",
  "venue": "Etihad Arena, Abu Dhabi , United Arab Emirates",
- "generated_utc": "2026-10-21T15:54:09.752115+00:00",
+ "generated_utc": "2026-10-22T15:51:12.354859+00:00",
  "bouts": [
   {
    "bout": "Alexander Volkanovski vs. Movsar Evloev",
@@ -638,9 +638,9 @@
      "fight": 4
     }
    },
-   "p_market": 0.602,
+   "p_market": 0.5769,
    "books": 25.0,
-   "edge": -0.0673,
+   "edge": -0.0422,
    "p_open": 0.6125
   },
   {
@@ -1510,9 +1510,9 @@
      "fight": 2
     }
    },
-   "p_market": 0.5391,
+   "p_market": 0.5535,
    "books": 22.0,
-   "edge": -0.0203,
+   "edge": -0.0347,
    "p_open": null
   },
   {
@@ -1822,9 +1822,9 @@
      "fight": 1
     }
    },
-   "p_market": 0.6643,
+   "p_market": 0.6548,
    "books": 21.0,
-   "edge": -0.2307,
+   "edge": -0.2211,
    "p_open": 0.6314
   },
   {
@@ -2123,9 +2123,9 @@
      "fight": 4
     }
    },
-   "p_market": 0.2069,
+   "p_market": 0.1973,
    "books": 21.0,
-   "edge": 0.1622,
+   "edge": 0.1717,
    "p_open": null
   },
   {
@@ -2420,9 +2420,9 @@
      "fight": 3
     }
    },
-   "p_market": 0.5157,
+   "p_market": 0.5184,
    "books": 22.0,
-   "edge": 0.0461,
+   "edge": 0.0434,
    "p_open": 0.5224
   },
   {
@@ -2697,9 +2697,9 @@
      "fight": 3
     }
    },
-   "p_market": 0.5852,
+   "p_market": 0.5784,
    "books": 20.0,
-   "edge": -0.3008,
+   "edge": -0.294,
    "p_open": null
   },
   {
@@ -2997,9 +2997,9 @@
      "fight": 2
     }
    },
-   "p_market": 0.4803,
+   "p_market": 0.4737,
    "books": 19.0,
-   "edge": 0.0021,
+   "edge": 0.0087,
    "p_open": 0.4499
   },
   {

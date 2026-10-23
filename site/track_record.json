@@ -1,17 +1,17 @@
 {
- "computed_utc": "2026-10-15T12:27:34+00:00",
- "n_fights": 8808,
+ "computed_utc": "2026-10-23T15:42:54+00:00",
+ "n_fights": 8820,
  "record": {
   "winner": {
-   "n_tested": 835,
-   "accuracy": 0.674,
+   "n_tested": 840,
+   "accuracy": 0.67,
    "tested_from": "2024-05-04",
-   "tested_to": "2026-10-10",
+   "tested_to": "2026-10-17",
    "bands": [
     {
      "said": "50-60%",
-     "n": 369,
-     "right": 0.599
+     "n": 371,
+     "right": 0.596
     },
     {
      "said": "60-70%",
@@ -20,8 +20,8 @@
     },
     {
      "said": "70-80%",
-     "n": 141,
-     "right": 0.823
+     "n": 144,
+     "right": 0.806
     },
     {
      "said": "80-100%",
@@ -32,12 +32,12 @@
   },
   "takedown": {
    "said_likely": {
-    "n": 376,
-    "happened": 0.739,
+    "n": 378,
+    "happened": 0.741,
     "avg_said": 0.719
    },
    "said_unlikely": {
-    "n": 824,
+    "n": 830,
     "happened": 0.258,
     "avg_said": 0.244
    },
@@ -45,22 +45,56 @@
   },
   "knockdown": {
    "said_unlikely": {
-    "n": 1594,
-    "happened": 0.174,
+    "n": 1603,
+    "happened": 0.173,
     "avg_said": 0.165
    },
    "auc": 0.67
   },
+  "finish": {
+   "n_tested": 850,
+   "said_mean": 0.467,
+   "happened": 0.476,
+   "brier": 0.2385,
+   "base_brier": 0.2494,
+   "bands": [
+    {
+     "said": "0-40%",
+     "n": 229,
+     "avg_said": 0.343,
+     "finished": 0.336
+    },
+    {
+     "said": "40-50%",
+     "n": 318,
+     "avg_said": 0.449,
+     "finished": 0.45
+    },
+    {
+     "said": "50-60%",
+     "n": 208,
+     "avg_said": 0.546,
+     "finished": 0.62
+    },
+    {
+     "said": "60-100%",
+     "n": 95,
+     "avg_said": 0.651,
+     "finished": 0.589
+    }
+   ],
+   "beats_base": true
+  },
   "ranges": {
    "control time": {
     "claimed": 0.8,
-    "actual": 0.793,
-    "n": 1704
+    "actual": 0.792,
+    "n": 1714
    },
    "significant strikes": {
     "claimed": 0.8,
     "actual": 0.802,
-    "n": 1704
+    "n": 1714
    }
   }
  }
