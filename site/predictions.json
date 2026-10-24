@@ -2,7 +2,7 @@
  "event": "UFC 333",
  "date": "2026-10-24",
  "venue": "Etihad Arena, Abu Dhabi , United Arab Emirates",
- "generated_utc": "2026-10-23T15:42:54.141704+00:00",
+ "generated_utc": "2026-10-24T14:21:20.339088+00:00",
  "bouts": [
   {
    "bout": "Alexander Volkanovski vs. Movsar Evloev",
@@ -638,9 +638,9 @@
      "fight": 4
     }
    },
-   "p_market": 0.5769,
+   "p_market": 0.5867,
    "books": 25.0,
-   "edge": -0.0422,
+   "edge": -0.052,
    "p_open": 0.6125
   },
   {
@@ -1233,9 +1233,9 @@
      "fight": 1
     }
    },
-   "p_market": 0.5249,
+   "p_market": 0.5339,
    "books": 25.0,
-   "edge": 0.0995,
+   "edge": 0.0906,
    "p_open": 0.5426
   },
   {
@@ -1510,9 +1510,9 @@
      "fight": 2
     }
    },
-   "p_market": 0.567,
-   "books": 23.0,
-   "edge": -0.0482,
+   "p_market": null,
+   "books": null,
+   "edge": null,
    "p_open": null
   },
   {
@@ -1822,9 +1822,9 @@
      "fight": 1
     }
    },
-   "p_market": 0.6548,
+   "p_market": 0.6401,
    "books": 21.0,
-   "edge": -0.2211,
+   "edge": -0.2065,
    "p_open": 0.6314
   },
   {
@@ -2123,9 +2123,9 @@
      "fight": 4
     }
    },
-   "p_market": 0.1973,
+   "p_market": 0.1879,
    "books": 21.0,
-   "edge": 0.1717,
+   "edge": 0.1811,
    "p_open": null
   },
   {
@@ -2420,9 +2420,9 @@
      "fight": 3
     }
    },
-   "p_market": 0.517,
+   "p_market": 0.5118,
    "books": 22.0,
-   "edge": 0.0449,
+   "edge": 0.05,
    "p_open": 0.5224
   },
   {
@@ -2697,9 +2697,9 @@
      "fight": 3
     }
    },
-   "p_market": 0.5838,
-   "books": 22.0,
-   "edge": -0.2993,
+   "p_market": null,
+   "books": null,
+   "edge": null,
    "p_open": null
   },
   {
@@ -2997,9 +2997,9 @@
      "fight": 2
     }
    },
-   "p_market": 0.4805,
+   "p_market": 0.4921,
    "books": 21.0,
-   "edge": 0.0019,
+   "edge": -0.0097,
    "p_open": 0.4499
   },
   {
@@ -3274,15 +3274,15 @@
      "fight": 4
     }
    },
-   "p_market": 0.5852,
-   "books": 21.0,
-   "edge": -0.3652,
+   "p_market": null,
+   "books": null,
+   "edge": null,
    "p_open": null
   },
   {
-   "bout": "Iasmin Lucindo vs. Nicole Caliari",
+   "bout": "Iasmin Lucindo vs. Nicolle Caliari",
    "a": "Iasmin Lucindo",
-   "b": "Nicole Caliari",
+   "b": "Nicolle Caliari",
    "a_id": "abcf2cc6efc42031",
    "b_id": "fc0a4053eb8a3a59",
    "rounds": 3,
@@ -3334,7 +3334,7 @@
      "kd15": 0.13,
      "kd_against15": 0.34,
      "ko_loss": 0.314,
-     "avg_time": null
+     "avg_time": 13.21
     }
    },
    "record_split": {
@@ -3360,16 +3360,21 @@
     "b": {
      "wins": {
       "ko": 0,
-      "sub": 0,
+      "sub": 1,
       "dec": 0
      },
      "losses": {
-      "ko": 0,
+      "ko": 1,
       "sub": 0,
-      "dec": 0
+      "dec": 1
      },
-     "win_rounds": {},
-     "n": 0
+     "win_rounds": {
+      "3": {
+       "ko": 0,
+       "sub": 1
+      }
+     },
+     "n": 3
     }
    },
    "evidence": {
@@ -3521,7 +3526,11 @@
    "b_strikes_rate": 2.082,
    "b_p_takedown": 0.594,
    "b_p_knockdown": 0.116,
-   "dec_share": null,
+   "dec_share": {
+    "a": 0.857,
+    "b": 0.333,
+    "pair": 0.595
+   },
    "bands": {
     "C1": {
      "a": 4,
@@ -3565,12 +3574,15 @@
     },
     "C9": {
      "fight": 2
+    },
+    "C13": {
+     "fight": 3
     }
    },
-   "p_market": null,
-   "books": null,
-   "edge": null,
-   "p_open": null
+   "p_market": 0.7735,
+   "books": 20.0,
+   "edge": 0.0738,
+   "p_open": 0.748
   }
  ],
  "no_read": [
@@ -3592,7 +3604,7 @@
   "Asaf Chopurov",
   "Cameron Rowston"
  ],
- "market_source": "the-odds-api",
+ "market_source": "ledger (latest capture, 50% of card)",
  "track_record": {
   "winner": {
    "n_tested": 840,

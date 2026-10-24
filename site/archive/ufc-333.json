@@ -2,7 +2,7 @@
  "event": "UFC 333",
  "date": "2026-10-24",
  "venue": "Etihad Arena, Abu Dhabi , United Arab Emirates",
- "generated_utc": "2026-10-22T15:51:12.354859+00:00",
+ "generated_utc": "2026-10-23T15:42:54.141704+00:00",
  "bouts": [
   {
    "bout": "Alexander Volkanovski vs. Movsar Evloev",
@@ -1233,9 +1233,9 @@
      "fight": 1
     }
    },
-   "p_market": 0.5312,
-   "books": 24.0,
-   "edge": 0.0932,
+   "p_market": 0.5249,
+   "books": 25.0,
+   "edge": 0.0995,
    "p_open": 0.5426
   },
   {
@@ -1510,9 +1510,9 @@
      "fight": 2
     }
    },
-   "p_market": 0.5535,
-   "books": 22.0,
-   "edge": -0.0347,
+   "p_market": 0.567,
+   "books": 23.0,
+   "edge": -0.0482,
    "p_open": null
   },
   {
@@ -2420,9 +2420,9 @@
      "fight": 3
     }
    },
-   "p_market": 0.5184,
+   "p_market": 0.517,
    "books": 22.0,
-   "edge": 0.0434,
+   "edge": 0.0449,
    "p_open": 0.5224
   },
   {
@@ -2697,9 +2697,9 @@
      "fight": 3
     }
    },
-   "p_market": 0.5784,
-   "books": 20.0,
-   "edge": -0.294,
+   "p_market": 0.5838,
+   "books": 22.0,
+   "edge": -0.2993,
    "p_open": null
   },
   {
@@ -2997,9 +2997,9 @@
      "fight": 2
     }
    },
-   "p_market": 0.4737,
-   "books": 19.0,
-   "edge": 0.0087,
+   "p_market": 0.4805,
+   "books": 21.0,
+   "edge": 0.0019,
    "p_open": 0.4499
   },
   {
@@ -3274,9 +3274,9 @@
      "fight": 4
     }
    },
-   "p_market": 0.5867,
-   "books": 19.0,
-   "edge": -0.3667,
+   "p_market": 0.5852,
+   "books": 21.0,
+   "edge": -0.3652,
    "p_open": null
   },
   {
@@ -3287,7 +3287,7 @@
    "b_id": "fc0a4053eb8a3a59",
    "rounds": 3,
    "segment": "Early prelims",
-   "weight_class": "Women's Strawweight",
+   "weight_class": "Catchweight (120.5 lb)",
    "thin": false,
    "p_a": 0.8473,
    "p_b": 0.1527,
@@ -3455,51 +3455,51 @@
     }
    },
    "p_finish_survival_raw": 0.2723,
-   "m_a_ko": 0.1463,
-   "m_b_ko": 0.0226,
-   "m_a_sub": 0.0711,
-   "m_b_sub": 0.0356,
-   "m_decision": 0.7244,
-   "m_a_dec": 0.6299,
-   "m_b_dec": 0.0945,
-   "p_finish": 0.2756,
-   "p_end_r1": 0.108,
-   "p_end_r2": 0.0891,
-   "p_end_r3": 0.0786,
+   "m_a_ko": 0.1943,
+   "m_b_ko": 0.03,
+   "m_a_sub": 0.0945,
+   "m_b_sub": 0.0473,
+   "m_decision": 0.634,
+   "m_a_dec": 0.5586,
+   "m_b_dec": 0.0754,
+   "p_finish": 0.366,
+   "p_end_r1": 0.1434,
+   "p_end_r2": 0.1183,
+   "p_end_r3": 0.1043,
    "p_end_r4": null,
    "p_end_r5": null,
-   "p_ends_before_r2": 0.108,
-   "p_starts_r2": 0.892,
-   "p_ends_before_r3": 0.1971,
-   "p_starts_r3": 0.8029,
+   "p_ends_before_r2": 0.1434,
+   "p_starts_r2": 0.8566,
+   "p_ends_before_r3": 0.2617,
+   "p_starts_r3": 0.7383,
    "p_ends_before_r4": null,
    "p_starts_r4": null,
    "p_ends_before_r5": null,
    "p_starts_r5": null,
    "p_a_given_finish": 0.7889,
    "p_b_given_finish": 0.2111,
-   "p_a_given_decision": 0.8696,
-   "p_b_given_decision": 0.1304,
-   "exp_minutes": 12.79,
+   "p_a_given_decision": 0.8811,
+   "p_b_given_decision": 0.1189,
+   "exp_minutes": 12.06,
    "round_of_victory": {
-    "a_ko_r1": 0.0557,
-    "b_ko_r1": 0.0093,
-    "a_sub_r1": 0.0265,
-    "b_sub_r1": 0.0165,
-    "a_ko_r2": 0.049,
-    "b_ko_r2": 0.0071,
-    "a_sub_r2": 0.0228,
-    "b_sub_r2": 0.0101,
-    "a_ko_r3": 0.0416,
-    "b_ko_r3": 0.0062,
-    "a_sub_r3": 0.0218,
-    "b_sub_r3": 0.0089
+    "a_ko_r1": 0.0739,
+    "b_ko_r1": 0.0123,
+    "a_sub_r1": 0.0352,
+    "b_sub_r1": 0.022,
+    "a_ko_r2": 0.0651,
+    "b_ko_r2": 0.0094,
+    "a_sub_r2": 0.0303,
+    "b_sub_r2": 0.0135,
+    "a_ko_r3": 0.0552,
+    "b_ko_r3": 0.0082,
+    "a_sub_r3": 0.029,
+    "b_sub_r3": 0.0119
    },
-   "m_a_finish": 0.2174,
-   "m_b_finish": 0.0582,
+   "m_a_finish": 0.2887,
+   "m_b_finish": 0.0773,
    "totals": {
-    "over_1_5": 0.8521,
-    "over_2_5": 0.7633
+    "over_1_5": 0.8037,
+    "over_2_5": 0.6857
    },
    "a_ctrl_lo": 0.0,
    "a_ctrl_mid": 10.38,
@@ -3595,15 +3595,15 @@
  "market_source": "the-odds-api",
  "track_record": {
   "winner": {
-   "n_tested": 835,
-   "accuracy": 0.674,
+   "n_tested": 840,
+   "accuracy": 0.67,
    "tested_from": "2024-05-04",
-   "tested_to": "2026-10-10",
+   "tested_to": "2026-10-17",
    "bands": [
     {
      "said": "50-60%",
-     "n": 369,
-     "right": 0.599
+     "n": 371,
+     "right": 0.596
     },
     {
      "said": "60-70%",
@@ -3612,8 +3612,8 @@
     },
     {
      "said": "70-80%",
-     "n": 141,
-     "right": 0.823
+     "n": 144,
+     "right": 0.806
     },
     {
      "said": "80-100%",
@@ -3624,12 +3624,12 @@
   },
   "takedown": {
    "said_likely": {
-    "n": 376,
-    "happened": 0.739,
+    "n": 378,
+    "happened": 0.741,
     "avg_said": 0.719
    },
    "said_unlikely": {
-    "n": 824,
+    "n": 830,
     "happened": 0.258,
     "avg_said": 0.244
    },
@@ -3637,22 +3637,56 @@
   },
   "knockdown": {
    "said_unlikely": {
-    "n": 1594,
-    "happened": 0.174,
+    "n": 1603,
+    "happened": 0.173,
     "avg_said": 0.165
    },
    "auc": 0.67
   },
+  "finish": {
+   "n_tested": 850,
+   "said_mean": 0.467,
+   "happened": 0.476,
+   "brier": 0.2385,
+   "base_brier": 0.2494,
+   "bands": [
+    {
+     "said": "0-40%",
+     "n": 229,
+     "avg_said": 0.343,
+     "finished": 0.336
+    },
+    {
+     "said": "40-50%",
+     "n": 318,
+     "avg_said": 0.449,
+     "finished": 0.45
+    },
+    {
+     "said": "50-60%",
+     "n": 208,
+     "avg_said": 0.546,
+     "finished": 0.62
+    },
+    {
+     "said": "60-100%",
+     "n": 95,
+     "avg_said": 0.651,
+     "finished": 0.589
+    }
+   ],
+   "beats_base": true
+  },
   "ranges": {
    "control time": {
     "claimed": 0.8,
-    "actual": 0.793,
-    "n": 1704
+    "actual": 0.792,
+    "n": 1714
    },
    "significant strikes": {
     "claimed": 0.8,
     "actual": 0.802,
-    "n": 1704
+    "n": 1714
    }
   }
  },
