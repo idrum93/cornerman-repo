@@ -2332,6 +2332,20 @@
    "status": "ok",
    "title": "UFC 332"
   },
+  "UFC 333: Volkanovski vs. Evloev ": {
+   "date": "2026-10-24",
+   "fotn": [
+    "Petr Yan",
+    "Merab Dvalishvili"
+   ],
+   "none_awarded": false,
+   "potn": [
+    "Alexander Volkanovski",
+    "Lone'er Kavanagh"
+   ],
+   "status": "ok",
+   "title": "UFC 333"
+  },
   "UFC Fight Night 56: Shogun vs Saint Preux ": {
    "date": "2014-11-08",
    "fotn": [
@@ -6324,6 +6338,6 @@
   }
  },
  "parser": 5,
- "updated_utc": "2026-10-19T14:24:43+00:00",
+ "updated_utc": "2026-10-26T13:57:19+00:00",
  "version": 1
 }
