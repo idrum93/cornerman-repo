@@ -1,6 +1,2941 @@
 {
  "cards": [
   {
+   "event": "UFC 333",
+   "date": "2026-10-24",
+   "venue": "Etihad Arena, Abu Dhabi , United Arab Emirates",
+   "n": 12,
+   "right": 8,
+   "method_n": 9,
+   "method_right": 5,
+   "round_n": 4,
+   "round_right": 4,
+   "props_n": 170,
+   "props_brier": 15.0319,
+   "props_base_brier": 16.4926,
+   "props_right": 133,
+   "props_base_n": 69,
+   "props_base_right": 42,
+   "card_tally": {
+    "r1_n": 9,
+    "r1_said": 1.77,
+    "r1_hit": 3,
+    "r1_base": 2.26,
+    "fin_n": 9,
+    "fin_said": 4.3,
+    "fin_hit": 4,
+    "fin_base": 4.47
+   },
+   "market_n": 9,
+   "market_right": 8,
+   "model_closer": 3,
+   "disagree_n": 5,
+   "disagree_model_closer": 2,
+   "bouts": [
+    {
+     "bout": "Alexander Volkanovski vs. Movsar Evloev",
+     "a": "Alexander Volkanovski",
+     "b": "Movsar Evloev",
+     "p_a": 0.4769,
+     "segment": "Main card",
+     "rounds": 5,
+     "weight_class": "Featherweight",
+     "m_decision": 0.5965,
+     "p_end_r1": 0.0719,
+     "fin": {
+      "a": {
+       "elo": 1640.944475,
+       "opp_elo": 1585.743053,
+       "log_exp": 2.944439,
+       "adj_slpm": 6.365964,
+       "sapm": 3.342943,
+       "str_acc": 0.570169,
+       "str_def": 0.587032,
+       "adj_td15": 1.978681,
+       "td_def": 0.675,
+       "sub15": 0.234246,
+       "ko_loss_rate": 0.145455,
+       "reach": 71.0,
+       "age": 38.067077,
+       "log_layoff": 5.587249
+      },
+      "b": {
+       "elo": 1616.830798,
+       "opp_elo": 1554.68582,
+       "log_exp": 2.397895,
+       "adj_slpm": 4.44154,
+       "sapm": 2.902857,
+       "str_acc": 0.475879,
+       "str_def": 0.611464,
+       "adj_td15": 4.055441,
+       "td_def": 0.627049,
+       "sub15": 0.252632,
+       "ko_loss_rate": 0.085714,
+       "reach": 72.0,
+       "age": 32.698152,
+       "log_layoff": 5.384495
+      }
+     },
+     "round_of_victory": {
+      "a_ko_r1": 0.0227,
+      "b_ko_r1": 0.0337,
+      "a_sub_r1": 0.0066,
+      "b_sub_r1": 0.0089,
+      "a_ko_r2": 0.0302,
+      "b_ko_r2": 0.0394,
+      "a_sub_r2": 0.0094,
+      "b_sub_r2": 0.0104,
+      "a_ko_r3": 0.0274,
+      "b_ko_r3": 0.0342,
+      "a_sub_r3": 0.0088,
+      "b_sub_r3": 0.0096,
+      "a_ko_r4": 0.0255,
+      "b_ko_r4": 0.0318,
+      "a_sub_r4": 0.008,
+      "b_sub_r4": 0.009,
+      "a_ko_r5": 0.0299,
+      "b_ko_r5": 0.0373,
+      "a_sub_r5": 0.0094,
+      "b_sub_r5": 0.0113
+     },
+     "winner": "Alexander Volkanovski",
+     "method": "KO/TKO",
+     "round": 2,
+     "seconds": 594,
+     "model_right": false,
+     "p_winner_model": 0.477,
+     "report": [
+      {
+       "kind": "method",
+       "label": "How it ended",
+       "actual": "Alexander Volkanovski by KO/TKO",
+       "said": 0.136,
+       "top": "decision",
+       "top_p": 0.597,
+       "right": false
+      },
+      {
+       "kind": "round",
+       "label": "Round it ended",
+       "actual": "round 2",
+       "said": 0.089,
+       "top": "round 2",
+       "top_p": 0.089,
+       "right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Go the distance",
+       "said": 0.597,
+       "happened": false,
+       "right": false,
+       "brier": 0.3558,
+       "base": 0.503,
+       "base_brier": 0.253,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Over 1.5 rounds",
+       "said": 0.888,
+       "happened": true,
+       "right": true,
+       "brier": 0.0125,
+       "base": 0.705,
+       "base_brier": 0.0871,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Over 2.5 rounds",
+       "said": 0.798,
+       "happened": false,
+       "right": false,
+       "brier": 0.6366,
+       "base": 0.564,
+       "base_brier": 0.318,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Over 3.5 rounds",
+       "said": 0.721,
+       "happened": false,
+       "right": false,
+       "brier": 0.5197,
+       "base": 0.49,
+       "base_brier": 0.2405,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Over 4.5 rounds",
+       "said": 0.647,
+       "happened": false,
+       "right": false,
+       "brier": 0.4193,
+       "base": 0.43,
+       "base_brier": 0.1851,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Ends before round 2",
+       "said": 0.072,
+       "happened": false,
+       "right": true,
+       "brier": 0.0052,
+       "base": 0.214,
+       "base_brier": 0.046,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Ends before round 3",
+       "said": 0.161,
+       "happened": true,
+       "right": false,
+       "brier": 0.7034,
+       "base": 0.376,
+       "base_brier": 0.3895,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Ends before round 4",
+       "said": 0.241,
+       "happened": true,
+       "right": false,
+       "brier": 0.5756,
+       "base": 0.477,
+       "base_brier": 0.2733,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Ends before round 5",
+       "said": 0.316,
+       "happened": true,
+       "right": false,
+       "brier": 0.4684,
+       "base": 0.536,
+       "base_brier": 0.2153,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Fight starts round 2",
+       "said": 0.928,
+       "happened": true,
+       "right": true,
+       "brier": 0.0052,
+       "base": 0.786,
+       "base_brier": 0.046,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Fight starts round 3",
+       "said": 0.839,
+       "happened": false,
+       "right": false,
+       "brier": 0.7034,
+       "base": 0.624,
+       "base_brier": 0.3895,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Fight starts round 4",
+       "said": 0.759,
+       "happened": false,
+       "right": false,
+       "brier": 0.5756,
+       "base": 0.523,
+       "base_brier": 0.2733,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Fight starts round 5",
+       "said": 0.684,
+       "happened": false,
+       "right": false,
+       "brier": 0.4684,
+       "base": 0.464,
+       "base_brier": 0.2153,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Alexander Volkanovski by KO/TKO/DQ",
+       "said": 0.136,
+       "happened": true,
+       "right": false,
+       "brier": 0.747,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Alexander Volkanovski by submission",
+       "said": 0.042,
+       "happened": false,
+       "right": true,
+       "brier": 0.0018,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Alexander Volkanovski by decision",
+       "said": 0.299,
+       "happened": false,
+       "right": true,
+       "brier": 0.0894,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Alexander Volkanovski by KO/TKO/DQ or submission",
+       "said": 0.178,
+       "happened": true,
+       "right": false,
+       "brier": 0.6758,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Movsar Evloev by KO/TKO/DQ",
+       "said": 0.176,
+       "happened": false,
+       "right": true,
+       "brier": 0.0311,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Movsar Evloev by submission",
+       "said": 0.049,
+       "happened": false,
+       "right": true,
+       "brier": 0.0024,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Movsar Evloev by decision",
+       "said": 0.297,
+       "happened": false,
+       "right": true,
+       "brier": 0.0885,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Movsar Evloev by KO/TKO/DQ or submission",
+       "said": 0.226,
+       "happened": false,
+       "right": true,
+       "brier": 0.0509,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 1",
+       "said": 0.072,
+       "happened": false,
+       "right": true,
+       "brier": 0.0052,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 2",
+       "said": 0.089,
+       "happened": true,
+       "right": false,
+       "brier": 0.8292,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 3",
+       "said": 0.08,
+       "happened": false,
+       "right": true,
+       "brier": 0.0064,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 4",
+       "said": 0.074,
+       "happened": false,
+       "right": true,
+       "brier": 0.0055,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 5",
+       "said": 0.088,
+       "happened": false,
+       "right": true,
+       "brier": 0.0077,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      }
+     ],
+     "props_n": 26,
+     "props_right": 13,
+     "props_brier": 5.4491,
+     "props_base_brier": 2.9319,
+     "props_base_n": 13,
+     "props_base_right": 7
+    },
+    {
+     "bout": "Petr Yan vs. Merab Dvalishvili",
+     "a": "Petr Yan",
+     "b": "Merab Dvalishvili",
+     "p_a": 0.5347,
+     "segment": "Main card",
+     "rounds": 3,
+     "weight_class": "Bantamweight",
+     "m_decision": 0.6553,
+     "p_end_r1": 0.1048,
+     "fin": {
+      "a": {
+       "elo": 1616.287483,
+       "opp_elo": 1569.581231,
+       "log_exp": 2.833213,
+       "adj_slpm": 5.762924,
+       "sapm": 4.231373,
+       "str_acc": 0.548095,
+       "str_def": 0.595633,
+       "adj_td15": 1.793695,
+       "td_def": 0.83634,
+       "sub15": 0.153813,
+       "ko_loss_rate": 0.06,
+       "reach": 67.0,
+       "age": 33.697467,
+       "log_layoff": 5.777652
+      },
+      "b": {
+       "elo": 1629.417257,
+       "opp_elo": 1554.007802,
+       "log_exp": 2.890372,
+       "adj_slpm": 4.648097,
+       "sapm": 2.85881,
+       "str_acc": 0.415861,
+       "str_def": 0.540449,
+       "adj_td15": 6.173486,
+       "td_def": 0.723333,
+       "sub15": 0.373728,
+       "ko_loss_rate": 0.057143,
+       "reach": 68.0,
+       "age": 35.786448,
+       "log_layoff": 5.777652
+      }
+     },
+     "round_of_victory": {
+      "a_ko_r1": 0.0655,
+      "b_ko_r1": 0.026,
+      "a_sub_r1": 0.0062,
+      "b_sub_r1": 0.0071,
+      "a_ko_r2": 0.0788,
+      "b_ko_r2": 0.031,
+      "a_sub_r2": 0.008,
+      "b_sub_r2": 0.0089,
+      "a_ko_r3": 0.0692,
+      "b_ko_r3": 0.0291,
+      "a_sub_r3": 0.0072,
+      "b_sub_r3": 0.0077
+     },
+     "winner": "Petr Yan",
+     "method": "DEC",
+     "round": 5,
+     "seconds": 1500,
+     "model_right": true,
+     "p_winner_model": 0.535,
+     "report": [
+      {
+       "kind": "method",
+       "label": "How it ended",
+       "actual": "decision",
+       "said": 0.655,
+       "top": "decision",
+       "top_p": 0.655,
+       "right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Go the distance",
+       "said": 0.655,
+       "happened": true,
+       "right": true,
+       "brier": 0.1188,
+       "base": 0.503,
+       "base_brier": 0.247,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Over 1.5 rounds",
+       "said": 0.839,
+       "happened": true,
+       "right": true,
+       "brier": 0.026,
+       "base": 0.669,
+       "base_brier": 0.1094,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Over 2.5 rounds",
+       "said": 0.711,
+       "happened": true,
+       "right": true,
+       "brier": 0.0835,
+       "base": 0.544,
+       "base_brier": 0.2084,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Ends before round 2",
+       "said": 0.105,
+       "happened": false,
+       "right": true,
+       "brier": 0.011,
+       "base": 0.256,
+       "base_brier": 0.0653,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Ends before round 3",
+       "said": 0.232,
+       "happened": false,
+       "right": true,
+       "brier": 0.0536,
+       "base": 0.41,
+       "base_brier": 0.1678,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Fight starts round 2",
+       "said": 0.895,
+       "happened": true,
+       "right": true,
+       "brier": 0.011,
+       "base": 0.744,
+       "base_brier": 0.0653,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Fight starts round 3",
+       "said": 0.768,
+       "happened": true,
+       "right": true,
+       "brier": 0.0536,
+       "base": 0.59,
+       "base_brier": 0.1678,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Petr Yan by KO/TKO/DQ",
+       "said": 0.214,
+       "happened": false,
+       "right": true,
+       "brier": 0.0456,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Petr Yan by submission",
+       "said": 0.021,
+       "happened": false,
+       "right": true,
+       "brier": 0.0005,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Petr Yan by decision",
+       "said": 0.3,
+       "happened": true,
+       "right": false,
+       "brier": 0.4904,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Petr Yan by KO/TKO/DQ or submission",
+       "said": 0.235,
+       "happened": false,
+       "right": true,
+       "brier": 0.0552,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Merab Dvalishvili by KO/TKO/DQ",
+       "said": 0.086,
+       "happened": false,
+       "right": true,
+       "brier": 0.0074,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Merab Dvalishvili by submission",
+       "said": 0.024,
+       "happened": false,
+       "right": true,
+       "brier": 0.0006,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Merab Dvalishvili by decision",
+       "said": 0.356,
+       "happened": false,
+       "right": true,
+       "brier": 0.1265,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Merab Dvalishvili by KO/TKO/DQ or submission",
+       "said": 0.11,
+       "happened": false,
+       "right": true,
+       "brier": 0.012,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 1",
+       "said": 0.105,
+       "happened": false,
+       "right": true,
+       "brier": 0.011,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 2",
+       "said": 0.127,
+       "happened": false,
+       "right": true,
+       "brier": 0.0161,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 3",
+       "said": 0.113,
+       "happened": false,
+       "right": true,
+       "brier": 0.0128,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      }
+     ],
+     "props_n": 18,
+     "props_right": 17,
+     "props_brier": 0.3575,
+     "props_base_brier": 1.031,
+     "props_base_n": 7,
+     "props_base_right": 7,
+     "market": {
+      "p_market": 0.5769,
+      "p_winner_market": 0.577,
+      "market_right": true,
+      "gap": -0.042,
+      "picks_differ": false,
+      "model_closer": false
+     }
+    },
+    {
+     "bout": "Lone'er Kavanagh vs. Ramazan Temirov",
+     "a": "Lone'er Kavanagh",
+     "b": "Ramazan Temirov",
+     "p_a": 0.4729,
+     "segment": "Main card",
+     "rounds": 3,
+     "weight_class": "Flyweight",
+     "m_decision": 0.4962,
+     "p_end_r1": 0.2127,
+     "fin": {
+      "a": {
+       "elo": 1506.776907,
+       "opp_elo": 1524.378799,
+       "log_exp": 1.791759,
+       "adj_slpm": 3.816742,
+       "sapm": 3.946381,
+       "str_acc": 0.498126,
+       "str_def": 0.535974,
+       "adj_td15": 1.061564,
+       "td_def": 0.734375,
+       "sub15": 0.443418,
+       "ko_loss_rate": 0.244444,
+       "reach": 67.0,
+       "age": 27.37577,
+       "log_layoff": 4.663439
+      },
+      "b": {
+       "elo": 1543.13515,
+       "opp_elo": 1519.36634,
+       "log_exp": 1.386294,
+       "adj_slpm": 4.445449,
+       "sapm": 3.792022,
+       "str_acc": 0.415179,
+       "str_def": 0.614017,
+       "adj_td15": 1.156265,
+       "td_def": 0.698276,
+       "sub15": 0.344938,
+       "ko_loss_rate": 0.171429,
+       "reach": 63.0,
+       "age": 29.727584,
+       "log_layoff": 4.521789
+      }
+     },
+     "round_of_victory": {
+      "a_ko_r1": 0.0868,
+      "b_ko_r1": 0.0874,
+      "a_sub_r1": 0.0235,
+      "b_sub_r1": 0.0149,
+      "a_ko_r2": 0.0734,
+      "b_ko_r2": 0.0681,
+      "a_sub_r2": 0.0202,
+      "b_sub_r2": 0.0129,
+      "a_ko_r3": 0.0521,
+      "b_ko_r3": 0.0427,
+      "a_sub_r3": 0.0133,
+      "b_sub_r3": 0.0085
+     },
+     "winner": "Lone'er Kavanagh",
+     "method": "KO/TKO",
+     "round": 1,
+     "seconds": 268,
+     "model_right": false,
+     "p_winner_model": 0.473,
+     "report": [
+      {
+       "kind": "method",
+       "label": "How it ended",
+       "actual": "Lone'er Kavanagh by KO/TKO",
+       "said": 0.212,
+       "top": "decision",
+       "top_p": 0.496,
+       "right": false
+      },
+      {
+       "kind": "round",
+       "label": "Round it ended",
+       "actual": "round 1",
+       "said": 0.213,
+       "top": "round 1",
+       "top_p": 0.213,
+       "right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Go the distance",
+       "said": 0.496,
+       "happened": false,
+       "right": true,
+       "brier": 0.2462,
+       "base": 0.503,
+       "base_brier": 0.253,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Over 1.5 rounds",
+       "said": 0.707,
+       "happened": false,
+       "right": false,
+       "brier": 0.4998,
+       "base": 0.669,
+       "base_brier": 0.4479,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Over 2.5 rounds",
+       "said": 0.552,
+       "happened": false,
+       "right": false,
+       "brier": 0.3051,
+       "base": 0.544,
+       "base_brier": 0.2954,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Ends before round 2",
+       "said": 0.213,
+       "happened": true,
+       "right": false,
+       "brier": 0.6198,
+       "base": 0.256,
+       "base_brier": 0.5542,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Ends before round 3",
+       "said": 0.387,
+       "happened": true,
+       "right": false,
+       "brier": 0.3754,
+       "base": 0.41,
+       "base_brier": 0.3486,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Fight starts round 2",
+       "said": 0.787,
+       "happened": false,
+       "right": false,
+       "brier": 0.6198,
+       "base": 0.744,
+       "base_brier": 0.5542,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Fight starts round 3",
+       "said": 0.613,
+       "happened": false,
+       "right": false,
+       "brier": 0.3754,
+       "base": 0.59,
+       "base_brier": 0.3486,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Lone'er Kavanagh by KO/TKO/DQ",
+       "said": 0.212,
+       "happened": true,
+       "right": false,
+       "brier": 0.6205,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Lone'er Kavanagh by submission",
+       "said": 0.057,
+       "happened": false,
+       "right": true,
+       "brier": 0.0032,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Lone'er Kavanagh by decision",
+       "said": 0.204,
+       "happened": false,
+       "right": true,
+       "brier": 0.0415,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Lone'er Kavanagh by KO/TKO/DQ or submission",
+       "said": 0.269,
+       "happened": true,
+       "right": false,
+       "brier": 0.5341,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ramazan Temirov by KO/TKO/DQ",
+       "said": 0.198,
+       "happened": false,
+       "right": true,
+       "brier": 0.0393,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ramazan Temirov by submission",
+       "said": 0.036,
+       "happened": false,
+       "right": true,
+       "brier": 0.0013,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ramazan Temirov by decision",
+       "said": 0.292,
+       "happened": false,
+       "right": true,
+       "brier": 0.0856,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ramazan Temirov by KO/TKO/DQ or submission",
+       "said": 0.235,
+       "happened": false,
+       "right": true,
+       "brier": 0.055,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 1",
+       "said": 0.213,
+       "happened": true,
+       "right": false,
+       "brier": 0.6198,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 2",
+       "said": 0.175,
+       "happened": false,
+       "right": true,
+       "brier": 0.0305,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 3",
+       "said": 0.117,
+       "happened": false,
+       "right": true,
+       "brier": 0.0136,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      }
+     ],
+     "props_n": 18,
+     "props_right": 9,
+     "props_brier": 3.0415,
+     "props_base_brier": 2.8019,
+     "props_base_n": 7,
+     "props_base_right": 0
+    },
+    {
+     "bout": "Alexander Volkov vs. Rizvan Kuniev",
+     "a": "Alexander Volkov",
+     "b": "Rizvan Kuniev",
+     "p_a": 0.6244,
+     "segment": "Main card",
+     "rounds": 3,
+     "weight_class": "Heavyweight",
+     "m_decision": 0.4666,
+     "p_end_r1": 0.2269,
+     "fin": {
+      "a": {
+       "elo": 1609.282979,
+       "opp_elo": 1563.465217,
+       "log_exp": 2.944439,
+       "adj_slpm": 4.943848,
+       "sapm": 3.079632,
+       "str_acc": 0.572317,
+       "str_def": 0.540939,
+       "adj_td15": 0.732204,
+       "td_def": 0.682377,
+       "sub15": 0.183814,
+       "ko_loss_rate": 0.1,
+       "reach": 80.0,
+       "age": 37.998631,
+       "log_layoff": 5.899897
+      },
+      "b": {
+       "elo": 1506.308492,
+       "opp_elo": 1593.625631,
+       "log_exp": 1.098612,
+       "adj_slpm": 2.925397,
+       "sapm": 3.266667,
+       "str_acc": 0.439159,
+       "str_def": 0.474599,
+       "adj_td15": 0.623121,
+       "td_def": 0.776042,
+       "sub15": 0.3,
+       "ko_loss_rate": 0.2,
+       "reach": 76.0,
+       "age": 34.622861,
+       "log_layoff": 5.560682
+      }
+     },
+     "round_of_victory": {
+      "a_ko_r1": 0.1055,
+      "b_ko_r1": 0.0987,
+      "a_sub_r1": 0.0134,
+      "b_sub_r1": 0.0092,
+      "a_ko_r2": 0.1001,
+      "b_ko_r2": 0.0748,
+      "a_sub_r2": 0.0122,
+      "b_sub_r2": 0.0083,
+      "a_ko_r3": 0.0647,
+      "b_ko_r3": 0.0346,
+      "a_sub_r3": 0.0076,
+      "b_sub_r3": 0.0042
+     },
+     "winner": "Alexander Volkov",
+     "method": "DEC",
+     "round": 3,
+     "seconds": 900,
+     "model_right": true,
+     "p_winner_model": 0.624,
+     "report": [
+      {
+       "kind": "method",
+       "label": "How it ended",
+       "actual": "decision",
+       "said": 0.467,
+       "top": "decision",
+       "top_p": 0.467,
+       "right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Go the distance",
+       "said": 0.467,
+       "happened": true,
+       "right": false,
+       "brier": 0.2845,
+       "base": 0.503,
+       "base_brier": 0.247,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Over 1.5 rounds",
+       "said": 0.688,
+       "happened": true,
+       "right": true,
+       "brier": 0.0975,
+       "base": 0.669,
+       "base_brier": 0.1094,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Over 2.5 rounds",
+       "said": 0.52,
+       "happened": true,
+       "right": true,
+       "brier": 0.23,
+       "base": 0.544,
+       "base_brier": 0.2084,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Ends before round 2",
+       "said": 0.227,
+       "happened": false,
+       "right": true,
+       "brier": 0.0515,
+       "base": 0.256,
+       "base_brier": 0.0653,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Ends before round 3",
+       "said": 0.422,
+       "happened": false,
+       "right": true,
+       "brier": 0.1783,
+       "base": 0.41,
+       "base_brier": 0.1678,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Fight starts round 2",
+       "said": 0.773,
+       "happened": true,
+       "right": true,
+       "brier": 0.0515,
+       "base": 0.744,
+       "base_brier": 0.0653,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Fight starts round 3",
+       "said": 0.578,
+       "happened": true,
+       "right": true,
+       "brier": 0.1783,
+       "base": 0.59,
+       "base_brier": 0.1678,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Alexander Volkov by KO/TKO/DQ",
+       "said": 0.27,
+       "happened": false,
+       "right": true,
+       "brier": 0.0731,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Alexander Volkov by submission",
+       "said": 0.033,
+       "happened": false,
+       "right": true,
+       "brier": 0.0011,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Alexander Volkov by decision",
+       "said": 0.321,
+       "happened": true,
+       "right": false,
+       "brier": 0.4612,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Alexander Volkov by KO/TKO/DQ or submission",
+       "said": 0.303,
+       "happened": false,
+       "right": true,
+       "brier": 0.0921,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Rizvan Kuniev by KO/TKO/DQ",
+       "said": 0.208,
+       "happened": false,
+       "right": true,
+       "brier": 0.0433,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Rizvan Kuniev by submission",
+       "said": 0.022,
+       "happened": false,
+       "right": true,
+       "brier": 0.0005,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Rizvan Kuniev by decision",
+       "said": 0.146,
+       "happened": false,
+       "right": true,
+       "brier": 0.0212,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Rizvan Kuniev by KO/TKO/DQ or submission",
+       "said": 0.23,
+       "happened": false,
+       "right": true,
+       "brier": 0.0529,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 1",
+       "said": 0.227,
+       "happened": false,
+       "right": true,
+       "brier": 0.0515,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 2",
+       "said": 0.195,
+       "happened": false,
+       "right": true,
+       "brier": 0.0381,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 3",
+       "said": 0.111,
+       "happened": false,
+       "right": true,
+       "brier": 0.0124,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      }
+     ],
+     "props_n": 18,
+     "props_right": 16,
+     "props_brier": 1.0716,
+     "props_base_brier": 1.031,
+     "props_base_n": 7,
+     "props_base_right": 7,
+     "market": {
+      "p_market": 0.5249,
+      "p_winner_market": 0.525,
+      "market_right": true,
+      "gap": 0.099,
+      "picks_differ": false,
+      "model_closer": true
+     }
+    },
+    {
+     "bout": "Aaron Pico vs. Losene Keita",
+     "a": "Aaron Pico",
+     "b": "Losene Keita",
+     "p_a": 0.5188,
+     "segment": "Main card",
+     "rounds": 3,
+     "weight_class": "Featherweight",
+     "m_decision": null,
+     "p_end_r1": null,
+     "fin": {
+      "a": {
+       "elo": 1489.536109,
+       "opp_elo": 1599.826879,
+       "log_exp": 0.693147,
+       "adj_slpm": 4.669837,
+       "sapm": 3.705722,
+       "str_acc": 0.449074,
+       "str_def": 0.530488,
+       "adj_td15": 1.817384,
+       "td_def": 0.65,
+       "sub15": 0.53973,
+       "ko_loss_rate": 0.44,
+       "reach": 70.0,
+       "age": 30.083504,
+       "log_layoff": 6.075346
+      },
+      "b": {
+       "elo": 1507.977375,
+       "opp_elo": 1554.578201,
+       "log_exp": 1.098612,
+       "adj_slpm": 3.546236,
+       "sapm": 3.981763,
+       "str_acc": 0.466954,
+       "str_def": 0.637665,
+       "adj_td15": 1.101032,
+       "td_def": 0.663462,
+       "sub15": 0.375783,
+       "ko_loss_rate": 0.2,
+       "reach": 72.0,
+       "age": 28.81588,
+       "log_layoff": 3.912023
+      }
+     },
+     "round_of_victory": null,
+     "winner": "Aaron Pico",
+     "method": "KO/TKO",
+     "round": 1,
+     "seconds": 74,
+     "model_right": true,
+     "p_winner_model": 0.519,
+     "report": [],
+     "props_n": 0,
+     "props_right": 0,
+     "props_brier": 0,
+     "props_base_brier": 0,
+     "props_base_n": 0,
+     "props_base_right": 0,
+     "market": {
+      "p_market": 0.567,
+      "p_winner_market": 0.567,
+      "market_right": true,
+      "gap": -0.048,
+      "picks_differ": false,
+      "model_closer": false
+     }
+    },
+    {
+     "bout": "Azamat Murzakanov vs. Dominick Reyes",
+     "a": "Azamat Murzakanov",
+     "b": "Dominick Reyes",
+     "p_a": 0.4336,
+     "segment": "Prelims",
+     "rounds": 3,
+     "weight_class": "Light Heavyweight",
+     "m_decision": 0.3878,
+     "p_end_r1": 0.2649,
+     "fin": {
+      "a": {
+       "elo": 1567.199327,
+       "opp_elo": 1526.938414,
+       "log_exp": 2.079442,
+       "adj_slpm": 4.153749,
+       "sapm": 3.422005,
+       "str_acc": 0.559411,
+       "str_def": 0.557964,
+       "adj_td15": 0.949741,
+       "td_def": 0.713235,
+       "sub15": 0.353635,
+       "ko_loss_rate": 0.2,
+       "reach": 71.0,
+       "age": 37.533196,
+       "log_layoff": 5.283204
+      },
+      "b": {
+       "elo": 1570.857887,
+       "opp_elo": 1554.028922,
+       "log_exp": 2.772589,
+       "adj_slpm": 4.695219,
+       "sapm": 3.471386,
+       "str_acc": 0.534567,
+       "str_def": 0.497256,
+       "adj_td15": 0.484833,
+       "td_def": 0.761364,
+       "sub15": 0.324763,
+       "ko_loss_rate": 0.273684,
+       "reach": 77.0,
+       "age": 36.826831,
+       "log_layoff": 5.283204
+      }
+     },
+     "round_of_victory": {
+      "a_ko_r1": 0.1126,
+      "b_ko_r1": 0.1318,
+      "a_sub_r1": 0.0064,
+      "b_sub_r1": 0.0141,
+      "a_ko_r2": 0.0967,
+      "b_ko_r2": 0.1289,
+      "a_sub_r2": 0.0061,
+      "b_sub_r2": 0.0134,
+      "a_ko_r3": 0.0403,
+      "b_ko_r3": 0.0535,
+      "a_sub_r3": 0.0027,
+      "b_sub_r3": 0.0057
+     },
+     "winner": "Dominick Reyes",
+     "method": "KO/TKO",
+     "round": 1,
+     "seconds": 160,
+     "model_right": true,
+     "p_winner_model": 0.566,
+     "report": [
+      {
+       "kind": "method",
+       "label": "How it ended",
+       "actual": "Dominick Reyes by KO/TKO",
+       "said": 0.314,
+       "top": "decision",
+       "top_p": 0.388,
+       "right": false
+      },
+      {
+       "kind": "round",
+       "label": "Round it ended",
+       "actual": "round 1",
+       "said": 0.265,
+       "top": "round 1",
+       "top_p": 0.265,
+       "right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Go the distance",
+       "said": 0.388,
+       "happened": false,
+       "right": true,
+       "brier": 0.1504,
+       "base": 0.503,
+       "base_brier": 0.253,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Over 1.5 rounds",
+       "said": 0.616,
+       "happened": false,
+       "right": false,
+       "brier": 0.3793,
+       "base": 0.669,
+       "base_brier": 0.4479,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Over 2.5 rounds",
+       "said": 0.435,
+       "happened": false,
+       "right": true,
+       "brier": 0.1891,
+       "base": 0.544,
+       "base_brier": 0.2954,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Ends before round 2",
+       "said": 0.265,
+       "happened": true,
+       "right": false,
+       "brier": 0.5404,
+       "base": 0.256,
+       "base_brier": 0.5542,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Ends before round 3",
+       "said": 0.51,
+       "happened": true,
+       "right": true,
+       "brier": 0.24,
+       "base": 0.41,
+       "base_brier": 0.3486,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Fight starts round 2",
+       "said": 0.735,
+       "happened": false,
+       "right": false,
+       "brier": 0.5404,
+       "base": 0.744,
+       "base_brier": 0.5542,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Fight starts round 3",
+       "said": 0.49,
+       "happened": false,
+       "right": true,
+       "brier": 0.24,
+       "base": 0.59,
+       "base_brier": 0.3486,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Azamat Murzakanov by KO/TKO/DQ",
+       "said": 0.25,
+       "happened": false,
+       "right": true,
+       "brier": 0.0623,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Azamat Murzakanov by submission",
+       "said": 0.015,
+       "happened": false,
+       "right": true,
+       "brier": 0.0002,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Azamat Murzakanov by decision",
+       "said": 0.169,
+       "happened": false,
+       "right": true,
+       "brier": 0.0285,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Azamat Murzakanov by KO/TKO/DQ or submission",
+       "said": 0.265,
+       "happened": false,
+       "right": true,
+       "brier": 0.0701,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Dominick Reyes by KO/TKO/DQ",
+       "said": 0.314,
+       "happened": true,
+       "right": false,
+       "brier": 0.4703,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Dominick Reyes by submission",
+       "said": 0.033,
+       "happened": false,
+       "right": true,
+       "brier": 0.0011,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Dominick Reyes by decision",
+       "said": 0.219,
+       "happened": false,
+       "right": true,
+       "brier": 0.048,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Dominick Reyes by KO/TKO/DQ or submission",
+       "said": 0.347,
+       "happened": true,
+       "right": false,
+       "brier": 0.4259,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 1",
+       "said": 0.265,
+       "happened": true,
+       "right": false,
+       "brier": 0.5404,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 2",
+       "said": 0.245,
+       "happened": false,
+       "right": true,
+       "brier": 0.0601,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 3",
+       "said": 0.102,
+       "happened": false,
+       "right": true,
+       "brier": 0.0104,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      }
+     ],
+     "props_n": 18,
+     "props_right": 12,
+     "props_brier": 2.2796,
+     "props_base_brier": 2.8019,
+     "props_base_n": 7,
+     "props_base_right": 0,
+     "market": {
+      "p_market": 0.6548,
+      "p_winner_market": 0.345,
+      "market_right": false,
+      "gap": -0.221,
+      "picks_differ": true,
+      "model_closer": true
+     }
+    },
+    {
+     "bout": "Nikita Krylov vs. Abdul-Rakhman Yakhyaev",
+     "a": "Nikita Krylov",
+     "b": "Abdul-Rakhman Yakhyaev",
+     "p_a": 0.369,
+     "segment": "Prelims",
+     "rounds": 3,
+     "weight_class": "Light Heavyweight",
+     "m_decision": 0.2534,
+     "p_end_r1": 0.4201,
+     "fin": {
+      "a": {
+       "elo": 1536.297076,
+       "opp_elo": 1536.48878,
+       "log_exp": 3.135494,
+       "adj_slpm": 4.167962,
+       "sapm": 2.860735,
+       "str_acc": 0.540316,
+       "str_def": 0.48343,
+       "adj_td15": 2.264509,
+       "td_def": 0.572917,
+       "sub15": 1.05694,
+       "ko_loss_rate": 0.2,
+       "reach": 77.0,
+       "age": 34.631075,
+       "log_layoff": 4.663439
+      },
+      "b": {
+       "elo": 1541.838409,
+       "opp_elo": 1483.856393,
+       "log_exp": 1.386294,
+       "adj_slpm": 3.80104,
+       "sapm": 3.665768,
+       "str_acc": 0.521552,
+       "str_def": 0.5625,
+       "adj_td15": 2.387848,
+       "td_def": 0.65,
+       "sub15": 1.4307,
+       "ko_loss_rate": 0.171429,
+       "reach": 78.0,
+       "age": 25.804244,
+       "log_layoff": 4.787492
+      }
+     },
+     "round_of_victory": {
+      "a_ko_r1": 0.0983,
+      "b_ko_r1": 0.1366,
+      "a_sub_r1": 0.0393,
+      "b_sub_r1": 0.1459,
+      "a_ko_r2": 0.0514,
+      "b_ko_r2": 0.0678,
+      "a_sub_r2": 0.0255,
+      "b_sub_r2": 0.1131,
+      "a_ko_r3": 0.0148,
+      "b_ko_r3": 0.0197,
+      "a_sub_r3": 0.0075,
+      "b_sub_r3": 0.0268
+     },
+     "winner": "Abdul-Rakhman Yakhyaev",
+     "method": "KO/TKO",
+     "round": 1,
+     "seconds": 158,
+     "model_right": true,
+     "p_winner_model": 0.631,
+     "report": [
+      {
+       "kind": "method",
+       "label": "How it ended",
+       "actual": "Abdul-Rakhman Yakhyaev by KO/TKO",
+       "said": 0.224,
+       "top": "Abdul-Rakhman Yakhyaev by submission",
+       "top_p": 0.286,
+       "right": false
+      },
+      {
+       "kind": "round",
+       "label": "Round it ended",
+       "actual": "round 1",
+       "said": 0.42,
+       "top": "round 1",
+       "top_p": 0.42,
+       "right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Go the distance",
+       "said": 0.253,
+       "happened": false,
+       "right": true,
+       "brier": 0.0642,
+       "base": 0.503,
+       "base_brier": 0.253,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Over 1.5 rounds",
+       "said": 0.447,
+       "happened": false,
+       "right": true,
+       "brier": 0.1995,
+       "base": 0.669,
+       "base_brier": 0.4479,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Over 2.5 rounds",
+       "said": 0.285,
+       "happened": false,
+       "right": true,
+       "brier": 0.0812,
+       "base": 0.544,
+       "base_brier": 0.2954,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Ends before round 2",
+       "said": 0.42,
+       "happened": true,
+       "right": false,
+       "brier": 0.3363,
+       "base": 0.256,
+       "base_brier": 0.5542,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Ends before round 3",
+       "said": 0.678,
+       "happened": true,
+       "right": true,
+       "brier": 0.1038,
+       "base": 0.41,
+       "base_brier": 0.3486,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Fight starts round 2",
+       "said": 0.58,
+       "happened": false,
+       "right": false,
+       "brier": 0.3363,
+       "base": 0.744,
+       "base_brier": 0.5542,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Fight starts round 3",
+       "said": 0.322,
+       "happened": false,
+       "right": true,
+       "brier": 0.1038,
+       "base": 0.59,
+       "base_brier": 0.3486,
+       "base_right": false
+      },
+      {
+       "kind": "prop",
+       "label": "Nikita Krylov by KO/TKO/DQ",
+       "said": 0.164,
+       "happened": false,
+       "right": true,
+       "brier": 0.027,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Nikita Krylov by submission",
+       "said": 0.072,
+       "happened": false,
+       "right": true,
+       "brier": 0.0052,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Nikita Krylov by decision",
+       "said": 0.132,
+       "happened": false,
+       "right": true,
+       "brier": 0.0175,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Nikita Krylov by KO/TKO/DQ or submission",
+       "said": 0.237,
+       "happened": false,
+       "right": true,
+       "brier": 0.056,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Abdul-Rakhman Yakhyaev by KO/TKO/DQ",
+       "said": 0.224,
+       "happened": true,
+       "right": false,
+       "brier": 0.602,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Abdul-Rakhman Yakhyaev by submission",
+       "said": 0.286,
+       "happened": false,
+       "right": true,
+       "brier": 0.0817,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Abdul-Rakhman Yakhyaev by decision",
+       "said": 0.121,
+       "happened": false,
+       "right": true,
+       "brier": 0.0147,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Abdul-Rakhman Yakhyaev by KO/TKO/DQ or submission",
+       "said": 0.51,
+       "happened": true,
+       "right": true,
+       "brier": 0.2402,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 1",
+       "said": 0.42,
+       "happened": true,
+       "right": false,
+       "brier": 0.3363,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 2",
+       "said": 0.258,
+       "happened": false,
+       "right": true,
+       "brier": 0.0664,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 3",
+       "said": 0.069,
+       "happened": false,
+       "right": true,
+       "brier": 0.0047,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      }
+     ],
+     "props_n": 18,
+     "props_right": 14,
+     "props_brier": 1.2251,
+     "props_base_brier": 2.8019,
+     "props_base_n": 7,
+     "props_base_right": 0,
+     "market": {
+      "p_market": 0.1973,
+      "p_winner_market": 0.803,
+      "market_right": true,
+      "gap": 0.172,
+      "picks_differ": false,
+      "model_closer": false
+     }
+    },
+    {
+     "bout": "Grant Dawson vs. Nurullo Aliev",
+     "a": "Grant Dawson",
+     "b": "Nurullo Aliev",
+     "p_a": 0.5619,
+     "segment": "Prelims",
+     "rounds": 3,
+     "weight_class": "Lightweight",
+     "m_decision": 0.575,
+     "p_end_r1": 0.1652,
+     "fin": {
+      "a": {
+       "elo": 1611.408506,
+       "opp_elo": 1530.829528,
+       "log_exp": 2.772589,
+       "adj_slpm": 3.360606,
+       "sapm": 2.349756,
+       "str_acc": 0.51017,
+       "str_def": 0.451991,
+       "adj_td15": 3.520651,
+       "td_def": 0.664286,
+       "sub15": 1.141713,
+       "ko_loss_rate": 0.168421,
+       "reach": 72.0,
+       "age": 32.673511,
+       "log_layoff": 5.129899
+      },
+      "b": {
+       "elo": 1521.827319,
+       "opp_elo": 1509.456747,
+       "log_exp": 1.098612,
+       "adj_slpm": 2.434068,
+       "sapm": 2.088889,
+       "str_acc": 0.412975,
+       "str_def": 0.588636,
+       "adj_td15": 1.75948,
+       "td_def": 0.625,
+       "sub15": 0.3,
+       "ko_loss_rate": 0.2,
+       "reach": 72.0,
+       "age": 25.875428,
+       "log_layoff": 6.480045
+      }
+     },
+     "round_of_victory": {
+      "a_ko_r1": 0.0307,
+      "b_ko_r1": 0.0359,
+      "a_sub_r1": 0.0775,
+      "b_sub_r1": 0.021,
+      "a_ko_r2": 0.0334,
+      "b_ko_r2": 0.0302,
+      "a_sub_r2": 0.085,
+      "b_sub_r2": 0.0217,
+      "a_ko_r3": 0.0204,
+      "b_ko_r3": 0.0161,
+      "a_sub_r3": 0.0399,
+      "b_sub_r3": 0.0132
+     },
+     "winner": "Grant Dawson",
+     "method": "DEC",
+     "round": 3,
+     "seconds": 900,
+     "model_right": true,
+     "p_winner_model": 0.562,
+     "report": [
+      {
+       "kind": "method",
+       "label": "How it ended",
+       "actual": "decision",
+       "said": 0.575,
+       "top": "decision",
+       "top_p": 0.575,
+       "right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Go the distance",
+       "said": 0.575,
+       "happened": true,
+       "right": true,
+       "brier": 0.1806,
+       "base": 0.503,
+       "base_brier": 0.247,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Over 1.5 rounds",
+       "said": 0.759,
+       "happened": true,
+       "right": true,
+       "brier": 0.0579,
+       "base": 0.669,
+       "base_brier": 0.1094,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Over 2.5 rounds",
+       "said": 0.619,
+       "happened": true,
+       "right": true,
+       "brier": 0.1454,
+       "base": 0.544,
+       "base_brier": 0.2084,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Ends before round 2",
+       "said": 0.165,
+       "happened": false,
+       "right": true,
+       "brier": 0.0273,
+       "base": 0.256,
+       "base_brier": 0.0653,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Ends before round 3",
+       "said": 0.336,
+       "happened": false,
+       "right": true,
+       "brier": 0.1126,
+       "base": 0.41,
+       "base_brier": 0.1678,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Fight starts round 2",
+       "said": 0.835,
+       "happened": true,
+       "right": true,
+       "brier": 0.0273,
+       "base": 0.744,
+       "base_brier": 0.0653,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Fight starts round 3",
+       "said": 0.664,
+       "happened": true,
+       "right": true,
+       "brier": 0.1126,
+       "base": 0.59,
+       "base_brier": 0.1678,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Grant Dawson by KO/TKO/DQ",
+       "said": 0.085,
+       "happened": false,
+       "right": true,
+       "brier": 0.0071,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Grant Dawson by submission",
+       "said": 0.203,
+       "happened": false,
+       "right": true,
+       "brier": 0.041,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Grant Dawson by decision",
+       "said": 0.275,
+       "happened": true,
+       "right": false,
+       "brier": 0.5258,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Grant Dawson by KO/TKO/DQ or submission",
+       "said": 0.287,
+       "happened": false,
+       "right": true,
+       "brier": 0.0824,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Nurullo Aliev by KO/TKO/DQ",
+       "said": 0.082,
+       "happened": false,
+       "right": true,
+       "brier": 0.0068,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Nurullo Aliev by submission",
+       "said": 0.056,
+       "happened": false,
+       "right": true,
+       "brier": 0.0031,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Nurullo Aliev by decision",
+       "said": 0.3,
+       "happened": false,
+       "right": true,
+       "brier": 0.0901,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Nurullo Aliev by KO/TKO/DQ or submission",
+       "said": 0.138,
+       "happened": false,
+       "right": true,
+       "brier": 0.019,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 1",
+       "said": 0.165,
+       "happened": false,
+       "right": true,
+       "brier": 0.0273,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 2",
+       "said": 0.17,
+       "happened": false,
+       "right": true,
+       "brier": 0.029,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 3",
+       "said": 0.089,
+       "happened": false,
+       "right": true,
+       "brier": 0.008,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      }
+     ],
+     "props_n": 18,
+     "props_right": 17,
+     "props_brier": 0.6637,
+     "props_base_brier": 1.031,
+     "props_base_n": 7,
+     "props_base_right": 7,
+     "market": {
+      "p_market": 0.517,
+      "p_winner_market": 0.517,
+      "market_right": true,
+      "gap": 0.045,
+      "picks_differ": false,
+      "model_closer": true
+     }
+    },
+    {
+     "bout": "Abubakar Vagaev vs. Jacob Malkoun",
+     "a": "Abubakar Vagaev",
+     "b": "Jacob Malkoun",
+     "p_a": 0.2845,
+     "segment": "Early prelims",
+     "rounds": 3,
+     "weight_class": "Middleweight",
+     "m_decision": null,
+     "p_end_r1": null,
+     "fin": {
+      "a": {
+       "elo": 1511.464266,
+       "opp_elo": 1489.484805,
+       "log_exp": 0.693147,
+       "adj_slpm": 3.082953,
+       "sapm": 3.1,
+       "str_acc": 0.402632,
+       "str_def": 0.590278,
+       "adj_td15": 2.52,
+       "td_def": 0.664062,
+       "sub15": 0.4,
+       "ko_loss_rate": 0.24,
+       "reach": 71.678947,
+       "age": 33.527721,
+       "log_layoff": 4.521789
+      },
+      "b": {
+       "elo": 1547.735882,
+       "opp_elo": 1510.616082,
+       "log_exp": 2.302585,
+       "adj_slpm": 3.829685,
+       "sapm": 2.543403,
+       "str_acc": 0.564527,
+       "str_def": 0.554288,
+       "adj_td15": 4.169406,
+       "td_def": 0.625,
+       "sub15": 0.714286,
+       "ko_loss_rate": 0.169231,
+       "reach": 73.0,
+       "age": 31.162218,
+       "log_layoff": 5.170484
+      }
+     },
+     "round_of_victory": null,
+     "winner": "Abubakar Vagaev",
+     "method": "DEC",
+     "round": 3,
+     "seconds": 900,
+     "model_right": false,
+     "p_winner_model": 0.284,
+     "report": [],
+     "props_n": 0,
+     "props_right": 0,
+     "props_brier": 0,
+     "props_base_brier": 0,
+     "props_base_n": 0,
+     "props_base_right": 0,
+     "market": {
+      "p_market": 0.5838,
+      "p_winner_market": 0.584,
+      "market_right": true,
+      "gap": -0.299,
+      "picks_differ": true,
+      "model_closer": false
+     }
+    },
+    {
+     "bout": "Bolaji Oki vs. Daniel Santos",
+     "a": "Bolaji Oki",
+     "b": "Daniel Santos",
+     "p_a": 0.4824,
+     "segment": "Early prelims",
+     "rounds": 3,
+     "weight_class": "Featherweight",
+     "m_decision": 0.6336,
+     "p_end_r1": 0.1578,
+     "fin": {
+      "a": {
+       "elo": 1467.753941,
+       "opp_elo": 1504.974728,
+       "log_exp": 1.609438,
+       "adj_slpm": 4.648873,
+       "sapm": 4.120095,
+       "str_acc": 0.446069,
+       "str_def": 0.602941,
+       "adj_td15": 1.514054,
+       "td_def": 0.682432,
+       "sub15": 0.253283,
+       "ko_loss_rate": 0.4,
+       "reach": 73.0,
+       "age": 30.940452,
+       "log_layoff": 5.4161
+      },
+      "b": {
+       "elo": 1527.257485,
+       "opp_elo": 1515.005172,
+       "log_exp": 1.94591,
+       "adj_slpm": 5.245943,
+       "sapm": 5.136418,
+       "str_acc": 0.406009,
+       "str_def": 0.506105,
+       "adj_td15": 2.367014,
+       "td_def": 0.68125,
+       "sub15": 0.181269,
+       "ko_loss_rate": 0.22,
+       "reach": 67.0,
+       "age": 31.619439,
+       "log_layoff": 5.087596
+      }
+     },
+     "round_of_victory": {
+      "a_ko_r1": 0.0326,
+      "b_ko_r1": 0.0952,
+      "a_sub_r1": 0.0162,
+      "b_sub_r1": 0.0139,
+      "a_ko_r2": 0.0247,
+      "b_ko_r2": 0.0733,
+      "a_sub_r2": 0.0134,
+      "b_sub_r2": 0.0116,
+      "a_ko_r3": 0.0176,
+      "b_ko_r3": 0.0492,
+      "a_sub_r3": 0.0093,
+      "b_sub_r3": 0.0094
+     },
+     "winner": "Daniel Santos",
+     "method": "DEC",
+     "round": 3,
+     "seconds": 900,
+     "model_right": true,
+     "p_winner_model": 0.518,
+     "report": [
+      {
+       "kind": "method",
+       "label": "How it ended",
+       "actual": "decision",
+       "said": 0.634,
+       "top": "decision",
+       "top_p": 0.634,
+       "right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Go the distance",
+       "said": 0.634,
+       "happened": true,
+       "right": true,
+       "brier": 0.1342,
+       "base": 0.503,
+       "base_brier": 0.247,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Over 1.5 rounds",
+       "said": 0.784,
+       "happened": true,
+       "right": true,
+       "brier": 0.0467,
+       "base": 0.669,
+       "base_brier": 0.1094,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Over 2.5 rounds",
+       "said": 0.675,
+       "happened": true,
+       "right": true,
+       "brier": 0.1058,
+       "base": 0.544,
+       "base_brier": 0.2084,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Ends before round 2",
+       "said": 0.158,
+       "happened": false,
+       "right": true,
+       "brier": 0.0249,
+       "base": 0.256,
+       "base_brier": 0.0653,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Ends before round 3",
+       "said": 0.281,
+       "happened": false,
+       "right": true,
+       "brier": 0.0789,
+       "base": 0.41,
+       "base_brier": 0.1678,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Fight starts round 2",
+       "said": 0.842,
+       "happened": true,
+       "right": true,
+       "brier": 0.0249,
+       "base": 0.744,
+       "base_brier": 0.0653,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Fight starts round 3",
+       "said": 0.719,
+       "happened": true,
+       "right": true,
+       "brier": 0.0789,
+       "base": 0.59,
+       "base_brier": 0.1678,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Bolaji Oki by KO/TKO/DQ",
+       "said": 0.075,
+       "happened": false,
+       "right": true,
+       "brier": 0.0056,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Bolaji Oki by submission",
+       "said": 0.039,
+       "happened": false,
+       "right": true,
+       "brier": 0.0015,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Bolaji Oki by decision",
+       "said": 0.368,
+       "happened": false,
+       "right": true,
+       "brier": 0.1358,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Bolaji Oki by KO/TKO/DQ or submission",
+       "said": 0.114,
+       "happened": false,
+       "right": true,
+       "brier": 0.013,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Daniel Santos by KO/TKO/DQ",
+       "said": 0.218,
+       "happened": false,
+       "right": true,
+       "brier": 0.0474,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Daniel Santos by submission",
+       "said": 0.035,
+       "happened": false,
+       "right": true,
+       "brier": 0.0012,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Daniel Santos by decision",
+       "said": 0.265,
+       "happened": true,
+       "right": false,
+       "brier": 0.5401,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Daniel Santos by KO/TKO/DQ or submission",
+       "said": 0.253,
+       "happened": false,
+       "right": true,
+       "brier": 0.0638,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 1",
+       "said": 0.158,
+       "happened": false,
+       "right": true,
+       "brier": 0.0249,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 2",
+       "said": 0.123,
+       "happened": false,
+       "right": true,
+       "brier": 0.0151,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 3",
+       "said": 0.086,
+       "happened": false,
+       "right": true,
+       "brier": 0.0073,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      }
+     ],
+     "props_n": 18,
+     "props_right": 17,
+     "props_brier": 0.4943,
+     "props_base_brier": 1.031,
+     "props_base_n": 7,
+     "props_base_right": 7,
+     "market": {
+      "p_market": 0.4805,
+      "p_winner_market": 0.52,
+      "market_right": true,
+      "gap": 0.002,
+      "picks_differ": false,
+      "model_closer": false
+     }
+    },
+    {
+     "bout": "Kody Steele vs. Noah Gugnon",
+     "a": "Kody Steele",
+     "b": "Noah Gugnon",
+     "p_a": 0.2201,
+     "segment": "Early prelims",
+     "rounds": 3,
+     "weight_class": "Lightweight",
+     "m_decision": null,
+     "p_end_r1": null,
+     "fin": {
+      "a": {
+       "elo": 1503.67831,
+       "opp_elo": 1493.135953,
+       "log_exp": 1.098612,
+       "adj_slpm": 2.990904,
+       "sapm": 5.481336,
+       "str_acc": 0.303191,
+       "str_def": 0.487873,
+       "adj_td15": 1.780298,
+       "td_def": 0.65,
+       "sub15": 0.674387,
+       "ko_loss_rate": 0.2,
+       "reach": 71.0,
+       "age": 31.509925,
+       "log_layoff": 5.170484
+      },
+      "b": {
+       "elo": 1515.386218,
+       "opp_elo": 1500.0,
+       "log_exp": 0.693147,
+       "adj_slpm": 3.975535,
+       "sapm": 4.036697,
+       "str_acc": 0.451389,
+       "str_def": 0.607955,
+       "adj_td15": 1.435407,
+       "td_def": 0.65,
+       "sub15": 1.052632,
+       "ko_loss_rate": 0.24,
+       "reach": 71.678947,
+       "age": 26.015058,
+       "log_layoff": 4.442651
+      }
+     },
+     "round_of_victory": null,
+     "winner": "Kody Steele",
+     "method": "KO/TKO",
+     "round": 1,
+     "seconds": 234,
+     "model_right": false,
+     "p_winner_model": 0.22,
+     "report": [],
+     "props_n": 0,
+     "props_right": 0,
+     "props_brier": 0,
+     "props_base_brier": 0,
+     "props_base_n": 0,
+     "props_base_right": 0,
+     "market": {
+      "p_market": 0.5852,
+      "p_winner_market": 0.585,
+      "market_right": true,
+      "gap": -0.365,
+      "picks_differ": true,
+      "model_closer": false
+     }
+    },
+    {
+     "bout": "Iasmin Lucindo vs. Nicole Caliari",
+     "a": "Iasmin Lucindo",
+     "b": "Nicole Caliari",
+     "p_a": 0.8473,
+     "segment": "Early prelims",
+     "rounds": 3,
+     "weight_class": "Catchweight (120.5 lb)",
+     "m_decision": 0.634,
+     "p_end_r1": 0.1434,
+     "fin": {
+      "a": {
+       "elo": 1537.594965,
+       "opp_elo": 1517.100488,
+       "log_exp": 2.079442,
+       "adj_slpm": 3.182527,
+       "sapm": 2.955145,
+       "str_acc": 0.454765,
+       "str_def": 0.619032,
+       "adj_td15": 2.087428,
+       "td_def": 0.664634,
+       "sub15": 0.25641,
+       "ko_loss_rate": 0.109091,
+       "reach": 66.0,
+       "age": 24.791239,
+       "log_layoff": 6.09131
+      },
+      "b": {
+       "elo": 1489.730675,
+       "opp_elo": 1497.267352,
+       "log_exp": 1.386294,
+       "adj_slpm": 2.871201,
+       "sapm": 5.363026,
+       "str_acc": 0.394697,
+       "str_def": 0.534762,
+       "adj_td15": 2.379077,
+       "td_def": 0.663462,
+       "sub15": 0.473911,
+       "ko_loss_rate": 0.314286,
+       "reach": 62.0,
+       "age": 29.968515,
+       "log_layoff": 5.087596
+      }
+     },
+     "round_of_victory": {
+      "a_ko_r1": 0.0739,
+      "b_ko_r1": 0.0123,
+      "a_sub_r1": 0.0352,
+      "b_sub_r1": 0.022,
+      "a_ko_r2": 0.0651,
+      "b_ko_r2": 0.0094,
+      "a_sub_r2": 0.0303,
+      "b_sub_r2": 0.0135,
+      "a_ko_r3": 0.0552,
+      "b_ko_r3": 0.0082,
+      "a_sub_r3": 0.029,
+      "b_sub_r3": 0.0119
+     },
+     "winner": "Iasmin Lucindo",
+     "method": "DEC",
+     "round": 3,
+     "seconds": 900,
+     "model_right": true,
+     "p_winner_model": 0.847,
+     "report": [
+      {
+       "kind": "method",
+       "label": "How it ended",
+       "actual": "decision",
+       "said": 0.634,
+       "top": "decision",
+       "top_p": 0.634,
+       "right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Go the distance",
+       "said": 0.634,
+       "happened": true,
+       "right": true,
+       "brier": 0.134,
+       "base": 0.503,
+       "base_brier": 0.247,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Over 1.5 rounds",
+       "said": 0.804,
+       "happened": true,
+       "right": true,
+       "brier": 0.0385,
+       "base": 0.669,
+       "base_brier": 0.1094,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Over 2.5 rounds",
+       "said": 0.686,
+       "happened": true,
+       "right": true,
+       "brier": 0.0988,
+       "base": 0.544,
+       "base_brier": 0.2084,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Ends before round 2",
+       "said": 0.143,
+       "happened": false,
+       "right": true,
+       "brier": 0.0206,
+       "base": 0.256,
+       "base_brier": 0.0653,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Ends before round 3",
+       "said": 0.262,
+       "happened": false,
+       "right": true,
+       "brier": 0.0685,
+       "base": 0.41,
+       "base_brier": 0.1678,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Fight starts round 2",
+       "said": 0.857,
+       "happened": true,
+       "right": true,
+       "brier": 0.0206,
+       "base": 0.744,
+       "base_brier": 0.0653,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Fight starts round 3",
+       "said": 0.738,
+       "happened": true,
+       "right": true,
+       "brier": 0.0685,
+       "base": 0.59,
+       "base_brier": 0.1678,
+       "base_right": true
+      },
+      {
+       "kind": "prop",
+       "label": "Iasmin Lucindo by KO/TKO/DQ",
+       "said": 0.194,
+       "happened": false,
+       "right": true,
+       "brier": 0.0378,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Iasmin Lucindo by submission",
+       "said": 0.095,
+       "happened": false,
+       "right": true,
+       "brier": 0.0089,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Iasmin Lucindo by decision",
+       "said": 0.559,
+       "happened": true,
+       "right": true,
+       "brier": 0.1948,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Iasmin Lucindo by KO/TKO/DQ or submission",
+       "said": 0.289,
+       "happened": false,
+       "right": true,
+       "brier": 0.0833,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Nicole Caliari by KO/TKO/DQ",
+       "said": 0.03,
+       "happened": false,
+       "right": true,
+       "brier": 0.0009,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Nicole Caliari by submission",
+       "said": 0.047,
+       "happened": false,
+       "right": true,
+       "brier": 0.0022,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Nicole Caliari by decision",
+       "said": 0.075,
+       "happened": false,
+       "right": true,
+       "brier": 0.0057,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Nicole Caliari by KO/TKO/DQ or submission",
+       "said": 0.077,
+       "happened": false,
+       "right": true,
+       "brier": 0.006,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 1",
+       "said": 0.143,
+       "happened": false,
+       "right": true,
+       "brier": 0.0206,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 2",
+       "said": 0.118,
+       "happened": false,
+       "right": true,
+       "brier": 0.014,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      },
+      {
+       "kind": "prop",
+       "label": "Ends in round 3",
+       "said": 0.104,
+       "happened": false,
+       "right": true,
+       "brier": 0.0109,
+       "base": null,
+       "base_brier": null,
+       "base_right": null
+      }
+     ],
+     "props_n": 18,
+     "props_right": 18,
+     "props_brier": 0.4495,
+     "props_base_brier": 1.031,
+     "props_base_n": 7,
+     "props_base_right": 7
+    }
+   ]
+  },
+  {
    "event": "UFC Fight Night: Buckley vs. Malott",
    "date": "2026-10-17",
    "venue": "Rogers Place, Edmonton , Alberta , Canada",
@@ -12,7 +2947,7 @@
    "round_right": 2,
    "props_n": 98,
    "props_brier": 11.4167,
-   "props_base_brier": 10.6076,
+   "props_base_brier": 10.6037,
    "props_right": 64,
    "props_base_n": 41,
    "props_base_right": 20,
@@ -141,8 +3076,8 @@
        "happened": true,
        "right": true,
        "brier": 0.0621,
-       "base": 0.704,
-       "base_brier": 0.0876,
+       "base": 0.705,
+       "base_brier": 0.0871,
        "base_right": true
       },
       {
@@ -153,7 +3088,7 @@
        "right": false,
        "brier": 0.3853,
        "base": 0.564,
-       "base_brier": 0.3182,
+       "base_brier": 0.318,
        "base_right": false
       },
       {
@@ -175,7 +3110,7 @@
        "right": true,
        "brier": 0.1966,
        "base": 0.43,
-       "base_brier": 0.1849,
+       "base_brier": 0.1851,
        "base_right": true
       },
       {
@@ -185,8 +3120,8 @@
        "happened": false,
        "right": true,
        "brier": 0.0316,
-       "base": 0.215,
-       "base_brier": 0.0462,
+       "base": 0.214,
+       "base_brier": 0.046,
        "base_right": true
       },
       {
@@ -197,7 +3132,7 @@
        "right": false,
        "brier": 0.4525,
        "base": 0.376,
-       "base_brier": 0.3899,
+       "base_brier": 0.3895,
        "base_right": false
       },
       {
@@ -219,7 +3154,7 @@
        "right": true,
        "brier": 0.2336,
        "base": 0.536,
-       "base_brier": 0.2152,
+       "base_brier": 0.2153,
        "base_right": true
       },
       {
@@ -229,8 +3164,8 @@
        "happened": true,
        "right": true,
        "brier": 0.0316,
-       "base": 0.785,
-       "base_brier": 0.0462,
+       "base": 0.786,
+       "base_brier": 0.046,
        "base_right": true
       },
       {
@@ -241,7 +3176,7 @@
        "right": false,
        "brier": 0.4525,
        "base": 0.624,
-       "base_brier": 0.3899,
+       "base_brier": 0.3895,
        "base_right": false
       },
       {
@@ -263,7 +3198,7 @@
        "right": true,
        "brier": 0.2336,
        "base": 0.464,
-       "base_brier": 0.2152,
+       "base_brier": 0.2153,
        "base_right": true
       },
       {
@@ -413,7 +3348,7 @@
      "props_n": 26,
      "props_right": 17,
      "props_brier": 3.1753,
-     "props_base_brier": 2.9334,
+     "props_base_brier": 2.9319,
      "props_base_n": 13,
      "props_base_right": 7,
      "market": {
@@ -517,8 +3452,8 @@
        "happened": true,
        "right": true,
        "brier": 0.0209,
-       "base": 0.67,
-       "base_brier": 0.1092,
+       "base": 0.669,
+       "base_brier": 0.1094,
        "base_right": true
       },
       {
@@ -529,7 +3464,7 @@
        "right": true,
        "brier": 0.07,
        "base": 0.544,
-       "base_brier": 0.2083,
+       "base_brier": 0.2084,
        "base_right": true
       },
       {
@@ -539,8 +3474,8 @@
        "happened": false,
        "right": true,
        "brier": 0.0091,
-       "base": 0.255,
-       "base_brier": 0.0651,
+       "base": 0.256,
+       "base_brier": 0.0653,
        "base_right": true
       },
       {
@@ -550,8 +3485,8 @@
        "happened": false,
        "right": true,
        "brier": 0.0426,
-       "base": 0.409,
-       "base_brier": 0.1676,
+       "base": 0.41,
+       "base_brier": 0.1678,
        "base_right": true
       },
       {
@@ -561,8 +3496,8 @@
        "happened": true,
        "right": true,
        "brier": 0.0091,
-       "base": 0.745,
-       "base_brier": 0.0651,
+       "base": 0.744,
+       "base_brier": 0.0653,
        "base_right": true
       },
       {
@@ -572,8 +3507,8 @@
        "happened": true,
        "right": true,
        "brier": 0.0426,
-       "base": 0.591,
-       "base_brier": 0.1676,
+       "base": 0.59,
+       "base_brier": 0.1678,
        "base_right": true
       },
       {
@@ -701,7 +3636,7 @@
      "props_n": 18,
      "props_right": 16,
      "props_brier": 0.3083,
-     "props_base_brier": 1.0299,
+     "props_base_brier": 1.031,
      "props_base_n": 7,
      "props_base_right": 7,
      "market": {
@@ -814,8 +3749,8 @@
        "happened": false,
        "right": false,
        "brier": 0.4699,
-       "base": 0.67,
-       "base_brier": 0.4483,
+       "base": 0.669,
+       "base_brier": 0.4479,
        "base_right": false
       },
       {
@@ -826,7 +3761,7 @@
        "right": false,
        "brier": 0.2861,
        "base": 0.544,
-       "base_brier": 0.2955,
+       "base_brier": 0.2954,
        "base_right": false
       },
       {
@@ -836,8 +3771,8 @@
        "happened": true,
        "right": false,
        "brier": 0.5918,
-       "base": 0.255,
-       "base_brier": 0.5549,
+       "base": 0.256,
+       "base_brier": 0.5542,
        "base_right": false
       },
       {
@@ -847,8 +3782,8 @@
        "happened": true,
        "right": false,
        "brier": 0.3358,
-       "base": 0.409,
-       "base_brier": 0.3488,
+       "base": 0.41,
+       "base_brier": 0.3486,
        "base_right": false
       },
       {
@@ -858,8 +3793,8 @@
        "happened": false,
        "right": false,
        "brier": 0.5918,
-       "base": 0.745,
-       "base_brier": 0.5549,
+       "base": 0.744,
+       "base_brier": 0.5542,
        "base_right": false
       },
       {
@@ -869,8 +3804,8 @@
        "happened": false,
        "right": false,
        "brier": 0.3358,
-       "base": 0.591,
-       "base_brier": 0.3488,
+       "base": 0.59,
+       "base_brier": 0.3486,
        "base_right": false
       },
       {
@@ -998,7 +3933,7 @@
      "props_n": 18,
      "props_right": 9,
      "props_brier": 2.8476,
-     "props_base_brier": 2.8042,
+     "props_base_brier": 2.8019,
      "props_base_n": 7,
      "props_base_right": 0,
      "market": {
@@ -1178,8 +4113,8 @@
        "happened": true,
        "right": true,
        "brier": 0.0831,
-       "base": 0.67,
-       "base_brier": 0.1092,
+       "base": 0.669,
+       "base_brier": 0.1094,
        "base_right": true
       },
       {
@@ -1190,7 +4125,7 @@
        "right": true,
        "brier": 0.2142,
        "base": 0.544,
-       "base_brier": 0.2083,
+       "base_brier": 0.2084,
        "base_right": true
       },
       {
@@ -1200,8 +4135,8 @@
        "happened": false,
        "right": true,
        "brier": 0.043,
-       "base": 0.255,
-       "base_brier": 0.0651,
+       "base": 0.256,
+       "base_brier": 0.0653,
        "base_right": true
       },
       {
@@ -1211,8 +4146,8 @@
        "happened": false,
        "right": true,
        "brier": 0.1661,
-       "base": 0.409,
-       "base_brier": 0.1676,
+       "base": 0.41,
+       "base_brier": 0.1678,
        "base_right": true
       },
       {
@@ -1222,8 +4157,8 @@
        "happened": true,
        "right": true,
        "brier": 0.043,
-       "base": 0.745,
-       "base_brier": 0.0651,
+       "base": 0.744,
+       "base_brier": 0.0653,
        "base_right": true
       },
       {
@@ -1233,8 +4168,8 @@
        "happened": true,
        "right": true,
        "brier": 0.1661,
-       "base": 0.591,
-       "base_brier": 0.1676,
+       "base": 0.59,
+       "base_brier": 0.1678,
        "base_right": true
       },
       {
@@ -1362,7 +4297,7 @@
      "props_n": 18,
      "props_right": 15,
      "props_brier": 0.9394,
-     "props_base_brier": 1.0359,
+     "props_base_brier": 1.037,
      "props_base_n": 7,
      "props_base_right": 6,
      "market": {
@@ -1542,8 +4477,8 @@
        "happened": false,
        "right": false,
        "brier": 0.6442,
-       "base": 0.67,
-       "base_brier": 0.4483,
+       "base": 0.669,
+       "base_brier": 0.4479,
        "base_right": false
       },
       {
@@ -1554,7 +4489,7 @@
        "right": false,
        "brier": 0.4897,
        "base": 0.544,
-       "base_brier": 0.2955,
+       "base_brier": 0.2954,
        "base_right": false
       },
       {
@@ -1564,8 +4499,8 @@
        "happened": true,
        "right": false,
        "brier": 0.7418,
-       "base": 0.255,
-       "base_brier": 0.5549,
+       "base": 0.256,
+       "base_brier": 0.5542,
        "base_right": false
       },
       {
@@ -1575,8 +4510,8 @@
        "happened": true,
        "right": false,
        "brier": 0.5427,
-       "base": 0.409,
-       "base_brier": 0.3488,
+       "base": 0.41,
+       "base_brier": 0.3486,
        "base_right": false
       },
       {
@@ -1586,8 +4521,8 @@
        "happened": false,
        "right": false,
        "brier": 0.7418,
-       "base": 0.745,
-       "base_brier": 0.5549,
+       "base": 0.744,
+       "base_brier": 0.5542,
        "base_right": false
       },
       {
@@ -1597,8 +4532,8 @@
        "happened": false,
        "right": false,
        "brier": 0.5427,
-       "base": 0.591,
-       "base_brier": 0.3488,
+       "base": 0.59,
+       "base_brier": 0.3486,
        "base_right": false
       },
       {
@@ -1726,7 +4661,7 @@
      "props_n": 18,
      "props_right": 7,
      "props_brier": 4.1461,
-     "props_base_brier": 2.8042,
+     "props_base_brier": 2.8019,
      "props_base_n": 7,
      "props_base_right": 0,
      "market": {
@@ -1752,7 +4687,7 @@
    "round_right": 2,
    "props_n": 116,
    "props_brier": 12.3311,
-   "props_base_brier": 11.6734,
+   "props_base_brier": 11.6707,
    "props_right": 87,
    "props_base_n": 48,
    "props_base_right": 25,
@@ -1881,8 +4816,8 @@
        "happened": true,
        "right": true,
        "brier": 0.0647,
-       "base": 0.704,
-       "base_brier": 0.0876,
+       "base": 0.705,
+       "base_brier": 0.0871,
        "base_right": true
       },
       {
@@ -1893,7 +4828,7 @@
        "right": true,
        "brier": 0.1425,
        "base": 0.564,
-       "base_brier": 0.19,
+       "base_brier": 0.1902,
        "base_right": true
       },
       {
@@ -1904,7 +4839,7 @@
        "right": true,
        "brier": 0.2022,
        "base": 0.49,
-       "base_brier": 0.2597,
+       "base_brier": 0.2596,
        "base_right": false
       },
       {
@@ -1915,7 +4850,7 @@
        "right": false,
        "brier": 0.2593,
        "base": 0.43,
-       "base_brier": 0.3248,
+       "base_brier": 0.3246,
        "base_right": false
       },
       {
@@ -1925,8 +4860,8 @@
        "happened": false,
        "right": true,
        "brier": 0.0309,
-       "base": 0.215,
-       "base_brier": 0.0462,
+       "base": 0.214,
+       "base_brier": 0.046,
        "base_right": true
       },
       {
@@ -1937,7 +4872,7 @@
        "right": true,
        "brier": 0.113,
        "base": 0.376,
-       "base_brier": 0.141,
+       "base_brier": 0.1413,
        "base_right": true
       },
       {
@@ -1948,7 +4883,7 @@
        "right": true,
        "brier": 0.1726,
        "base": 0.477,
-       "base_brier": 0.2277,
+       "base_brier": 0.2278,
        "base_right": true
       },
       {
@@ -1959,7 +4894,7 @@
        "right": true,
        "brier": 0.2313,
        "base": 0.536,
-       "base_brier": 0.2874,
+       "base_brier": 0.2873,
        "base_right": false
       },
       {
@@ -1969,8 +4904,8 @@
        "happened": true,
        "right": true,
        "brier": 0.0309,
-       "base": 0.785,
-       "base_brier": 0.0462,
+       "base": 0.786,
+       "base_brier": 0.046,
        "base_right": true
       },
       {
@@ -1981,7 +4916,7 @@
        "right": true,
        "brier": 0.113,
        "base": 0.624,
-       "base_brier": 0.141,
+       "base_brier": 0.1413,
        "base_right": true
       },
       {
@@ -1992,7 +4927,7 @@
        "right": true,
        "brier": 0.1726,
        "base": 0.523,
-       "base_brier": 0.2277,
+       "base_brier": 0.2278,
        "base_right": true
       },
       {
@@ -2003,7 +4938,7 @@
        "right": true,
        "brier": 0.2313,
        "base": 0.464,
-       "base_brier": 0.2874,
+       "base_brier": 0.2873,
        "base_right": false
       },
       {
@@ -2153,7 +5088,7 @@
      "props_n": 26,
      "props_right": 22,
      "props_brier": 1.9804,
-     "props_base_brier": 2.5197,
+     "props_base_brier": 2.5193,
      "props_base_n": 13,
      "props_base_right": 8,
      "market": {
@@ -2257,8 +5192,8 @@
        "happened": true,
        "right": true,
        "brier": 0.0928,
-       "base": 0.67,
-       "base_brier": 0.1092,
+       "base": 0.669,
+       "base_brier": 0.1094,
        "base_right": true
       },
       {
@@ -2269,7 +5204,7 @@
        "right": true,
        "brier": 0.1954,
        "base": 0.544,
-       "base_brier": 0.2083,
+       "base_brier": 0.2084,
        "base_right": true
       },
       {
@@ -2279,8 +5214,8 @@
        "happened": false,
        "right": true,
        "brier": 0.0514,
-       "base": 0.255,
-       "base_brier": 0.0651,
+       "base": 0.256,
+       "base_brier": 0.0653,
        "base_right": true
       },
       {
@@ -2290,8 +5225,8 @@
        "happened": false,
        "right": true,
        "brier": 0.1492,
-       "base": 0.409,
-       "base_brier": 0.1676,
+       "base": 0.41,
+       "base_brier": 0.1678,
        "base_right": true
       },
       {
@@ -2301,8 +5236,8 @@
        "happened": true,
        "right": true,
        "brier": 0.0514,
-       "base": 0.745,
-       "base_brier": 0.0651,
+       "base": 0.744,
+       "base_brier": 0.0653,
        "base_right": true
       },
       {
@@ -2312,8 +5247,8 @@
        "happened": true,
        "right": true,
        "brier": 0.1492,
-       "base": 0.591,
-       "base_brier": 0.1676,
+       "base": 0.59,
+       "base_brier": 0.1678,
        "base_right": true
       },
       {
@@ -2441,7 +5376,7 @@
      "props_n": 18,
      "props_right": 17,
      "props_brier": 0.9337,
-     "props_base_brier": 1.0299,
+     "props_base_brier": 1.031,
      "props_base_n": 7,
      "props_base_right": 7,
      "market": {
@@ -2545,8 +5480,8 @@
        "happened": true,
        "right": true,
        "brier": 0.0426,
-       "base": 0.67,
-       "base_brier": 0.1092,
+       "base": 0.669,
+       "base_brier": 0.1094,
        "base_right": true
       },
       {
@@ -2557,7 +5492,7 @@
        "right": true,
        "brier": 0.085,
        "base": 0.544,
-       "base_brier": 0.2083,
+       "base_brier": 0.2084,
        "base_right": true
       },
       {
@@ -2567,8 +5502,8 @@
        "happened": false,
        "right": true,
        "brier": 0.0237,
-       "base": 0.255,
-       "base_brier": 0.0651,
+       "base": 0.256,
+       "base_brier": 0.0653,
        "base_right": true
       },
       {
@@ -2578,8 +5513,8 @@
        "happened": false,
        "right": true,
        "brier": 0.0664,
-       "base": 0.409,
-       "base_brier": 0.1676,
+       "base": 0.41,
+       "base_brier": 0.1678,
        "base_right": true
       },
       {
@@ -2589,8 +5524,8 @@
        "happened": true,
        "right": true,
        "brier": 0.0237,
-       "base": 0.745,
-       "base_brier": 0.0651,
+       "base": 0.744,
+       "base_brier": 0.0653,
        "base_right": true
       },
       {
@@ -2600,8 +5535,8 @@
        "happened": true,
        "right": true,
        "brier": 0.0664,
-       "base": 0.591,
-       "base_brier": 0.1676,
+       "base": 0.59,
+       "base_brier": 0.1678,
        "base_right": true
       },
       {
@@ -2729,7 +5664,7 @@
      "props_n": 18,
      "props_right": 17,
      "props_brier": 0.4132,
-     "props_base_brier": 1.0299,
+     "props_base_brier": 1.031,
      "props_base_n": 7,
      "props_base_right": 7
     },
@@ -2834,8 +5769,8 @@
        "happened": true,
        "right": true,
        "brier": 0.211,
-       "base": 0.67,
-       "base_brier": 0.1092,
+       "base": 0.669,
+       "base_brier": 0.1094,
        "base_right": true
       },
       {
@@ -2846,7 +5781,7 @@
        "right": true,
        "brier": 0.2097,
        "base": 0.544,
-       "base_brier": 0.2955,
+       "base_brier": 0.2954,
        "base_right": false
       },
       {
@@ -2856,8 +5791,8 @@
        "happened": false,
        "right": true,
        "brier": 0.1417,
-       "base": 0.255,
-       "base_brier": 0.0651,
+       "base": 0.256,
+       "base_brier": 0.0653,
        "base_right": true
       },
       {
@@ -2867,8 +5802,8 @@
        "happened": true,
        "right": true,
        "brier": 0.2299,
-       "base": 0.409,
-       "base_brier": 0.3488,
+       "base": 0.41,
+       "base_brier": 0.3486,
        "base_right": false
       },
       {
@@ -2878,8 +5813,8 @@
        "happened": true,
        "right": true,
        "brier": 0.1417,
-       "base": 0.745,
-       "base_brier": 0.0651,
+       "base": 0.744,
+       "base_brier": 0.0653,
        "base_right": true
       },
       {
@@ -2889,8 +5824,8 @@
        "happened": false,
        "right": true,
        "brier": 0.2299,
-       "base": 0.591,
-       "base_brier": 0.3488,
+       "base": 0.59,
+       "base_brier": 0.3486,
        "base_right": false
       },
       {
@@ -3018,7 +5953,7 @@
      "props_n": 18,
      "props_right": 15,
      "props_brier": 1.3591,
-     "props_base_brier": 1.4855,
+     "props_base_brier": 1.4856,
      "props_base_n": 7,
      "props_base_right": 3,
      "market": {
@@ -3190,8 +6125,8 @@
        "happened": false,
        "right": false,
        "brier": 0.5232,
-       "base": 0.67,
-       "base_brier": 0.4483,
+       "base": 0.669,
+       "base_brier": 0.4479,
        "base_right": false
       },
       {
@@ -3202,7 +6137,7 @@
        "right": false,
        "brier": 0.3727,
        "base": 0.544,
-       "base_brier": 0.2955,
+       "base_brier": 0.2954,
        "base_right": false
       },
       {
@@ -3212,8 +6147,8 @@
        "happened": true,
        "right": false,
        "brier": 0.6448,
-       "base": 0.255,
-       "base_brier": 0.5549,
+       "base": 0.256,
+       "base_brier": 0.5542,
        "base_right": false
       },
       {
@@ -3223,8 +6158,8 @@
        "happened": true,
        "right": false,
        "brier": 0.4215,
-       "base": 0.409,
-       "base_brier": 0.3488,
+       "base": 0.41,
+       "base_brier": 0.3486,
        "base_right": false
       },
       {
@@ -3234,8 +6169,8 @@
        "happened": false,
        "right": false,
        "brier": 0.6448,
-       "base": 0.745,
-       "base_brier": 0.5549,
+       "base": 0.744,
+       "base_brier": 0.5542,
        "base_right": false
       },
       {
@@ -3245,8 +6180,8 @@
        "happened": false,
        "right": false,
        "brier": 0.4215,
-       "base": 0.591,
-       "base_brier": 0.3488,
+       "base": 0.59,
+       "base_brier": 0.3486,
        "base_right": false
       },
       {
@@ -3374,7 +6309,7 @@
      "props_n": 18,
      "props_right": 8,
      "props_brier": 3.3595,
-     "props_base_brier": 2.8042,
+     "props_base_brier": 2.8019,
      "props_base_n": 7,
      "props_base_right": 0,
      "market": {
@@ -3664,8 +6599,8 @@
        "happened": false,
        "right": false,
        "brier": 0.6739,
-       "base": 0.67,
-       "base_brier": 0.4483,
+       "base": 0.669,
+       "base_brier": 0.4479,
        "base_right": false
       },
       {
@@ -3676,7 +6611,7 @@
        "right": false,
        "brier": 0.5054,
        "base": 0.544,
-       "base_brier": 0.2955,
+       "base_brier": 0.2954,
        "base_right": false
       },
       {
@@ -3686,8 +6621,8 @@
        "happened": true,
        "right": false,
        "brier": 0.7609,
-       "base": 0.255,
-       "base_brier": 0.5549,
+       "base": 0.256,
+       "base_brier": 0.5542,
        "base_right": false
       },
       {
@@ -3697,8 +6632,8 @@
        "happened": true,
        "right": false,
        "brier": 0.5738,
-       "base": 0.409,
-       "base_brier": 0.3488,
+       "base": 0.41,
+       "base_brier": 0.3486,
        "base_right": false
       },
       {
@@ -3708,8 +6643,8 @@
        "happened": false,
        "right": false,
        "brier": 0.7609,
-       "base": 0.745,
-       "base_brier": 0.5549,
+       "base": 0.744,
+       "base_brier": 0.5542,
        "base_right": false
       },
       {
@@ -3719,8 +6654,8 @@
        "happened": false,
        "right": false,
        "brier": 0.5738,
-       "base": 0.591,
-       "base_brier": 0.3488,
+       "base": 0.59,
+       "base_brier": 0.3486,
        "base_right": false
       },
       {
@@ -3848,7 +6783,7 @@
      "props_n": 18,
      "props_right": 8,
      "props_brier": 4.2852,
-     "props_base_brier": 2.8042,
+     "props_base_brier": 2.8019,
      "props_base_n": 7,
      "props_base_right": 0,
      "market": {
@@ -3874,7 +6809,7 @@
    "round_right": 3,
    "props_n": 170,
    "props_brier": 17.0723,
-   "props_base_brier": 20.086,
+   "props_base_brier": 20.0764,
    "props_right": 118,
    "props_base_n": 69,
    "props_base_right": 25,
@@ -3961,8 +6896,8 @@
        "happened": true,
        "right": true,
        "brier": 0.0079,
-       "base": 0.704,
-       "base_brier": 0.0876,
+       "base": 0.705,
+       "base_brier": 0.0871,
        "base_right": true
       },
       {
@@ -3973,7 +6908,7 @@
        "right": true,
        "brier": 0.0331,
        "base": 0.564,
-       "base_brier": 0.19,
+       "base_brier": 0.1902,
        "base_right": true
       },
       {
@@ -3984,7 +6919,7 @@
        "right": true,
        "brier": 0.0719,
        "base": 0.49,
-       "base_brier": 0.2597,
+       "base_brier": 0.2596,
        "base_right": false
       },
       {
@@ -3995,7 +6930,7 @@
        "right": true,
        "brier": 0.1218,
        "base": 0.43,
-       "base_brier": 0.3248,
+       "base_brier": 0.3246,
        "base_right": false
       },
       {
@@ -4005,8 +6940,8 @@
        "happened": false,
        "right": true,
        "brier": 0.0032,
-       "base": 0.215,
-       "base_brier": 0.0462,
+       "base": 0.214,
+       "base_brier": 0.046,
        "base_right": true
       },
       {
@@ -4017,7 +6952,7 @@
        "right": true,
        "brier": 0.0194,
        "base": 0.376,
-       "base_brier": 0.141,
+       "base_brier": 0.1413,
        "base_right": true
       },
       {
@@ -4028,7 +6963,7 @@
        "right": true,
        "brier": 0.051,
        "base": 0.477,
-       "base_brier": 0.2277,
+       "base_brier": 0.2278,
        "base_right": true
       },
       {
@@ -4039,7 +6974,7 @@
        "right": true,
        "brier": 0.0954,
        "base": 0.536,
-       "base_brier": 0.2874,
+       "base_brier": 0.2873,
        "base_right": false
       },
       {
@@ -4049,8 +6984,8 @@
        "happened": true,
        "right": true,
        "brier": 0.0032,
-       "base": 0.785,
-       "base_brier": 0.0462,
+       "base": 0.786,
+       "base_brier": 0.046,
        "base_right": true
       },
       {
@@ -4061,7 +6996,7 @@
        "right": true,
        "brier": 0.0194,
        "base": 0.624,
-       "base_brier": 0.141,
+       "base_brier": 0.1413,
        "base_right": true
       },
       {
@@ -4072,7 +7007,7 @@
        "right": true,
        "brier": 0.051,
        "base": 0.523,
-       "base_brier": 0.2277,
+       "base_brier": 0.2278,
        "base_right": true
       },
       {
@@ -4083,7 +7018,7 @@
        "right": true,
        "brier": 0.0954,
        "base": 0.464,
-       "base_brier": 0.2874,
+       "base_brier": 0.2873,
        "base_right": false
       },
       {
@@ -4233,7 +7168,7 @@
      "props_n": 26,
      "props_right": 25,
      "props_brier": 0.7257,
-     "props_base_brier": 2.5137,
+     "props_base_brier": 2.5133,
      "props_base_n": 13,
      "props_base_right": 9,
      "market": {
@@ -4313,8 +7248,8 @@
        "happened": false,
        "right": false,
        "brier": 0.5069,
-       "base": 0.67,
-       "base_brier": 0.4483,
+       "base": 0.669,
+       "base_brier": 0.4479,
        "base_right": false
       },
       {
@@ -4325,7 +7260,7 @@
        "right": false,
        "brier": 0.2859,
        "base": 0.544,
-       "base_brier": 0.2955,
+       "base_brier": 0.2954,
        "base_right": false
       },
       {
@@ -4335,8 +7270,8 @@
        "happened": true,
        "right": false,
        "brier": 0.6453,
-       "base": 0.255,
-       "base_brier": 0.5549,
+       "base": 0.256,
+       "base_brier": 0.5542,
        "base_right": false
       },
       {
@@ -4346,8 +7281,8 @@
        "happened": true,
        "right": false,
        "brier": 0.3572,
-       "base": 0.409,
-       "base_brier": 0.3488,
+       "base": 0.41,
+       "base_brier": 0.3486,
        "base_right": false
       },
       {
@@ -4357,8 +7292,8 @@
        "happened": false,
        "right": false,
        "brier": 0.6453,
-       "base": 0.745,
-       "base_brier": 0.5549,
+       "base": 0.744,
+       "base_brier": 0.5542,
        "base_right": false
       },
       {
@@ -4368,8 +7303,8 @@
        "happened": false,
        "right": false,
        "brier": 0.3572,
-       "base": 0.591,
-       "base_brier": 0.3488,
+       "base": 0.59,
+       "base_brier": 0.3486,
        "base_right": false
       },
       {
@@ -4497,7 +7432,7 @@
      "props_n": 18,
      "props_right": 9,
      "props_brier": 3.027,
-     "props_base_brier": 2.8042,
+     "props_base_brier": 2.8019,
      "props_base_n": 7,
      "props_base_right": 0,
      "market": {
@@ -4577,8 +7512,8 @@
        "happened": false,
        "right": false,
        "brier": 0.55,
-       "base": 0.67,
-       "base_brier": 0.4483,
+       "base": 0.669,
+       "base_brier": 0.4479,
        "base_right": false
       },
       {
@@ -4589,7 +7524,7 @@
        "right": false,
        "brier": 0.4119,
        "base": 0.544,
-       "base_brier": 0.2955,
+       "base_brier": 0.2954,
        "base_right": false
       },
       {
@@ -4599,8 +7534,8 @@
        "happened": true,
        "right": false,
        "brier": 0.6493,
-       "base": 0.255,
-       "base_brier": 0.5549,
+       "base": 0.256,
+       "base_brier": 0.5542,
        "base_right": false
       },
       {
@@ -4610,8 +7545,8 @@
        "happened": true,
        "right": false,
        "brier": 0.4658,
-       "base": 0.409,
-       "base_brier": 0.3488,
+       "base": 0.41,
+       "base_brier": 0.3486,
        "base_right": false
       },
       {
@@ -4621,8 +7556,8 @@
        "happened": false,
        "right": false,
        "brier": 0.6493,
-       "base": 0.745,
-       "base_brier": 0.5549,
+       "base": 0.744,
+       "base_brier": 0.5542,
        "base_right": false
       },
       {
@@ -4632,8 +7567,8 @@
        "happened": false,
        "right": false,
        "brier": 0.4658,
-       "base": 0.591,
-       "base_brier": 0.3488,
+       "base": 0.59,
+       "base_brier": 0.3486,
        "base_right": false
       },
       {
@@ -4761,7 +7696,7 @@
      "props_n": 18,
      "props_right": 8,
      "props_brier": 3.557,
-     "props_base_brier": 2.8042,
+     "props_base_brier": 2.8019,
      "props_base_n": 7,
      "props_base_right": 0,
      "market": {
@@ -4841,8 +7776,8 @@
        "happened": false,
        "right": false,
        "brier": 0.3754,
-       "base": 0.67,
-       "base_brier": 0.4483,
+       "base": 0.669,
+       "base_brier": 0.4479,
        "base_right": false
       },
       {
@@ -4853,7 +7788,7 @@
        "right": true,
        "brier": 0.167,
        "base": 0.544,
-       "base_brier": 0.2955,
+       "base_brier": 0.2954,
        "base_right": false
       },
       {
@@ -4863,8 +7798,8 @@
        "happened": true,
        "right": false,
        "brier": 0.5546,
-       "base": 0.255,
-       "base_brier": 0.5549,
+       "base": 0.256,
+       "base_brier": 0.5542,
        "base_right": false
       },
       {
@@ -4874,8 +7809,8 @@
        "happened": true,
        "right": true,
        "brier": 0.2285,
-       "base": 0.409,
-       "base_brier": 0.3488,
+       "base": 0.41,
+       "base_brier": 0.3486,
        "base_right": false
       },
       {
@@ -4885,8 +7820,8 @@
        "happened": false,
        "right": false,
        "brier": 0.5546,
-       "base": 0.745,
-       "base_brier": 0.5549,
+       "base": 0.744,
+       "base_brier": 0.5542,
        "base_right": false
       },
       {
@@ -4896,8 +7831,8 @@
        "happened": false,
        "right": true,
        "brier": 0.2285,
-       "base": 0.591,
-       "base_brier": 0.3488,
+       "base": 0.59,
+       "base_brier": 0.3486,
        "base_right": false
       },
       {
@@ -5025,7 +7960,7 @@
      "props_n": 18,
      "props_right": 12,
      "props_brier": 2.2271,
-     "props_base_brier": 2.8042,
+     "props_base_brier": 2.8019,
      "props_base_n": 7,
      "props_base_right": 0,
      "market": {
@@ -5131,8 +8066,8 @@
        "happened": false,
        "right": false,
        "brier": 0.3875,
-       "base": 0.67,
-       "base_brier": 0.4483,
+       "base": 0.669,
+       "base_brier": 0.4479,
        "base_right": false
       },
       {
@@ -5143,7 +8078,7 @@
        "right": true,
        "brier": 0.2096,
        "base": 0.544,
-       "base_brier": 0.2955,
+       "base_brier": 0.2954,
        "base_right": false
       },
       {
@@ -5153,8 +8088,8 @@
        "happened": true,
        "right": false,
        "brier": 0.5364,
-       "base": 0.255,
-       "base_brier": 0.5549,
+       "base": 0.256,
+       "base_brier": 0.5542,
        "base_right": false
       },
       {
@@ -5164,8 +8099,8 @@
        "happened": true,
        "right": false,
        "brier": 0.2642,
-       "base": 0.409,
-       "base_brier": 0.3488,
+       "base": 0.41,
+       "base_brier": 0.3486,
        "base_right": false
       },
       {
@@ -5175,8 +8110,8 @@
        "happened": false,
        "right": false,
        "brier": 0.5364,
-       "base": 0.745,
-       "base_brier": 0.5549,
+       "base": 0.744,
+       "base_brier": 0.5542,
        "base_right": false
       },
       {
@@ -5186,8 +8121,8 @@
        "happened": false,
        "right": false,
        "brier": 0.2642,
-       "base": 0.591,
-       "base_brier": 0.3488,
+       "base": 0.59,
+       "base_brier": 0.3486,
        "base_right": false
       },
       {
@@ -5315,7 +8250,7 @@
      "props_n": 18,
      "props_right": 10,
      "props_brier": 2.3643,
-     "props_base_brier": 2.8042,
+     "props_base_brier": 2.8019,
      "props_base_n": 7,
      "props_base_right": 0,
      "market": {
@@ -5395,8 +8330,8 @@
        "happened": false,
        "right": false,
        "brier": 0.3235,
-       "base": 0.67,
-       "base_brier": 0.4483,
+       "base": 0.669,
+       "base_brier": 0.4479,
        "base_right": false
       },
       {
@@ -5407,7 +8342,7 @@
        "right": true,
        "brier": 0.1934,
        "base": 0.544,
-       "base_brier": 0.2955,
+       "base_brier": 0.2954,
        "base_right": false
       },
       {
@@ -5417,8 +8352,8 @@
        "happened": true,
        "right": false,
        "brier": 0.4547,
-       "base": 0.255,
-       "base_brier": 0.5549,
+       "base": 0.256,
+       "base_brier": 0.5542,
        "base_right": false
       },
       {
@@ -5428,8 +8363,8 @@
        "happened": true,
        "right": true,
        "brier": 0.23,
-       "base": 0.409,
-       "base_brier": 0.3488,
+       "base": 0.41,
+       "base_brier": 0.3486,
        "base_right": false
       },
       {
@@ -5439,8 +8374,8 @@
        "happened": false,
        "right": false,
        "brier": 0.4547,
-       "base": 0.745,
-       "base_brier": 0.5549,
+       "base": 0.744,
+       "base_brier": 0.5542,
        "base_right": false
       },
       {
@@ -5450,8 +8385,8 @@
        "happened": false,
        "right": true,
        "brier": 0.23,
-       "base": 0.591,
-       "base_brier": 0.3488,
+       "base": 0.59,
+       "base_brier": 0.3486,
        "base_right": false
       },
       {
@@ -5579,7 +8514,7 @@
      "props_n": 18,
      "props_right": 12,
      "props_brier": 2.0505,
-     "props_base_brier": 2.8042,
+     "props_base_brier": 2.8019,
      "props_base_n": 7,
      "props_base_right": 0
     },
@@ -5651,8 +8586,8 @@
        "happened": true,
        "right": true,
        "brier": 0.0751,
-       "base": 0.67,
-       "base_brier": 0.1092,
+       "base": 0.669,
+       "base_brier": 0.1094,
        "base_right": true
       },
       {
@@ -5663,7 +8598,7 @@
        "right": false,
        "brier": 0.3823,
        "base": 0.544,
-       "base_brier": 0.2955,
+       "base_brier": 0.2954,
        "base_right": false
       },
       {
@@ -5673,8 +8608,8 @@
        "happened": false,
        "right": true,
        "brier": 0.0415,
-       "base": 0.255,
-       "base_brier": 0.0651,
+       "base": 0.256,
+       "base_brier": 0.0653,
        "base_right": true
       },
       {
@@ -5684,8 +8619,8 @@
        "happened": true,
        "right": false,
        "brier": 0.434,
-       "base": 0.409,
-       "base_brier": 0.3488,
+       "base": 0.41,
+       "base_brier": 0.3486,
        "base_right": false
       },
       {
@@ -5695,8 +8630,8 @@
        "happened": true,
        "right": true,
        "brier": 0.0415,
-       "base": 0.745,
-       "base_brier": 0.0651,
+       "base": 0.744,
+       "base_brier": 0.0653,
        "base_right": true
       },
       {
@@ -5706,8 +8641,8 @@
        "happened": false,
        "right": false,
        "brier": 0.434,
-       "base": 0.591,
-       "base_brier": 0.3488,
+       "base": 0.59,
+       "base_brier": 0.3486,
        "base_right": false
       },
       {
@@ -5835,7 +8770,7 @@
      "props_n": 18,
      "props_right": 11,
      "props_brier": 1.7464,
-     "props_base_brier": 1.4855,
+     "props_base_brier": 1.4856,
      "props_base_n": 7,
      "props_base_right": 3
     },
@@ -5898,8 +8833,8 @@
        "happened": true,
        "right": true,
        "brier": 0.0537,
-       "base": 0.67,
-       "base_brier": 0.1092,
+       "base": 0.669,
+       "base_brier": 0.1094,
        "base_right": true
       },
       {
@@ -5910,7 +8845,7 @@
        "right": true,
        "brier": 0.1279,
        "base": 0.544,
-       "base_brier": 0.2083,
+       "base_brier": 0.2084,
        "base_right": true
       },
       {
@@ -5920,8 +8855,8 @@
        "happened": false,
        "right": true,
        "brier": 0.027,
-       "base": 0.255,
-       "base_brier": 0.0651,
+       "base": 0.256,
+       "base_brier": 0.0653,
        "base_right": true
       },
       {
@@ -5931,8 +8866,8 @@
        "happened": false,
        "right": true,
        "brier": 0.091,
-       "base": 0.409,
-       "base_brier": 0.1676,
+       "base": 0.41,
+       "base_brier": 0.1678,
        "base_right": true
       },
       {
@@ -5942,8 +8877,8 @@
        "happened": true,
        "right": true,
        "brier": 0.027,
-       "base": 0.745,
-       "base_brier": 0.0651,
+       "base": 0.744,
+       "base_brier": 0.0653,
        "base_right": true
       },
       {
@@ -5953,8 +8888,8 @@
        "happened": true,
        "right": true,
        "brier": 0.091,
-       "base": 0.591,
-       "base_brier": 0.1676,
+       "base": 0.59,
+       "base_brier": 0.1678,
        "base_right": true
       },
       {
@@ -6082,7 +9017,7 @@
      "props_n": 18,
      "props_right": 17,
      "props_brier": 0.5873,
-     "props_base_brier": 1.0299,
+     "props_base_brier": 1.031,
      "props_base_n": 7,
      "props_base_right": 7,
      "market": {
@@ -6162,8 +9097,8 @@
        "happened": true,
        "right": true,
        "brier": 0.0544,
-       "base": 0.67,
-       "base_brier": 0.1092,
+       "base": 0.669,
+       "base_brier": 0.1094,
        "base_right": true
       },
       {
@@ -6174,7 +9109,7 @@
        "right": true,
        "brier": 0.1415,
        "base": 0.544,
-       "base_brier": 0.2083,
+       "base_brier": 0.2084,
        "base_right": true
       },
       {
@@ -6184,8 +9119,8 @@
        "happened": false,
        "right": true,
        "brier": 0.0251,
-       "base": 0.255,
-       "base_brier": 0.0651,
+       "base": 0.256,
+       "base_brier": 0.0653,
        "base_right": true
       },
       {
@@ -6195,8 +9130,8 @@
        "happened": false,
        "right": true,
        "brier": 0.1048,
-       "base": 0.409,
-       "base_brier": 0.1676,
+       "base": 0.41,
+       "base_brier": 0.1678,
        "base_right": true
       },
       {
@@ -6206,8 +9141,8 @@
        "happened": true,
        "right": true,
        "brier": 0.0251,
-       "base": 0.745,
-       "base_brier": 0.0651,
+       "base": 0.744,
+       "base_brier": 0.0653,
        "base_right": true
       },
       {
@@ -6217,8 +9152,8 @@
        "happened": true,
        "right": true,
        "brier": 0.1048,
-       "base": 0.591,
-       "base_brier": 0.1676,
+       "base": 0.59,
+       "base_brier": 0.1678,
        "base_right": true
       },
       {
@@ -6346,7 +9281,7 @@
      "props_n": 18,
      "props_right": 14,
      "props_brier": 0.787,
-     "props_base_brier": 1.0359,
+     "props_base_brier": 1.037,
      "props_base_n": 7,
      "props_base_right": 6,
      "market": {
@@ -6372,7 +9307,7 @@
    "round_right": 2,
    "props_n": 152,
    "props_brier": 18.4361,
-   "props_base_brier": 15.1391,
+   "props_base_brier": 15.136,
    "props_right": 101,
    "props_base_n": 62,
    "props_base_right": 35,
@@ -6459,8 +9394,8 @@
        "happened": true,
        "right": true,
        "brier": 0.0256,
-       "base": 0.704,
-       "base_brier": 0.0876,
+       "base": 0.705,
+       "base_brier": 0.0871,
        "base_right": true
       },
       {
@@ -6471,7 +9406,7 @@
        "right": true,
        "brier": 0.077,
        "base": 0.564,
-       "base_brier": 0.19,
+       "base_brier": 0.1902,
        "base_right": true
       },
       {
@@ -6482,7 +9417,7 @@
        "right": true,
        "brier": 0.1356,
        "base": 0.49,
-       "base_brier": 0.2597,
+       "base_brier": 0.2596,
        "base_right": false
       },
       {
@@ -6493,7 +9428,7 @@
        "right": true,
        "brier": 0.203,
        "base": 0.43,
-       "base_brier": 0.3248,
+       "base_brier": 0.3246,
        "base_right": false
       },
       {
@@ -6503,8 +9438,8 @@
        "happened": false,
        "right": true,
        "brier": 0.0115,
-       "base": 0.215,
-       "base_brier": 0.0462,
+       "base": 0.214,
+       "base_brier": 0.046,
        "base_right": true
       },
       {
@@ -6515,7 +9450,7 @@
        "right": true,
        "brier": 0.0531,
        "base": 0.376,
-       "base_brier": 0.141,
+       "base_brier": 0.1413,
        "base_right": true
       },
       {
@@ -6526,7 +9461,7 @@
        "right": true,
        "brier": 0.1054,
        "base": 0.477,
-       "base_brier": 0.2277,
+       "base_brier": 0.2278,
        "base_right": true
       },
       {
@@ -6537,7 +9472,7 @@
        "right": true,
        "brier": 0.1681,
        "base": 0.536,
-       "base_brier": 0.2874,
+       "base_brier": 0.2873,
        "base_right": false
       },
       {
@@ -6547,8 +9482,8 @@
        "happened": true,
        "right": true,
        "brier": 0.0115,
-       "base": 0.785,
-       "base_brier": 0.0462,
+       "base": 0.786,
+       "base_brier": 0.046,
        "base_right": true
       },
       {
@@ -6559,7 +9494,7 @@
        "right": true,
        "brier": 0.0531,
        "base": 0.624,
-       "base_brier": 0.141,
+       "base_brier": 0.1413,
        "base_right": true
       },
       {
@@ -6570,7 +9505,7 @@
        "right": true,
        "brier": 0.1054,
        "base": 0.523,
-       "base_brier": 0.2277,
+       "base_brier": 0.2278,
        "base_right": true
       },
       {
@@ -6581,7 +9516,7 @@
        "right": true,
        "brier": 0.1681,
        "base": 0.464,
-       "base_brier": 0.2874,
+       "base_brier": 0.2873,
        "base_right": false
       },
       {
@@ -6731,7 +9666,7 @@
      "props_n": 26,
      "props_right": 25,
      "props_brier": 1.3565,
-     "props_base_brier": 2.5137,
+     "props_base_brier": 2.5133,
      "props_base_n": 13,
      "props_base_right": 9,
      "market": {
@@ -6811,8 +9746,8 @@
        "happened": false,
        "right": false,
        "brier": 0.5017,
-       "base": 0.67,
-       "base_brier": 0.4483,
+       "base": 0.669,
+       "base_brier": 0.4479,
        "base_right": false
       },
       {
@@ -6823,7 +9758,7 @@
        "right": false,
        "brier": 0.3207,
        "base": 0.544,
-       "base_brier": 0.2955,
+       "base_brier": 0.2954,
        "base_right": false
       },
       {
@@ -6833,8 +9768,8 @@
        "happened": true,
        "right": false,
        "brier": 0.6216,
-       "base": 0.255,
-       "base_brier": 0.5549,
+       "base": 0.256,
+       "base_brier": 0.5542,
        "base_right": false
       },
       {
@@ -6844,8 +9779,8 @@
        "happened": true,
        "right": false,
        "brier": 0.389,
-       "base": 0.409,
-       "base_brier": 0.3488,
+       "base": 0.41,
+       "base_brier": 0.3486,
        "base_right": false
       },
       {
@@ -6855,8 +9790,8 @@
        "happened": false,
        "right": false,
        "brier": 0.6216,
-       "base": 0.745,
-       "base_brier": 0.5549,
+       "base": 0.744,
+       "base_brier": 0.5542,
        "base_right": false
       },
       {
@@ -6866,8 +9801,8 @@
        "happened": false,
        "right": false,
        "brier": 0.389,
-       "base": 0.591,
-       "base_brier": 0.3488,
+       "base": 0.59,
+       "base_brier": 0.3486,
        "base_right": false
       },
       {
@@ -6995,7 +9930,7 @@
      "props_n": 18,
      "props_right": 7,
      "props_brier": 3.1066,
-     "props_base_brier": 2.8042,
+     "props_base_brier": 2.8019,
      "props_base_n": 7,
      "props_base_right": 0,
      "market": {
@@ -7066,8 +10001,8 @@
        "happened": true,
        "right": false,
        "brier": 0.271,
-       "base": 0.67,
-       "base_brier": 0.1092,
+       "base": 0.669,
+       "base_brier": 0.1094,
        "base_right": true
       },
       {
@@ -7078,7 +10013,7 @@
        "right": false,
        "brier": 0.4685,
        "base": 0.544,
-       "base_brier": 0.2083,
+       "base_brier": 0.2084,
        "base_right": true
       },
       {
@@ -7088,8 +10023,8 @@
        "happened": false,
        "right": true,
        "brier": 0.1476,
-       "base": 0.255,
-       "base_brier": 0.0651,
+       "base": 0.256,
+       "base_brier": 0.0653,
        "base_right": true
       },
       {
@@ -7099,8 +10034,8 @@
        "happened": false,
        "right": false,
        "brier": 0.407,
-       "base": 0.409,
-       "base_brier": 0.1676,
+       "base": 0.41,
+       "base_brier": 0.1678,
        "base_right": true
       },
       {
@@ -7110,8 +10045,8 @@
        "happened": true,
        "right": true,
        "brier": 0.1476,
-       "base": 0.745,
-       "base_brier": 0.0651,
+       "base": 0.744,
+       "base_brier": 0.0653,
        "base_right": true
       },
       {
@@ -7121,8 +10056,8 @@
        "happened": true,
        "right": false,
        "brier": 0.407,
-       "base": 0.591,
-       "base_brier": 0.1676,
+       "base": 0.59,
+       "base_brier": 0.1678,
        "base_right": true
       },
       {
@@ -7250,7 +10185,7 @@
      "props_n": 18,
      "props_right": 12,
      "props_brier": 2.3746,
-     "props_base_brier": 1.0299,
+     "props_base_brier": 1.031,
      "props_base_n": 7,
      "props_base_right": 7,
      "market": {
@@ -7364,8 +10299,8 @@
        "happened": true,
        "right": true,
        "brier": 0.0569,
-       "base": 0.67,
-       "base_brier": 0.1092,
+       "base": 0.669,
+       "base_brier": 0.1094,
        "base_right": true
       },
       {
@@ -7376,7 +10311,7 @@
        "right": false,
        "brier": 0.3439,
        "base": 0.544,
-       "base_brier": 0.2955,
+       "base_brier": 0.2954,
        "base_right": false
       },
       {
@@ -7386,8 +10321,8 @@
        "happened": false,
        "right": true,
        "brier": 0.0261,
-       "base": 0.255,
-       "base_brier": 0.0651,
+       "base": 0.256,
+       "base_brier": 0.0653,
        "base_right": true
       },
       {
@@ -7397,8 +10332,8 @@
        "happened": false,
        "right": true,
        "brier": 0.1224,
-       "base": 0.409,
-       "base_brier": 0.1676,
+       "base": 0.41,
+       "base_brier": 0.1678,
        "base_right": true
       },
       {
@@ -7408,8 +10343,8 @@
        "happened": true,
        "right": true,
        "brier": 0.0261,
-       "base": 0.745,
-       "base_brier": 0.0651,
+       "base": 0.744,
+       "base_brier": 0.0653,
        "base_right": true
       },
       {
@@ -7419,8 +10354,8 @@
        "happened": true,
        "right": true,
        "brier": 0.1224,
-       "base": 0.591,
-       "base_brier": 0.1676,
+       "base": 0.59,
+       "base_brier": 0.1678,
        "base_right": true
       },
       {
@@ -7548,7 +10483,7 @@
      "props_n": 18,
      "props_right": 13,
      "props_brier": 0.9699,
-     "props_base_brier": 1.1231,
+     "props_base_brier": 1.124,
      "props_base_n": 7,
      "props_base_right": 5,
      "market": {
@@ -7619,8 +10554,8 @@
        "happened": true,
        "right": true,
        "brier": 0.137,
-       "base": 0.67,
-       "base_brier": 0.1092,
+       "base": 0.669,
+       "base_brier": 0.1094,
        "base_right": true
       },
       {
@@ -7631,7 +10566,7 @@
        "right": false,
        "brier": 0.3347,
        "base": 0.544,
-       "base_brier": 0.2083,
+       "base_brier": 0.2084,
        "base_right": true
       },
       {
@@ -7641,8 +10576,8 @@
        "happened": false,
        "right": true,
        "brier": 0.0725,
-       "base": 0.255,
-       "base_brier": 0.0651,
+       "base": 0.256,
+       "base_brier": 0.0653,
        "base_right": true
       },
       {
@@ -7652,8 +10587,8 @@
        "happened": false,
        "right": false,
        "brier": 0.2744,
-       "base": 0.409,
-       "base_brier": 0.1676,
+       "base": 0.41,
+       "base_brier": 0.1678,
        "base_right": true
       },
       {
@@ -7663,8 +10598,8 @@
        "happened": true,
        "right": true,
        "brier": 0.0725,
-       "base": 0.745,
-       "base_brier": 0.0651,
+       "base": 0.744,
+       "base_brier": 0.0653,
        "base_right": true
       },
       {
@@ -7674,8 +10609,8 @@
        "happened": true,
        "right": false,
        "brier": 0.2744,
-       "base": 0.591,
-       "base_brier": 0.1676,
+       "base": 0.59,
+       "base_brier": 0.1678,
        "base_right": true
       },
       {
@@ -7803,7 +10738,7 @@
      "props_n": 18,
      "props_right": 13,
      "props_brier": 1.5741,
-     "props_base_brier": 1.0299,
+     "props_base_brier": 1.031,
      "props_base_n": 7,
      "props_base_right": 7,
      "market": {
@@ -7908,8 +10843,8 @@
        "happened": true,
        "right": true,
        "brier": 0.121,
-       "base": 0.67,
-       "base_brier": 0.1092,
+       "base": 0.669,
+       "base_brier": 0.1094,
        "base_right": true
       },
       {
@@ -7920,7 +10855,7 @@
        "right": false,
        "brier": 0.2613,
        "base": 0.544,
-       "base_brier": 0.2083,
+       "base_brier": 0.2084,
        "base_right": true
       },
       {
@@ -7930,8 +10865,8 @@
        "happened": false,
        "right": true,
        "brier": 0.0578,
-       "base": 0.255,
-       "base_brier": 0.0651,
+       "base": 0.256,
+       "base_brier": 0.0653,
        "base_right": true
       },
       {
@@ -7941,8 +10876,8 @@
        "happened": false,
        "right": true,
        "brier": 0.2093,
-       "base": 0.409,
-       "base_brier": 0.1676,
+       "base": 0.41,
+       "base_brier": 0.1678,
        "base_right": true
       },
       {
@@ -7952,8 +10887,8 @@
        "happened": true,
        "right": true,
        "brier": 0.0578,
-       "base": 0.745,
-       "base_brier": 0.0651,
+       "base": 0.744,
+       "base_brier": 0.0653,
        "base_right": true
       },
       {
@@ -7963,8 +10898,8 @@
        "happened": true,
        "right": true,
        "brier": 0.2093,
-       "base": 0.591,
-       "base_brier": 0.1676,
+       "base": 0.59,
+       "base_brier": 0.1678,
        "base_right": true
       },
       {
@@ -8092,7 +11027,7 @@
      "props_n": 18,
      "props_right": 15,
      "props_brier": 1.2294,
-     "props_base_brier": 1.0299,
+     "props_base_brier": 1.031,
      "props_base_n": 7,
      "props_base_right": 7,
      "market": {
@@ -8172,8 +11107,8 @@
        "happened": false,
        "right": false,
        "brier": 0.7066,
-       "base": 0.67,
-       "base_brier": 0.4483,
+       "base": 0.669,
+       "base_brier": 0.4479,
        "base_right": false
       },
       {
@@ -8184,7 +11119,7 @@
        "right": false,
        "brier": 0.5488,
        "base": 0.544,
-       "base_brier": 0.2955,
+       "base_brier": 0.2954,
        "base_right": false
       },
       {
@@ -8194,8 +11129,8 @@
        "happened": true,
        "right": false,
        "brier": 0.7882,
-       "base": 0.255,
-       "base_brier": 0.5549,
+       "base": 0.256,
+       "base_brier": 0.5542,
        "base_right": false
       },
       {
@@ -8205,8 +11140,8 @@
        "happened": true,
        "right": false,
        "brier": 0.618,
-       "base": 0.409,
-       "base_brier": 0.3488,
+       "base": 0.41,
+       "base_brier": 0.3486,
        "base_right": false
       },
       {
@@ -8216,8 +11151,8 @@
        "happened": false,
        "right": false,
        "brier": 0.7882,
-       "base": 0.745,
-       "base_brier": 0.5549,
+       "base": 0.744,
+       "base_brier": 0.5542,
        "base_right": false
       },
       {
@@ -8227,8 +11162,8 @@
        "happened": false,
        "right": false,
        "brier": 0.618,
-       "base": 0.591,
-       "base_brier": 0.3488,
+       "base": 0.59,
+       "base_brier": 0.3486,
        "base_right": false
       },
       {
@@ -8356,7 +11291,7 @@
      "props_n": 18,
      "props_right": 8,
      "props_brier": 4.5512,
-     "props_base_brier": 2.8042,
+     "props_base_brier": 2.8019,
      "props_base_n": 7,
      "props_base_right": 0,
      "market": {
@@ -8436,8 +11371,8 @@
        "happened": false,
        "right": false,
        "brier": 0.5421,
-       "base": 0.67,
-       "base_brier": 0.4483,
+       "base": 0.669,
+       "base_brier": 0.4479,
        "base_right": false
       },
       {
@@ -8448,7 +11383,7 @@
        "right": false,
        "brier": 0.3305,
        "base": 0.544,
-       "base_brier": 0.2955,
+       "base_brier": 0.2954,
        "base_right": false
       },
       {
@@ -8458,8 +11393,8 @@
        "happened": true,
        "right": false,
        "brier": 0.6699,
-       "base": 0.255,
-       "base_brier": 0.5549,
+       "base": 0.256,
+       "base_brier": 0.5542,
        "base_right": false
       },
       {
@@ -8469,8 +11404,8 @@
        "happened": true,
        "right": false,
        "brier": 0.3936,
-       "base": 0.409,
-       "base_brier": 0.3488,
+       "base": 0.41,
+       "base_brier": 0.3486,
        "base_right": false
       },
       {
@@ -8480,8 +11415,8 @@
        "happened": false,
        "right": false,
        "brier": 0.6699,
-       "base": 0.745,
-       "base_brier": 0.5549,
+       "base": 0.744,
+       "base_brier": 0.5542,
        "base_right": false
       },
       {
@@ -8491,8 +11426,8 @@
        "happened": false,
        "right": false,
        "brier": 0.3936,
-       "base": 0.591,
-       "base_brier": 0.3488,
+       "base": 0.59,
+       "base_brier": 0.3486,
        "base_right": false
       },
       {
@@ -8620,7 +11555,7 @@
      "props_n": 18,
      "props_right": 8,
      "props_brier": 3.2738,
-     "props_base_brier": 2.8042,
+     "props_base_brier": 2.8019,
      "props_base_n": 7,
      "props_base_right": 0,
      "market": {
@@ -8635,6 +11570,6 @@
    ]
   }
  ],
- "total_graded": 37,
- "total_right": 20
+ "total_graded": 49,
+ "total_right": 28
 }
