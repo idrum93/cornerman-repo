@@ -969,7 +969,12 @@ function showUsage(){
   el.innerHTML=`<span style="color:${col}">odds api: <b>${r}</b> of ${tot} credits left</span>
     <span class="ubar"><i style="width:${(pct*100).toFixed(0)}%;background:${col}"></i></span>`;
 }
-let DATA=null, HIST=null, BR=null, SC=null, USG=null, ONLY_GAPS=false;
+/* The card's view filter. Was a boolean (ONLY_GAPS) and is now a mode, because
+   a second independent filter as a second boolean gives four states, two of
+   which ("disagreements AND checked", "neither") nobody asked for and both of
+   which would need their own button labels and counts. One mode, three
+   mutually exclusive views, one button lit at a time. */
+let DATA=null, HIST=null, BR=null, SC=null, USG=null, FMODE='all';
 
 function gap(b){ return b.edge==null?null:Math.abs(b.edge); }
 /* One framing, one color, everywhere: the MARKET leans toward a corner, shown
@@ -3589,11 +3594,21 @@ function render(){
       btn.textContent=on?'How often ▴':'How often ▾';
     });
   }
-  const pass=b=>!ONLY_GAPS||(b.edge!=null&&Math.abs(b.edge)>=0.05);
+  const pass=b=>FMODE==='all'||(FMODE==='gaps'
+    ? (b.edge!=null&&Math.abs(b.edge)>=0.05)
+    : sbHasCheck(b.bout));
   const nGaps=d.bouts.filter(b=>b.edge!=null&&Math.abs(b.edge)>=0.05).length;
+  /* The checked count spans BOTH lists. A bout the model declined can still
+     carry a check — it is the one place a check has nothing to be measured
+     against, and so the one place it is most worth finding again. Counting
+     only the modeled bouts would under-report the view's own contents. */
+  const nCk=d.bouts.filter(b=>sbHasCheck(b.bout)).length
+    +(d.no_read||[]).filter(n=>sbHasCheck(n.a+' vs. '+n.b)).length;
   const segs=SEGS.map(s=>{
     const bs=d.bouts.filter(b=>(b.segment||'Main card')===s).filter(pass);
-    const nr=ONLY_GAPS?[]:(d.no_read||[]).filter(n=>(n.segment||'Main card')===s);
+    const nr=(FMODE==='gaps'?[]:(d.no_read||[])
+        .filter(n=>FMODE!=='check'||sbHasCheck(n.a+' vs. '+n.b)))
+      .filter(n=>(n.segment||'Main card')===s);
     if(!bs.length&&!nr.length) return '';
     return `<div class="seg"><div class="seghd"><h2>${esc(s)}</h2>
         <span class="lbl">${bs.length} bout${bs.length===1?'':'s'}${nr.length?` · ${nr.length} no read`:''}</span></div>
@@ -3680,9 +3695,12 @@ function render(){
         }).join('')}</div></div>`;
   }).join('');
   const filt=`<div class="filt">
-      <button class="fb ${ONLY_GAPS?'':'on'}" data-f="all">All ${d.bouts.length} bouts</button>
-      <button class="fb ${ONLY_GAPS?'on':''}" data-f="gaps">Only disagreements${nGaps?` (${nGaps})`:''}</button>
-      <span class="lbl" style="margin-left:6px">a disagreement is 5+ points from the market</span></div>`;
+      <button class="fb ${FMODE==='all'?'on':''}" data-f="all">All ${d.bouts.length} bouts</button>
+      <button class="fb ${FMODE==='gaps'?'on':''}" data-f="gaps">Only disagreements${nGaps?` (${nGaps})`:''}</button>
+      <button class="fb ${FMODE==='check'?'on':''}" data-f="check"${nCk?'':' disabled style="opacity:.45;cursor:default"'}>With a check${nCk?` (${nCk})`:''}</button>
+      <span class="lbl" style="margin-left:6px">${FMODE==='check'
+        ? 'every bout you have pasted a record into, including ones the model declined'
+        : 'a disagreement is 5+ points from the market'}</span></div>`;
   const zone=(id,cls,title,sub,body)=>`<section class="zone ${cls}" id="${id}">
       <div class="zone-hd"><h2>${title}</h2><span class="lbl">${sub}</span></div>${body}</section>`;
   const nav=`<nav class="znav"><a href="#z-up">Upcoming</a><a href="#z-res">Last card</a><a href="#z-hist">What usually happens</a></nav>`;
@@ -3715,7 +3733,7 @@ function render(){
   document.querySelectorAll('[data-past]').forEach(el=>
     el.addEventListener('click',()=>openPast(el.dataset.past)));
   document.querySelectorAll('[data-f]').forEach(el=>
-    el.addEventListener('click',()=>{ ONLY_GAPS = el.dataset.f==='gaps'; render(); }));
+    el.addEventListener('click',()=>{ FMODE = el.dataset.f||'all'; render(); }));
   bindTabs();          // the page's own tab groups, bound after every draw
   fitNames();          // names scale to their box, which only exists once drawn
 }
@@ -6920,6 +6938,21 @@ function sbLengthCall(b,stIn){
   return {kind:kind, p:p, conv:conv, modelConv:modelConv, round:round,
           wins:thin, thin:thin<3, modelSilent:modelSilent, delta:delta,
           tier:tier, top:(top&&top.clear)?top:null};
+}
+/* Has a record been pasted for this bout?
+
+   Deliberately NOT `st.on`. That flag means "show this check beside the model
+   on the card", which is a display choice made after the work; a read that was
+   entered and then switched off is still a bout being worked on, and hiding it
+   from the filter would lose exactly the bout the user went looking for.
+
+   Any one of the four fields counts — a check half-entered, one corner done
+   and the other not, is still in progress and still wanted in the view. The
+   key for a no-read bout is "A vs. B", which is what sbSynthetic builds, so
+   the same predicate serves both lists. */
+function sbHasCheck(key){
+  const st=SBOX[key];
+  return !!(st&&(st.a||st.b||st.a_m||st.b_m));
 }
 function sandboxChip(b){
   const st=SBOX[b.bout];
