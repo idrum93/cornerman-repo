@@ -2,7 +2,7 @@
  "event": "UFC Fight Night: Moicano vs. Nolan",
  "date": "2026-10-31",
  "venue": "Meta Apex, Enterprise, Nevada , United States",
- "generated_utc": "2026-10-26T03:58:52.330338+00:00",
+ "generated_utc": "2026-10-26T17:11:39.364943+00:00",
  "bouts": [
   {
    "bout": "Renato Moicano vs. Tom Nolan",
@@ -183,9 +183,9 @@
      "log_layoff": 4.997212
     }
    },
-   "p_market": 0.4868,
-   "books": 23.0,
-   "edge": -0.0135,
+   "p_market": 0.4947,
+   "books": 24.0,
+   "edge": -0.0213,
    "p_finish_survival_raw": 0.559,
    "m_a_ko": 0.1485,
    "m_b_ko": 0.2314,
@@ -510,9 +510,9 @@
      "log_layoff": 3.367296
     }
    },
-   "p_market": 0.3067,
-   "books": 4.0,
-   "edge": 0.0989,
+   "p_market": 0.3295,
+   "books": 12.0,
+   "edge": 0.0761,
    "p_finish_survival_raw": 0.391,
    "m_a_ko": 0.1281,
    "m_b_ko": 0.2748,
@@ -1127,9 +1127,9 @@
      "log_layoff": 4.727388
     }
    },
-   "p_market": 0.5277,
-   "books": 23.0,
-   "edge": -0.1053,
+   "p_market": 0.5172,
+   "books": 24.0,
+   "edge": -0.0947,
    "p_finish_survival_raw": 0.3801,
    "m_a_ko": 0.1065,
    "m_b_ko": 0.1183,
@@ -1427,9 +1427,9 @@
      "log_layoff": 4.844187
     }
    },
-   "p_market": 0.6944,
-   "books": 24.0,
-   "edge": -0.1995,
+   "p_market": 0.7,
+   "books": 25.0,
+   "edge": -0.2051,
    "p_finish_survival_raw": null,
    "m_a_ko": null,
    "m_b_ko": null,
@@ -2003,9 +2003,9 @@
      "log_layoff": 4.844187
     }
    },
-   "p_market": 0.6188,
-   "books": 20.0,
-   "edge": -0.2094,
+   "p_market": 0.616,
+   "books": 21.0,
+   "edge": -0.2066,
    "p_finish_survival_raw": null,
    "m_a_ko": null,
    "m_b_ko": null,
@@ -2280,9 +2280,9 @@
      "log_layoff": 5.446737
     }
    },
-   "p_market": 0.3016,
-   "books": 18.0,
-   "edge": 0.0247,
+   "p_market": 0.3,
+   "books": 19.0,
+   "edge": 0.0263,
    "p_finish_survival_raw": 0.1267,
    "m_a_ko": 0.0685,
    "m_b_ko": 0.0804,
