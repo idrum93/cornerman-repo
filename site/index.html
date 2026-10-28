@@ -4729,11 +4729,11 @@ function ckEndsBlock(G){
     M.md_dec}; it was actually a decision ${M.act_dec} times. The decision is the one cell `
     +`that can be won without naming a fighter, so a read that leans toward the cards `
     +`collects full calls without ever picking a man.`:'';
-  if(G.len)   r.push(['ends early or goes the distance', G.len.n, G.len.check, G.len.model, G.len.base, '']);
-  if(G.mtype) r.push(['finish type (KO / SUB / decision)', G.mtype.n, G.mtype.check, G.mtype.model, G.mtype.base, '']);
-  if(G.method)r.push(['full call — fighter and method', G.method.n, G.method.check, G.method.model, G.method.base, hedge]);
-  if(G.rnd)   r.push(['round one, or past it', G.rnd.n, G.rnd.check, G.rnd.model, G.rnd.base, '']);
-  if(G.rexact)r.push(['exact round named', G.rexact.n, null, G.rexact.model, G.rexact.base, '']);
+  if(G.len)   r.push(['ends early or goes the distance', G.len.n, G.len.check, G.len.model, G.len.base, '', G.len.chance]);
+  if(G.mtype) r.push(['finish type (KO / SUB / decision)', G.mtype.n, G.mtype.check, G.mtype.model, G.mtype.base, '', G.mtype.chance]);
+  if(G.method)r.push(['full call — fighter and method', G.method.n, G.method.check, G.method.model, G.method.base, hedge, G.method.chance]);
+  if(G.rnd)   r.push(['round one, or past it', G.rnd.n, G.rnd.check, G.rnd.model, G.rnd.base, '', G.rnd.chance]);
+  if(G.rexact)r.push(['exact round named', G.rexact.n, null, G.rexact.model, G.rexact.base, '', G.rexact.chance]);
   if(!r.length) return '';
   const pc=(x,n)=>n?`${(x/n*100).toFixed(0)}%`:'--';
   /* The floor is NOT a third competitor and must not be highlighted as one —
@@ -4742,20 +4742,47 @@ function ckEndsBlock(G){
      rival; it has failed to do anything. */
   return `<div class="ckends"><div class="cklab" style="margin-bottom:5px">how the fight ends</div>
     <table class="cktab ckendtab"><thead><tr><th>claim</th><th>graded</th><th>model</th><th>ufc.com check</th><th class="ckbasehd" title="What the base rate alone scores on the SAME bouts: call each one the way that bout's own division leans and nothing else. Beating the two reads against each other says which is better; beating this says whether either is doing anything at all.">base rate</th></tr></thead>
-    <tbody>${r.map(([lab,n,c,m,bs,tip])=>`<tr${tip?` title="${esc(tip)}"`:''}><td>${lab}${
+    <tbody>${r.map(([lab,n,c,m,bs,tip,ch])=>{
+      /* THE FLOOR IS THE BEST UNINFORMED STRATEGY, not merely the base-rate one.
+         First build showed 39% here on a BINARY claim, and credited both reads
+         with beating it — but a coin is always available and scores 50%, so a
+         base-following rule that gets wrong-footed cannot be the bar. Whichever
+         of the two is higher is the thing a read has to beat; below that it has
+         demonstrated nothing, however far it is above the other one. */
+      const bRate=(bs!=null&&n)?bs/n:null;
+      const useCh=(bRate!=null&&ch!=null&&ch>bRate);
+      const fl=(bRate==null)?(ch!=null?ch:null):(useCh?ch:bRate);
+      const under=x=>(x!=null&&fl!=null&&n&&(x/n)<=fl);
+      const crown=x=>(x!=null&&fl!=null&&n&&(x/n)>fl);
+      return `<tr${tip?` title="${esc(tip)}"`:''}><td>${lab}${
       c==null?' <span class="ckonly">model only</span>':''}${tip?'<span class="ckq">?</span>':''}</td>
       <td class="mono">${n}</td>
-      <td class="mono${c!=null&&m>c&&(bs==null||m>bs)?' ckbest':''}${bs!=null&&m<=bs?' ckunder':''}">${pc(m,n)} <span class="cksub">${m}/${n}</span></td>
-      <td class="mono${c!=null&&c>m&&(bs==null||c>bs)?' ckbest':''}${c!=null&&bs!=null&&c<=bs?' ckunder':''}">${c==null?'<span class="ckna">n/a</span>':
+      <td class="mono${c!=null&&m>c&&crown(m)?' ckbest':''}${under(m)?' ckunder':''}">${pc(m,n)} <span class="cksub">${m}/${n}</span></td>
+      <td class="mono${c!=null&&c>m&&crown(c)?' ckbest':''}${under(c)?' ckunder':''}">${c==null?'<span class="ckna">n/a</span>':
         pc(c,n)+' <span class="cksub">'+c+'/'+n+'</span>'}</td>
-      <td class="mono ckbase">${bs==null?'<span class="ckna">--</span>':
-        pc(bs,n)+' <span class="cksub">'+bs+'/'+n+'</span>'}</td></tr>`).join('')}
+      <td class="mono ckbase">${fl==null?'<span class="ckna">--</span>':
+        (fl*100).toFixed(0)+'% <span class="cksub">'+(useCh?'chance':bs+'/'+n)+'</span>'}</td></tr>`;}).join('')}
     </tbody></table>
-    <div class="cknote"><b style="color:var(--mute)">The base-rate column is the floor, not a third
-      reader.</b> It calls every bout the way that bout's own division leans — the commonest
-      outcome, nothing else — scored on the same bouts as the two columns beside it. A read that
-      does not clear it has not lost to a rival; it has added nothing. Figures struck through sit
-      at or below the floor.</div>
+    <div class="cknote"><b style="color:var(--mute)">The floor is the best a read can do while
+      knowing nothing</b> — whichever is higher of calling every bout the way its own division
+      leans, or guessing blind (50% on a two-way claim, 33% on the finish type, 20% on the five-cell
+      full call). Scored on the same bouts as the columns beside it. A read below the floor has
+      not lost to a rival, it has added nothing, and it is struck through; a read is only marked
+      best if it clears the floor as well as the other column.</div>
+    ${G.bri?(()=>{const B=G.bri,lo=Math.min(B.check,B.model,B.rate);
+      const cell=(nm,v)=>`<b style="color:${v===lo?'var(--gold)':'var(--mute)'}">${nm} ${v.toFixed(3)}</b>`;
+      return `<div class="cknote" style="border-left:2px solid var(--line);padding-left:9px">
+        <b style="color:var(--bone)">The same claim, scored as a probability.</b>
+        Multiclass Brier on the five-cell method split, lower is better, over the
+        ${B.n} bout${B.n===1?'':'s'} where all three distributions exist —
+        ${cell('model',B.model)} · ${cell('check',B.check)} · ${cell('base rate',B.rate)}.
+        <b style="color:var(--mute)">Read this before the hit counts above.</b> Top-pick
+        accuracy is an argmax, and on 622 out-of-sample bouts the model's argmax ties the base
+        rate while its distribution beats it with P(better) = 1.000. A row can tie on picks and
+        be decisively ahead on probabilities; this line is where that shows.</div>`;})()
+      :'<div class="cknote">The probability score for the method split appears once a build '
+       +'carrying the model\'s five cells has run — the hit counts above are an argmax, which '
+       +'is known to be blind to real differences between these reads.</div>'}
     <div class="cknote">Round is scored as "round one or later" for both, because that is
       the only round claim the check makes — grading it against a modal round the check
       never names would be scoring it on a question it was not asked. The exact-round row
@@ -4819,6 +4846,7 @@ function ckGrade(){
     const tEnter=r.first_ts!=null?r.first_ts:r.ts;
     const post=(tEnter!=null&&isFinite(evd)) ? tEnter>=evd+36*3600*1000 : null;
     const row={event:c.event, date:c.date, bout:g.bout, a:g.a, b:g.b, post:post,
+      rounds:g.rounds||3,
       winner:g.winner, method:g.method, round:g.round, thin:r.thin, blend:r.blend,
       win:{check:aWon?r.p_a:1-r.p_a, model:g.p_winner_model,
            market:g.market?g.market.p_winner_market:null},
@@ -4886,6 +4914,21 @@ function ckGrade(){
       row.mtype={actual:fam(actual), check:fam(top), model:mrep?null:null,
                  check_right:fam(top)===fam(actual),
                  base:fam(btop), base_right:fam(btop)===fam(actual)};
+      /* PROPER SCORE, the thing the hit counts cannot see. Addendum 80: on
+         622 out-of-sample bouts the model's method TOP PICK ties the division
+         base while its DISTRIBUTION beats that base on multiclass Brier by
+         +0.0235, P(better) 1.000. An argmax tie is not evidence of no
+         information. The model's five cells reach the browser only from
+         upcoming.py builds carrying m_a_ko/m_a_sub/m_b_ko/m_b_sub; before
+         that this line stays hidden rather than showing two of three. */
+      const CK5=['decision','a_ko','a_sub','b_ko','b_sub'];
+      const mcell=(g.m_a_ko!=null&&g.m_b_ko!=null&&g.m_a_sub!=null&&
+                   g.m_b_sub!=null&&g.m_decision!=null)
+        ?{decision:g.m_decision,a_ko:g.m_a_ko,a_sub:g.m_a_sub,
+          b_ko:g.m_b_ko,b_sub:g.m_b_sub}:null;
+      const mbri=d=>{const t=CK5.reduce((x,k)=>x+(d[k]||0),0)||1;
+        return CK5.reduce((x,k)=>x+Math.pow((d[k]||0)/t-(k===actual?1:0),2),0);};
+      row.bri={check:mbri(cells), base:mbri(bcells), model:mcell?mbri(mcell):null};
       row.bdec=(top==='decision');          // did the CHECK hedge to the cards
       row.bdec_m=mrep?/decision/i.test(String(mrep.top)):null;
       if(mrep){
@@ -4978,20 +5021,29 @@ function ckGrade(){
     /* Every base figure is summed over the SAME array as the two beside it, so
        the floor is matched to the bouts it is a floor for. A control on a
        different bout set is not a control. */
-    method:meth.length?{n:meth.length, check:sum(meth,r=>r.mcmp.check_right?1:0),
+    method:meth.length?{n:meth.length, chance:1/5, check:sum(meth,r=>r.mcmp.check_right?1:0),
       model:sum(meth,r=>r.mcmp.model_right?1:0), base:sum(meth,r=>r.mcmp.base_right?1:0),
       ck_dec:sum(meth,r=>r.bdec?1:0), md_dec:sum(meth,r=>r.bdec_m?1:0),
       act_dec:sum(meth,r=>r.method==='DEC'?1:0)}:null,
-    len:len.length?{n:len.length,
+    len:len.length?{n:len.length, chance:0.5,
       check:sum(len,r=>r.len.check_right?1:0), model:sum(len,r=>r.len.model_right?1:0),
       base:sum(len,r=>r.len.base_right?1:0),
       check_b:sum(len,r=>r.len.check_b)/len.length, model_b:sum(len,r=>r.len.model_b)/len.length,
       base_b:sum(len,r=>r.len.base_b)/len.length}:null,
-    mtype:mty.length?{n:mty.length, check:sum(mty,r=>r.mtype.check_right?1:0),
+    mtype:mty.length?{n:mty.length, chance:1/3, check:sum(mty,r=>r.mtype.check_right?1:0),
       model:sum(mty,r=>r.mtype.model_right?1:0), base:sum(mty,r=>r.mtype.base_right?1:0)}:null,
-    rnd:rnd.length?{n:rnd.length, check:sum(rnd,r=>r.rnd.check_right?1:0),
+    rnd:rnd.length?{n:rnd.length, chance:0.5, check:sum(rnd,r=>r.rnd.check_right?1:0),
       model:sum(rnd,r=>r.rnd.model_right?1:0), base:sum(rnd,r=>r.rnd.base_right?1:0)}:null,
-    rexact:rex.length?{n:rex.length, model:sum(rex,r=>r.rexact.model_right?1:0),
+    /* Only bouts where ALL THREE distributions exist — a proper score on a
+       different bout set per column is the matched-denominator fault again. */
+    bri:(()=>{const q=base.filter(r=>r.bri&&r.bri.model!=null);
+      return q.length?{n:q.length,
+        check:sum(q,r=>r.bri.check)/q.length,
+        model:sum(q,r=>r.bri.model)/q.length,
+        rate:sum(q,r=>r.bri.base)/q.length}:null;})(),
+    rexact:rex.length?{n:rex.length,
+      chance:sum(rex,r=>1/((r.rounds||3)))/rex.length,
+      model:sum(rex,r=>r.rexact.model_right?1:0),
       base:sum(rex,r=>r.rexact.base_right?1:0)}:null,
     /* Agreed bouts cannot separate the two - they score identically there by
        construction, so including them drags both toward the same number and
