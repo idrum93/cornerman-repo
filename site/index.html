@@ -594,6 +594,18 @@
   .ckends{margin-top:10px;border-top:1px solid var(--line);padding-top:8px}
   .ckendtab td:first-child{color:var(--mute)}
   .ckbest{color:var(--gold);font-weight:700}
+  /* The floor. Deliberately the quietest column on the table: it is a bar to
+     clear, not a contender, and giving it the weight of a reader would invite
+     exactly the three-way race it exists to prevent. */
+  .ckbase{color:var(--dim)}
+  .ckbasehd{color:var(--dim);cursor:help}
+  /* A read at or below the floor. Struck rather than reddened — red is a miss
+     on this page, and this is not a miss, it is a figure that turns out not to
+     mean anything. */
+  .ckunder{text-decoration:line-through;text-decoration-thickness:1px;opacity:.72}
+  .ckq{display:inline-block;margin-left:5px;font-size:9px;color:var(--dim);
+    border:1px solid var(--line);border-radius:50%;width:12px;height:12px;
+    line-height:11px;text-align:center;cursor:help}
   .ckm{display:inline-block;min-width:15px;text-align:center;font-size:10px;font-weight:800;
     border-radius:3px;padding:1px 3px;margin-right:2px;border:1px solid var(--line)}
   .ckm.hit{color:var(--gold);border-color:var(--gold)}
@@ -4712,21 +4724,38 @@ function ckStrip(){
    skills. No market column — no book here quotes these. */
 function ckEndsBlock(G){
   const r=[];
-  if(G.len)   r.push(['ends early or goes the distance', G.len.n, G.len.check, G.len.model]);
-  if(G.mtype) r.push(['finish type (KO / SUB / decision)', G.mtype.n, G.mtype.check, G.mtype.model]);
-  if(G.method)r.push(['full call — fighter and method', G.method.n, G.method.check, G.method.model]);
-  if(G.rnd)   r.push(['round one, or past it', G.rnd.n, G.rnd.check, G.rnd.model]);
-  if(G.rexact)r.push(['exact round named', G.rexact.n, null, G.rexact.model]);
+  const M=G.method;
+  const hedge=M?`check named the decision cell on ${M.ck_dec} of ${M.n}, the model on ${
+    M.md_dec}; it was actually a decision ${M.act_dec} times. The decision is the one cell `
+    +`that can be won without naming a fighter, so a read that leans toward the cards `
+    +`collects full calls without ever picking a man.`:'';
+  if(G.len)   r.push(['ends early or goes the distance', G.len.n, G.len.check, G.len.model, G.len.base, '']);
+  if(G.mtype) r.push(['finish type (KO / SUB / decision)', G.mtype.n, G.mtype.check, G.mtype.model, G.mtype.base, '']);
+  if(G.method)r.push(['full call — fighter and method', G.method.n, G.method.check, G.method.model, G.method.base, hedge]);
+  if(G.rnd)   r.push(['round one, or past it', G.rnd.n, G.rnd.check, G.rnd.model, G.rnd.base, '']);
+  if(G.rexact)r.push(['exact round named', G.rexact.n, null, G.rexact.model, G.rexact.base, '']);
   if(!r.length) return '';
   const pc=(x,n)=>n?`${(x/n*100).toFixed(0)}%`:'--';
+  /* The floor is NOT a third competitor and must not be highlighted as one —
+     ckbest marks the better of the two reads, and the base column is the bar
+     they both have to clear. A read that loses to it has not been beaten by a
+     rival; it has failed to do anything. */
   return `<div class="ckends"><div class="cklab" style="margin-bottom:5px">how the fight ends</div>
-    <table class="cktab ckendtab"><thead><tr><th>claim</th><th>graded</th><th>model</th><th>ufc.com check</th></tr></thead>
-    <tbody>${r.map(([lab,n,c,m])=>`<tr><td>${lab}${c==null?' <span class="ckonly">model only</span>':''}</td>
+    <table class="cktab ckendtab"><thead><tr><th>claim</th><th>graded</th><th>model</th><th>ufc.com check</th><th class="ckbasehd" title="What the base rate alone scores on the SAME bouts: call each one the way that bout's own division leans and nothing else. Beating the two reads against each other says which is better; beating this says whether either is doing anything at all.">base rate</th></tr></thead>
+    <tbody>${r.map(([lab,n,c,m,bs,tip])=>`<tr${tip?` title="${esc(tip)}"`:''}><td>${lab}${
+      c==null?' <span class="ckonly">model only</span>':''}${tip?'<span class="ckq">?</span>':''}</td>
       <td class="mono">${n}</td>
-      <td class="mono${c!=null&&m>c?' ckbest':''}">${pc(m,n)} <span class="cksub">${m}/${n}</span></td>
-      <td class="mono${c!=null&&c>m?' ckbest':''}">${c==null?'<span class="ckna">n/a</span>':
-        pc(c,n)+' <span class="cksub">'+c+'/'+n+'</span>'}</td></tr>`).join('')}
+      <td class="mono${c!=null&&m>c&&(bs==null||m>bs)?' ckbest':''}${bs!=null&&m<=bs?' ckunder':''}">${pc(m,n)} <span class="cksub">${m}/${n}</span></td>
+      <td class="mono${c!=null&&c>m&&(bs==null||c>bs)?' ckbest':''}${c!=null&&bs!=null&&c<=bs?' ckunder':''}">${c==null?'<span class="ckna">n/a</span>':
+        pc(c,n)+' <span class="cksub">'+c+'/'+n+'</span>'}</td>
+      <td class="mono ckbase">${bs==null?'<span class="ckna">--</span>':
+        pc(bs,n)+' <span class="cksub">'+bs+'/'+n+'</span>'}</td></tr>`).join('')}
     </tbody></table>
+    <div class="cknote"><b style="color:var(--mute)">The base-rate column is the floor, not a third
+      reader.</b> It calls every bout the way that bout's own division leans — the commonest
+      outcome, nothing else — scored on the same bouts as the two columns beside it. A read that
+      does not clear it has not lost to a rival; it has added nothing. Figures struck through sit
+      at or below the floor.</div>
     <div class="cknote">Round is scored as "round one or later" for both, because that is
       the only round claim the check makes — grading it against a modal round the check
       never names would be scoring it on a question it was not asked. The exact-round row
@@ -4821,6 +4850,13 @@ function ckGrade(){
         check_b:brier(1-r.dec,fin), model_b:brier(1-dr.said,fin), base_b:brier(1-dr.base,fin)};
       row.len.check_right=row.len.check_call===row.len.actual;
       row.len.model_right=row.len.model_call===row.len.actual;
+      /* The floor: call it the way the base rate leans and nothing else. The
+         prop already publishes its own per-bout base, so this costs no new
+         arithmetic and is matched to the bout by construction — a heavyweight
+         bout and a flyweight bout get different floors, which one pooled
+         league number would not give. */
+      row.len.base_call=dr.base>=0.5?'distance':'finish';
+      row.len.base_right=row.len.base_call===row.len.actual;
     }
     // 2. METHOD - the finish TYPE (KO vs SUB vs decision), and separately the
     //    full claim including WHICH fighter. A read can get the type right and
@@ -4835,8 +4871,23 @@ function ckGrade(){
        absence of the flag is exactly the signature of that. Those rows rebuild
        from the saved sandbox inputs on the next load and score again. */
     if(actual && r.cells_ok===true){
+      /* THE FLOOR, on the same bout and the same claim. Without it "the check
+         got 56%" is unreadable: a read that always names the commonest outcome
+         scores well without knowing anything, and on a five-cell split the
+         commonest outcome is nearly always the decision — which is a cell you
+         can win WITHOUT naming a fighter. That is the whole reason this column
+         exists, so it is computed from the division's own mix rather than a
+         pooled league number, and the finish mass is split evenly between the
+         corners because a base rate has no opinion on who wins. */
+      const bm=(typeof sbBaseMix==='function')?sbBaseMix(g):{ko:0.25,sub:0.12,dec:0.63};
+      const bcells={decision:bm.dec, a_ko:bm.ko/2, a_sub:bm.sub/2,
+                    b_ko:bm.ko/2, b_sub:bm.sub/2};
+      const btop=Object.keys(bcells).reduce((x,y)=>bcells[y]>bcells[x]?y:x);
       row.mtype={actual:fam(actual), check:fam(top), model:mrep?null:null,
-                 check_right:fam(top)===fam(actual)};
+                 check_right:fam(top)===fam(actual),
+                 base:fam(btop), base_right:fam(btop)===fam(actual)};
+      row.bdec=(top==='decision');          // did the CHECK hedge to the cards
+      row.bdec_m=mrep?/decision/i.test(String(mrep.top)):null;
       if(mrep){
         const mt=/KO/.test(mrep.top)?'KO':/submission/i.test(mrep.top)?'SUB':'DEC';
         row.mtype.model=mt; row.mtype.model_right=mt===fam(actual);
@@ -4846,6 +4897,7 @@ function ckGrade(){
       row.mfull={check_right:top===actual, model_right:mrep?!!mrep.right:null,
                  check_said:cells[actual], model_said:mrep?mrep.said:null,
                  check_top:nm[top], check_top_p:cells[top],
+                 base_right:btop===actual, base_top:nm[btop],
                  model_top:mrep?mrep.top:null, model_top_p:mrep?mrep.top_p:null};
       row.mcmp=row.mfull;   // kept: the card panel's existing column reads this
     }
@@ -4857,7 +4909,12 @@ function ckGrade(){
        model-only, so the sharper claim is still scored without grading the
        check on a question it was never asked. */
     const rex=(g.report||[]).find(x=>x.kind==='round');
-    if(fin&&rex) row.rexact={model_right:!!rex.right, model_call:rex.top, actual:'round '+g.round};
+    /* "Always say round one" is the base-rate strategy for an exact round:
+       round one takes 51.7% of three-round finishes and 37.6% of five-round
+       ones, which is the largest single bucket either way. The check never
+       names an exact round, so this row stays model-against-floor. */
+    if(fin&&rex) row.rexact={model_right:!!rex.right, model_call:rex.top,
+                             base_right:g.round===1, actual:'round '+g.round};
     const r1p=(g.report||[]).find(x=>x.kind==='prop'&&x.label==='Ends before round 2');
     /* CONDITIONAL on a finish, because that is the only population this row is
        graded on. Both sides publish P(ends in round one) across ALL outcomes,
@@ -4877,8 +4934,15 @@ function ckGrade(){
       const wasR1=g.round===1;
       const cC=cnd(r.r1, 1-r.dec);
       if(cC!=null){
+        /* The league's CONDITIONAL round-one share — 51.7% on a three-round
+           fight, 37.6% on a five — which is the same figure the drawer's
+           "if it finishes, how early" tick uses. So the floor here calls round
+           one on a three-rounder and after it on a five, and nothing else. */
+        const lgC=((g.rounds||3)>=5)?0.376:0.517;
         row.rnd={actual:wasR1?'R1':'after R1', check_call:cC>=0.5?'R1':'after R1',
-                 check_p:cC, check_raw:r.r1, check_b:brier(cC,wasR1)};
+                 check_p:cC, check_raw:r.r1, check_b:brier(cC,wasR1),
+                 base_call:lgC>=0.5?'R1':'after R1'};
+        row.rnd.base_right=row.rnd.base_call===row.rnd.actual;
         row.rnd.check_right=row.rnd.check_call===row.rnd.actual;
         const cM=r1p?cnd(r1p.said, g.m_decision!=null?1-g.m_decision:null):null;
         if(cM!=null){ row.rnd.model_call=cM>=0.5?'R1':'after R1';
@@ -4911,17 +4975,24 @@ function ckGrade(){
       market_right:sum(mk,r=>r.win.market>0.5?1:0),
       check_brier:sum(mk,r=>r.wb.check)/mk.length, model_brier:sum(mk,r=>r.wb.model)/mk.length,
       market_brier:sum(mk,r=>r.wb.market)/mk.length}:null,
+    /* Every base figure is summed over the SAME array as the two beside it, so
+       the floor is matched to the bouts it is a floor for. A control on a
+       different bout set is not a control. */
     method:meth.length?{n:meth.length, check:sum(meth,r=>r.mcmp.check_right?1:0),
-      model:sum(meth,r=>r.mcmp.model_right?1:0)}:null,
+      model:sum(meth,r=>r.mcmp.model_right?1:0), base:sum(meth,r=>r.mcmp.base_right?1:0),
+      ck_dec:sum(meth,r=>r.bdec?1:0), md_dec:sum(meth,r=>r.bdec_m?1:0),
+      act_dec:sum(meth,r=>r.method==='DEC'?1:0)}:null,
     len:len.length?{n:len.length,
       check:sum(len,r=>r.len.check_right?1:0), model:sum(len,r=>r.len.model_right?1:0),
+      base:sum(len,r=>r.len.base_right?1:0),
       check_b:sum(len,r=>r.len.check_b)/len.length, model_b:sum(len,r=>r.len.model_b)/len.length,
       base_b:sum(len,r=>r.len.base_b)/len.length}:null,
     mtype:mty.length?{n:mty.length, check:sum(mty,r=>r.mtype.check_right?1:0),
-      model:sum(mty,r=>r.mtype.model_right?1:0)}:null,
+      model:sum(mty,r=>r.mtype.model_right?1:0), base:sum(mty,r=>r.mtype.base_right?1:0)}:null,
     rnd:rnd.length?{n:rnd.length, check:sum(rnd,r=>r.rnd.check_right?1:0),
-      model:sum(rnd,r=>r.rnd.model_right?1:0)}:null,
-    rexact:rex.length?{n:rex.length, model:sum(rex,r=>r.rexact.model_right?1:0)}:null,
+      model:sum(rnd,r=>r.rnd.model_right?1:0), base:sum(rnd,r=>r.rnd.base_right?1:0)}:null,
+    rexact:rex.length?{n:rex.length, model:sum(rex,r=>r.rexact.model_right?1:0),
+      base:sum(rex,r=>r.rexact.base_right?1:0)}:null,
     /* Agreed bouts cannot separate the two - they score identically there by
        construction, so including them drags both toward the same number and
        buries whatever difference exists. These are the bouts that carry the
