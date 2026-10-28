@@ -7656,3 +7656,1436 @@ reads as a missing feature, and the cheap conclusion is to go editing working
 code. **When a probe says a feature is missing, confirm the probe can see a
 feature that is definitely there before believing it.** This is the same lesson
 as the bisect in addendum 60, arriving from a different direction.
+
+---
+
+## Addendum 68: power density. REGISTERED 2026-10-17, before any fitting.
+
+## Why this one, after zero-for-ten
+
+The finish model carries `kd` (both corners' knockdowns per 15 min) and `pace`
+(both corners' adjusted strikes landed per minute) as separate linear inputs. A
+linear model in those two **cannot express their ratio.** Knockdowns per strike
+landed is therefore the one combination the current specification is
+structurally unable to reach, rather than a rearrangement of something it
+already has. Every other rate in the model is per-minute, which confounds how
+much a man throws with what happens when he lands.
+
+Prior: LOW. Ten formulas tested, zero supported (addendum 12), and a gradient
+booster representing every monotone transform and interaction simultaneously
+lost to plain logistic regression. This is one specified test, not a sweep.
+
+## Formula, fixed now
+
+Per fighter, in the existing `_share` idiom from `state.py`:
+
+    kd_per_ss = (KD + k * p0) / (SS_landed + k),   k = 60 significant strikes
+
+`k = 60` is the same shrinkage constant the existing style shares use, taken
+unchanged rather than chosen. `p0` is the league rate of knockdowns per
+significant strike landed, computed **on the training block only**.
+
+Pair feature, matching how `kd`, `pace`, `ctrl` and `sub` already enter
+`finish_row` (sum of both corners, because the finish is a property of the
+pair, not of one man):
+
+    pdens = kd_per_ss_a + kd_per_ss_b
+
+Added as a single new input to `FINISH_INPUTS`. One formula. No variants.
+
+## Universe, split, outcome
+
+- Universe: identical to `fit_finish_formula` — every bout from 2012-01-01
+  with at least 2 prior bouts for each corner.
+- Outcome: `y = 1` if the fight did NOT end in a decision.
+- Split: chronological, train on the first 80%, test on the last 20%
+  (`TEST_FRACTION = 0.20`, the project's standing split). No shuffling.
+
+## Decision rule, fixed now
+
+Primary metric: **held-out Brier score.**
+
+Supported only if BOTH hold:
+1. The Brier improvement's 95% bootstrap CI (2,000 fight-level resamples)
+   excludes zero, and
+2. P(better) >= 0.95.
+
+**Both arms refit their own intercept on train**, so a pure level shift cannot
+count as support. This is the load-bearing clause. The standing open finding is
+that the model UNDER-CALLS finishes; a level error is an intercept correction,
+not evidence for a new feature. If the only movement is in the base rate, that
+is recorded as an intercept finding and **power density is rejected.**
+
+Predicted sign: **POSITIVE.** A pair who score knockdowns per strike landed —
+power rather than volume — should finish more often than their per-minute rates
+alone imply. A negative coefficient falsifies the hypothesis regardless of fit.
+
+Secondary, DESCRIPTIVE ONLY, not criteria: held-out log loss; mean predicted
+versus actual finish rate on test; the fitted coefficient and its CI; whether
+adding `pdens` changes the sign or magnitude of `kd` or `pace`.
+
+
+## Addendum 68: RESULT (2026-10-17). NOT SUPPORTED, and the sign is wrong.
+
+Corpus: 4,252 bouts from 2012-01-01 with 2+ prior fights per corner. Train
+3,402 (to 2024-03-23), test 850 (2024-03-23 -> 2026-09-12). Finish rate .4921
+train, .4706 test. League prior p0 = 0.00538 knockdowns per significant strike
+landed, from train-block fights only.
+
+**Primary, as registered — held-out Brier:**
+
+| arm | Brier |
+|---|---|
+| baseline (8 inputs) | 0.23737 |
+| + pdens | 0.23703 |
+| gain | **+0.00034**, 95% CI **[-0.00006, +0.00073]**, P(better) = 0.953 |
+
+Both criteria were required. P(better) cleared 0.95; **the CI does not exclude
+zero.** Not supported.
+
+**And the coefficient came back NEGATIVE: -0.1038 per standard deviation,
+against a registered prediction of positive.** That falsifies the hypothesis on
+its own terms, independent of the fit criteria. Registering the sign in advance
+is what makes this unambiguous: a +0.00034 Brier gain with a backwards
+coefficient is not a near miss, it is the wrong model fitting slightly better
+by absorbing variance it was not supposed to touch.
+
+### Why it failed, which is the part worth keeping
+
+**`pdens` is not a new axis. It is `kd` wearing a denominator.**
+
+- corr(pdens, kd) = **+0.933**; corr(pdens, pace) = -0.066
+- Regressing pdens on (kd, pace): R^2 = **0.938**. Only **6.2% of its variance
+  is new information.**
+
+The reason is in the raw counts, and it is not subtle:
+
+| term | mean | sd |
+|---|---|---|
+| knockdown numerator (both corners) | 4.97 | 4.58 |
+| strike denominator (both corners) | 726.6 | 516.5 |
+
+The numerator nearly doubles across pairs relative to its own mean. Knockdowns
+are rare, so almost all the variation in "knockdowns per strike landed" is
+variation in *knockdowns*, and the denominator mostly rescales it. **The
+premise was that per-minute rates confound volume with effect. They do — but
+dividing by volume does not separate them when the numerator carries ~94% of
+the variance.**
+
+What the model actually did with it is visible in the coefficient shift:
+`kd` moved **+0.196 -> +0.298** while `pdens` took **-0.104**. The two split a
+single signal, with pdens acting as a suppressor on kd rather than contributing
+an axis. That is the collinear pair the `DROPPED` list exists to prevent, and
+it is why the condition number matters: see addendum 1, where the composites
+cut it from ~42 to ~10 precisely by *replacing* their ingredients instead of
+sitting beside them.
+
+**Eleven formulas tested, zero supported.** The booster result still stands
+behind all of it: a model representing every monotone transform and interaction
+simultaneously lost to plain logistic regression. The honest reading is that
+the inputs are close to exhausted at this sample size, and further gains come
+from better inputs, not better arithmetic on the inputs already present.
+
+### EXPLORATORY, found after the registered test closed
+
+**Not a criterion, not confirmatory, registered here only so the forward ledger
+can test it honestly.**
+
+The standing open finding — five independent slices suggesting the model
+under-calls finishes — **does not reproduce on the held-out block as a global
+bias.** Baseline predicted 0.4683 against 0.4706 actual over 850 bouts, a gap
+of **+0.0022**. No probability bucket is more than 0.8 se off:
+
+| predicted | n | predicted | actual | gap |
+|---|---|---|---|---|
+| 0.00-0.35 | 112 | 0.315 | 0.304 | -0.012 (-0.3 se) |
+| 0.35-0.45 | 279 | 0.406 | 0.387 | -0.019 (-0.7 se) |
+| 0.45-0.55 | 270 | 0.495 | 0.519 | +0.024 (+0.8 se) |
+| 0.55-0.65 | 151 | 0.593 | 0.623 | +0.030 (+0.8 se) |
+| 0.65-1.00 |  38 | 0.693 | 0.632 | -0.061 (-0.8 se) |
+
+**But it is concentrated in time, not in the probability range:**
+
+| year | n | predicted | actual | gap |
+|---|---|---|---|---|
+| 2024 | 275 | 0.471 | 0.440 | **-0.031** (-1.0 se) |
+| 2025 | 339 | 0.467 | 0.463 | -0.004 (-0.1 se) |
+| 2026 | 236 | 0.468 | **0.517** | **+0.049** (+1.5 se) |
+
+2026 is the window every one of the five accumulating slices came from. +1.5 se
+on 236 bouts is not significant alone and must not be reported as a finding.
+But it reframes the open question: **if the finish rate is genuinely running
+above the model's base in 2026, that is DRIFT, not misspecification** — the
+same shape as the 12.3-point move in the UFC decision rate already recorded —
+and the correction is an intercept or a recency weight, not a new feature. It
+is emphatically not a reason to go looking for more formulas; addendum 68 is
+what happens when you do.
+
+**This changes the registered re-read at ten graded cards.** The question to
+ask of that data is no longer "does the finish model need another input" but
+"is the 2026 base rate above the training base rate, and by how much." Those
+have different corrections and only one of them is supported by anything.
+
+---
+
+## Addendum 69 (2026-10-19): the conditional round split, and two pieces of furniture
+
+### The matched-denominator problem, showing up as a reading problem
+
+The drawer's "where it ends" bar is **unconditional** — round one as a share of
+every way the fight can end. The graded card asks a **conditional** question:
+given that it finished, was it round one or later. Same subject, different
+denominators, and the conditional form was reachable on the upcoming card only
+as a clause at the end of a paragraph.
+
+So a bout read "30% round one" before the card and "30% of its finishes in
+round one" after it, and the reader had to work out that those are not the same
+30%. That is the denominator discipline this project applies to every
+side-by-side comparison, failing on the one axis nobody checked: **the same
+quantity stated two different ways in two different places, days apart.**
+
+**Built:** a second track under the first, `if it finishes, how early`, round
+one against after round one, model and records, with the league's conditional
+rate as the tick. It is the first bar divided by its own finish share — stated
+on screen, because a derived number that looks measured is the next version of
+this same mistake.
+
+**Both segments are gold-family and the blue never shows.** That is the entire
+visual grammar of the change: on this page blue means distance, and there is no
+distance inside a bar that is conditioned on finishing. The model's row had to
+be re-pointed at the dim GREY rather than the dim gold, or it rendered half
+grey and half gold and read as two sources in one bar — while the note
+underneath promised no blue in it. A caption that contradicts the picture above
+it is the defect this panel has had to fix twice before.
+
+**Nothing new is computed and nothing is claimed.** The recorded null still
+governs: a fighter's own round history does not replicate, split-half 0.21
+falling to 0.05 against 0.54 rising to 0.60 for whether he finishes at all.
+This is a second view of a number already on the page, placed so that the
+before and the after can be read against each other without arithmetic.
+
+### Two pieces of furniture
+
+**The clash explainer is now a hover.** Six lines sat open under the ab-grid on
+every bout where `ends` and `pick` named different families, explaining that
+the two rows answer different questions. It is read once and then it is
+furniture. The row still *says* "not a contradiction" — that has to be visible
+the moment the clash is seen — and the reasoning moved to the title attribute.
+Plain text there, with no markup: a title renders tags literally.
+
+**The page has an icon.** A corner stool cut out of the site's gold, inlined as
+a base64 data URI in the `<link rel="icon">` rather than shipped as a second
+file. The deployment is one file uploaded through a web UI, and **a favicon
+that lives in a second file is a favicon that goes missing the first time only
+`index.html` is uploaded.** The gold field is doing the work rather than the
+mark: candidates drawn as a dark tile with a gold figure were tested in a
+simulated tab strip and dissolved into the browser chrome, since the tab bar is
+already dark. Inverting it — gold field, dark cut-out — is what made it legible
+at 16px. To change it, replace the payload; nothing else references it.
+
+---
+
+## Addendum 70 (2026-10-19): marking model-check agreement without ranking it
+
+A strip down the left edge of each upcoming-card tile: **gold** where the model
+and the check both call a finish, **steel** where both call the distance,
+**split gold-over-steel** where they differ, **nothing** where there is no
+second opinion.
+
+### Why not the border, which is what was asked for
+
+`.tile.is-hot` already owns `border-color`, for a market edge of five points or
+more. A bout that is both hot and agreed would then have one border and two
+things to say, and no way for the reader to know which meaning was being shown.
+The strip is a separate channel, and it reads vertically down a column of
+tiles, which is the scanning motion this is actually for.
+
+The palette was constrained harder than it looks. The stylesheet already
+records why the hot border is neutral bone: *"Orange read as the red corner,
+and gold already means the market everywhere else, so the tile highlight is
+neutral."* Gold therefore means the MARKET on a tile and a FINISH in the
+drawer, and the strip deliberately imports the drawer's meaning — which is
+defensible only because the strip is a drawer-side quantity. The steel is the
+drawer's muted blue and expressly **not** `--bluesoft`, because on a tile
+`--bluesoft` is the blue CORNER and a strip in a corner colour would read as a
+fighter rather than as an outcome.
+
+### What this must not become, which is the whole design constraint
+
+**Whether model-check agreement predicts accuracy is an OPEN registered
+question.** It is H1 of the check-against-model test: 40 length disagreements
+required, roughly eight clean cards, with a stopping rule and an explicit
+instruction that nothing is reported before that. It is nowhere near resolved.
+
+And the market work already records the adjacent trap: **conditioning on
+disagreement with a better forecaster selects the bouts where the worse one is
+most likely wrong.** So "they agree, therefore this is the safer bout" is not
+merely unearned — it may run backwards.
+
+Two consequences, both binding:
+
+1. **All three states are drawn at equal weight.** Agreement is not brightened,
+   the split is not dimmed or greyed. A reader absorbs a visual ordering whether
+   or not the caption disclaims it, so there is no ordering to absorb.
+2. **The split is both colours, not a third one.** A third hue would name a
+   third category — "uncertain" — which is a claim about the bout. Two colours
+   stacked say only that the two readers differ, which is a fact about the
+   readers. It also keeps the colour budget at two on a page that has none
+   spare.
+
+### Two silences, both drawn as nothing
+
+- **No check pasted** — there is no second reader, so there is no agreement to
+  report.
+- **Model publishes no method split** — there is nothing for the check to agree
+  WITH.
+
+Both get no strip rather than a "no agreement" mark. Marking either as a
+disagreement would report an absent opinion as a conflicting one, which is the
+same error as grading a silent model as having predicted a decision — a defect
+this project has already had to fix once.
+
+**A thin check still counts.** Thinness is flagged in its own places and is a
+statement about the record's size, not about what the check read. Suppressing
+the strip there would quietly redefine it as "agreement among checks I judged
+solid enough", which is a different and unstated quantity.
+
+### The counter
+
+The card header carries a key chip with the three swatches and a running
+`N agree · M differ`. The differ tally **is** the disagreement set H1 scores, so
+the chip doubles as a progress read toward the registered 40 — which is the
+only thing the page is allowed to say about those bouts, and is strictly a
+count, not a verdict. It is omitted entirely when no bout carries a strip
+rather than displayed as `0 agree · 0 differ`, which would look like a
+measurement.
+
+---
+
+## Addendum 69, amendment 1 (2026-10-19): the mark is the help button
+
+The "?" circle beside the wordmark is replaced by the stool icon built in
+addendum 69. The explainer already opened on hover — `.tipwrap:hover .tip` was
+there all along — so nothing about the interaction changed; only the glyph did.
+
+The reason it is worth recording: **the symbol that identifies the page in a
+row of tabs is now the symbol you reach for to ask what the page is.** One mark
+doing both jobs rather than a logo sitting next to a piece of punctuation.
+
+The cost is that a logo does not normally invite a hover, so the affordance had
+to be rebuilt by other means: the help cursor, a resting state at 72% opacity
+that lifts to full on hover, and a gold ring that appears with it. Without
+those the icon reads as decoration and the explainer becomes unreachable —
+which would be a worse outcome than the "?" it replaced. The `aria-label`
+stays and matters more than before, because the button now contains no text at
+all.
+
+---
+
+## Addendum 71: breadth of edge. REGISTERED 2026-10-19, before any fitting.
+
+## The question, and the trap in it
+
+Asked: of the per-fighter log-odds contributions shown on each bout, were any
+indicative of outcome — and did fighters with more of them leaning their way
+win more often on average?
+
+**The literal question has a trivially affirmative answer that means nothing.**
+The win model is a logistic regression with `fit_intercept=False` on
+standardised features, so the model's logit IS the sum of the displayed
+contributions. A fighter with more features leaning his way therefore has a
+higher model probability almost by construction, and "he wins more often"
+restates the model's calibration rather than discovering anything. Reported on
+its own it would be a finding-shaped non-finding.
+
+The question that is NOT already answered is whether the SHAPE of the edge
+carries information the TOTAL does not. Two fighters can hold the same summed
+log-odds, one by leading narrowly on twelve features and the other by leading
+hugely on three. If breadth matters, the model is misspecified, because a
+correctly specified logistic model's logit is a sufficient statistic and the
+count of favourable terms adds nothing.
+
+Prior: LOW, for exactly that reason, and lower still given eleven formulas
+tested and zero supported.
+
+## Definitions, fixed now
+
+For each bout, using the model's own standardisation:
+
+    contribution_j = coef_j * z_j          (14 features, WIN_FEATURES)
+    logit          = sum_j contribution_j  (exactly, since fit_intercept=False)
+    breadth        = #{j : contribution_j > 0} - #{j : contribution_j < 0}
+
+`breadth` runs -14..+14 and is antisymmetric under swapping corners, like every
+other feature in this model.
+
+## Universe, split, fitting
+
+- Universe: the standard training universe — both corners with 2+ prior bouts,
+  decisive results only, from 2012-01-01.
+- One orientation per fight (`orient == 0`), so a fight contributes one row and
+  the mirrored copy is not counted twice.
+- Split: chronological, first 80% train / last 20% test (`TEST_FRACTION`).
+- The win model is **refit on the training block only** —
+  `LogisticRegression(max_iter=4000, C=0.5, fit_intercept=False)` on
+  `StandardScaler`-ed `WIN_FEATURES`, matching `train.py`. The shipped frozen
+  model is not used, because it has seen the test block.
+
+## H1, primary: does breadth add to the total?
+
+- Baseline: logistic on `[logit]` alone.
+- Treatment: logistic on `[logit, breadth]`.
+- Both refit their own intercept on train, so a level shift cannot count.
+- Primary metric: **held-out Brier.**
+- **Supported only if** the 95% bootstrap CI (2,000 fight-level resamples)
+  excludes zero AND P(better) >= 0.95.
+- Predicted sign: **POSITIVE**. A negative coefficient falsifies the
+  hypothesis regardless of fit.
+
+## H2, secondary: is any single contribution indicative beyond the model?
+
+For each of the 14 features, add `contribution_j` to `[logit]` and score
+held-out Brier. Since the logit already contains that contribution, a gain
+means the model under-weights that feature out of sample.
+
+- **Benjamini-Hochberg at FDR 0.10 across all 14.**
+- Supported individually only if it survives correction AND improves held-out
+  Brier.
+
+## Descriptive, NOT a test
+
+Raw win rate by `breadth` bucket, unconditional. This is the question as
+literally asked and it is expected to show a strong monotone trend. It is
+reported **beside** H1 precisely so the two can be told apart: the trend is the
+model working, and H1 is the only thing that would be news.
+
+
+## Addendum 71: RESULT (2026-10-19). H1 null. H2 null — after correcting a hole in my own decision rule.
+
+4,167 bouts, train 3,334 (to 2024-03-30), test 833 (to 2026-09-12). Win model
+refit on train only. `breadth` runs -10..+12, sd 3.81, and correlates **+0.696**
+with the logit — as expected, since it is a coarsened version of it.
+
+### Descriptive: the question as literally asked
+
+| breadth | n | won | model said | gap |
+|---|---|---|---|---|
+| -14..-6 | 78 | 0.282 | 0.385 | -0.103 (-2.0 se) |
+| -5..-3 | 100 | 0.470 | 0.478 | -0.008 (-0.2 se) |
+| -2..0 | 339 | 0.487 | 0.549 | -0.063 (-2.3 se) |
+| +1..+2 | 137 | 0.650 | 0.638 | +0.012 (+0.3 se) |
+| +3..+5 | 93 | 0.645 | 0.694 | -0.049 (-1.0 se) |
+| +6..+14 | 86 | 0.802 | 0.756 | +0.046 (+1.1 se) |
+
+**Yes, emphatically** — 28% up to 80%. And the model column tracks it the whole
+way, 38.5% to 75.6%, which is the point: **the trend is the model, not a
+discovery.** The residual gaps are non-monotone in breadth (negative at the
+bottom, negative in the middle, positive at the top), so they are not a breadth
+effect; they are consistent with the model running slightly over-confident on
+this test block, which is a drift question and is already open elsewhere.
+
+### H1: breadth adds nothing to the total
+
+| arm | held-out Brier |
+|---|---|
+| `[logit]` | 0.21602 |
+| `[logit, breadth]` | 0.21599 |
+| gain | **+0.00003**, 95% CI **[-0.00023, +0.00028]**, P(better) **0.598** |
+
+**NOT SUPPORTED**, and not close — P(better) barely beats a coin. The
+coefficient is +0.0066, the predicted direction, and indistinguishable from
+zero.
+
+**The shape of an edge carries nothing the size of it does not.** Twelve narrow
+advantages and three large ones are worth the same if they sum the same. This
+is what a correctly specified logistic model is supposed to do — the logit is a
+sufficient statistic — so the null is the model passing a test it should pass,
+and a pass here would have been evidence of misspecification.
+
+### H2, and the methodological correction that is the real content here
+
+By the letter of the rule I registered, **two of fourteen passed**:
+`d_log_layoff` (p = .000) and `d_age` (p = .003), both under BH.
+
+**Both are artifacts of a hole in that rule, and I am recording them as null.**
+
+The gains:
+
+| feature | Brier gain |
+|---|---|
+| d_log_layoff | **+5.5e-07** |
+| d_age | **+4.3e-06** |
+| d_elo | +1.1e-05 |
+| d_str_acc | +2.1e-05 |
+
+Against a baseline Brier of **0.216**. For scale: **flipping a single bout of
+833 moves Brier by 1.2e-03** — roughly *two thousand times* the supposedly
+significant `d_log_layoff` effect. These gains are three orders of magnitude
+below the resolution of one fight.
+
+The mechanism is specific and worth knowing. **A bootstrap p-value on a
+difference tests the CONSISTENCY of its sign, not its magnitude.** A gain that
+is microscopic but reliably positive across resamples drives p toward zero
+exactly as a large one does. And here there is a reason for the reliable sign:
+the win model is fitted with `C=0.5`, so re-admitting a feature's own
+contribution lets the second-stage fit recover a sliver of that shrinkage. The
+direction is systematic for every feature; the size is nothing.
+
+**My registration said "improves held-out Brier" and set no minimum effect
+size.** A gain of 5e-07 improves held-out Brier. The rule was satisfied and the
+conclusion was still wrong, which makes this my error and not a finding.
+
+**Amendment, binding on every future Brier test in this file:** a result must
+clear a pre-specified **minimum effect of one tenth of a single flipped bout**,
+i.e. `0.1 / n_test` in Brier units — 1.2e-04 on a test block of this size — in
+addition to its CI and P(better) conditions. Applied here, **H2 is zero of
+fourteen**, and H1's +3e-05 also sits below the floor, which it would have
+failed on anyway.
+
+Noted for the record: addendum 68's registration carried a sign prediction,
+which is what caught power density despite its P(better) of 0.953. This one
+carried no effect-size floor, and that is what let two nulls through. **Both
+guards are needed; each catches what the other misses.**
+
+---
+
+## Addendum 72: does a finish rate mean the same thing at 8 fights as at 30?
+## REGISTERED 2026-10-19, before any fitting.
+
+## What is already settled, and what is not
+
+**Settled (addendum 46).** Recency weighting of the finish rate is worse than
+flat career, monotonically, with no interior optimum: half-life 8 fights
++0.00139 log loss, last-5-only +0.00620, last-3-only +0.01279, against a
+career-over-base-rate gain of 0.0337. A TREND term adds nothing on top. So
+"discount his old fights" is rejected, and the gradient points at *use every
+fight*. The mechanism recorded there is variance, not bias: a method outcome is
+one Bernoulli draw per fight, and halving the sample to chase a trend costs more
+in noise than any drift it recovers.
+
+**Not settled, and the actual question here.** Addendum 46 discounted old
+fights uniformly. It did not ask whether the career rate carries a *different
+meaning* depending on how long the career is — which is the comparison problem:
+a 30-fight veteran and an 8-fight prospect both reading 50%, who finishes the
+next man? Shrinkage already handles the difference in RELIABILITY (k=4 pulls the
+short record toward the league). This asks whether there is also a difference in
+BIAS.
+
+Prior: LOW for a decay effect, given 46. The descriptive arc, however, is simply
+unmeasured and is worth having on the record either way.
+
+## Universe and outcome
+
+- One row per fighter per fight (both corners), from 2012-01-01, requiring 2+
+  prior bouts for that fighter.
+- Outcome `y = 1` if **this fighter finished his opponent in this bout** — he
+  won and the method was not a decision. Scored per fighter, not per bout.
+- Predictors from his pre-fight snapshot only: `finish_rate` (shrunk, k=4, as
+  the site shows it), `log1p(n_prior)`, `age`.
+- Chronological split, first 80% train / last 20% test.
+
+## H1, primary: the interaction
+
+- Baseline: `[finish_rate, log1p(n_prior)]`
+- Treatment: baseline + `finish_rate x log1p(n_prior)`
+- Primary metric: **held-out Brier.**
+- **Supported only if all three hold:** 95% bootstrap CI (2,000 resamples)
+  excludes zero; P(better) >= 0.95; and the gain clears the **addendum 71
+  effect-size floor of 0.1 / n_test** in Brier units.
+- **Predicted sign: NEGATIVE.** The hypothesis under test is that a long record
+  dilutes — that a given finish rate built over 30 fights converts to fewer
+  finishes now than the same rate built over 8, because the long record averages
+  in an earlier and more finishing-prone phase. A positive interaction
+  falsifies it.
+
+## H2, secondary: age on top
+
+- Baseline as above; treatment adds `age`. Same three conditions.
+- **Predicted sign: NEGATIVE.**
+
+## Descriptive, NOT tests
+
+1. Finish rate by **age** bucket and by **career fight number** bucket, at the
+   population level. This is the "at what point does it decline" question in its
+   plainest form.
+2. **Chronological split-half against random split-half, on the SAME fighters.**
+   For every fighter with 8+ recorded bouts, correlate his first-half finish
+   rate with his second-half, then correlate a random half with its complement.
+   Same men, same sample sizes, only the split rule differs — so **any gap
+   between the two correlations IS the within-career decay**, with the sampling
+   noise matched out. The recorded random split-half for "does he finish at all"
+   is 0.54 rising to 0.60; a chronological figure materially below that is
+   decay, and one at parity is a career rate that holds.
+
+
+## Addendum 72: RESULT (2026-10-19). The decline is by AGE, not by record size.
+
+10,439 fighter-fights from 2012, train 8,351 (to 2024-02-17), test 2,088.
+Effect-size floor 4.79e-05 (addendum 71).
+
+### H1: a long record does NOT dilute. NOT SUPPORTED.
+
+| arm | held-out Brier |
+|---|---|
+| `[finish_rate, log n]` | 0.17411 |
+| + `finish_rate x log n` | 0.17414 |
+| gain | **-0.00003**, CI [-0.00021, +0.00014], P(better) **0.328** |
+
+Coefficient **+0.1066**, against a registered prediction of negative. The
+premise behind the question — that a thirty-fight record averages in an older,
+more finishing-prone phase and so overstates the man today — **is rejected, and
+the point estimate leans the other way.** A 50% finish rate built over thirty
+fights means what a 50% rate built over eight means. The difference between
+them is precision, not bias, and shrinkage (k=4) already handles precision.
+
+### Descriptive: where the decline actually lives
+
+**By age** — a smooth, monotone slide with no breakpoint:
+
+| age | n | finishes | their avg career rate |
+|---|---|---|---|
+| under 26 | 799 | **0.314** ±.016 | 0.472 |
+| 26-29 | 2,045 | 0.282 ±.010 | 0.446 |
+| 29-32 | 3,055 | 0.250 ±.008 | 0.423 |
+| 32-35 | 2,515 | 0.222 ±.008 | 0.406 |
+| 35+ | 2,025 | **0.200** ±.009 | 0.392 |
+
+**By career fight number** — essentially flat until about fifteen:
+
+| fight # | n | finishes |
+|---|---|---|
+| 2-4 | 2,697 | 0.248 ±.008 |
+| 5-8 | 2,331 | 0.250 ±.009 |
+| 9-14 | 2,074 | 0.240 ±.009 |
+| 15-22 | 1,046 | 0.219 ±.013 |
+| 23+ | 363 | 0.226 ±.022 |
+
+**Mileage does not dull a finisher; years do.** Eleven points across the age
+range against roughly two or three across the fight-count range, and the
+fight-count figures are flat within noise through the first fourteen bouts.
+**There is no "point at which" to name** — the age curve is a continuous slide,
+so any threshold would be invented rather than found.
+
+### Descriptive: the ordering survives, the level does not
+
+Matched comparison on the same 788 fighters with 8+ recorded bouts, same half
+sizes, only the split rule differing:
+
+| split | r |
+|---|---|
+| RANDOM half vs half | +0.249 |
+| CHRONOLOGICAL first half vs second | **+0.261** |
+| gap (= within-career decay) | **-0.012** |
+
+**No decay in rank.** Who finishes more than whom is as predictable across time
+as it is at random — if anything marginally more so. But the levels move a long
+way: mean finish rate **0.371 in the first half, 0.230 in the second**, down
+14.2 points.
+
+So the two halves of the picture are: everyone slides down together, and the
+order they stand in does not change. A fighter who out-finished his peers at 27
+out-finishes them at 35; both are finishing less.
+
+**Caveat that no statistic here removes.** That 14-point level drop is
+confounded with opponent quality. The corpus is UFC-only, so a fighter's later
+bouts are against better opposition almost by construction, and some of the
+drop is the division rising to meet him rather than him declining. The rank
+correlation is immune to this — it asks about ordering, not level — which is
+why the ordering result is the stronger of the two. The level figure should be
+read as an upper bound on decline, not an estimate of it.
+
+**Also not comparable to the recorded 0.54.** That figure is the split-half
+reliability of the shrunk, pair-level finish read. This is raw, per-fighter,
+half-career, roughly four bouts per half. The matched random/chronological pair
+above is the valid comparison; the 0.54 is a different measurement and is not
+a benchmark for it.
+
+### H2: age adds beyond the career rate. SUPPORTED.
+
+| arm | Brier | |
+|---|---|---|
+| `[finish_rate, log n]` | 0.17411 | |
+| + `age` | 0.17306 | gain **+0.00105**, CI [+0.00016, +0.00201], P **0.989** |
+
+Coefficient **-0.1766**, the predicted sign. Clears the effect floor by more
+than twentyfold. All three conditions met.
+
+Which raised the only question that could change the product, and it needed its
+own registration rather than an extrapolation from here.
+
+
+---
+
+## Addendum 73: age LEVEL in the production finish model.
+## REGISTERED 2026-10-19, before fitting. Follow-up to addendum 72 H2.
+
+72's H2 showed age predicts whether a fighter finishes his opponent BEYOND his
+career finish rate and experience. That was against a two-input baseline. It
+does NOT establish that age adds to the production finish model, whose eight
+inputs (kd, ctrl, pace, agegap, sub, five, wt, women) may already proxy it.
+
+Note what the production model does and does not carry: `agegap` is
+|age_a - age_b|, the DIFFERENCE. There is no age LEVEL term. Two 36-year-olds
+and two 26-year-olds have identical agegap and, 72 suggests, different finish
+probabilities.
+
+Formula, fixed now: `agelvl = (age_a + age_b) / 2`, the pair's mean age, matching
+how kd / ctrl / pace / sub already combine the two corners.
+
+- Universe and split: identical to `fit_finish_formula` - bouts from
+  2012-01-01, 2+ priors per corner, outcome = not a decision. Chronological
+  80/20.
+- Baseline: the eight FINISH_INPUTS. Treatment: those plus `agelvl`.
+- Primary: held-out Brier. Supported only if ALL THREE hold - 95% bootstrap CI
+  (2,000) excludes zero; P(better) >= 0.95; gain >= 0.1/n_test (addendum 71).
+- Predicted sign: NEGATIVE. Older pairs finish less.
+- Secondary, descriptive: whether agegap's coefficient moves when the level is
+  admitted, which would say the gap term has been absorbing the level.
+
+
+## Addendum 73: RESULT (2026-10-19). NOT SUPPORTED, and this is why 72's H2 was not enough.
+
+4,252 bouts, train 3,402, test 850, floor 1.18e-04. `agelvl` correlates only
++0.103 with `agegap`, so it is very nearly a new axis.
+
+| arm | held-out Brier |
+|---|---|
+| the eight FINISH_INPUTS | 0.23737 |
+| + `agelvl` | 0.23737 |
+| gain | **+0.00000**, CI [-0.00051, +0.00047], P(better) **0.510** |
+
+Coefficient -0.0309 — the predicted direction, and nothing. `agegap` barely
+moves when the level is admitted (+0.0302 -> +0.0330), so the gap term was not
+quietly carrying the level either.
+
+**Age adds nothing the production model does not already hold.** Knockdown rate,
+control share and striking pace evidently carry whatever age was standing in
+for in 72's thin baseline — which is the expected relationship between a
+demographic variable and the performance measures it acts through.
+
+**The methodological point is the one to keep.** 72's H2 passed every condition:
+CI clear of zero, P = 0.989, effect twenty times the floor, sign as predicted.
+It was a real relationship. It was also **not an improvement to anything**,
+because the baseline it beat was a two-input stand-in rather than the model that
+would have used it. A supported result against a weak baseline is a statement
+about the baseline.
+
+So the rule, now explicit: **a finding is only actionable when the baseline it
+beat is the thing it would replace.** Extrapolating 72's H2 into "add age to the
+finish model" would have shipped a null as a feature, and the only reason it did
+not is that the follow-up was registered and run separately rather than assumed.
+
+Twelve formulas and additions tested now. One supported against a toy baseline,
+zero against the model in production.
+
+---
+
+## Addendum 74 (2026-10-20): calibration of the combined finish read, and where it actually crosses half
+
+Descriptive, not a registered test — it measures an existing published quantity
+rather than proposing a new one. No split is needed: `walk()` builds each
+corner's rate from PRIOR fights only, so every bout is an honest out-of-sample
+observation of its own number.
+
+2,681 bouts from 2012, both corners with 4+ priors, overall finish rate
+**0.494**. Each corner's finish rate rebuilt at the check's **k=5** rather than
+the model's k=4.
+
+### The question as asked: does above-50% combined deliver above half?
+
+| | n | finished |
+|---|---|---|
+| combined average >= 0.50 | 590 | **0.627** ±.020 — **+6.4 se above half** |
+| combined average < 0.50 | 2,091 | 0.457 ±.011 — -4.0 se |
+
+**Yes, and by a wide margin.**
+
+### But the average under-states across the ENTIRE range
+
+| combined avg | n | claimed | actual | gap |
+|---|---|---|---|---|
+| 0.00-0.30 | 211 | 0.269 | 0.341 | **+0.072** |
+| 0.30-0.38 | 665 | 0.344 | 0.391 | **+0.047** |
+| 0.38-0.44 | 660 | 0.410 | 0.505 | **+0.095** |
+| 0.44-0.50 | 555 | 0.470 | 0.523 | **+0.053** |
+| 0.50-0.56 | 398 | 0.527 | 0.611 | **+0.084** |
+| 0.56-0.64 | 160 | 0.588 | 0.675 | **+0.087** |
+
+**Six buckets, six positive gaps, mean about +0.07.** This is a LEVEL error, not
+a slope error — the ordering is fine and every bucket is shifted by roughly the
+same amount. It is the same shape as the accumulating under-call finding, now on
+2,681 bouts instead of slices of fifteen to twenty-three, and it is the
+strongest corroboration that finding has.
+
+### Which means the crossing point is NOT 0.50
+
+By twentiles of the combined average, the actual finish rate passes half at
+roughly **0.37-0.40**, not at 0.50:
+
+| combined avg | n | finished |
+|---|---|---|
+| 0.346-0.359 | 135 | 0.363 |
+| **0.372-0.386** | 132 | **0.523** |
+| 0.398-0.409 | 136 | 0.544 |
+| 0.420-0.433 | 137 | 0.533 |
+| 0.448-0.462 | 133 | 0.489 |
+| 0.476-0.491 | 134 | 0.567 |
+| 0.505-0.524 | 134 | 0.642 |
+| 0.576-0.742 | 135 | 0.659 |
+
+**The exact crossing point is NOT identified and must not be used as a cut.**
+The band from 0.37 to 0.50 is flat and noisy — 0.523, 0.544, 0.533, 0.489,
+0.537, 0.567, 0.522 — and a threshold chosen by looking at which twentile first
+clears 0.500 is selected on the same data it would be scored against. That is
+precisely the post-hoc selection already rejected for the minimum-picks idea.
+**Any operational cut must be registered forward and scored on later cards.**
+
+### The union form is worse, and in the other direction
+
+| union 1-(1-a)(1-b) | n | claimed | actual | gap |
+|---|---|---|---|---|
+| 0.50-0.60 | 546 | 0.558 | 0.357 | **-0.201** |
+| 0.60-0.68 | 708 | 0.642 | 0.510 | -0.132 |
+| 0.68-0.74 | 518 | 0.710 | 0.517 | **-0.192** |
+| 0.74-0.80 | 474 | 0.768 | 0.576 | **-0.192** |
+| 0.80-1.01 | 269 | 0.834 | 0.651 | **-0.184** |
+
+Treating the two corners as independent over-states by 13 to 20 points
+everywhere. The reason is that they are not independent: a finisher meets a
+durable man and does not get his career rate. The truth sits between an average
+that reads 7 points low and a union that reads 18 points high, and **neither
+form is the right combination rule.**
+
+**Spearman is identical for both: +0.188 and +0.188.** The two forms rank bouts
+the same way, so the choice between them is purely about level and not at all
+about ordering. That also caps what any recalibration can buy: it can fix the
+level, and it cannot improve the ranking, which is where a betting edge would
+have to come from.
+
+### What this is NOT
+
+The drawer does not display this quantity. `sbMethodRead` combines the two
+corners **weighted by who wins**, over method shares from the pasted record —
+which includes non-UFC bouts at half weight — and shrinks toward the division
+base. This is the corpus-side analogue built from UFC fights only and a simple
+average. **The structure here (level low, ordering sound, union far worse)
+should carry; the exact +0.07 should not be read as the drawer's error**, and
+no correction should be applied to the shipped read on the strength of this
+table alone.
+
+---
+
+## Addendum 75 (2026-10-21): the bracket/count-off finish board, tested and rejected
+
+Proposed: allocate a finish-board pick by comparing the two corners' RAW COUNTS
+of a method in a round — fighter A has 3 round-one KOs, fighter B has 2, so the
+R1-KO cell goes to A.
+
+Rule fixed before running: legitimate only if the count-leader takes the finish
+meaningfully more than half the time AND beats selection by plain career finish
+rate.
+
+2,681 bouts from 2012, both corners 4+ priors, snapshot-before-update so every
+row uses prior fights only. The statistic is the clean one: **conditional on the
+bout actually ending that way, was it the selected man?** Chance is 0.500.
+
+### Result
+
+| selector | n | leader got it | vs coin flip |
+|---|---|---|---|
+| **more prior R1 KOs — the proposal** | 314 | **0.497** ±.028 | **-0.1 se** |
+| higher career finish RATE | 406 | **0.576** ±.025 | **+3.1 se** |
+| more prior R1 finishes, counts | 502 | 0.514 ±.022 | +0.6 se |
+| higher career finish RATE | 591 | **0.587** ±.020 | **+4.3 se** |
+
+**The count-off is exactly a coin flip.** Not weak — indistinguishable from
+chance, on 314 bouts that genuinely ended in a round-one knockout.
+
+### Why it fails, which is the part worth keeping
+
+The count is substantially a measure of CAREER LENGTH, not of finishing:
+
+- when a man leads on R1-KO count he has more career fights **64.1%** of the time
+- his mean career fights **13.1** against his opponent's **9.9**
+- his mean career finish rate 0.417 against 0.346
+
+So the count-leader IS the better finisher on average — the signal is in there —
+and **the count form destroys it by mixing it with experience.** A thirty-fight
+veteran out-counts an eight-fight prospect on raw totals while finishing less
+often per fight. Rate 0.576, count 0.497: the contamination cancels the signal
+almost exactly. This is the same error addendum 72 identified from the other
+direction, where record LENGTH was shown not to dilute the RATE — the rate is
+the quantity that carries, and any form that lets record size in corrupts it.
+
+### And the rate form adds nothing over what is already used
+
+| selector | n | leader got it |
+|---|---|---|
+| higher R1-KO RATE | 365 | 0.567 ±.026 |
+| higher career finish rate | 406 | **0.576** ±.025 |
+| higher R1-FINISH RATE | 580 | 0.571 ±.021 |
+| higher career finish rate | 591 | **0.587** ±.020 |
+
+Round-specific rates lose to the plain career finish rate on both comparisons.
+Not by much, and inside noise — but there is **no direction in which the
+round-specific version is better**, which is the recorded null arriving exactly
+where it was predicted to: split-half 0.21 falling to 0.05 for a fighter's own
+round shape, against 0.54 rising to 0.60 for whether he finishes at all. Knowing
+*which round* a man's past finishes landed in tells you nothing beyond knowing
+*that* he finishes.
+
+### Two further practical objections
+
+**It would be silent on a third of matchups.** 31.9% of fighter-rows have EQUAL
+R1-KO counts, so the bracket has no opinion there and needs a tiebreak — which
+would end up being the finish rate, i.e. the thing that works, reached by the
+long way round.
+
+**It discards the opponent entirely.** The board's current lean pairs one man's
+finishing against the other man's way of being beaten. A count-off between two
+career totals cannot see who is across from him, which is the single largest
+thing the finish board knows.
+
+**Verdict: not built.** The idea's working part — that the more dangerous
+finisher should get the cell — is already what the board does, through the
+quantity that replicates.
+
+---
+
+## Addendum 76 (2026-10-25): a third card view — bouts with a check
+
+The card filter was a boolean, `ONLY_GAPS`, with two buttons. It is now a
+three-state mode, `FMODE`, adding **"With a check (N)"** beside "All bouts" and
+"Only disagreements".
+
+**Why a mode and not a second boolean.** Two independent flags give four
+states, two of which — "disagreements AND checked", and "neither" — nobody
+asked for, and both of which would still need a label and a count. One mode,
+three mutually exclusive views, one button lit at a time.
+
+**The predicate is deliberately not `st.on`.** That flag means *show this check
+beside the model on the card*, which is a display choice made after the work is
+done. A read entered and then switched off is still a bout being worked on, and
+gating the filter on it would hide precisely the bout the user went looking
+for. The test is instead whether any of the four paste fields hold anything, so
+a half-entered check — one corner done, the other not — still appears. Those
+are the ones most likely to be hunted for.
+
+**It spans both lists.** A bout the model declined can carry a check, and that
+is the one place a check has nothing to be measured against — so it is the one
+place it is most worth finding again. The count covers modeled bouts and
+no-read bouts together, and the no-read entries survive this filter where they
+are dropped by the disagreement filter. Verified: a check with `on:false` is
+included, a no-read bout with a check is included, and an SBOX entry with no
+pasted content is correctly excluded from both the view and the count.
+
+The hint line beside the buttons swaps with the mode rather than stating the
+disagreement threshold under a view that has nothing to do with it.
+
+---
+
+## Addendum 77 (2026-10-27): a base-rate floor on the method table
+
+### The gap
+
+The graded props panel has always reported a control — "right on 30 of 40
+props" set beside "the base rate alone got 27" — so that a read cannot take
+credit for following the base rate. **The four method rows of "how the fight
+ends" had no such column.** They reported check against model and nothing else.
+
+That makes the rows unreadable. "The check got 56% on finish type" says nothing
+without "always naming the commonest outcome gets X%", and a read that leans
+toward the common outcome will beat the model while contributing nothing at
+all.
+
+This surfaced from a live reading of the panel: the check led the model on all
+four rows (+1, +3, +5, +2 bouts) while losing the winner row 7/19 to 11/19. The
+four rows are not four results — the full call contains the finish type which
+contains the length, scored on overlapping bouts, so one method lean wins all
+four mechanically. And **the full call can be won without naming a fighter**:
+`check_right = top === actual` over five cells of which one is `decision`. A
+read that leans to the cards collects full calls while never picking a man,
+which is the same hedging visible in its winner Brier — 0.304 against the
+model's 0.302, level, across a 21-point hit-rate gap.
+
+Under the most favourable exact McNemar consistent with the totals — every
+discordant pair breaking the leader's way — the best row reaches p = 0.062 and
+the rest are 0.25 to 1.00. Nothing is significant, and the registered
+40-disagreement bar still governs. But the missing control is a defect
+independent of the sample size, and it is fixed here.
+
+### The floors, each matched to its own bout
+
+| row | the floor |
+|---|---|
+| ends early or goes the distance | the prop's own per-bout published base, so division-specific by construction |
+| finish type | the commonest family in that bout's division — in practice almost always the decision |
+| full call | the largest of the five cells under base rates alone, finish mass split evenly between corners because a base rate has no opinion on who wins |
+| round one, or past it | the league's CONDITIONAL round-one share, .517 on three rounds and .376 on five — the same figure the drawer's "if it finishes, how early" tick uses |
+| exact round named | always round one, the largest single bucket either way |
+
+Every figure summed over the **same array** as the two columns beside it. A
+control on a different bout set is not a control.
+
+### The floor is not a third reader, and the display enforces it
+
+- The column is the quietest on the table, `--dim`, and never takes the gold.
+- A figure at or below the floor is **struck through** — not reddened, because
+  red means a miss on this page and this is not a miss; it is a number that
+  turns out not to mean anything.
+- **`ckbest` is suppressed when the leader is itself at or below the floor.**
+  This was caught in review: the first build marked the check gold for leading
+  the model on the full call while striking it through for sitting under the
+  base, which is two contradictory verdicts in one cell. Crowning the better of
+  two reads that both failed is precisely the reading this column exists to
+  prevent, so when neither clears the bar, neither is marked.
+
+### The hedging diagnostic
+
+On the full-call row, a hover: *"check named the decision cell on N of M, the
+model on K; it was actually a decision J times."* One tooltip, no new panel —
+the same move as the clash explainer in addendum 69. It tests the hedging
+account directly, and if the check's decision count approaches M the four-row
+lead is one behaviour rather than four findings.
+
+### What it can and cannot settle
+
+Three outcomes, all informative. Check clears the floor and the model does not:
+real, and it would be reported. Check tracks the floor: the lead is hedging and
+the four rows collapse to one. Both lose to the floor: the finding is about the
+model, and is a different finding worth having.
+
+It does not improve the sample. Eighteen to twenty-six bouts stays small and
+the registered bar is unchanged. **This column changes which question the table
+asks, not how much power there is to answer it.**
+
+Not computable here: `CKR` lives in the browser's localStorage, so the figures
+fill in on the user's machine. The table was verified against synthesised
+pre-card reads covering every row, including the strike-through and
+suppressed-crown paths.
+
+---
+
+## Addendum 77, amendment 1 (2026-10-27): the floor was wrong on binary claims
+
+The column shipped hours earlier reported **39%** as the floor for "ends early
+or goes the distance" — a TWO-WAY claim. A coin scores 50%. The base-following
+rule had simply been wrong-footed: on these 18 bouts it called the
+division-leaning side and lost 11 of them, which is itself a reading of the
+sample rather than a floor.
+
+Crediting a read with beating 39% on a binary claim is crediting it with
+beating something worse than guessing. **The floor is now the best UNINFORMED
+strategy available: the higher of the base-rate rule and blind chance** — 50%
+on a two-way claim, 1/3 on the finish type, 1/5 on the five-cell full call,
+1/rounds on the exact round. The cell prints whichever one is governing, so a
+floor reading "50% chance" says out loud that the base rule lost to a coin
+there.
+
+Caught by reading the live figures, not by a test. A control that can itself be
+wrong-footed is not a control, and the binary case is exactly where that
+happens.
+
+## Addendum 78 (2026-10-27): first real reading — the floor indicts the MODEL
+
+The graded record, pre-card reads only, against the corrected floor:
+
+| claim | n | model | check | floor |
+|---|---|---|---|---|
+| ends early or goes the distance | 18 | 78% 14/18 | **83% 15/18** | 50% chance |
+| finish type | 18 | **39% 7/18** | **56% 10/18** | 39% 7/18 |
+| full call — fighter and method | 26 | **27% 7/26** | **46% 12/26** | 27% 7/26 |
+| round one, or past it | 11 | **36% 4/11** | **55% 6/11** | 82% 9/11 |
+| exact round named | 11 | **64% 7/11** | n/a | 64% 7/11 |
+
+**The model is at or below the floor on four of the five rows**, and on three of
+them its count is EXACTLY the floor's: 7/18, 7/26, 7/11. The check clears the
+floor on three.
+
+This was built to test whether the check's lead was hedging. It answered a
+different question. The claim under examination was "is the check better than
+the model"; the floor says **the model's method and round reads are doing
+nothing at all** on this sample, and the check's lead over it is therefore not
+the interesting quantity.
+
+**Equal counts are not identical picks.** 7/18 and 7/18 can be different sevens,
+and the hover on the full-call row reports each side's decision-cell count,
+which is what distinguishes "the model IS the base rate" from "the model is
+wrong in a different place than the base rate". That diagnostic has to be read
+before the stronger claim is made.
+
+### What is and is not significant
+
+Exact tests, most favourable pairing the totals allow:
+
+| comparison | best-case p |
+|---|---|
+| check vs floor, early/distance (binomial vs 50%) | **0.008** |
+| model vs floor, early/distance (binomial vs 50%) | **0.031** |
+| check vs floor, full call | 0.062 |
+| check vs floor, finish type | 0.250 |
+| model vs floor, round one | 0.062 (model WORSE) |
+
+**Only the length row is established.** Both reads genuinely beat a coin at
+calling early-versus-distance, and they are a bout apart from each other. The
+check's method edge remains unconfirmed at 0.062 and 0.250, and the registered
+40-disagreement bar is unchanged.
+
+### The round row is the clearest negative, and it is for both
+
+Floor 9/11; check 6/11; model 4/11. **Both reads are substantially worse than
+"call round one on a three-rounder and after it on a five".** This is the
+recorded null arriving where it was always predicted: split-half 0.21 falling
+to 0.05 for a fighter's own round shape. The model's 4/11 against a 9/11 floor
+is the single worst cell in the table.
+
+### Registered now, before more cards
+
+1. If the model's method count continues to track the floor exactly, the
+   question becomes whether its published method split is adding anything over
+   the division base — a question about the MODEL, and a candidate for removal
+   rather than improvement.
+2. The round rows for both reads are candidates for withdrawal from the page,
+   not repair. A claim that loses to one line of arithmetic over eleven bouts
+   has to clear the floor before it is shown as a read again.
+3. Neither is acted on before the registered bar. This is an interim, and the
+   stopping rule says interims do not move thresholds.
+
+---
+
+## Addendum 79: does the model's METHOD and ROUND read beat the floor?
+## REGISTERED 2026-10-27, before any fitting.
+
+## Why this needs no checks
+
+Addendum 78 found the model at or below the base-rate floor on four of five
+rows of the graded method table, with its count EXACTLY equal to the floor's on
+three of them (7/18, 7/26, 7/11). That sample is 26 bouts and every row depends
+on a pasted check existing.
+
+This question does not. "Does the model's method split beat the division base
+rate" is model-against-floor, so it runs on the whole corpus, walked forward,
+with no checks involved and no wait for the registered 40 disagreements.
+
+If the model clears the floor at corpus scale, the 26-bout table is a cold
+streak and nothing changes. If it does not, the finding is real at real sample
+size.
+
+## Universe, split, fitting
+
+- The pipeline's own recipe, unchanged: survival model fitted on dates up to
+  the 0.85 quantile of the expanded panel, hazards calibrated on the remainder,
+  the finish formula rescaling the level exactly as `upcoming.py` does.
+- Scored only on bouts AFTER the survival model's calibration cut, so every
+  scored bout is out of sample for every component.
+- Both corners 2+ priors, decisive results, from 2012-01-01.
+
+## The floors, matched per bout
+
+- **Method, 5 cells** (`decision`, `a_ko`, `a_sub`, `b_ko`, `b_sub`): the
+  largest cell under that bout's own division base, finish mass split evenly
+  between corners. Blind chance is 1/5.
+- **Finish type, 3 families**: the commonest family in that division. Blind
+  chance is 1/3.
+- **Round one or past, conditional on a finish**: the league's conditional
+  round-one share, .517 on three rounds and .376 on five. Blind chance is 1/2.
+
+The reported floor on each row is the HIGHER of the base-rate rule and blind
+chance, per addendum 77 amendment 1.
+
+Division bases are computed on the TRAINING block only.
+
+## Decision rule, fixed now
+
+For each of the three rows, the model is credited only if it beats the floor
+with a 95% bootstrap CI (2,000 resamples) on the paired difference excluding
+zero, AND the gain clears the addendum 71 effect-size floor of `0.1 / n_test`.
+
+**Predicted: the model beats the floor on method and finish type, and does NOT
+beat it on round one.** The round prediction follows the recorded null — a
+fighter's own round shape does not replicate, split-half 0.21 falling to 0.05 —
+and the model's round number is built from the league curve, so it should track
+the floor rather than beat it.
+
+## What follows from each outcome, stated before seeing it
+
+- **Model clears the floor on method:** the 26-bout table was a cold streak.
+  Nothing changes, and addendum 78's registered candidates are withdrawn.
+- **Model does not clear it on method:** the method split is a candidate for
+  WITHHOLDING, not repair — the model already declines to publish a method on
+  bouts too thin to support one, so there is precedent for showing nothing
+  rather than showing a number that has not earned its place.
+- **Model does not clear it on round:** same, for the round row, on both the
+  model and the check sides.
+
+
+## Addendum 79: RESULT (2026-10-27). All three fail on top-pick — and my prediction was wrong on two of three.
+
+622 out-of-sample bouts from 2024-10-27, every component fitted before the cut.
+
+| claim | n | model | base rule | floor | gain | 95% CI |
+|---|---|---|---|---|---|---|
+| full call, 5 cells | 622 | 0.511 | 0.508 | 0.508 | +0.0032 | [-0.0096, +0.0161] |
+| finish type, 3 families | 622 | 0.514 | 0.508 | 0.508 | +0.0064 | [-0.0064, +0.0209] |
+| round one, or past | 306 | 0.520 | 0.575 | **0.575** | **-0.0556** | [-0.1569, +0.0392] |
+
+**To measurement precision the model's method TOP PICK is the division base
+rate.** The 26-bout graded table, where the model's count equalled the floor's
+exactly on three rows, was not a cold streak — it was reading something real,
+and it holds at twenty-four times the sample.
+
+**Registered prediction: model beats the floor on method and finish type, fails
+on round one. It failed on all three.** The round call was right for the stated
+reason. The other two were simply wrong, and writing them down beforehand is
+the only thing that makes that visible rather than retrofittable.
+
+## Addendum 80: RESULT (2026-10-27). The proper score REVERSES it. The method split stays.
+
+Top-pick accuracy is argmax agreement. This project has twice recorded that
+accuracy moves while probabilities go the other way (addendum 11), so before
+withdrawing a component on an argmax tie, the distributions were scored with a
+proper rule — same 622 bouts, model's five-cell distribution against the base
+distribution.
+
+| rule | model | base | model better by | 95% CI | P(better) |
+|---|---|---|---|---|---|
+| multiclass Brier | **0.63783** | 0.66132 | **+0.02350** | [+0.01169, +0.03553] | **1.000** |
+| log loss | **1.23876** | 1.32416 | **+0.08540** | [+0.05385, +0.11601] | **1.000** |
+
+Both CIs clear of zero by a wide margin, P(better) = 1.000 on 2,000 resamples,
+and the Brier gain is **146 times** the addendum 71 effect-size floor.
+
+**The model's method distribution carries real information. Its top pick is the
+base rate; its probabilities are not.** The registered withholding consequence
+from addendum 79 is therefore **withdrawn**, and so are addendum 78's
+candidates for the method split.
+
+### The finding is now about the TABLE, not about the model
+
+Every row of "how the fight ends" is scored on **top-pick accuracy**, which has
+just been shown at corpus scale to be blind to a difference that a proper rule
+calls certain. That means:
+
+- The model's apparent failure against the floor was an artifact of the metric.
+- **The check's lead on those rows is measured the same way**, so it does not
+  establish that the check's method read is better. It establishes that its
+  argmax lands more often on 18 to 26 bouts. Those are different claims and the
+  table cannot tell them apart.
+
+**Registered next step:** the method rows need a proper score beside the hit
+counts — multiclass Brier for check, model and base on the same bouts. The
+check already stores its five cells with a `cells_ok` flag, so this is
+computable in the browser with no new data. Until it exists, **no comparison
+between the check and the model on method is to be treated as settled in either
+direction**, including the three rows where the check currently clears the
+floor.
+
+### Still open
+
+The ROUND row was scored only on top-pick, where the model trails the floor by
+5.6 points on 306 finishes (CI spanning zero). Whether its round PROBABILITY
+beats the floor's is not yet measured and is not claimed either way. The
+recorded null predicts it does not.
+
+### Twice wrong in one evening
+
+I predicted the model would clear the floor on method and finish type: wrong.
+I then came close to recommending withdrawal of a component that a proper
+scoring rule says is certainly informative — stopped only because the
+registration named the metric as crude before the number arrived. **An argmax
+tie is not evidence of no information, and a 5e-07 sign-consistent gain is not
+evidence of information. Both errors are the same error.**
+
+---
+
+## Addendum 81 (2026-10-27): the ROUND claim fails as a probability too
+
+Addendum 79 left this open: the round row was scored only on top-pick, where
+the model trailed the floor by 5.6 points. Scored properly, same 306
+out-of-sample finishes:
+
+| rule | model | floor | model better by | 95% CI | P(better) |
+|---|---|---|---|---|---|
+| Brier | 0.24768 | **0.24341** | **-0.00427** | [-0.01627, +0.00757] | 0.234 |
+| log loss | 0.68803 | **0.67978** | **-0.00824** | [-0.03420, +0.01521] | 0.253 |
+
+**No detectable gain on either rule, and the point estimate is negative on
+both.** This is now the ONE component with corpus-scale evidence against it on
+BOTH the crude metric and the proper one — which is exactly what separates it
+from the method split, where the two metrics disagreed and the proper one won.
+
+The recorded null predicted this and is confirmed at scale: a fighter's own
+round shape does not replicate, split-half 0.21 falling to 0.05.
+
+### A level error sits underneath it
+
+| | round-one share |
+|---|---|
+| actual | **0.513** |
+| model's mean P | **0.409** |
+| floor's P | 0.495 |
+
+**The model's conditional round-one probability runs about ten points low.**
+That is a calibration fault, not a resolution fault, and it is the same
+direction as every other under-call on the record — addendum 74's seven-point
+shortfall on the combined finish read, addendum 68's +0.049 in 2026. Three
+independent surfaces now point the same way.
+
+**Registered, not acted on:** an intercept correction on the conditional
+round-one probability is the candidate, tested the way addendum 73 was tested —
+against the production read, with the sign and the effect floor fixed first.
+It is NOT to be fitted on this sample and reported from it.
+
+## Addendum 82 (2026-10-27): the graded table gets a proper score
+
+Two changes, both following from addendum 80.
+
+**`upcoming.py` now carries the model's full five-cell method split** —
+`m_a_ko`, `m_a_sub`, `m_b_ko`, `m_b_sub` — into each graded row. `history.json`
+held `m_decision` alone, so the browser could only ever score an argmax, and
+reported a tie where a proper rule reports P(better) = 1.000. Four numbers per
+bout; `grade_archive()` re-grades from scratch each run, so the whole record
+backfills on the next pass.
+
+**The method table gains a probability line**, not a sixth column: multiclass
+Brier for model, check and base rate over the bouts where all three
+distributions exist, with the lowest marked. Matched denominators — a proper
+score computed on a different bout set per column would be the same fault the
+"claims called" row was fixed for.
+
+The line carries its own instruction: *read this before the hit counts above*,
+with the reason stated — the counts are an argmax, and an argmax has now been
+shown at corpus scale to tie where the distribution is decisively ahead. Before
+a build carrying the five cells has run, the line says so rather than
+displaying two columns of three.
+
+**Nothing is concluded from it yet.** On 18 to 26 bouts a proper score is still
+a small sample; what changes is that the question is now being asked with an
+instrument that can answer it.
+
+---
+
+## Addendum 83: is there a blend weight that beats both ends?
+## REGISTERED 2026-10-27, before any fitting.
+
+The check overrides 9 of the 14 win-model inputs (SB_MAP: str_acc, slpm->adj_slpm,
+sapm, td15->adj_td15, sub15, str_def, td_def, age, reach). Five are always held
+at model values (elo, opp_elo, log_exp, ko_loss_rate, log_layoff). age and reach
+are bio and identical on both sides, so the live blend moves 7 slots.
+
+`st.blend` was a slider, fixed at w=1.0 with the note "a check that is 70% the
+model is not a second opinion, it is the model." That was a MEASUREMENT
+decision — keeping the check clean as an independent read. It is not a claim
+that w=1 forecasts best. This tests the forecasting question.
+
+## Reconstructing the check without a paste
+
+UFC.com publishes RAW career-to-date aggregates over UFC bouts: landed/minute,
+absorbed/minute, accuracy, defense, takedowns per 15, submission attempts per
+15. `FighterState` already accumulates every one of those counters before it
+shrinks them toward a prior and multiplies by a strength-of-schedule factor. So
+the UFC.com value is the unshrunk, unadjusted form of a number the state
+already holds, and it can be rebuilt for every bout in the corpus.
+
+Caveat recorded up front: this is the MECHANISM, not the user's usage. Real
+checks are entered on the interesting bouts, not a random sample, and a real
+paste can be wrong or partial. The sweep says what blending does, not what the
+26 entered checks did.
+
+## Procedure
+
+- Walk the corpus from 2012-01-01, both corners 2+ priors, decisive results.
+- Chronological THREE-way split: 60% train, 20% validation, 20% test.
+- Win model fitted ONCE on train, on pure model features, exactly as
+  `train.py` does (C=0.5, fit_intercept=False, standardised).
+- For w in 0.00 .. 1.00 by 0.05, blend the 9 mapped slots per corner
+  (model*(1-w) + ufc*w), rebuild the 14 features, and score with the SAME fitted
+  coefficients — which is precisely what `sbProb` does in the browser.
+- **w is chosen on VALIDATION only, then confirmed once on TEST.**
+
+That split is not optional. Sweeping 21 weights and reporting the best on the
+same data is how the recency half-life was nearly mis-reported (Ablation 2),
+and the discipline that caught it then is the discipline here.
+
+## Decision rule, fixed now
+
+The blend is supported only if, on the TEST block, the validation-chosen w
+beats BOTH endpoints — w=0 (pure model) and w=1 (pure check) — on held-out
+Brier, with a 95% bootstrap CI (2,000) excluding zero against w=0, and a gain
+clearing 0.1/n_test.
+
+Predicted: w* lies strictly between 0 and 1 and beats w=1 comfortably; whether
+it beats w=0 is the open question and the prior is AGAINST it, because the
+model's inputs are opponent-adjusted and shrunk and the UFC.com ones are
+neither.
+
+
+## Addendum 83: RESULT (2026-10-27). No interior optimum. The gradient points at the model.
+
+4,167 bouts. Train 2,500 (to 2021-09-25), validation 833 (to 2024-03-30), test
+834 (to 2026-09-12). Win model fitted once on train; the same coefficients
+score every blend, which is what `sbProb` does in the browser.
+
+**The validation curve is MONOTONE.**
+
+| w | validation Brier | | w | validation Brier |
+|---|---|---|---|---|
+| 0.00 | **0.22795** | | 0.55 | 0.22881 |
+| 0.05 | **0.22795** | | 0.65 | 0.22917 |
+| 0.15 | 0.22799 | | 0.75 | 0.22958 |
+| 0.25 | 0.22809 | | 0.85 | 0.23003 |
+| 0.35 | 0.22827 | | 0.95 | 0.23053 |
+| 0.45 | 0.22851 | | 1.00 | **0.23080** |
+
+Every step away from the model's inputs makes the read worse, with no interior
+minimum. Validation picked w* = 0.05, which is w = 0 to five decimal places.
+
+**Confirmation on test (n=834):**
+
+| arm | Brier |
+|---|---|
+| w=0, pure model | 0.21684 |
+| w=0.05 | 0.21677 |
+| w=1, pure check | 0.21879 |
+
+| comparison | gain | 95% CI | P | floor |
+|---|---|---|---|---|
+| w* vs pure model | +0.00007 | [-0.00009, +0.00024] | 0.802 | **fails** |
+| w* vs pure check | +0.00202 | [-0.00111, +0.00504] | 0.895 | clears |
+
+**BLEND NOT SUPPORTED.** No weight beats the model, and w* does not even beat
+pure check at the registered bar.
+
+### The validation block earned its keep, visibly
+
+The TEST column — blind, not used for selection — has a shallow dip at
+w = 0.20-0.25 (0.21666 against 0.21684 at w=0), and that gain of 1.8e-04 would
+have cleared the effect floor of 1.2e-04. **A sweep without a validation block
+would have reported "optimal blend ≈ 0.22, beats the pure model" and it would
+have been wrong.** Validation says the dip is not there; it is the shape of one
+sample. This is Ablation 2's lesson arriving in a new place, and it is the
+second time tonight that a guard fixed in advance stopped a false positive.
+
+### What it settles
+
+**The check's winner read is strictly degraded, monotonically, by its own
+inputs.** It is the same model with unshrunk, opponent-unadjusted numbers, and
+the gradient says every ounce of that substitution costs. So the check should
+not be blended into the winner line at ANY weight, and w=1 was already the
+right setting for the reason it was chosen — it keeps the check a clean
+independent read — not merely a defensible one.
+
+It also sharpens where the check could still be worth something: **not in the
+winner line, which goes through the model's coefficients, but in the method
+read, which is the check's own arithmetic on the pasted record and never
+touches `sbProb`.** That is the one surface where it is not a degraded copy of
+the model, and it is exactly the surface the addendum 82 Brier line was built
+to measure.
+
+### Prediction scored
+
+Registered: w* strictly interior, beating w=1 comfortably, probably not beating
+w=0. Outcome: w* sat at the model end, did NOT beat w=1 at the bar, and did not
+beat w=0. **Right on the conclusion, wrong on the shape** — I expected the two
+input sets to have complementary errors and they do not; the UFC.com set is
+simply worse on every axis the win model uses.

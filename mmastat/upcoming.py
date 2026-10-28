@@ -1216,6 +1216,19 @@ def _grade_bout(b, row, a_is_red, base):
            # model inputs that were never saved.
            "m_decision": b.get("m_decision"), "p_end_r1": b.get("p_end_r1"),
            "fin": b.get("fin"),
+           # The model's FULL five-cell method split, not just the decision.
+           #
+           # Addendum 80: the model's method TOP PICK ties the division base
+           # rate on 622 out-of-sample bouts, while its DISTRIBUTION beats that
+           # base on multiclass Brier by +0.0235 with P(better) = 1.000. The
+           # browser could see only the first of those, because history.json
+           # carried m_decision alone - so the graded table scored an argmax
+           # and reported a tie where a proper rule reports a certainty.
+           #
+           # Four numbers per bout. grade_archive() re-grades from scratch each
+           # run, so this backfills the whole record on the next pass.
+           "m_a_ko": b.get("m_a_ko"), "m_a_sub": b.get("m_a_sub"),
+           "m_b_ko": b.get("m_b_ko"), "m_b_sub": b.get("m_b_sub"),
            # The round-by-round split, carried so the finish board can be graded
            # in the browser against what actually happened. history.json already
            # holds winner/method/round; without the split there is nothing to
