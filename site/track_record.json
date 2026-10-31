@@ -1,86 +1,86 @@
 {
- "computed_utc": "2026-10-23T15:42:54+00:00",
- "n_fights": 8820,
+ "computed_utc": "2026-10-31T16:00:54+00:00",
+ "n_fights": 8834,
  "record": {
   "winner": {
-   "n_tested": 840,
-   "accuracy": 0.67,
-   "tested_from": "2024-05-04",
-   "tested_to": "2026-10-17",
+   "n_tested": 841,
+   "accuracy": 0.669,
+   "tested_from": "2024-05-11",
+   "tested_to": "2026-10-24",
    "bands": [
     {
      "said": "50-60%",
-     "n": 371,
-     "right": 0.596
+     "n": 377,
+     "right": 0.594
     },
     {
      "said": "60-70%",
-     "n": 297,
-     "right": 0.684
+     "n": 295,
+     "right": 0.688
     },
     {
      "said": "70-80%",
-     "n": 144,
-     "right": 0.806
+     "n": 140,
+     "right": 0.8
     },
     {
      "said": "80-100%",
-     "n": 28,
-     "right": 0.821
+     "n": 29,
+     "right": 0.828
     }
    ]
   },
   "takedown": {
    "said_likely": {
-    "n": 378,
-    "happened": 0.741,
-    "avg_said": 0.719
+    "n": 398,
+    "happened": 0.724,
+    "avg_said": 0.715
    },
    "said_unlikely": {
-    "n": 830,
-    "happened": 0.258,
+    "n": 834,
+    "happened": 0.257,
     "avg_said": 0.244
    },
-   "auc": 0.743
+   "auc": 0.742
   },
   "knockdown": {
    "said_unlikely": {
     "n": 1603,
-    "happened": 0.173,
+    "happened": 0.175,
     "avg_said": 0.165
    },
-   "auc": 0.67
+   "auc": 0.678
   },
   "finish": {
-   "n_tested": 850,
+   "n_tested": 851,
    "said_mean": 0.467,
-   "happened": 0.476,
+   "happened": 0.477,
    "brier": 0.2385,
-   "base_brier": 0.2494,
+   "base_brier": 0.2495,
    "bands": [
     {
      "said": "0-40%",
-     "n": 229,
+     "n": 232,
      "avg_said": 0.343,
-     "finished": 0.336
+     "finished": 0.332
     },
     {
      "said": "40-50%",
-     "n": 318,
+     "n": 317,
      "avg_said": 0.449,
-     "finished": 0.45
+     "finished": 0.457
     },
     {
      "said": "50-60%",
-     "n": 208,
+     "n": 204,
      "avg_said": 0.546,
-     "finished": 0.62
+     "finished": 0.618
     },
     {
      "said": "60-100%",
-     "n": 95,
-     "avg_said": 0.651,
-     "finished": 0.589
+     "n": 98,
+     "avg_said": 0.652,
+     "finished": 0.592
     }
    ],
    "beats_base": true
@@ -88,13 +88,13 @@
   "ranges": {
    "control time": {
     "claimed": 0.8,
-    "actual": 0.792,
-    "n": 1714
+    "actual": 0.787,
+    "n": 1702
    },
    "significant strikes": {
     "claimed": 0.8,
-    "actual": 0.802,
-    "n": 1714
+    "actual": 0.79,
+    "n": 1702
    }
   }
  }
